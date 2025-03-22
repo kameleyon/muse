@@ -142,12 +142,12 @@ const Pricing: React.FC = () => {
           
           {/* Plan type toggle */}
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 mb-8">
-            <div className="flex justify-center bg-neutral-light/20 dark:bg-secondary-hover p-1 rounded-lg">
+            <div className="flex justify-center bg-neutral-light/20 dark:bg-secondary-hover border dark:border-neutral-medium/30 p-1 rounded-xl">
               <button
                 onClick={() => setShowAPI(false)}
-                className={`py-2 px-4 rounded-md transition-colors ${
+                className={`py-2 px-4 rounded-xl transition-colors ${
                   !showAPI 
-                    ? 'bg-white dark:bg-secondary text-secondary dark:text-primary' 
+                    ? 'bg-white dark:bg-secondary  text-secondary dark:text-primary' 
                     : 'text-neutral-medium hover:text-secondary dark:hover:text-primary'
                 }`}
               >
@@ -155,7 +155,7 @@ const Pricing: React.FC = () => {
               </button>
               <button
                 onClick={() => setShowAPI(true)}
-                className={`py-2 px-4 rounded-md transition-colors ${
+                className={`py-2 px-4 rounded-xl transition-colors ${
                   showAPI 
                     ? 'bg-white dark:bg-secondary text-secondary dark:text-primary' 
                     : 'text-neutral-medium hover:text-secondary dark:hover:text-primary'
@@ -168,10 +168,10 @@ const Pricing: React.FC = () => {
           
           {/* Billing toggle */}
           <div className="flex justify-center items-center space-x-4 mb-12">
-            <span className={`text-sm ${!isAnnual ? 'text-secondary dark:text-primary font-bold' : 'text-neutral-medium'}`}>Monthly</span>
+            <span className={`text-md ${!isAnnual ? 'text-secondary dark:text-primary font-medium' : 'text-neutral-medium'}`}>Monthly</span>
             <button 
               onClick={() => setIsAnnual(!isAnnual)}
-              className="relative inline-flex h-6 w-12 items-center rounded-full bg-neutral-light/50 dark:bg-secondary-hover"
+              className="relative inline-flex h-6 w-12 items-center rounded-full bg-neutral-light/50 dark:bg-black/80 border dark:border-neutral-medium/30"
             >
               <span className="sr-only">Toggle billing period</span>
               <span
@@ -180,8 +180,8 @@ const Pricing: React.FC = () => {
                 }`}
               />
             </button>
-            <span className={`text-sm ${isAnnual ? 'text-secondary dark:text-primary font-bold' : 'text-neutral-medium'}`}>
-              Annual <span className="text-xs text-success">Save 20%</span>
+            <span className={`text-md ${isAnnual ? 'text-secondary dark:text-primary font-medium' : 'text-neutral-medium'}`}>
+              Annual <span className="text-sm text-success">Save 20%</span>
             </span>
           </div>
         </div>
@@ -196,10 +196,10 @@ const Pricing: React.FC = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className={`
-                rounded-xl shadow-md shadow-black/30 overflow-hidden relative
+                rounded-xl shadow-sm shadow-black/30 overflow-hidden relative 
                 ${plan.highlighted 
                   ? 'bg-secondary text-neutral-light border-2 border-primary transform -translate-y-4 md:scale-105' 
-                  : 'bg-white dark:bg-secondary-hover text-secondary dark:text-neutral-light'
+                  : 'bg-white dark:bg-secondary-hover text-secondary dark:text-neutral-light border border-neutral-medium/30'
                 }
               `}
             >
@@ -237,7 +237,7 @@ const Pricing: React.FC = () => {
                   <Button 
                     fullWidth 
                     variant={plan.highlighted ? 'primary' : 'outline'}
-                    className={plan.highlighted ? 'bg-primary text-secondary' : 'border-primary text-primary'}
+                    className={plan.highlighted ? 'bg-primary text-secondary font-regular rounded-xl' : 'border-primary font-regular text-primary rounded-xl'}
                   >
                     {plan.cta}
                   </Button>

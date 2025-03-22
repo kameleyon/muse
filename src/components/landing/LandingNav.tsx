@@ -28,8 +28,8 @@ const LandingNav: React.FC = () => {
     <header
       className={`fixed w-full top-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-secondary py-2 shadow-md'
-          : 'bg-secondary py-4'
+          ? 'bg-secondary py-4 shadow-md border-b border-primary/50'
+          : 'bg-transparent py-4 shadow-sm shadow-black/10 dark:bg-secondary border-b border-primary/50'
       }`}
     >
       <div className="container mx-auto px-4 lg:px-8">
@@ -41,30 +41,30 @@ const LandingNav: React.FC = () => {
               alt="MagicMuse Logo"
               className="h-10 w-auto mr-2"
             />
-            <span className="font-heading text-xl text-primary">MAGICMUSE.io</span>
+            <span className="font-heading text-3xl mt-3 text-primary web-only">MAGICMUSE</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link to="#features" className="text-primary hover:text-primary/80 transition-colors">
+          <div className="hidden md:flex items-center space-x-8 font-medium">
+            <Link to="#features" className="text-[#9195a1] hover:text-primary transition-colors">
               FEATURES
             </Link>
-            <Link to="#how-it-works" className="text-primary hover:text-primary/80 transition-colors">
+            <Link to="#how-it-works" className="text-[#9195a1] hover:text-primary transition-colors">
               HOW IT WORKS
             </Link>
-            <Link to="#prices" className="text-primary hover:text-primary/80 transition-colors">
+            <Link to="#prices" className="text-[#9195a1] hover:text-primary transition-colors">
               PRICES
             </Link>
-            <Link to="#api" className="text-primary hover:text-primary/80 transition-colors">
+            <Link to="#api" className="text-[#9195a1] hover:text-primary transition-colors">
               API
             </Link>
           </div>
 
           {/* Action Buttons & Theme Toggle */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-4 font-light">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-full text-primary hover:text-primary/80 transition-colors"
+              className="p-2 rounded-full text-primary hover:text-primary transition-colors"
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
@@ -72,16 +72,16 @@ const LandingNav: React.FC = () => {
             <Link to="/auth/login">
               <Button 
                 variant="outline" 
-                size="sm" 
-                className="border-primary text-primary hover:bg-primary/10"
+                size="md" 
+                className="border-primary px-6 rounded-lg text-primary hover:text-secondary hover:bg-primary/90 font-light shadow-sm"
               >
                 Login
               </Button>
             </Link>
             <Link to="/auth/register">
               <Button 
-                size="sm"
-                className="bg-primary text-secondary hover:bg-primary/90"
+                size="md"
+                className="bg-primary px-6 rounded-lg text-secondary hover:bg-primary/90 font-light shadow-sm"
               >
                 Sign Up
               </Button>

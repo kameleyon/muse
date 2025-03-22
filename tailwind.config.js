@@ -28,12 +28,12 @@ export default {
         error: '#f40000', // Alert Red
         warning: '#ff9856', // Orange
         accent: {
-          teal: '#00A3A3', // Teal accent color
+          // Removed teal accent color
         },
       },
       fontFamily: {
         heading: ['Comfortaa', 'cursive'],
-        body: ['Nunito Sans', 'sans-serif'],
+        body: ['Questrial', 'sans-serif'],
       },
       boxShadow: {
         'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',

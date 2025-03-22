@@ -6,31 +6,28 @@
 
 /* ---------- FONT IMPORTS ---------- */
 @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Questrial&display=swap');
 
 /* ---------- CSS VARIABLES ---------- */
 :root {
   /* Primary Colors */
-  --color-gold: #F2B705;
-  --color-navy: #2D3142;
-  
-  /* Secondary Colors */
-  --color-teal: #00A6A6;
-  --color-purple: #5F4BB6;
+  --color-yellow: #fcbf23;
+  --color-dark-gray: #1b1e27;
   
   /* Neutral Colors */
   --color-off-white: #F9F9F9;
   --color-light-grey: #E5E5E5;
   --color-medium-grey: #9195A1;
-  --color-deep-grey: #353A47;
+  --color-deep-grey: #fcbf23;
   
   /* UI Accents */
-  --color-success: #26D07C;
-  --color-alert: #FF5252;
+  --color-success: #00b81e;
+  --color-alert: #f40000;
+  --color-warning: #ff9856;
   
   /* Font Families */
   --font-heading: 'Comfortaa', sans-serif;
-  --font-body: 'Nunito Sans', sans-serif;
+  --font-body: 'Questrial', sans-serif;
   
   /* Font Weights */
   --weight-light: 300;
@@ -78,7 +75,7 @@ html {
 body {
   font-family: var(--font-body);
   font-weight: var(--weight-regular);
-  color: var(--color-navy);
+  color: var(--color-dark-gray);
   background-color: var(--color-off-white);
   margin: 0;
   padding: 0;
@@ -94,22 +91,22 @@ h1, h2, h3, h4, h5, h6 {
 
 h1 {
   font-size: 2.5rem; /* 40px */
-  font-weight: var(--weight-bold);
+  font-weight: var(--weight-light);
 }
 
 h2 {
   font-size: 2rem; /* 32px */
-  font-weight: var(--weight-bold);
+  font-weight: var(--weight-light);
 }
 
 h3 {
   font-size: 1.5rem; /* 24px */
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-light);
 }
 
 h4 {
   font-size: 1.25rem; /* 20px */
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-regular);
 }
 
 h5 {
@@ -125,6 +122,7 @@ h6 {
 p {
   margin-top: 0;
   margin-bottom: var(--space-md);
+  font-family: var(--font-body);
 }
 
 small, .text-small {
@@ -139,7 +137,7 @@ small, .text-small {
 
 /* Text Colors */
 .text-primary {
-  color: var(--color-navy);
+  color: var(--color-dark-gray);
 }
 
 .text-secondary {
@@ -147,11 +145,11 @@ small, .text-small {
 }
 
 .text-accent {
-  color: var(--color-teal);
+  color: var(--color-yellow);
 }
 
-.text-gold {
-  color: var(--color-gold);
+.text-yellow {
+  color: var(--color-yellow);
 }
 
 .text-light {
@@ -169,7 +167,7 @@ small, .text-small {
 /* ---------- BUTTONS ---------- */
 .btn {
   font-family: var(--font-heading);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-regular);
   font-size: 1rem;
   padding: var(--space-md) var(--space-lg);
   border-radius: var(--radius-md);
@@ -184,44 +182,44 @@ small, .text-small {
 
 .btn:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 166, 166, 0.4);
+  box-shadow: 0 0 0 3px rgba(252, 191, 35, 0.4);
 }
 
 .btn-primary {
-  background-color: var(--color-gold);
-  color: var(--color-navy);
+  background-color: var(--color-yellow);
+  color: var(--color-dark-gray);
 }
 
 .btn-primary:hover, .btn-primary:focus {
-  background-color: #D9A504; /* 10% darker */
+  background-color: #e3ab16; /* 10% darker */
 }
 
 .btn-secondary {
-  background-color: var(--color-teal);
+  background-color: var(--color-dark-gray);
   color: var(--color-off-white);
 }
 
 .btn-secondary:hover, .btn-secondary:focus {
-  background-color: #009595; /* 10% darker */
+  background-color: #16191f; /* 10% darker */
 }
 
 .btn-tertiary {
   background-color: transparent;
-  color: var(--color-navy);
-  border: 1px solid var(--color-navy);
+  color: var(--color-dark-gray);
+  border: 1px solid var(--color-dark-gray);
 }
 
 .btn-tertiary:hover, .btn-tertiary:focus {
-  background-color: rgba(45, 49, 66, 0.1);
+  background-color: rgba(27, 30, 39, 0.1);
 }
 
-.btn-tertiary.gold {
-  color: var(--color-gold);
-  border-color: var(--color-gold);
+.btn-tertiary.yellow {
+  color: var(--color-yellow);
+  border-color: var(--color-yellow);
 }
 
-.btn-tertiary.gold:hover, .btn-tertiary.gold:focus {
-  background-color: rgba(242, 183, 5, 0.1);
+.btn-tertiary.yellow:hover, .btn-tertiary.yellow:focus {
+  background-color: rgba(252, 191, 35, 0.1);
 }
 
 .btn-sm {
@@ -255,7 +253,7 @@ small, .text-small {
   font-size: 1rem;
   font-weight: var(--weight-regular);
   line-height: 1.5;
-  color: var(--color-navy);
+  color: var(--color-dark-gray);
   background-color: var(--color-off-white);
   border: 1px solid var(--color-medium-grey);
   border-radius: var(--radius-md);
@@ -263,9 +261,9 @@ small, .text-small {
 }
 
 .form-control:focus {
-  border-color: var(--color-teal);
+  border-color: var(--color-yellow);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 166, 166, 0.2);
+  box-shadow: 0 0 0 3px rgba(252, 191, 35, 0.2);
 }
 
 .form-text {
@@ -299,8 +297,8 @@ small, .text-small {
 }
 
 .form-check-input:checked {
-  background-color: var(--color-gold);
-  border-color: var(--color-gold);
+  background-color: var(--color-yellow);
+  border-color: var(--color-yellow);
 }
 
 .form-check-label {
@@ -347,22 +345,22 @@ small, .text-small {
 
 /* ---------- UTILITIES ---------- */
 /* Background Colors */
-.bg-gold {
-  background-color: var(--color-gold);
+.bg-yellow {
+  background-color: var(--color-yellow);
 }
 
-.bg-navy {
-  background-color: var(--color-navy);
+.bg-dark-gray {
+  background-color: var(--color-dark-gray);
   color: var(--color-off-white);
 }
 
-.bg-teal {
-  background-color: var(--color-teal);
+.bg-success {
+  background-color: var(--color-success);
   color: var(--color-off-white);
 }
 
-.bg-purple {
-  background-color: var(--color-purple);
+.bg-alert {
+  background-color: var(--color-alert);
   color: var(--color-off-white);
 }
 
@@ -460,16 +458,16 @@ small, .text-small {
 /* ---------- DARK MODE ---------- */
 .dark-mode {
   color: var(--color-off-white);
-  background-color: var(--color-deep-grey);
+  background-color: var(--color-dark-gray);
 }
 
 .dark-mode .card {
-  background-color: var(--color-navy);
+  background-color: var(--color-dark-gray);
   color: var(--color-off-white);
 }
 
 .dark-mode .form-control {
-  background-color: var(--color-navy);
+  background-color: var(--color-dark-gray);
   border-color: var(--color-medium-grey);
   color: var(--color-off-white);
 }

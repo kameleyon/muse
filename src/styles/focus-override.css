@@ -1,0 +1,33 @@
+/* Override all focus styles to remove teal outlines */
+a:focus,
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+[tabindex]:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  outline-offset: 0 !important;
+}
+
+/* Add a more subtle focus style using the primary color when needed */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(252, 191, 35, 0.4) !important;
+}
+
+.badge-secondary {
+  background-color: rgba(252, 191, 35, 0.2) !important;
+  color: #fcbf23 !important;
+}
+
+/* Remove focus rings for buttons */
+.btn:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(252, 191, 35, 0.4) !important;
+}

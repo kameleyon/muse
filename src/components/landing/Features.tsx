@@ -99,9 +99,9 @@ const Features: React.FC = () => {
             <motion.div
               key={index}
               variants={itemVariants}
-              className="bg-white dark:bg-secondary-hover rounded-xl shadow-md shadow-black/30 p-6 hover:shadow-lg transition-shadow duration-300 transform hover:-translate-y-1 transition-transform"
+              className="bg-white dark:bg-secondary-hover rounded-xl shadow-sm shadow-black/20 p-6 hover:shadow-lg transition-shadow duration-300 transform hover:-translate-y-1 transition-transform"
             >
-              <div className="p-3 bg-primary/10 rounded-lg inline-block mb-4">
+              <div className="p-3 bg-primary/5 rounded-full font-light inline-block mb-4">
                 {feature.icon}
               </div>
               <h3 className="text-xl font-heading font-light text-secondary dark:text-primary mb-3">

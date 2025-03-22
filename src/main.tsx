@@ -7,6 +7,7 @@ import App from './App';
 import { store } from './store/store';
 import './styles/index.css';
 import './styles/colors.css';
+import './styles/focus-override.css'; // Import focus override styles
 
 const queryClient = new QueryClient({
   defaultOptions: {
