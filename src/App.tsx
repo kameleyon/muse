@@ -4,6 +4,8 @@ import { AnimatePresence } from 'framer-motion';
 import useThemeStore from './store/themeStore';
 import Layout from './components/layout/Layout';
 import Loading from './components/common/Loading';
+import { AuthModalProvider } from './context/AuthModalContext';
+import AuthModalContainer from './components/auth/AuthModalContainer';
 
 // Lazy loaded pages
 const Landing = lazy(() => import('./pages/Landing'));
@@ -40,29 +42,34 @@ function App() {
   }, []);
 
   return (
-    <AnimatePresence mode="wait">
-      <Suspense fallback={<Loading />}>
-        <Routes>
-          {/* Landing page as root */}
-          <Route index element={<Landing />} />
-          
-          {/* Auth pages */}
-          <Route path="/auth/*" element={<Auth />} />
-          
-          {/* App routes - protected by layout */}
-          <Route path="/app" element={<Layout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="generator" element={<ContentGenerator />} />
-            <Route path="library" element={<ContentLibrary />} />
-            <Route path="profile" element={<Profile />} />
+    <AuthModalProvider>
+      <AnimatePresence mode="wait">
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            {/* Landing page as root */}
+            <Route index element={<Landing />} />
+            
+            {/* Auth pages */}
+            <Route path="/auth/*" element={<Auth />} />
+            
+            {/* App routes - protected by layout */}
+            <Route path="/app" element={<Layout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="generator" element={<ContentGenerator />} />
+              <Route path="library" element={<ContentLibrary />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+            
+            {/* Catch all */}
             <Route path="*" element={<NotFound />} />
-          </Route>
-          
-          {/* Catch all */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
-    </AnimatePresence>
+          </Routes>
+        </Suspense>
+      </AnimatePresence>
+      
+      {/* Auth modal container - will be available throughout the app */}
+      <AuthModalContainer />
+    </AuthModalProvider>
   );
 }
 

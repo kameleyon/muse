@@ -4,11 +4,13 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Menu, X, Moon, Sun } from 'lucide-react';
 import useThemeStore from '@/store/themeStore';
+import { useAuthModal } from '@/context/AuthModalContext';
 
 const LandingNav: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { theme, toggleTheme } = useThemeStore();
+  const { openForm } = useAuthModal();
 
   // Handle scroll event
   useEffect(() => {
@@ -24,9 +26,20 @@ const LandingNav: React.FC = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  // Authentication modal handlers
+  const handleOpenLogin = (e: React.MouseEvent) => {
+    e.preventDefault();
+    openForm('login');
+  };
+
+  const handleOpenRegister = (e: React.MouseEvent) => {
+    e.preventDefault();
+    openForm('register');
+  };
+
   return (
     <header
-      className={`fixed w-full top-0 z-50 transition-all duration-300 ${
+      className={`fixed w-full top-0 z-40 transition-all duration-300 ${
         isScrolled
           ? 'bg-secondary py-4 shadow-md border-b border-primary/50'
           : 'bg-transparent py-4 shadow-sm shadow-black/10 dark:bg-secondary border-b border-primary/50'
@@ -77,23 +90,21 @@ const LandingNav: React.FC = () => {
             >
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <Link to="/auth/login">
-              <Button 
-                variant="outline" 
-                size="md" 
-                className="border-primary px-6 rounded-lg text-primary hover:text-secondary hover:bg-primary/90 font-light shadow-sm"
-              >
-                Login
-              </Button>
-            </Link>
-            <Link to="/auth/register">
-              <Button 
-                size="md"
-                className="bg-primary px-6 rounded-lg text-secondary hover:bg-primary/90 font-light shadow-sm"
-              >
-                Sign Up
-              </Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              size="md" 
+              className="border-primary px-6 rounded-lg text-primary hover:text-secondary hover:bg-primary/90 font-light shadow-sm"
+              onClick={handleOpenLogin}
+            >
+              Login
+            </Button>
+            <Button 
+              size="md"
+              className="bg-primary px-6 rounded-lg text-secondary hover:bg-primary/90 font-light shadow-sm"
+              onClick={handleOpenRegister}
+            >
+              Sign Up
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -154,23 +165,27 @@ const LandingNav: React.FC = () => {
                 API
               </Link>
               <div className="pt-2 flex flex-col space-y-2">
-                <Link to="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button 
-                    variant="outline" 
-                    fullWidth
-                    className="border-primary text-primary hover:bg-primary/10"
-                  >
-                    Login
-                  </Button>
-                </Link>
-                <Link to="/auth/register" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button 
-                    fullWidth
-                    className="bg-primary text-secondary hover:bg-primary/90"
-                  >
-                    Sign Up
-                  </Button>
-                </Link>
+                <Button 
+                  variant="outline" 
+                  fullWidth
+                  className="border-primary text-primary hover:bg-primary/10"
+                  onClick={(e) => {
+                    setIsMobileMenuOpen(false);
+                    handleOpenLogin(e);
+                  }}
+                >
+                  Login
+                </Button>
+                <Button 
+                  fullWidth
+                  className="bg-primary text-secondary hover:bg-primary/90"
+                  onClick={(e) => {
+                    setIsMobileMenuOpen(false);
+                    handleOpenRegister(e);
+                  }}
+                >
+                  Sign Up
+                </Button>
               </div>
             </div>
           </motion.div>

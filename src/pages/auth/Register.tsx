@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpWithEmail } from '@/services/supabase';
 import { addToast } from '@/store/slices/uiSlice';
+import { useAuthModal } from '@/context/AuthModalContext';
 
 import {
-  Card,
   CardHeader,
   CardTitle,
   CardContent,
@@ -50,6 +50,8 @@ const Register: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { openForm, closeForm } = useAuthModal();
 
   const {
     register,
@@ -100,10 +102,22 @@ const Register: React.FC = () => {
     }
   };
 
+  const handleLogin = (e: React.MouseEvent) => {
+    e.preventDefault();
+    openForm('login');
+  };
+
+  const handleGoToLogin = () => {
+    closeForm();
+    setTimeout(() => {
+      openForm('login');
+    }, 300);
+  };
+
   return (
-    <Card>
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>
+    <div className="w-full max-w-md mx-auto">
+      <CardHeader className="space-y-1 pb-2">
+        <CardTitle className="text-2xl font-bold text-center">Create Your Account</CardTitle>
       </CardHeader>
       <CardContent>
         {verificationSent ? (
@@ -119,9 +133,9 @@ const Register: React.FC = () => {
               Please check your inbox and click the link to complete your registration.
             </p>
             <div className="pt-4">
-              <Link to="/auth/login">
-                <Button variant="outline">Go to Login</Button>
-              </Link>
+              <Button variant="outline" onClick={handleGoToLogin}>
+                Go to Login
+              </Button>
             </div>
           </div>
         ) : (
@@ -198,13 +212,13 @@ const Register: React.FC = () => {
                   className="text-sm text-neutral-medium"
                 >
                   I accept the{' '}
-                  <Link to="/terms" className="text-primary hover:underline">
+                  <a href="/terms" className="text-primary hover:underline" target="_blank">
                     Terms of Service
-                  </Link>{' '}
+                  </a>{' '}
                   and{' '}
-                  <Link to="/privacy" className="text-primary hover:underline">
+                  <a href="/privacy" className="text-primary hover:underline" target="_blank">
                     Privacy Policy
-                  </Link>
+                  </a>
                 </label>
               </div>
               {errors.termsAccepted && (
@@ -219,15 +233,19 @@ const Register: React.FC = () => {
             <div className="mt-6 text-center">
               <p className="text-sm text-neutral-medium">
                 Already have an account?{' '}
-                <Link to="/auth/login" className="text-primary hover:underline">
+                <button 
+                  type="button"
+                  className="text-primary hover:underline"
+                  onClick={handleLogin}
+                >
                   Sign in
-                </Link>
+                </button>
               </p>
             </div>
           </Form>
         )}
       </CardContent>
-    </Card>
+    </div>
   );
 };
 

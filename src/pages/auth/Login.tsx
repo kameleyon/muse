@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { signInWithEmail } from '@/services/supabase';
 import { setUser, setSession } from '@/store/slices/authSlice';
 import { addToast } from '@/store/slices/uiSlice';
+import { useAuthModal } from '@/context/AuthModalContext';
 
 import {
   Card,
@@ -33,6 +34,7 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { openForm, closeForm } = useAuthModal();
 
   const {
     register,
@@ -62,7 +64,10 @@ const Login: React.FC = () => {
         })
       );
 
-      // Redirect to app dashboard instead of root
+      // Close the modal
+      closeForm();
+      
+      // Redirect to app dashboard
       navigate('/app');
     } catch (error: any) {
       dispatch(
@@ -76,9 +81,19 @@ const Login: React.FC = () => {
     }
   };
 
+  const handleForgotPassword = (e: React.MouseEvent) => {
+    e.preventDefault();
+    openForm('forgotPassword');
+  };
+
+  const handleRegister = (e: React.MouseEvent) => {
+    e.preventDefault();
+    openForm('register');
+  };
+
   return (
-    <Card>
-      <CardHeader className="space-y-1">
+    <div className="w-full max-w-md mx-auto">
+      <CardHeader className="space-y-1 pb-2">
         <CardTitle className="text-2xl font-bold text-center">Sign in</CardTitle>
       </CardHeader>
       <CardContent>
@@ -102,12 +117,13 @@ const Login: React.FC = () => {
               <FormLabel htmlFor="password" required>
                 Password
               </FormLabel>
-              <Link
-                to="/auth/forgot-password"
+              <button
+                type="button"
                 className="text-sm text-primary hover:underline"
+                onClick={handleForgotPassword}
               >
                 Forgot password?
-              </Link>
+              </button>
             </div>
             <Input
               id="password"
@@ -195,14 +211,18 @@ const Login: React.FC = () => {
           <div className="mt-6 text-center">
             <p className="text-sm text-neutral-medium">
               Don't have an account?{' '}
-              <Link to="/auth/register" className="text-primary hover:underline">
+              <button
+                type="button"
+                className="text-primary hover:underline"
+                onClick={handleRegister}
+              >
                 Sign up
-              </Link>
+              </button>
             </p>
           </div>
         </Form>
       </CardContent>
-    </Card>
+    </div>
   );
 };
 

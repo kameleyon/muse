@@ -2,8 +2,16 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
+import { useAuthModal } from '@/context/AuthModalContext';
 
 const CTA: React.FC = () => {
+  const { openForm } = useAuthModal();
+
+  const handleRegister = (e: React.MouseEvent) => {
+    e.preventDefault();
+    openForm('register');
+  };
+
   return (
     <section className="py-20 bg-secondary relative overflow-hidden">
       {/* Background Elements */}
@@ -47,11 +55,13 @@ const CTA: React.FC = () => {
             transition={{ duration: 0.5, delay: 0.6 }}
             className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4"
           >
-            <Link to="/auth/register">
-              <Button size="lg" className="bg-primary text-secondary hover:bg-primary/90">
-                Start Your Free Trial
-              </Button>
-            </Link>
+            <Button 
+              size="lg" 
+              className="bg-primary text-secondary hover:bg-primary/90"
+              onClick={handleRegister}
+            >
+              Start Your Free Trial
+            </Button>
             <Link to="#how-it-works">
               <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/10">
                 See How It Works
