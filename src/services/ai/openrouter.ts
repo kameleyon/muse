@@ -167,13 +167,13 @@ export class OpenRouterService {
   private readonly defaultModel: string;
 
   constructor(
-    apiKey: string = import.meta.env.VITE_OPENROUTER_API_KEY || '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',
+    apiKey?: string,
     baseUrl: string = 'https://openrouter.ai/api/v1',
-    defaultModel: string = import.meta.env.VITE_DEFAULT_CONTENT_MODEL || 'anthropic/claude-3.7-sonnet'
+    defaultModel?: string
   ) {
-    this.apiKey = apiKey;
+    this.apiKey = apiKey || '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';
     this.baseUrl = baseUrl;
-    this.defaultModel = defaultModel;
+    this.defaultModel = defaultModel || 'anthropic/claude-3.7-sonnet';
   }
 
   // Get the API key
@@ -200,8 +200,7 @@ export class OpenRouterService {
       model = this.defaultModel, 
       maxTokens = 1000, 
       temperature = 0.7,
-      systemPrompt = 'You are a professional content generator who creates high-quality, engaging, and accurate content.',
-      onProgress 
+      systemPrompt = 'You are a professional content generator who creates high-quality, engaging, and accurate content.'
     } = params;
 
     // Mock implementation with simulated progress for demo purposes
@@ -264,14 +263,14 @@ export class OpenRouterService {
     temperature?: number;
     onProgress?: (progress: number) => void;
   }): Promise<OpenRouterResponse> {
-    const { prompt, model = this.defaultModel, onProgress } = params;
+    const { prompt, model = this.defaultModel } = params;
     
     // Simulate progress updates
-    if (onProgress) {
+    if (params.onProgress) {
       const steps = 10;
       for (let i = 1; i <= steps; i++) {
         await new Promise(resolve => setTimeout(resolve, 300));
-        onProgress((i / steps) * 100);
+        params.onProgress((i / steps) * 100);
       }
     }
 

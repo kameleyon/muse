@@ -18,12 +18,12 @@ const NotFound: React.FC = () => {
         temporarily unavailable.
       </p>
       <div className="flex gap-4">
-        <Button variant="primary" asChild>
-          <Link to="/">Go to Dashboard</Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <Link to="/help">Contact Support</Link>
-        </Button>
+        <Link to="/">
+          <Button variant="primary">Go to Dashboard</Button>
+        </Link>
+        <Link to="/help">
+          <Button variant="outline">Contact Support</Button>
+        </Link>
       </div>
     </motion.div>
   );

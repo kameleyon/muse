@@ -47,12 +47,16 @@ const CTA: React.FC = () => {
             transition={{ duration: 0.5, delay: 0.6 }}
             className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4"
           >
-            <Button size="lg" asChild>
-              <Link to="/auth/register">Start Your Free Trial</Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link to="#how-it-works">See How It Works</Link>
-            </Button>
+            <Link to="/auth/register">
+              <Button size="lg" className="bg-primary text-secondary hover:bg-primary/90">
+                Start Your Free Trial
+              </Button>
+            </Link>
+            <Link to="#how-it-works">
+              <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/10">
+                See How It Works
+              </Button>
+            </Link>
           </motion.div>
         </motion.div>
       </div>

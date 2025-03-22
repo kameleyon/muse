@@ -233,15 +233,15 @@ const Pricing: React.FC = () => {
                     </li>
                   ))}
                 </ul>
-                <Button 
-                  fullWidth 
-                  variant={plan.highlighted ? 'default' : 'outline'}
-                  asChild
-                >
-                  <Link to="/auth/register">
+                <Link to="/auth/register">
+                  <Button 
+                    fullWidth 
+                    variant={plan.highlighted ? 'primary' : 'outline'}
+                    className={plan.highlighted ? 'bg-primary text-secondary' : 'border-primary text-primary'}
+                  >
                     {plan.cta}
-                  </Link>
-                </Button>
+                  </Button>
+                </Link>
               </div>
             </motion.div>
           ))}

@@ -1,4 +1,4 @@
-import React, { forwardRef, SelectHTMLAttributes } from 'react';
+import { forwardRef, SelectHTMLAttributes } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 
@@ -23,9 +23,14 @@ const selectVariants = cva(
   }
 );
 
+// Extract the 'size' property from VariantProps to avoid conflict
+type SelectVariantProps = Omit<VariantProps<typeof selectVariants>, 'size'> & {
+  size?: 'sm' | 'md' | 'lg'; // Define size manually
+};
+
 export interface SelectProps
-  extends SelectHTMLAttributes<HTMLSelectElement>,
-    VariantProps<typeof selectVariants> {
+  extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'size'>,
+    SelectVariantProps {
   options: { value: string; label: string }[];
   error?: string;
 }

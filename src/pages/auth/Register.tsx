@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpWithEmail } from '@/services/supabase';
-import { setUser, setSession } from '@/store/slices/authSlice';
 import { addToast } from '@/store/slices/uiSlice';
 
 import {
@@ -20,7 +19,6 @@ import {
   FormLabel,
   FormError,
   FormHint,
-  FormActions,
 } from '@/components/ui/Form';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -51,7 +49,6 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 const Register: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const {
@@ -70,16 +67,14 @@ const Register: React.FC = () => {
       setIsLoading(true);
       
       // Configure to require email verification
-      const { data: authData, error } = await signUpWithEmail(
-        data.email,
-        data.password,
-        {
-          data: {
-            full_name: data.fullName,
-          },
-          emailRedirectTo: `${window.location.origin}/auth/login`
-        }
-      );
+      const options = {
+        data: {
+          full_name: data.fullName,
+        },
+        emailRedirectTo: `${window.location.origin}/auth/login`
+      };
+      
+      const { error } = await signUpWithEmail(data.email, data.password, options);
 
       if (error) throw error;
 
@@ -124,9 +119,9 @@ const Register: React.FC = () => {
               Please check your inbox and click the link to complete your registration.
             </p>
             <div className="pt-4">
-              <Button variant="outline" asChild>
-                <Link to="/auth/login">Go to Login</Link>
-              </Button>
+              <Link to="/auth/login">
+                <Button variant="outline">Go to Login</Button>
+              </Link>
             </div>
           </div>
         ) : (

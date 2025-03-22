@@ -8,11 +8,13 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIU
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Authentication functions
-export const signUpWithEmail = async (email: string, password: string) => {
-  return await supabase.auth.signUp({
+export const signUpWithEmail = async (email: string, password: string, options?: any) => {
+  const signUpOptions = {
     email,
     password,
-  });
+    options
+  };
+  return await supabase.auth.signUp(signUpOptions);
 };
 
 export const signInWithEmail = async (email: string, password: string) => {
@@ -96,7 +98,7 @@ export const uploadAvatar = async (userId: string, file: File) => {
   const fileExt = file.name.split('.').pop();
   const fileName = `${userId}.${fileExt}`;
   
-  const { data, error } = await supabase.storage
+  const { error } = await supabase.storage
     .from('avatars')
     .upload(fileName, file, { upsert: true });
     

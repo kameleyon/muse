@@ -1,6 +1,7 @@
 import React, { ButtonHTMLAttributes, forwardRef } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
+import { Slot } from '@radix-ui/react-slot';
 
 // Define button variants using class-variance-authority
 const buttonVariants = cva(
@@ -8,6 +9,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        default: 'bg-primary text-secondary hover:bg-primary-hover active:bg-primary-active focus:ring-primary',
         primary: 'bg-primary text-secondary hover:bg-primary-hover active:bg-primary-active focus:ring-primary',
         secondary: 'bg-secondary text-neutral-white hover:bg-secondary-hover active:bg-secondary-active focus:ring-secondary',
         outline: 'bg-transparent border border-current hover:bg-neutral-light/10 focus:ring-current',
@@ -39,6 +41,7 @@ export interface ButtonProps
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  asChild?: boolean;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -53,12 +56,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       leftIcon,
       rightIcon,
       disabled,
+      asChild = false,
       ...props
     },
     ref
   ) => {
+    const Comp = asChild ? Slot : "button";
     return (
-      <button
+      <Comp
         className={cn(buttonVariants({ variant, size, fullWidth, className }))}
         ref={ref}
         disabled={disabled || isLoading}
@@ -89,7 +94,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {!isLoading && leftIcon && <span className="mr-2">{leftIcon}</span>}
         {children}
         {!isLoading && rightIcon && <span className="ml-2">{rightIcon}</span>}
-      </button>
+      </Comp>
     );
   }
 );

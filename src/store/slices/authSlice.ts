@@ -5,7 +5,6 @@ export interface User {
   email: string;
   fullName?: string;
   avatar_url?: string;
-  createdAt: string;
 }
 
 interface AuthState {
@@ -35,8 +34,19 @@ const authSlice = createSlice({
       state.error = action.payload;
       state.isLoading = false;
     },
-    setUser: (state, action: PayloadAction<User | null>) => {
-      state.user = action.payload;
+    setUser: (state, action: PayloadAction<any>) => {
+      // Create a normalized user object from the Supabase user
+      const supabaseUser = action.payload;
+      if (supabaseUser) {
+        state.user = {
+          id: supabaseUser.id,
+          email: supabaseUser.email,
+          fullName: supabaseUser.user_metadata?.full_name,
+          avatar_url: supabaseUser.user_metadata?.avatar_url,
+        };
+      } else {
+        state.user = null;
+      }
       state.isAuthenticated = !!action.payload;
       state.isLoading = false;
       state.error = null;

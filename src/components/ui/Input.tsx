@@ -23,9 +23,14 @@ const inputVariants = cva(
   }
 );
 
+// Extract the 'size' property from VariantProps to avoid conflict
+type InputVariantProps = Omit<VariantProps<typeof inputVariants>, 'size'> & {
+  size?: 'sm' | 'md' | 'lg'; // Define size manually
+};
+
 export interface InputProps
-  extends InputHTMLAttributes<HTMLInputElement>,
-    VariantProps<typeof inputVariants> {
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>,
+    InputVariantProps {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   error?: string;
