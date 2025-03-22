@@ -92,9 +92,9 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto ">
       <CardHeader className="space-y-1 pb-2">
-        <CardTitle className="text-2xl font-bold text-center">Sign in</CardTitle>
+        <CardTitle className="text-2xl font-light text-center">Welcome Back!</CardTitle>
       </CardHeader>
       <CardContent>
         <Form onSubmit={handleSubmit(onSubmit)}>
@@ -102,13 +102,14 @@ const Login: React.FC = () => {
             <FormLabel htmlFor="email" required>
               Email
             </FormLabel>
-            <Input
+<Input
               id="email"
               type="email"
               placeholder="example@email.com"
               {...register('email')}
               error={errors.email?.message}
               disabled={isLoading}
+              className="bg-secondary/10 dark:bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
             />
           </FormGroup>
 
@@ -125,17 +126,18 @@ const Login: React.FC = () => {
                 Forgot password?
               </button>
             </div>
-            <Input
+<Input
               id="password"
               type="password"
               placeholder="••••••••"
               {...register('password')}
               error={errors.password?.message}
               disabled={isLoading}
+              className="bg-secondary/10 dark:bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
             />
           </FormGroup>
 
-          <Button type="submit" fullWidth isLoading={isLoading} className="mt-6">
+          <Button type="submit" fullWidth isLoading={isLoading} className="mt-6 rounded-lg">
             Sign in
           </Button>
 
@@ -145,7 +147,7 @@ const Login: React.FC = () => {
                 <div className="w-full border-t border-neutral-light dark:border-neutral-dark"></div>
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="px-2 bg-white dark:bg-neutral-dark text-neutral-medium">
+                <span className="px-2 bg-white dark:bg-secondary text-neutral-medium">
                   Or continue with
                 </span>
               </div>
@@ -155,9 +157,10 @@ const Login: React.FC = () => {
               <Button
                 type="button"
                 variant="outline"
+                className="rounded-lg border dark:border-white/20 border-gray-200"
                 fullWidth
                 leftIcon={
-                  <svg viewBox="0 0 24 24" className="h-4 w-4">
+                  <svg viewBox="0 0 24 24" className="h-4 w-4 rounded-lg">
                     <path
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                       fill="#4285F4"
@@ -184,8 +187,9 @@ const Login: React.FC = () => {
                 type="button"
                 variant="outline"
                 fullWidth
+                className="rounded-lg border dark:border-white/20 border-gray-200"
                 leftIcon={
-                  <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current">
+                  <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current rounded-lg">
                     <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
                   </svg>
                 }
@@ -196,9 +200,10 @@ const Login: React.FC = () => {
               <Button
                 type="button"
                 variant="outline"
+                className="rounded-lg border dark:border-white/20 border-gray-200"
                 fullWidth
                 leftIcon={
-                  <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current">
+                  <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current rounded-lg">
                     <path d="M12 0C5.373 0 0 5.373 0 12c0 5.302 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.332-1.756-1.332-1.756-1.09-.745.083-.73.083-.73 1.205.085 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.298 24 12c0-6.627-5.373-12-12-12" />
                   </svg>
                 }
