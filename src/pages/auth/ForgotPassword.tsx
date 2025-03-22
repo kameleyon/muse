@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { supabase } from '@/services/supabase';
+import { resetPasswordForEmail } from '@/services/supabase';
 import { addToast } from '@/store/slices/uiSlice';
 
 import {
@@ -34,6 +34,7 @@ type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 const ForgotPassword: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState('');
   const dispatch = useDispatch();
 
   const {
@@ -49,14 +50,16 @@ const ForgotPassword: React.FC = () => {
       setIsLoading(true);
       
       // Use Supabase to send password reset email
-      const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
-      });
+      const { error } = await resetPasswordForEmail(
+        data.email, 
+        `${window.location.origin}/auth/reset-password`
+      );
 
       if (error) throw error;
 
       // Show success message
       setIsSubmitted(true);
+      setSubmittedEmail(data.email);
       
       dispatch(
         addToast({
@@ -69,6 +72,38 @@ const ForgotPassword: React.FC = () => {
         addToast({
           type: 'error',
           message: error.message || 'Failed to send password reset email',
+        })
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle resend of password reset email
+  const handleResendEmail = async () => {
+    if (!submittedEmail) return;
+    
+    try {
+      setIsLoading(true);
+      
+      const { error } = await resetPasswordForEmail(
+        submittedEmail, 
+        `${window.location.origin}/auth/reset-password`
+      );
+
+      if (error) throw error;
+      
+      dispatch(
+        addToast({
+          type: 'success',
+          message: 'Password reset link resent to your email',
+        })
+      );
+    } catch (error: any) {
+      dispatch(
+        addToast({
+          type: 'error',
+          message: error.message || 'Failed to resend password reset email',
         })
       );
     } finally {
@@ -105,9 +140,12 @@ const ForgotPassword: React.FC = () => {
             If you don't receive an email within a few minutes, check your spam folder.
           </p>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex justify-center gap-4">
           <Button variant="outline" asChild>
             <Link to="/auth/login">Return to Login</Link>
+          </Button>
+          <Button variant="secondary" onClick={handleResendEmail} isLoading={isLoading}>
+            Resend Email
           </Button>
         </CardFooter>
       </Card>
@@ -135,17 +173,18 @@ const ForgotPassword: React.FC = () => {
               {...register('email')}
               error={errors.email?.message}
               disabled={isLoading}
+              className="bg-secondary/10 dark:bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
             />
           </FormGroup>
 
-          <Button type="submit" fullWidth isLoading={isLoading} className="mt-6">
+          <Button type="submit" fullWidth isLoading={isLoading} className="mt-6 rounded-lg">
             Send Reset Link
           </Button>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-neutral-medium">
               Remember your password?{' '}
-              <Link to="/auth/login" className="text-accent-teal hover:underline">
+              <Link to="/auth/login" className="text-primary hover:underline">
                 Sign in
               </Link>
             </p>

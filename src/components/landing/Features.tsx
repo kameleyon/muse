@@ -2,44 +2,56 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   Sparkles, 
-  Zap, 
-  Layers, 
-  BarChart, 
-  ShieldCheck, 
-  MessageSquare 
+  FileEdit, 
+  Lightbulb, 
+  Rocket, 
+  Palette, 
+  Cpu, 
+  Globe, 
+  BarChart4
 } from 'lucide-react';
 
 const Features: React.FC = () => {
   const features = [
     {
-      title: 'Advanced AI Writing',
-      description: 'State-of-the-art AI models trained on high-quality content create human-like text for any purpose.',
+      title: 'AI Writing Tools',
+      description: 'Real-time writing assistance with contextual suggestions and multiple writing styles. Our intuitive AI analyzes your content as you write, offering relevant recommendations to enhance clarity, tone, and impact.',
       icon: <Sparkles size={24} className="text-primary" />
     },
     {
-      title: 'Lightning Fast',
-      description: 'Generate complete, polished content in seconds, not hours. Save time for what matters most.',
-      icon: <Zap size={24} className="text-primary" />
+      title: 'Document Enhancement',
+      description: 'Smart editing tools with grammar and style correction for polished content. Our comprehensive editing suite goes beyond basic spell-checking to identify passive voice, redundant phrases, and inconsistent terminology.',
+      icon: <FileEdit size={24} className="text-primary" />
     },
     {
-      title: 'Multi-format Support',
-      description: 'From blog posts to marketing copy, academic papers to creative fiction, we support it all.',
-      icon: <Layers size={24} className="text-primary" />
+      title: 'Intelligent Suggestions',
+      description: 'Context-aware recommendations that understand your intent and writing style. MagicMuse\'s sophisticated AI recognizes the purpose behind your content and offers targeted improvements aligned with your goals.',
+      icon: <Lightbulb size={24} className="text-primary" />
     },
     {
-      title: 'Advanced Analytics',
-      description: 'Track content performance with detailed analytics and improvement recommendations.',
-      icon: <BarChart size={24} className="text-primary" />
+      title: 'Productivity Features',
+      description: 'Batch processing, export options, and version history to save time. Process multiple documents simultaneously with consistent parameters and formatting. Export your content in various formats including PDF, DOCX, HTML, and Markdown.',
+      icon: <Rocket size={24} className="text-primary" />
     },
     {
-      title: 'Security Focused',
-      description: 'Enterprise-grade security ensures your data and content remain private and protected.',
-      icon: <ShieldCheck size={24} className="text-primary" />
+      title: 'Style Adaptation',
+      description: 'Personalized writing style that adapts to your voice and preferences. Our AI studies your writing patterns to develop a unique profile of your communication style. Over time, MagicMuse fine-tunes its suggestions to align with your distinctive tone.',
+      icon: <Palette size={24} className="text-primary" />
     },
     {
-      title: 'Collaborative Tools',
-      description: 'Share, edit, and collaborate on content with team members in real-time with intuitive tools.',
-      icon: <MessageSquare size={24} className="text-primary" />
+      title: 'Advanced AI Capabilities',
+      description: 'Cutting-edge AI that understands context, nuance, and creative elements. Our sophisticated models comprehend complex topics and specialized terminology across industries. The system recognizes subtle emotional tones and rhetorical techniques.',
+      icon: <Cpu size={24} className="text-primary" />
+    },
+    {
+      title: 'Multi-Language Support',
+      description: 'Create content in over 15 languages with native-level quality and tone. Our language models have been trained on authentic texts across multiple languages, ensuring grammatically correct and culturally appropriate content.',
+      icon: <Globe size={24} className="text-primary" />
+    },
+    {
+      title: 'Content Analytics',
+      description: 'Detailed insights on readability, engagement, and improvement opportunities. Monitor key performance metrics including reading level, emotional tone, keyword optimization, and audience alignment.',
+      icon: <BarChart4 size={24} className="text-primary" />
     }
   ];
 
@@ -93,7 +105,7 @@ const Features: React.FC = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
         >
           {features.map((feature, index) => (
             <motion.div

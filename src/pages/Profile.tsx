@@ -8,6 +8,7 @@ import { RootState } from '@/store/store';
 import { setUser } from '@/store/slices/authSlice';
 import { addToast } from '@/store/slices/uiSlice';
 import useThemeStore from '@/store/themeStore';
+import ChangePassword from './profile/ChangePassword';
 
 import {
   Card,
@@ -511,87 +512,67 @@ const Profile: React.FC = () => {
 
           {/* Password/Security */}
           {activeTab === 'password' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Security</CardTitle>
-                <CardDescription>
-                  Update your password and security settings
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form onSubmit={handleSubmitPassword(onPasswordSubmit)}>
-                  <FormGroup>
-                    <FormLabel htmlFor="currentPassword" required>
-                      Current Password
-                    </FormLabel>
-                    <Input
-                      id="currentPassword"
-                      type="password"
-                      placeholder="••••••••"
-                      {...registerPassword('currentPassword')}
-                      error={errorsPassword.currentPassword?.message}
-                      disabled={isLoading}
-                    />
-                  </FormGroup>
+            <>
+              {/* Import and use our enhanced ChangePassword component */}
+              <div className="mb-6">
+                <ChangePassword />
+              </div>
 
-                  <FormGroup>
-                    <FormLabel htmlFor="newPassword" required>
-                      New Password
-                    </FormLabel>
-                    <Input
-                      id="newPassword"
-                      type="password"
-                      placeholder="••••••••"
-                      {...registerPassword('newPassword')}
-                      error={errorsPassword.newPassword?.message}
-                      disabled={isLoading}
-                    />
-                    <FormHint>
-                      Password must be at least 8 characters and include uppercase,
-                      lowercase, and numbers.
-                    </FormHint>
-                  </FormGroup>
-
-                  <FormGroup>
-                    <FormLabel htmlFor="confirmPassword" required>
-                      Confirm New Password
-                    </FormLabel>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="••••••••"
-                      {...registerPassword('confirmPassword')}
-                      error={errorsPassword.confirmPassword?.message}
-                      disabled={isLoading}
-                    />
-                  </FormGroup>
-
-                  <Button
-                    type="submit"
-                    isLoading={isLoading}
-                    disabled={isLoading}
-                    className="mt-6"
-                  >
-                    Update Password
-                  </Button>
-                </Form>
-
-                <div className="mt-8 pt-6 border-t border-neutral-light dark:border-neutral-dark">
-                  <h3 className="text-lg font-medium mb-4">Two-Factor Authentication</h3>
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div>
-                        <h4 className="font-medium">Two-Factor Authentication</h4>
-                        <p className="text-sm text-neutral-medium">
-                          Add an extra layer of security to your account
-                        </p>
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle>Additional Security Settings</CardTitle>
+                    <CardDescription>
+                      Enhance your account security
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <h4 className="font-medium">Two-Factor Authentication</h4>
+                          <p className="text-sm text-neutral-medium">
+                            Add an extra layer of security to your account
+                          </p>
+                        </div>
+                        <Switch id="2fa" />
                       </div>
-                      <Switch id="2fa" />
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                    
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <h4 className="font-medium">Login Notifications</h4>
+                          <p className="text-sm text-neutral-medium">
+                            Receive email notifications when your account is accessed from a new device
+                          </p>
+                        </div>
+                        <Switch id="loginNotifications" defaultChecked={true} />
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6">
+                      <h4 className="font-medium mb-2">Recent Login Activity</h4>
+                      <div className="text-sm space-y-2">
+                        <div className="flex justify-between items-center p-2 bg-neutral-light/10 dark:bg-neutral-dark/20 rounded">
+                          <div>
+                            <div className="font-medium">Chrome on Windows</div>
+                            <div className="text-neutral-medium">United States · Current Session</div>
+                          </div>
+                          <div className="text-success text-xs">Active now</div>
+                        </div>
+                        <div className="flex justify-between items-center p-2 bg-neutral-light/10 dark:bg-neutral-dark/20 rounded">
+                          <div>
+                            <div className="font-medium">Safari on MacOS</div>
+                            <div className="text-neutral-medium">United Kingdom · March 18, 2025</div>
+                          </div>
+                          <Button variant="ghost" size="sm" className="text-xs h-6">Sign out</Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </>
           )}
 
           {/* Notifications */}

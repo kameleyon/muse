@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { signUpWithEmail } from '@/services/supabase';
+import { signUpWithEmail, sendEmailVerification, createProfileIfNotExists } from '@/services/supabase';
 import { addToast } from '@/store/slices/uiSlice';
 import { useAuthModal } from '@/context/AuthModalContext';
 
@@ -49,6 +49,8 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 const Register: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
+  const [debugError, setDebugError] = useState<string | null>(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { openForm, closeForm } = useAuthModal();
@@ -67,21 +69,42 @@ const Register: React.FC = () => {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setIsLoading(true);
+      setDebugError(null);
       
       // Configure to require email verification
-      const options = {
-        data: {
-          full_name: data.fullName,
-        },
-        emailRedirectTo: `${window.location.origin}/auth/login`
-      };
+      const redirectUrl = `${window.location.origin}/auth/login`;
       
-      const { error } = await signUpWithEmail(data.email, data.password, options);
+      // Simplified registration approach to fix database error by not passing user metadata to the signup function.
+      const { error: signUpError, data: signUpData } = await signUpWithEmail(
+        data.email, 
+        data.password,
+        { 
+          emailRedirectTo: redirectUrl
+        }
+      );
 
-      if (error) throw error;
+      if (signUpError) {
+        setDebugError(`Registration Error: ${signUpError.message}`);
+        console.error('Sign-up error details:', signUpError);
+        throw signUpError;
+      }
 
-      // If email confirmation is required
+      // Create user profile using the provided full name and email.
+      if (signUpData?.user?.id) {
+        const { error: profileError } = await createProfileIfNotExists(signUpData.user.id, {
+          full_name: data.fullName
+        });
+
+        if (profileError) {
+          setDebugError(`Profile Creation Error: ${profileError.message}`);
+          console.error('Profile creation error:', profileError);
+          throw profileError;
+        }
+      }
+
+      // If email confirmation is required.
       setVerificationSent(true);
+      setRegisteredEmail(data.email);
       
       dispatch(
         addToast({
@@ -91,10 +114,41 @@ const Register: React.FC = () => {
       );
       
     } catch (error: any) {
+      console.error('Registration error:', error);
+      
       dispatch(
         addToast({
           type: 'error',
           message: error.message || 'Failed to create account',
+        })
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!registeredEmail) return;
+    
+    try {
+      setIsLoading(true);
+      
+      const redirectUrl = `${window.location.origin}/auth/login`;
+      const { error } = await sendEmailVerification(registeredEmail, redirectUrl);
+      
+      if (error) throw error;
+      
+      dispatch(
+        addToast({
+          type: 'success',
+          message: 'Verification email has been resent.',
+        })
+      );
+    } catch (error: any) {
+      dispatch(
+        addToast({
+          type: 'error',
+          message: error.message || 'Failed to resend verification email',
         })
       );
     } finally {
@@ -132,14 +186,31 @@ const Register: React.FC = () => {
               We've sent a verification link to your email address.
               Please check your inbox and click the link to complete your registration.
             </p>
-            <div className="pt-4">
-              <Button variant="outline" onClick={handleGoToLogin}>
+            <div className="pt-4 space-y-2">
+              <Button 
+                variant="outline" 
+                onClick={handleGoToLogin}
+                className="mr-2"
+              >
                 Go to Login
+              </Button>
+              <Button 
+                variant="secondary" 
+                onClick={handleResendVerification}
+                isLoading={isLoading}
+              >
+                Resend Verification Email
               </Button>
             </div>
           </div>
         ) : (
           <Form onSubmit={handleSubmit(onSubmit)}>
+            {debugError && (
+              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
+                {debugError}
+              </div>
+            )}
+            
             <FormGroup>
               <FormLabel htmlFor="fullName" required>
                 Full Name

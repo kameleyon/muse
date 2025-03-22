@@ -25,13 +25,14 @@ import { Button } from '@/components/ui/Button';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  password: z.string().min(1, 'Password is required'),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [debugError, setDebugError] = useState<string | null>(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { openForm, closeForm } = useAuthModal();
@@ -47,12 +48,21 @@ const Login: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setIsLoading(true);
+      setDebugError(null);
+      
       const { data: authData, error } = await signInWithEmail(
         data.email,
         data.password
       );
 
-      if (error) throw error;
+      if (error) {
+        setDebugError(`Login Error: ${error.message}`);
+        throw error;
+      }
+      
+      if (!authData || !authData.user || !authData.session) {
+        throw new Error('Invalid response from server');
+      }
 
       dispatch(setUser(authData.user));
       dispatch(setSession(authData.session.access_token));
@@ -70,6 +80,7 @@ const Login: React.FC = () => {
       // Redirect to app dashboard
       navigate('/app');
     } catch (error: any) {
+      console.error('Login error:', error);
       dispatch(
         addToast({
           type: 'error',
@@ -98,11 +109,17 @@ const Login: React.FC = () => {
       </CardHeader>
       <CardContent>
         <Form onSubmit={handleSubmit(onSubmit)}>
+          {debugError && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
+              {debugError}
+            </div>
+          )}
+          
           <FormGroup>
             <FormLabel htmlFor="email" required>
               Email
             </FormLabel>
-<Input
+            <Input
               id="email"
               type="email"
               placeholder="example@email.com"
@@ -126,7 +143,7 @@ const Login: React.FC = () => {
                 Forgot password?
               </button>
             </div>
-<Input
+            <Input
               id="password"
               type="password"
               placeholder="••••••••"
@@ -181,20 +198,6 @@ const Login: React.FC = () => {
                 }
               >
                 Google
-              </Button>
-              
-              <Button
-                type="button"
-                variant="outline"
-                fullWidth
-                className="rounded-lg border dark:border-white/20 border-gray-200"
-                leftIcon={
-                  <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current rounded-lg">
-                    <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
-                  </svg>
-                }
-              >
-                Facebook
               </Button>
 
               <Button

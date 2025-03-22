@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { Menu, X, Moon, Sun } from 'lucide-react';
 import useThemeStore from '@/store/themeStore';
 import { useAuthModal } from '@/context/AuthModalContext';
+import './LandingNav.css';
 
 const LandingNav: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -54,15 +55,7 @@ const LandingNav: React.FC = () => {
               alt="magicmuse Logo"
               className="h-10 w-auto mr-2"
             />
-            <span className="font-heading text-3xl mt-3 text-primary web-only">magicmuse
-  <style jsx>{`
-    .web-only {
-      @media (max-width: 768px) {
-        display: none;
-      }
-    }
-  `}</style>
-</span>
+            <span className="font-heading text-3xl mt-3 text-primary web-only">magicmuse</span>
           </Link>
 
           {/* Desktop Navigation */}

@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { supabase } from '@/services/supabase';
+import { updateUserPassword, getCurrentUser } from '@/services/supabase';
 import { addToast } from '@/store/slices/uiSlice';
 
 import {
@@ -46,7 +46,8 @@ type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 const ResetPassword: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isValidToken, setIsValidToken] = useState(true);
+  const [isValidToken, setIsValidToken] = useState(false);
+  const [isCheckingToken, setIsCheckingToken] = useState(true);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { token } = useParams<{ token: string }>();
@@ -60,16 +61,42 @@ const ResetPassword: React.FC = () => {
   });
 
   useEffect(() => {
-    // In a real implementation, we would validate the token with Supabase
-    // For now, we'll assume the token is valid if it's present
-    if (!token) {
+    const validateToken = async () => {
+      try {
+        setIsCheckingToken(true);
+        // Validate by checking if user is authenticated with this recovery token
+        const { data, error } = await getCurrentUser();
+        
+        // If we can get the user, the token is valid
+        if (data?.user && !error) {
+          setIsValidToken(true);
+        } else {
+          setIsValidToken(false);
+          dispatch(
+            addToast({
+              type: 'error',
+              message: 'Invalid or expired password reset link',
+            })
+          );
+        }
+      } catch (error) {
+        setIsValidToken(false);
+        dispatch(
+          addToast({
+            type: 'error',
+            message: 'Invalid or expired password reset link',
+          })
+        );
+      } finally {
+        setIsCheckingToken(false);
+      }
+    };
+
+    if (token) {
+      validateToken();
+    } else {
       setIsValidToken(false);
-      dispatch(
-        addToast({
-          type: 'error',
-          message: 'Invalid or expired password reset link',
-        })
-      );
+      setIsCheckingToken(false);
     }
   }, [token, dispatch]);
 
@@ -78,9 +105,7 @@ const ResetPassword: React.FC = () => {
       setIsLoading(true);
       
       // Update password using Supabase
-      const { error } = await supabase.auth.updateUser({
-        password: data.password,
-      });
+      const { error } = await updateUserPassword(data.password);
 
       if (error) throw error;
 
@@ -109,6 +134,22 @@ const ResetPassword: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  if (isCheckingToken) {
+    return (
+      <Card>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">Verifying Link</CardTitle>
+          <CardDescription className="text-center">
+            Please wait while we verify your password reset link...
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex justify-center py-6">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!isValidToken) {
     return (
@@ -184,6 +225,7 @@ const ResetPassword: React.FC = () => {
               {...register('password')}
               error={errors.password?.message}
               disabled={isLoading}
+              className="bg-secondary/10 dark:bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
             />
             <FormHint>
               Password must be at least 8 characters and include uppercase, lowercase, and numbers.
@@ -201,10 +243,11 @@ const ResetPassword: React.FC = () => {
               {...register('confirmPassword')}
               error={errors.confirmPassword?.message}
               disabled={isLoading}
+              className="bg-secondary/10 dark:bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
             />
           </FormGroup>
 
-          <Button type="submit" fullWidth isLoading={isLoading} className="mt-6">
+          <Button type="submit" fullWidth isLoading={isLoading} className="mt-6 rounded-lg">
             Reset Password
           </Button>
         </Form>

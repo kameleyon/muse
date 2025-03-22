@@ -8,25 +8,31 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIU
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Authentication functions
+
 export const signUpWithEmail = async (email: string, password: string, options?: any) => {
+  // Removed user metadata from signup options to avoid database errors;
+  // profile creation will be handled separately.
   const signUpOptions = {
+    emailRedirectTo: options?.emailRedirectTo || `${window.location.origin}/auth/login`
+  };
+
+  return await supabase.auth.signUp({
     email,
     password,
-    options
-  };
-  return await supabase.auth.signUp(signUpOptions);
+    options: signUpOptions
+  });
 };
 
 export const signInWithEmail = async (email: string, password: string) => {
   return await supabase.auth.signInWithPassword({
     email,
-    password,
+    password
   });
 };
 
 export const signInWithMagicLink = async (email: string) => {
   return await supabase.auth.signInWithOtp({
-    email,
+    email
   });
 };
 
@@ -36,6 +42,28 @@ export const signOut = async () => {
 
 export const getCurrentUser = async () => {
   return await supabase.auth.getUser();
+};
+
+export const resetPasswordForEmail = async (email: string, redirectTo: string) => {
+  return await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo
+  });
+};
+
+export const updateUserPassword = async (password: string) => {
+  return await supabase.auth.updateUser({
+    password
+  });
+};
+
+export const sendEmailVerification = async (email: string, redirectTo: string) => {
+  return await supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: {
+      emailRedirectTo: redirectTo
+    }
+  });
 };
 
 export const getSession = async () => {
@@ -92,6 +120,29 @@ export const updateUserProfile = async (userId: string, updates: any) => {
     .from('profiles')
     .update(updates)
     .eq('id', userId);
+};
+
+// Create profile if it doesn't exist - this helps with registration issues
+export const createProfileIfNotExists = async (userId: string, userData = {}) => {
+  // Check if profile already exists
+  const { data: existingProfile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+  
+  if (!existingProfile) {
+    // Create new profile
+    return await supabase
+      .from('profiles')
+      .insert([{ 
+        id: userId,
+        created_at: new Date().toISOString(),
+        ...userData 
+      }]);
+  }
+  
+  return { data: existingProfile, error: null };
 };
 
 export const uploadAvatar = async (userId: string, file: File) => {

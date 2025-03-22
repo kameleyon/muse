@@ -6,6 +6,7 @@ import Layout from './components/layout/Layout';
 import Loading from './components/common/Loading';
 import { AuthModalProvider } from './context/AuthModalContext';
 import AuthModalContainer from './components/auth/AuthModalContainer';
+import AuthInit from './components/auth/AuthInit';
 
 // Lazy loaded pages
 const Landing = lazy(() => import('./pages/Landing'));
@@ -43,6 +44,9 @@ function App() {
 
   return (
     <AuthModalProvider>
+      {/* Initialize authentication state */}
+      <AuthInit />
+      
       <AnimatePresence mode="wait">
         <Suspense fallback={<Loading />}>
           <Routes>
