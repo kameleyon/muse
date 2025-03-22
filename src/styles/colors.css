@@ -1,0 +1,74 @@
+:root {
+  /* Primary Colors */
+  --color-yellow: #1b1e27;
+  --color-dark-gray: #fcbf23;
+  
+  /* Neutral Colors */
+  --color-off-white: #F9F9F9;
+  --color-light-grey: #E5E5E5;
+  --color-medium-grey: #9195A1;
+  --color-deep-grey: #fcbf23;
+  
+  /* UI Accents */
+  --color-success-green: #00b81e;
+  --color-alert-red: #f40000;
+  --color-orange: #ff9856;
+
+  /* Light Theme */
+  --color-background-light: var(--color-off-white);
+  --color-text-primary-light: var(--color-yellow);
+  --color-text-secondary-light: var(--color-medium-grey);
+  --color-border-light: var(--color-light-grey);
+  
+  /* Dark Theme */
+  --color-background-dark: var(--color-yellow);
+  --color-text-primary-dark: var(--color-dark-gray);
+  --color-text-secondary-dark: var(--color-medium-grey);
+  --color-border-dark: var(--color-deep-grey);
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  .light {
+    --background: var(--color-background-light);
+    --foreground: var(--color-text-primary-light);
+    --primary: var(--color-dark-gray);
+    --primary-foreground: var(--color-yellow);
+    --secondary: var(--color-yellow);
+    --secondary-foreground: var(--color-dark-gray);
+    --accent: var(--color-dark-gray);
+    --accent-foreground: var(--color-yellow);
+    --success: var(--color-success-green);
+    --error: var(--color-alert-red);
+    --warning: var(--color-orange);
+    --info: var(--color-medium-grey);
+    --border: var(--color-border-light);
+    --neutral-white: var(--color-off-white);
+    --neutral-light: var(--color-light-grey);
+    --neutral-medium: var(--color-medium-grey);
+    --neutral-dark: var(--color-deep-grey);
+  }
+
+  .dark {
+    --background: var(--color-background-dark);
+    --foreground: var(--color-text-primary-dark);
+    --primary: var(--color-dark-gray);
+    --primary-foreground: var(--color-yellow);
+    --secondary: var(--color-dark-gray);
+    --secondary-foreground: var(--color-yellow);
+    --accent: var(--color-dark-gray);
+    --accent-foreground: var(--color-yellow);
+    --success: var(--color-success-green);
+    --error: var(--color-alert-red);
+    --warning: var(--color-orange);
+    --info: var(--color-medium-grey);
+    --border: var(--color-border-dark);
+    --neutral-white: var(--color-yellow);
+    --neutral-light: var(--color-light-grey);
+    --neutral-medium: var(--color-medium-grey);
+    --neutral-dark: var(--color-deep-grey);
+  }
+}

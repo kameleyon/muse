@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&family=Nunito+Sans:ital,wght@0,200;0,300;0,400;0,600;0,700;0,800;1,200;1,300;1,400;1,600;1,700;1,800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+@layer base {
+  html {
+    @apply font-body;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-neutral-white text-secondary dark:bg-secondary dark:text-neutral-white transition-colors duration-200;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-bold;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  h4 {
+    @apply text-xl md:text-2xl;
+  }
+
+  h5 {
+    @apply text-lg md:text-xl;
+  }
+
+  h6 {
+    @apply text-base md:text-lg;
+  }
+
+  a {
+    @apply text-accent-teal hover:underline focus:outline-none focus:ring-2 focus:ring-accent-teal focus:ring-opacity-50;
+  }
+}
+
+/* Component styles */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 shadow-button;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-secondary hover:bg-primary-hover active:bg-primary-active focus:ring-primary;
+  }
+  
+  .btn-secondary {
+    @apply btn bg-secondary text-neutral-white hover:bg-secondary-hover active:bg-secondary-active focus:ring-secondary;
+  }
+  
+  .btn-outline {
+    @apply btn bg-transparent border border-current hover:bg-neutral-light/10 focus:ring-current;
+  }
+
+  .card {
+    @apply bg-white dark:bg-neutral-dark rounded-xl shadow-card p-6 transition-all duration-200;
+  }
+
+  .input {
+    @apply w-full px-4 py-2 rounded-md border border-neutral-light dark:border-neutral-dark bg-white dark:bg-neutral-dark text-secondary dark:text-neutral-white focus:outline-none focus:ring-2 focus:ring-accent-teal transition-all duration-200;
+  }
+
+  .badge {
+    @apply inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-primary {
+    @apply badge bg-primary/20 text-primary-hover;
+  }
+
+  .badge-secondary {
+    @apply badge bg-accent-teal/20 text-accent-teal;
+  }
+
+  .animation-fade-in {
+    @apply animate-fade-in;
+  }
+
+  .animation-slide-up {
+    @apply animate-slide-up;
+  }
+}
+
+/* Utility styles */
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-accent-teal to-accent-purple;
+  }
+}
