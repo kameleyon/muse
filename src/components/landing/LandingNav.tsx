@@ -38,10 +38,18 @@ const LandingNav: React.FC = () => {
           <Link to="/" className="flex items-center">
             <img
               src="/mmlogo.png"
-              alt="MagicMuse Logo"
+              alt="magicmuse Logo"
               className="h-10 w-auto mr-2"
             />
-            <span className="font-heading text-3xl mt-3 text-primary web-only">MAGICMUSE</span>
+            <span className="font-heading text-3xl mt-3 text-primary web-only">magicmuse
+  <style jsx>{`
+    .web-only {
+      @media (max-width: 768px) {
+        display: none;
+      }
+    }
+  `}</style>
+</span>
           </Link>
 
           {/* Desktop Navigation */}

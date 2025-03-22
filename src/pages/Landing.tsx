@@ -23,17 +23,17 @@ const Landing: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>MagicMuse.io - AI-Powered Content Generation</title>
+        <title>magicmuse</title>
         <meta name="description" content="Create, edit, and generate high-quality content with the most intuitive AI writing companion. Craft AI-powered on-demand content in seconds." />
         <meta name="keywords" content="AI writing, content generation, copywriting, blog writing, AI assistant, content creation, writing tool" />
         <link rel="canonical" href="https://magicmuse.io" />
-        <meta property="og:title" content="MagicMuse.io - AI-Powered Content Generation" />
+        <meta property="og:title" content="magicmuse" />
         <meta property="og:description" content="Create professional, creative, and engaging content in seconds with our AI writing platform." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://magicmuse.io" />
         <meta property="og:image" content="https://magicmuse.io/og-image.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="MagicMuse.io - AI-Powered Content Generation" />
+        <meta name="twitter:title" content="magicmuse" />
         <meta name="twitter:description" content="Create professional, creative, and engaging content in seconds with our AI writing platform." />
         <meta name="twitter:image" content="https://magicmuse.io/og-image.jpg" />
         <link rel="icon" href="/favicon.ico" />

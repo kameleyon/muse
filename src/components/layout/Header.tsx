@@ -51,11 +51,11 @@ const Header: React.FC = () => {
               <Link to="/" className="flex items-center">
                 <img
                   src="/mmiologo.png"
-                  alt="MagicMuse Logo"
+                  alt="magicmuse Logo"
                   className="h-8 w-auto mr-2"
                 />
                 <span className="font-heading font-bold text-xl text-secondary dark:text-neutral-white">
-                  MagicMuse
+                  magicmuse
                 </span>
               </Link>
             </div>

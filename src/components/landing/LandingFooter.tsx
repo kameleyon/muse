@@ -17,8 +17,8 @@ const LandingFooter: React.FC = () => {
           {/* Company Info */}
           <div>
             <div className="flex items-center mb-6">
-              <img src="/mmlogo.png" alt="MagicMuse Logo" className="h-8 w-auto mr-2" />
-              <span className="font-heading text-xl">MAGICMUSE.io</span>
+              <img src="/mmlogo.png" alt="magicmuse Logo" className="h-8 w-auto mr-2" />
+              <span className="font-heading text-xl">magicmuse</span>
             </div>
             <p className="text-secondary/80 mb-6">
               Your AI-powered content generation platform. Create professional, creative, and
@@ -108,7 +108,7 @@ const LandingFooter: React.FC = () => {
               <li className="flex items-start">
                 <Mail size={20} className="mr-3 flex-shrink-0 mt-1" />
                 <span className="text-secondary/80">
-                  support@magicmuse.io
+                  support@magicmuse.com
                 </span>
               </li>
               <li className="flex items-start">
@@ -130,7 +130,7 @@ const LandingFooter: React.FC = () => {
         
         <div className="border-t border-secondary/20 mt-12 pt-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-secondary/80 text-sm mb-4 md:mb-0">
-            &copy; {new Date().getFullYear()} MagicMuse.io. All rights reserved.
+            &copy; {new Date().getFullYear()} magicmuse. All rights reserved.
           </p>
           <div className="flex space-x-6">
             <Link to="/sitemap" className="text-secondary/80 hover:text-secondary text-sm transition-colors">
