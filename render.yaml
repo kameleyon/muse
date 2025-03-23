@@ -2,7 +2,7 @@ services:
   - type: web
     name: magicmuse
     env: static
-    buildCommand: ./render-build.sh
+    buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     routes:
       - type: rewrite
@@ -11,5 +11,7 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 18
-      - key: HUSKY
-        value: 0
+      - key: NPM_CONFIG_PRODUCTION
+        value: false
+      - key: CI
+        value: true
