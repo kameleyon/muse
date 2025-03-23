@@ -7,8 +7,8 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-white dark:bg-neutral-dark shadow-card',
-        outline: 'bg-white dark:bg-neutral-dark border border-neutral-light dark:border-neutral-dark',
+        default: 'bg-white dark:bg-secondary-hover shadow-sm shadow-black/30 dark:shadow-white/10 border border-neutral-light/20 dark:border-secondary-hover',
+        outline: 'bg-white dark:bg-secondary-hover border border-neutral-light/20 dark:border-secondary-hover',
         ghost: 'bg-transparent',
       },
       padding: {

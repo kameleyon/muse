@@ -4,7 +4,6 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -60,8 +59,8 @@ export default {
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
         pulseLight: {
-          '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.7' },
+          '0%': { opacity: '1' },
+          '100%': { opacity: '0.7' },
         },
       },
       backdropBlur: {

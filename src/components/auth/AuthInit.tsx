@@ -22,7 +22,8 @@ const AuthInit: React.FC = () => {
         
         if (data.session) {
           // User is logged in
-          const { user } = data;
+          // Fix: Access user from data.session, not directly from data
+          const user = data.session.user;
           
           if (user) {
             // Set user info in Redux

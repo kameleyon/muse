@@ -61,14 +61,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
+    // When using Slot (asChild), it expects exactly one React element child
     const Comp = asChild ? Slot : "button";
-    return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, fullWidth, className }))}
-        ref={ref}
-        disabled={disabled || isLoading}
-        {...props}
-      >
+    
+    // Create the button content
+    const buttonContent = (
+      <>
         {isLoading && (
           <svg
             className="mr-2 h-4 w-4 animate-spin"
@@ -94,6 +92,25 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {!isLoading && leftIcon && <span className="mr-2">{leftIcon}</span>}
         {children}
         {!isLoading && rightIcon && <span className="ml-2">{rightIcon}</span>}
+      </>
+    );
+    
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, fullWidth, className }))}
+        ref={ref}
+        disabled={disabled || isLoading}
+        {...props}
+      >
+        {asChild ? 
+          // If asChild is true, we need to ensure there is exactly one child
+          // Since Slot merges props onto its child, we need to make sure there is a single element
+          // If children is empty or not a valid element, we'll render a span as fallback
+          React.isValidElement(children) ? children : <span>{buttonContent}</span>
+          : 
+          // Regular button case - render all content directly
+          buttonContent
+        }
       </Comp>
     );
   }

@@ -2,15 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
-import { Menu, X, Moon, Sun } from 'lucide-react';
-import useThemeStore from '@/store/themeStore';
+import { Menu, X } from 'lucide-react';
 import { useAuthModal } from '@/context/AuthModalContext';
 import './LandingNav.css';
 
 const LandingNav: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { theme, toggleTheme } = useThemeStore();
   const { openForm } = useAuthModal();
 
   // Handle scroll event
@@ -43,7 +41,7 @@ const LandingNav: React.FC = () => {
       className={`fixed w-full top-0 z-40 transition-all duration-300 ${
         isScrolled
           ? 'bg-secondary py-4 shadow-md border-b border-primary/50'
-          : 'bg-transparent py-4 shadow-sm shadow-black/10 dark:bg-secondary border-b border-primary/50'
+          : 'bg-transparent py-4 shadow-sm shadow-black/10 border-b border-primary/50'
       }`}
     >
       <div className="container mx-auto px-4 lg:px-8">
@@ -74,15 +72,8 @@ const LandingNav: React.FC = () => {
             </Link>
           </div>
 
-          {/* Action Buttons & Theme Toggle */}
+          {/* Action Buttons */}
           <div className="hidden md:flex items-center space-x-4 font-light">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-full text-primary hover:text-primary transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
             <Button 
               variant="outline" 
               size="md" 
@@ -102,13 +93,6 @@ const LandingNav: React.FC = () => {
 
           {/* Mobile Menu Button */}
           <div className="flex md:hidden items-center space-x-4">
-            <button
-              onClick={toggleTheme}
-              className="p-2 text-primary hover:text-primary/80 transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
             <button
               onClick={toggleMobileMenu}
               className="p-2 text-primary hover:text-primary/80 transition-colors"

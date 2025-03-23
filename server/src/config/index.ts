@@ -5,7 +5,7 @@ dotenv.config();
 
 const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
-  port: process.env.PORT ? parseInt(process.env.PORT, 10) : 3001,
+  port: process.env.PORT ? parseInt(process.env.PORT, 10) : 9999,
   
   // Database (Supabase)
   supabase: {
@@ -31,7 +31,7 @@ const config = {
   // CORS
   corsOrigins: process.env.CORS_ORIGINS ? 
     process.env.CORS_ORIGINS.split(',') : 
-    ['http://localhost:3000', 'http://localhost:3001'],
+    ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:9999'],
   
   // Logging
   logLevel: process.env.LOG_LEVEL || 'info',

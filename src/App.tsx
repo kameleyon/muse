@@ -1,34 +1,24 @@
 import { useEffect, lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import useThemeStore from './store/themeStore';
-import Layout from './components/layout/Layout';
 import Loading from './components/common/Loading';
 import { AuthModalProvider } from './context/AuthModalContext';
-import AuthModalContainer from './components/auth/AuthModalContainer';
 import AuthInit from './components/auth/AuthInit';
 
-// Lazy loaded pages
-const Landing = lazy(() => import('./pages/Landing'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Auth = lazy(() => import('./pages/Auth'));
-const ContentGenerator = lazy(() => import('./pages/ContentGenerator'));
-const ContentLibrary = lazy(() => import('./pages/ContentLibrary'));
-const Profile = lazy(() => import('./pages/Profile'));
-const NotFound = lazy(() => import('./pages/NotFound'));
+// Lazy loaded components
+const AuthModalContainer = lazy(() => import('./components/auth/AuthModalContainer'));
+const Layout = lazy(() => import('./components/layout/Layout'));
+
+// Lazy loaded pages with named chunks for better code splitting
+const Landing = lazy(() => import(/* webpackChunkName: "landing" */ './pages/Landing'));
+const Dashboard = lazy(() => import(/* webpackChunkName: "dashboard" */ './pages/Dashboard'));
+const Auth = lazy(() => import(/* webpackChunkName: "auth" */ './pages/Auth'));
+const ContentGenerator = lazy(() => import(/* webpackChunkName: "content-generator" */ './pages/ContentGenerator'));
+const ContentLibrary = lazy(() => import(/* webpackChunkName: "content-library" */ './pages/ContentLibrary'));
+const Profile = lazy(() => import(/* webpackChunkName: "profile" */ './pages/Profile'));
+const NotFound = lazy(() => import(/* webpackChunkName: "not-found" */ './pages/NotFound'));
 
 function App() {
-  const { theme } = useThemeStore();
-
-  // Apply theme to document
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]);
-
   // Set favicon
   useEffect(() => {
     const favicon = document.querySelector("link[rel='icon']");
@@ -57,7 +47,14 @@ function App() {
             <Route path="/auth/*" element={<Auth />} />
             
             {/* App routes - protected by layout */}
-            <Route path="/app" element={<Layout />}>
+            <Route 
+              path="/app" 
+              element={
+                <Suspense fallback={<Loading />}>
+                  <Layout />
+                </Suspense>
+              }
+            >
               <Route index element={<Dashboard />} />
               <Route path="generator" element={<ContentGenerator />} />
               <Route path="library" element={<ContentLibrary />} />
@@ -72,7 +69,9 @@ function App() {
       </AnimatePresence>
       
       {/* Auth modal container - will be available throughout the app */}
-      <AuthModalContainer />
+      <Suspense fallback={null}>
+        <AuthModalContainer />
+      </Suspense>
     </AuthModalProvider>
   );
 }

@@ -42,6 +42,34 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split vendor code into separate chunks
+          'vendor-react': ['react', 'react-dom', 'react-router-dom', 'framer-motion'],
+          'vendor-ui': [
+            '@headlessui/react', 
+            '@radix-ui/react-dialog', 
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-icons',
+            '@radix-ui/react-slot',
+            '@radix-ui/react-switch',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-toast',
+            'class-variance-authority',
+            'clsx',
+            'tailwind-merge',
+            'lucide-react'
+          ],
+          'vendor-form': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          'vendor-auth': ['@supabase/supabase-js'],
+          'vendor-state': ['@reduxjs/toolkit', 'react-redux', 'zustand', '@tanstack/react-query'],
+          'vendor-utils': ['date-fns', 'uuid', 'axios', 'marked']
+        }
+      }
+    },
+    // Increase the warning limit for now (while also implementing chunking)
+    chunkSizeWarningLimit: 1000
   }
 });
