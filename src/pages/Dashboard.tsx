@@ -157,7 +157,7 @@ const Dashboard: React.FC = () => {
       
       
       {/* Dashboard Content */}
-      <div className="px-3 sm:px-6 py-8 w-full sm:max-w-8xl mx-auto">
+      <div className="px-1 sm:px-5 py-8 w-full sm:max-w-8xl mx-auto">
         {/* Welcome Section */}
         <WelcomeSection 
           userName={userName}
