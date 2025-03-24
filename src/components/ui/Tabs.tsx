@@ -11,7 +11,7 @@ const TabsList = React.forwardRef<
     ref={ref}
     className={`
       inline-flex h-10 items-center justify-center rounded-md bg-neutral-light/20 p-1 
-      text-secondary dark:bg-neutral-dark dark:text-neutral-white ${className || ''}
+      text-secondary       ${className || ''}
     `}
     {...props}
   />

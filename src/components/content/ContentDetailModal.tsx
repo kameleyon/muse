@@ -58,17 +58,17 @@ const ContentDetailModal: React.FC<ContentDetailModalProps> = ({ content }) => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 50 }}
           transition={{ duration: 0.3 }}
-          className="bg-white dark:bg-neutral-dark rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col"
+          className="bg-white    rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col"
         >
           {/* Header */}
-          <div className="p-6 border-b border-neutral-light dark:border-neutral-dark flex flex-col md:flex-row justify-between items-start md:items-center">
+          <div className="p-6 border-b border-neutral-light    flex flex-col md:flex-row justify-between items-start md:items-center">
             <div className="mb-4 md:mb-0">
               {isEditing ? (
                 <input
                   type="text"
                   value={editedTitle}
                   onChange={(e) => setEditedTitle(e.target.value)}
-                  className="text-xl font-bold font-heading w-full px-3 py-2 rounded-md border border-neutral-light dark:border-neutral-dark bg-white dark:bg-neutral-dark focus:outline-none focus:ring-2 focus:ring-accent-teal"
+                  className="text-xl font-bold font-heading w-full px-3 py-2 rounded-md border border-neutral-light    bg-white    focus:outline-none focus:ring-2 focus:ring-accent-teal"
                 />
               ) : (
                 <h2 className="text-xl font-bold font-heading">{content.title}</h2>
@@ -79,7 +79,7 @@ const ContentDetailModal: React.FC<ContentDetailModalProps> = ({ content }) => {
                     content.type === 'blog' ? 'bg-accent-teal/20 text-accent-teal' :
                     content.type === 'marketing' ? 'bg-primary/20 text-primary-hover' :
                     content.type === 'creative' ? 'bg-accent-purple/20 text-accent-purple' :
-                    content.type === 'academic' ? 'bg-secondary/20 text-secondary dark:text-neutral-light' :
+                    content.type === 'academic' ? 'bg-secondary/20 text-secondary   ' :
                     'bg-success/20 text-success'
                   } mr-2`}
                 >
@@ -139,10 +139,10 @@ const ContentDetailModal: React.FC<ContentDetailModalProps> = ({ content }) => {
               <textarea
                 value={editedContent}
                 onChange={(e) => setEditedContent(e.target.value)}
-                className="w-full h-full px-3 py-2 rounded-md border border-neutral-light dark:border-neutral-dark bg-white dark:bg-neutral-dark focus:outline-none focus:ring-2 focus:ring-accent-teal transition-all duration-200 resize-none font-mono"
+                className="w-full h-full px-3 py-2 rounded-md border border-neutral-light    bg-white    focus:outline-none focus:ring-2 focus:ring-accent-teal transition-all duration-200 resize-none font-mono"
               />
             ) : (
-              <div className="prose dark:prose-invert max-w-none">
+              <div className="prose    max-w-none">
                 {/* In a real app, we'd use a markdown renderer here */}
                 <pre className="whitespace-pre-wrap font-sans">{content.content}</pre>
               </div>
@@ -150,12 +150,12 @@ const ContentDetailModal: React.FC<ContentDetailModalProps> = ({ content }) => {
           </div>
 
           {/* Tags */}
-          <div className="p-6 border-t border-neutral-light dark:border-neutral-dark">
+          <div className="p-6 border-t border-neutral-light   ">
             <div className="flex flex-wrap gap-1">
               {content.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-xs bg-neutral-light/30 dark:bg-neutral-dark/30 text-neutral-medium px-2 py-0.5 rounded-full"
+                  className="text-xs bg-neutral-light/30    text-neutral-medium px-2 py-0.5 rounded-full"
                 >
                   {tag}
                 </span>

@@ -197,14 +197,14 @@ const ContentGeneratorForm: React.FC<ContentGeneratorFormProps> = ({
         </FormLabel>
         <textarea
           id="additionalInstructions"
-          className="w-full px-3 py-2 rounded-md border border-neutral-light dark:border-neutral-dark bg-white dark:bg-neutral-dark text-secondary dark:text-neutral-white focus:outline-none focus:ring-2 focus:ring-accent-teal transition-all duration-200 h-24 resize-y"
+          className="w-full px-3 py-2 rounded-md border border-neutral-light    bg-white    text-secondary    focus:outline-none focus:ring-2 focus:ring-accent-teal transition-all duration-200 h-24 resize-y"
           placeholder="Any specific requirements or guidelines..."
           disabled={isGenerating}
           {...register('additionalInstructions')}
         />
       </FormGroup>
 
-      <div className="mt-6 border-t border-neutral-light dark:border-neutral-dark pt-6">
+      <div className="mt-6 border-t border-neutral-light    pt-6">
         <PresetSelector
           contentType={control._formValues.type}
           selectedPreset={null}
@@ -225,7 +225,7 @@ const ContentGeneratorForm: React.FC<ContentGeneratorFormProps> = ({
         />
       </div>
       
-      <div className="p-4 mt-4 bg-neutral-light/20 dark:bg-neutral-dark/50 rounded-md">
+      <div className="p-4 mt-4 bg-neutral-light/20    rounded-md">
         <h3 className="font-medium mb-2">Tips:</h3>
         <p className="text-sm text-neutral-medium">
           {getTipsForContentType(control._formValues.type)}

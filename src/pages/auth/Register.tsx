@@ -218,7 +218,7 @@ const Register: React.FC = () => {
               <Input
                 id="fullName"
                 type="text"
-                className="bg-secondary/10 dark:bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
+                className="bg-secondary/10    shadow-inner border border-primary shadow-black text-secondary rounded-lg"
                 placeholder="John Doe"
                 {...register('fullName')}
                 error={errors.fullName?.message}
@@ -233,7 +233,7 @@ const Register: React.FC = () => {
               <Input
                 id="email"
                 type="email"
-                className="bg-secondary/10 dark:bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
+                className="bg-secondary/10    shadow-inner border border-primary shadow-black text-secondary rounded-lg"
                 placeholder="example@email.com"
                 {...register('email')}
                 error={errors.email?.message}
@@ -248,7 +248,7 @@ const Register: React.FC = () => {
               <Input
                 id="password"
                 type="password"
-                className="bg-secondary/10 dark:bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
+                className="bg-secondary/10    shadow-inner border border-primary shadow-black text-secondary rounded-lg"
                 placeholder="••••••••"
                 {...register('password')}
                 error={errors.password?.message}
@@ -266,7 +266,7 @@ const Register: React.FC = () => {
               <Input
                 id="confirmPassword"
                 type="password"
-                className="bg-secondary/10 dark:bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
+                className="bg-secondary/10    shadow-inner border border-primary shadow-black text-secondary rounded-lg"
                 placeholder="••••••••"
                 {...register('confirmPassword')}
                 error={errors.confirmPassword?.message}

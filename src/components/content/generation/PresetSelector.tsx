@@ -48,7 +48,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = ({
             className={`p-3 rounded-md cursor-pointer border transition-colors duration-200 ${
               selectedPreset === preset.id
                 ? 'border-primary bg-primary/10'
-                : 'border-neutral-light dark:border-neutral-dark hover:border-neutral-medium'
+                : 'border-neutral-light    hover:border-neutral-medium'
             }`}
             onClick={() => !disabled && onSelect(preset)}
           >

@@ -42,22 +42,22 @@ const ContentGeneratorPreview: React.FC<ContentGeneratorPreviewProps> = ({
   return (
     <div>
       <div
-        className={`bg-white dark:bg-neutral-dark border border-neutral-light dark:border-neutral-dark rounded-md p-4 min-h-[400px] max-h-[600px] overflow-y-auto ${
+        className={`bg-white    border border-neutral-light    rounded-md p-4 min-h-[400px] max-h-[600px] overflow-y-auto ${
           isGenerating ? 'animate-pulse' : ''
         }`}
       >
         {isGenerating ? (
           <div className="flex flex-col space-y-4">
-            <div className="h-4 bg-neutral-light dark:bg-neutral-dark rounded w-3/4"></div>
-            <div className="h-4 bg-neutral-light dark:bg-neutral-dark rounded w-1/2"></div>
-            <div className="h-4 bg-neutral-light dark:bg-neutral-dark rounded w-5/6"></div>
-            <div className="h-4 bg-neutral-light dark:bg-neutral-dark rounded w-2/3"></div>
-            <div className="h-4 bg-neutral-light dark:bg-neutral-dark rounded w-3/4"></div>
-            <div className="h-4 bg-neutral-light dark:bg-neutral-dark rounded w-1/2"></div>
-            <div className="h-4 bg-neutral-light dark:bg-neutral-dark rounded w-5/6"></div>
+            <div className="h-4 bg-neutral-light    rounded w-3/4"></div>
+            <div className="h-4 bg-neutral-light    rounded w-1/2"></div>
+            <div className="h-4 bg-neutral-light    rounded w-5/6"></div>
+            <div className="h-4 bg-neutral-light    rounded w-2/3"></div>
+            <div className="h-4 bg-neutral-light    rounded w-3/4"></div>
+            <div className="h-4 bg-neutral-light    rounded w-1/2"></div>
+            <div className="h-4 bg-neutral-light    rounded w-5/6"></div>
           </div>
         ) : content ? (
-          <div className="prose dark:prose-invert max-w-none">
+          <div className="prose    max-w-none">
             {/* In a real app, we'd use a markdown renderer here */}
             <pre className="whitespace-pre-wrap font-sans">{content}</pre>
           </div>

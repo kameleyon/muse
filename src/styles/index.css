@@ -16,7 +16,7 @@
   }
 
   body {
-    @apply bg-neutral-white text-secondary dark:bg-secondary dark:text-neutral-white transition-colors duration-200;
+    @apply bg-neutral-white text-secondary       transition-colors duration-200;
   }
 
   h1, h2, h3 {
@@ -75,11 +75,11 @@
   }
 
   .card {
-    @apply bg-neutral-white dark:bg-neutral-dark rounded-lg shadow-card p-6 transition-all duration-200 border border-neutral-light dark:border-neutral-dark;
+    @apply bg-neutral-white    rounded-lg shadow-card p-6 transition-all duration-200 border border-neutral-light   ;
   }
 
   .input {
-    @apply w-full px-4 py-2 rounded-md border border-neutral-light dark:border-neutral-dark bg-neutral-white dark:bg-neutral-dark text-secondary dark:text-neutral-white focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200;
+    @apply w-full px-4 py-2 rounded-md border border-neutral-light    bg-neutral-white    text-secondary    focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200;
   }
 
   .badge {

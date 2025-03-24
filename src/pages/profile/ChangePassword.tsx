@@ -109,7 +109,7 @@ const ChangePassword: React.FC = () => {
               {...register('currentPassword')}
               error={errors.currentPassword?.message}
               disabled={isLoading}
-              className="bg-secondary/10 dark:bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
+              className="bg-secondary/10    shadow-inner border border-primary shadow-black text-secondary rounded-lg"
             />
           </FormGroup>
 
@@ -124,7 +124,7 @@ const ChangePassword: React.FC = () => {
               {...register('newPassword')}
               error={errors.newPassword?.message}
               disabled={isLoading}
-              className="bg-secondary/10 dark:bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
+              className="bg-secondary/10    shadow-inner border border-primary shadow-black text-secondary rounded-lg"
             />
             <FormHint>
               Password must be at least 8 characters and include uppercase, lowercase, and numbers.
@@ -142,7 +142,7 @@ const ChangePassword: React.FC = () => {
               {...register('confirmPassword')}
               error={errors.confirmPassword?.message}
               disabled={isLoading}
-              className="bg-secondary/10 dark:bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
+              className="bg-secondary/10    shadow-inner border border-primary shadow-black text-secondary rounded-lg"
             />
           </FormGroup>
 

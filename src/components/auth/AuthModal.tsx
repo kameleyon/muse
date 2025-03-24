@@ -52,9 +52,9 @@ const AuthModal: React.FC<AuthModalProps> = ({
       ></div>
       
       {/* Modal container */}
-      <div className="relative z-10 w-full max-w-md bg-white dark:bd-secondary rounded-xl shadow-xl overflow-hidden">
+      <div className="relative z-10 w-full max-w-md bg-white    rounded-xl shadow-xl overflow-hidden">
         {/* Modal header */}
-        <div className="flex items-center justify-between p-4 border-b dark:bg-secondary">
+        <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-xl font-light text-gray-400">{title}</h2>
           <button
             onClick={onClose}
@@ -67,7 +67,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
         </div>
         
         {/* Modal content */}
-        <div className="p-6 dark:bg-secondary">
+        <div className="p-6   ">
           {children}
         </div>
       </div>

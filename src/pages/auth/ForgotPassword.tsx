@@ -173,7 +173,7 @@ const ForgotPassword: React.FC = () => {
               {...register('email')}
               error={errors.email?.message}
               disabled={isLoading}
-              className="bg-secondary/10 dark:bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
+              className="bg-secondary/10    shadow-inner border border-primary shadow-black text-secondary rounded-lg"
             />
           </FormGroup>
 

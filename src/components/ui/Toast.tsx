@@ -38,7 +38,7 @@ export const Toast: React.FC<ToastProps> = ({
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.2 }}
       className={cn(
-        'max-w-md w-full bg-white dark:bg-neutral-dark shadow-lg rounded-lg pointer-events-auto flex items-center ring-1',
+        'max-w-md w-full bg-white    shadow-lg rounded-lg pointer-events-auto flex items-center ring-1',
         {
           'ring-green-500/20': type === 'success',
           'ring-red-500/20': type === 'error',
@@ -108,16 +108,16 @@ export const Toast: React.FC<ToastProps> = ({
             )}
           </div>
           <div className="ml-3 flex-1">
-            <p className="text-sm font-medium text-secondary dark:text-neutral-white">
+            <p className="text-sm font-medium text-secondary   ">
               {message}
             </p>
           </div>
         </div>
       </div>
-      <div className="flex border-l border-neutral-light dark:border-neutral-dark">
+      <div className="flex border-l border-neutral-light   ">
         <button
           onClick={handleClose}
-          className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-neutral-medium hover:text-secondary dark:hover:text-neutral-white focus:outline-none"
+          className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-neutral-medium hover:text-secondary    focus:outline-none"
         >
           <svg
             className="h-5 w-5"

@@ -39,7 +39,7 @@ const Landing: React.FC = () => {
         <link rel="icon" href="/favicon.ico" />
       </Helmet>
 
-      <div className="min-h-screen bg-neutral-white dark:bg-secondary overflow-x-hidden">
+      <div className="min-h-screen bg-neutral-white    overflow-x-hidden">
         <LandingNav />
         
         <main>

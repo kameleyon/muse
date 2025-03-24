@@ -25,7 +25,7 @@ const Layout: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex h-screen bg-neutral-white dark:bg-secondary overflow-hidden">
+    <div className="flex h-screen bg-neutral-white    overflow-hidden">
       {/* Sidebar */}
       <AnimatePresence mode="wait">
         {(sidebarOpen || !isMobile) && (

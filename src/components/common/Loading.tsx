@@ -56,7 +56,7 @@ const Loading: React.FC<LoadingProps> = ({
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-secondary bg-opacity-80 dark:bg-opacity-80">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white    bg-opacity-80   ">
         {content}
       </div>
     );

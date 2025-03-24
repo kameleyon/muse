@@ -138,7 +138,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({ onAddToContent }) => {
               {searchHistory.map((item, index) => (
                 <button
                   key={index}
-                  className="text-xs bg-neutral-light/30 dark:bg-neutral-dark/30 text-neutral-medium px-2 py-1 rounded-full hover:bg-neutral-light/50 dark:hover:bg-neutral-dark/50"
+                  className="text-xs bg-neutral-light/30    text-neutral-medium px-2 py-1 rounded-full hover:bg-neutral-light/50   "
                   onClick={() => setQuery(item)}
                   disabled={isSearching}
                 >
@@ -152,19 +152,19 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({ onAddToContent }) => {
         <div className="mt-4">
           <p className="text-sm font-medium mb-2">Results</p>
           <div 
-            className={`bg-white dark:bg-neutral-dark border border-neutral-light dark:border-neutral-dark rounded-md p-4 h-[280px] overflow-y-auto ${
+            className={`bg-white    border border-neutral-light    rounded-md p-4 h-[280px] overflow-y-auto ${
               isSearching ? 'animate-pulse' : ''
             }`}
           >
             {isSearching ? (
               <div className="flex flex-col space-y-4">
-                <div className="h-4 bg-neutral-light dark:bg-neutral-dark rounded w-3/4"></div>
-                <div className="h-4 bg-neutral-light dark:bg-neutral-dark rounded w-1/2"></div>
-                <div className="h-4 bg-neutral-light dark:bg-neutral-dark rounded w-5/6"></div>
-                <div className="h-4 bg-neutral-light dark:bg-neutral-dark rounded w-2/3"></div>
+                <div className="h-4 bg-neutral-light    rounded w-3/4"></div>
+                <div className="h-4 bg-neutral-light    rounded w-1/2"></div>
+                <div className="h-4 bg-neutral-light    rounded w-5/6"></div>
+                <div className="h-4 bg-neutral-light    rounded w-2/3"></div>
               </div>
             ) : searchResults ? (
-              <div className="prose dark:prose-invert max-w-none">
+              <div className="prose    max-w-none">
                 <pre className="whitespace-pre-wrap font-sans text-sm">{searchResults}</pre>
               </div>
             ) : (

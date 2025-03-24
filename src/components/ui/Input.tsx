@@ -7,8 +7,8 @@ const inputVariants = cva(
   {
     variants: {
       variant: {
-        default: 'border-neutral-light dark:border-neutral-dark bg-white dark:bg-neutral-dark text-secondary dark:text-neutral-white focus:ring-accent-teal',
-        error: 'border-error dark:border-error bg-white dark:bg-neutral-dark text-secondary dark:text-neutral-white focus:ring-error',
+        default: 'border-neutral-light    bg-white    text-secondary    focus:ring-accent-teal',
+        error: 'border-error    bg-white    text-secondary    focus:ring-error',
       },
       size: {
         sm: 'h-8 text-sm',

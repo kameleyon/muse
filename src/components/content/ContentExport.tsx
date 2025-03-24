@@ -84,7 +84,7 @@ const ContentExport: React.FC<ContentExportProps> = ({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ duration: 0.2 }}
-          className="bg-white dark:bg-neutral-dark rounded-lg shadow-xl w-full max-w-md"
+          className="bg-white    rounded-lg shadow-xl w-full max-w-md"
         >
           <div className="p-6">
             <h2 className="text-xl font-bold font-heading mb-4">Export Content</h2>

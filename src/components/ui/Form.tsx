@@ -25,7 +25,7 @@ const FormLabel = forwardRef<
 >(({ className, children, required, ...props }, ref) => (
   <label
     ref={ref}
-    className={cn('block text-sm font-medium text-secondary dark:text-neutral-white', className)}
+    className={cn('block text-sm font-medium text-secondary   ', className)}
     {...props}
   >
     {children}

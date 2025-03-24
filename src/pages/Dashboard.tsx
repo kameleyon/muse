@@ -257,7 +257,7 @@ const Dashboard: React.FC = () => {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center">
-                  <div className="p-2 rounded-md bg-neutral-light/20 dark:bg-neutral-dark/50 mr-4">
+                  <div className="p-2 rounded-md bg-neutral-light/20    mr-4">
                     {stat.icon}
                   </div>
                   <div>

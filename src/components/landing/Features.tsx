@@ -77,7 +77,7 @@ const Features: React.FC = () => {
   };
 
   return (
-    <section id="features" className="py-20 bg-neutral-white dark:bg-secondary">
+    <section id="features" className="py-20 bg-neutral-white   ">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="text-center mb-16">
           <motion.h2 
@@ -85,7 +85,7 @@ const Features: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="text-3xl md:text-4xl font-heading font-light text-secondary dark:text-primary mb-4"
+            className="text-3xl md:text-4xl font-heading font-light text-secondary    mb-4"
           >
             Powerful Features
           </motion.h2>
@@ -111,12 +111,12 @@ const Features: React.FC = () => {
             <motion.div
               key={index}
               variants={itemVariants}
-              className="bg-white dark:bg-secondary-hover rounded-xl shadow-sm shadow-black/20 p-6 hover:shadow-lg transition-shadow duration-300 transform hover:-translate-y-1 transition-transform"
+              className="bg-white    rounded-xl shadow-sm shadow-black/20 p-6 hover:shadow-lg transition-shadow duration-300 transform hover:-translate-y-1 transition-transform"
             >
               <div className="p-3 bg-primary/5 rounded-full font-light inline-block mb-4">
                 {feature.icon}
               </div>
-              <h3 className="text-xl font-heading font-light text-secondary dark:text-primary mb-3">
+              <h3 className="text-xl font-heading font-light text-secondary    mb-3">
                 {feature.title}
               </h3>
               <p className="text-neutral-medium">

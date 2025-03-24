@@ -23,7 +23,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
   return (
     <div>
       <div 
-        className="flex items-center justify-between cursor-pointer p-3 border border-neutral-light dark:border-neutral-dark rounded-md"
+        className="flex items-center justify-between cursor-pointer p-3 border border-neutral-light    rounded-md"
         onClick={() => !disabled && setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center">
@@ -87,7 +87,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
                         <p className="text-sm text-neutral-medium mb-2">{model.description}</p>
                         <p className="text-xs text-neutral-medium">{model.strengths}</p>
                       </div>
-                      <div className="text-xs bg-neutral-light/30 dark:bg-neutral-dark/30 text-neutral-medium px-2 py-1 rounded-full">
+                      <div className="text-xs bg-neutral-light/30    text-neutral-medium px-2 py-1 rounded-full">
                         ${model.costPer1KTokens.toFixed(5)}/1K tokens
                       </div>
                     </div>

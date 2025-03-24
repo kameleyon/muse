@@ -103,12 +103,12 @@ const Sidebar: React.FC = () => {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-neutral-dark border-r border-neutral-light dark:border-neutral-dark">
+    <div className="flex flex-col h-full bg-white    border-r border-neutral-light   ">
       {/* Logo */}
-      <div className="p-4 border-b border-neutral-light dark:border-neutral-dark">
+      <div className="p-4 border-b border-neutral-light   ">
         <Link to="/" className="flex items-center">
           <img src="/mmiologo.png" alt="MagicMuse Logo" className="h-10 w-auto mr-2" />
-          <span className="font-heading font-bold text-xl text-secondary dark:text-neutral-white">
+          <span className="font-heading font-bold text-xl text-secondary   ">
             MagicMuse
           </span>
         </Link>
@@ -125,7 +125,7 @@ const Sidebar: React.FC = () => {
                 'flex items-center px-3 py-2 rounded-md text-sm font-medium',
                 isActive
                   ? 'bg-primary text-secondary'
-                  : 'text-secondary dark:text-neutral-light hover:bg-neutral-light/20 dark:hover:bg-neutral-dark/50'
+                  : 'text-secondary    hover:bg-neutral-light/20   '
               )
             }
           >
@@ -136,7 +136,7 @@ const Sidebar: React.FC = () => {
       </nav>
 
       {/* Bottom Section */}
-      <div className="p-4 border-t border-neutral-light dark:border-neutral-dark">
+      <div className="p-4 border-t border-neutral-light   ">
         {isAuthenticated ? (
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -156,7 +156,7 @@ const Sidebar: React.FC = () => {
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-secondary dark:text-neutral-white">
+              <p className="text-sm font-medium text-secondary   ">
                 Magic Premium
               </p>
               <p className="text-xs text-neutral-medium">Active until: Mar 2026</p>

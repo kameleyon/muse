@@ -56,7 +56,7 @@ const getBadgeColorForType = (type: string) => {
     case 'creative':
       return 'bg-accent-purple/20 text-accent-purple';
     case 'academic':
-      return 'bg-secondary/20 text-secondary dark:text-neutral-light';
+      return 'bg-secondary/20 text-secondary   ';
     case 'social':
       return 'bg-success/20 text-success';
     default:
@@ -259,7 +259,7 @@ const ContentLibrary: React.FC = () => {
           </div>
 
           {selectedItems.length > 0 && (
-            <div className="mt-4 flex items-center justify-between bg-neutral-light/20 dark:bg-neutral-dark/50 p-2 rounded-md">
+            <div className="mt-4 flex items-center justify-between bg-neutral-light/20    p-2 rounded-md">
               <span className="text-sm">
                 {selectedItems.length} {selectedItems.length === 1 ? 'item' : 'items'}{' '}
                 selected
@@ -402,7 +402,7 @@ const ContentLibrary: React.FC = () => {
                       {item.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="text-xs bg-neutral-light/30 dark:bg-neutral-dark/30 text-neutral-medium px-2 py-0.5 rounded-full"
+                          className="text-xs bg-neutral-light/30    text-neutral-medium px-2 py-0.5 rounded-full"
                         >
                           {tag}
                         </span>

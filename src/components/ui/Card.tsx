@@ -7,8 +7,8 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-white dark:bg-secondary-hover shadow-sm shadow-black/30 dark:shadow-white/10 border border-neutral-light/20 dark:border-secondary-hover',
-        outline: 'bg-white dark:bg-secondary-hover border border-neutral-light/20 dark:border-secondary-hover',
+        default: 'bg-white    shadow-sm shadow-black/30    border border-neutral-light/20   ',
+        outline: 'bg-white    border border-neutral-light/20   ',
         ghost: 'bg-transparent',
       },
       padding: {
@@ -80,7 +80,7 @@ const CardDescription = forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn('text-sm text-neutral-medium dark:text-neutral-light', className)}
+    className={cn('text-sm text-neutral-medium   ', className)}
     {...props}
   />
 ));

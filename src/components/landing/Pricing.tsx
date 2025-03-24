@@ -118,7 +118,7 @@ const Pricing: React.FC = () => {
   const plans = showAPI ? apiPlans : subscriptionPlans;
 
   return (
-    <section id="prices" className="py-20 bg-neutral-white dark:bg-secondary">
+    <section id="prices" className="py-20 bg-neutral-white   ">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="text-center mb-12">
           <motion.h2 
@@ -126,7 +126,7 @@ const Pricing: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="text-3xl md:text-4xl font-heading font-light text-secondary dark:text-primary mb-4"
+            className="text-3xl md:text-4xl font-heading font-light text-secondary    mb-4"
           >
             Choose Your Plan
           </motion.h2>
@@ -142,13 +142,13 @@ const Pricing: React.FC = () => {
           
           {/* Plan type toggle */}
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 mb-8">
-            <div className="flex justify-center bg-neutral-light/20 dark:bg-secondary-hover border dark:border-neutral-medium/30 p-1 rounded-xl">
+            <div className="flex justify-center bg-neutral-light/20    border    p-1 rounded-xl">
               <button
                 onClick={() => setShowAPI(false)}
                 className={`py-2 px-4 rounded-xl transition-colors ${
                   !showAPI 
-                    ? 'bg-white dark:bg-secondary  text-secondary dark:text-primary' 
-                    : 'text-neutral-medium hover:text-secondary dark:hover:text-primary'
+                    ? 'bg-white     text-secondary   ' 
+                    : 'text-neutral-medium hover:text-secondary   '
                 }`}
               >
                 Subscription Plans
@@ -157,8 +157,8 @@ const Pricing: React.FC = () => {
                 onClick={() => setShowAPI(true)}
                 className={`py-2 px-4 rounded-xl transition-colors ${
                   showAPI 
-                    ? 'bg-white dark:bg-secondary text-secondary dark:text-primary' 
-                    : 'text-neutral-medium hover:text-secondary dark:hover:text-primary'
+                    ? 'bg-white    text-secondary   ' 
+                    : 'text-neutral-medium hover:text-secondary   '
                 }`}
               >
                 API Plans
@@ -168,10 +168,10 @@ const Pricing: React.FC = () => {
           
           {/* Billing toggle */}
           <div className="flex justify-center items-center space-x-4 mb-12">
-            <span className={`text-md ${!isAnnual ? 'text-secondary dark:text-primary font-medium' : 'text-neutral-medium'}`}>Monthly</span>
+            <span className={`text-md ${!isAnnual ? 'text-secondary    font-medium' : 'text-neutral-medium'}`}>Monthly</span>
             <button 
               onClick={() => setIsAnnual(!isAnnual)}
-              className="relative inline-flex h-6 w-12 items-center rounded-full bg-neutral-light/50 dark:bg-black/80 border dark:border-neutral-medium/30"
+              className="relative inline-flex h-6 w-12 items-center rounded-full bg-neutral-light/50    border   "
             >
               <span className="sr-only">Toggle billing period</span>
               <span
@@ -180,7 +180,7 @@ const Pricing: React.FC = () => {
                 }`}
               />
             </button>
-            <span className={`text-md ${isAnnual ? 'text-secondary dark:text-primary font-medium' : 'text-neutral-medium'}`}>
+            <span className={`text-md ${isAnnual ? 'text-secondary    font-medium' : 'text-neutral-medium'}`}>
               Annual <span className="text-sm text-success">Save 20%</span>
             </span>
           </div>
@@ -199,7 +199,7 @@ const Pricing: React.FC = () => {
                 rounded-xl shadow-sm shadow-black/30 overflow-hidden relative 
                 ${plan.highlighted 
                   ? 'bg-[#bcb7af]/40 text-[#3d3d3a] border-2 border-neutral-medium/10 transform -translate-y-4 md:scale-105' 
-                  : 'bg-white dark:bg-secondary-hover text-secondary  border border-neutral-medium/30'
+                  : 'bg-white    text-secondary  border border-neutral-medium/30'
                 }
               `}
             >
@@ -209,12 +209,12 @@ const Pricing: React.FC = () => {
                 </div>
               )}
               <div className="p-6">
-                <h3 className={`text-2xl font-heading font-light mb-2 ${plan.highlighted ? 'text-primary' : 'text-secondary dark:text-primary'}`}>
+                <h3 className={`text-2xl font-heading font-light mb-2 ${plan.highlighted ? 'text-primary' : 'text-secondary   '}`}>
                   {plan.name}
                 </h3>
                 <p className="text-neutral-medium text-sm mb-4">{plan.description}</p>
                 <div className="mb-6">
-                  <span className={`text-4xl font-heading ${plan.highlighted ? 'text-primary' : 'text-secondary dark:text-primary'}`}>
+                  <span className={`text-4xl font-heading ${plan.highlighted ? 'text-primary' : 'text-secondary   '}`}>
                     {typeof plan.monthlyPrice === 'number' 
                       ? `$${isAnnual ? plan.annualPrice : plan.monthlyPrice}` 
                       : plan.monthlyPrice}
