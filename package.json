@@ -13,6 +13,7 @@
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "preview": "vite preview",
         "test": "jest",
+        "start": "vite preview --host --port $PORT",
         "prepare": "[ -z \"$CI\" ] && husky install || echo \"Skipping husky install in CI environment\"",
         "postinstall": "chmod +x ./node_modules/.bin/*"
     },
