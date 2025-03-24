@@ -9,19 +9,12 @@ import { addToast } from '@/store/slices/uiSlice';
 import { useAuthModal } from '@/context/AuthModalContext';
 
 import {
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from '@/components/ui/Card';
-import {
   Form,
   FormGroup,
   FormLabel,
   FormError,
   FormHint,
 } from '@/components/ui/Form';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
 
 const registerSchema = z
   .object({
@@ -169,157 +162,181 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <CardHeader className="space-y-1 pb-2">
-        <CardTitle className="text-2xl font-light text-center">Create Your Account</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="auth-overlay">
+      <div className="auth-modal auth-modal-animate">
+        <button className="auth-close" onClick={closeForm}>×</button>
+        
+        <div className="auth-logo-container">
+          <img src="/mmlogo.png" alt="MagicMuse Logo" className="auth-logo" />
+        </div>
+        
         {verificationSent ? (
-          <div className="text-center space-y-4">
-            <div className="mx-auto bg-primary/20 text-primary w-16 h-16 rounded-full flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold">Verify your email</h3>
-            <p className="text-neutral-medium">
-              We've sent a verification link to your email address.
-              Please check your inbox and click the link to complete your registration.
+          <>
+            <h1 className="auth-heading">Verify Your Email</h1>
+            <p className="auth-subheading">
+              We've sent a verification link to {registeredEmail}
             </p>
-            <div className="pt-4 space-y-2">
-              <Button 
-                variant="outline" 
+            
+            <div className="flex flex-col items-center mb-6">
+              <div className="bg-primary/10 text-primary w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <p className="text-center text-sm">
+                Please check your inbox and click the link to complete your registration.
+                If you don't see the email, check your spam folder.
+              </p>
+            </div>
+            
+            <div className="flex flex-col space-y-3">
+              <button 
                 onClick={handleGoToLogin}
-                className="mr-2"
+                className="auth-button-secondary"
               >
                 Go to Login
-              </Button>
-              <Button 
-                variant="secondary" 
+              </button>
+              <button 
                 onClick={handleResendVerification}
-                isLoading={isLoading}
+                disabled={isLoading}
+                className="auth-button"
               >
-                Resend Verification Email
-              </Button>
+                {isLoading ? 'Sending...' : 'Resend Verification Email'}
+              </button>
             </div>
-          </div>
+          </>
         ) : (
-          <Form onSubmit={handleSubmit(onSubmit)}>
-            {debugError && (
-              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
-                {debugError}
-              </div>
-            )}
+          <>
+            <h1 className="auth-heading">Create Your Account</h1>
+            <p className="auth-subheading">Join MagicMuse to start your creative journey</p>
             
-            <FormGroup>
-              <FormLabel htmlFor="fullName" required>
-                Full Name
-              </FormLabel>
-              <Input
-                id="fullName"
-                type="text"
-                className="bg-secondary/10    shadow-inner border border-primary shadow-black text-secondary rounded-lg"
-                placeholder="John Doe"
-                {...register('fullName')}
-                error={errors.fullName?.message}
-                disabled={isLoading}
-              />
-            </FormGroup>
+            <Form onSubmit={handleSubmit(onSubmit)}>
+              {debugError && (
+                <div className="auth-error">
+                  {debugError}
+                </div>
+              )}
+              
+              <div className="mb-4">
+                <label className="auth-label" htmlFor="fullName">
+                  Full Name
+                </label>
+                <input
+                  id="fullName"
+                  type="text"
+                  className="auth-input"
+                  placeholder="John Doe"
+                  {...register('fullName')}
+                  disabled={isLoading}
+                />
+                {errors.fullName && (
+                  <div className="auth-error">{errors.fullName.message}</div>
+                )}
+              </div>
 
-            <FormGroup>
-              <FormLabel htmlFor="email" required>
-                Email
-              </FormLabel>
-              <Input
-                id="email"
-                type="email"
-                className="bg-secondary/10    shadow-inner border border-primary shadow-black text-secondary rounded-lg"
-                placeholder="example@email.com"
-                {...register('email')}
-                error={errors.email?.message}
-                disabled={isLoading}
-              />
-            </FormGroup>
+              <div className="mb-4">
+                <label className="auth-label" htmlFor="email">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  className="auth-input"
+                  placeholder="your@email.com"
+                  {...register('email')}
+                  disabled={isLoading}
+                />
+                {errors.email && (
+                  <div className="auth-error">{errors.email.message}</div>
+                )}
+              </div>
 
-            <FormGroup>
-              <FormLabel htmlFor="password" required>
-                Password
-              </FormLabel>
-              <Input
-                id="password"
-                type="password"
-                className="bg-secondary/10    shadow-inner border border-primary shadow-black text-secondary rounded-lg"
-                placeholder="••••••••"
-                {...register('password')}
-                error={errors.password?.message}
-                disabled={isLoading}
-              />
-              <FormHint>
-                Password must be at least 8 characters and include uppercase, lowercase, and numbers.
-              </FormHint>
-            </FormGroup>
+              <div className="mb-4">
+                <label className="auth-label" htmlFor="password">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  className="auth-input"
+                  placeholder="••••••••"
+                  {...register('password')}
+                  disabled={isLoading}
+                />
+                {errors.password && (
+                  <div className="auth-error">{errors.password.message}</div>
+                )}
+                <div className="auth-hint">
+                  Password must be at least 8 characters and include uppercase, lowercase, and numbers.
+                </div>
+              </div>
 
-            <FormGroup>
-              <FormLabel htmlFor="confirmPassword" required>
-                Confirm Password
-              </FormLabel>
-              <Input
-                id="confirmPassword"
-                type="password"
-                className="bg-secondary/10    shadow-inner border border-primary shadow-black text-secondary rounded-lg"
-                placeholder="••••••••"
-                {...register('confirmPassword')}
-                error={errors.confirmPassword?.message}
-                disabled={isLoading}
-              />
-            </FormGroup>
+              <div className="mb-4">
+                <label className="auth-label" htmlFor="confirmPassword">
+                  Confirm Password
+                </label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  className="auth-input"
+                  placeholder="••••••••"
+                  {...register('confirmPassword')}
+                  disabled={isLoading}
+                />
+                {errors.confirmPassword && (
+                  <div className="auth-error">{errors.confirmPassword.message}</div>
+                )}
+              </div>
 
-            <FormGroup>
-              <div className="flex items-center space-x-2">
+              <div className="auth-terms-container">
                 <input
                   type="checkbox"
                   id="termsAccepted"
-                  className="rounded border-neutral-light text-primary focus:ring-primary"
+                  className="auth-checkbox"
                   {...register('termsAccepted')}
                 />
                 <label
                   htmlFor="termsAccepted"
-                  className="text-sm text-neutral-medium"
+                  className="auth-terms-text"
                 >
                   I accept the{' '}
-                  <a href="/terms" className="text-primary hover:underline" target="_blank">
+                  <a href="/terms" className="auth-link" target="_blank">
                     Terms of Service
                   </a>{' '}
                   and{' '}
-                  <a href="/privacy" className="text-primary hover:underline" target="_blank">
+                  <a href="/privacy" className="auth-link" target="_blank">
                     Privacy Policy
                   </a>
                 </label>
               </div>
               {errors.termsAccepted && (
-                <FormError>{errors.termsAccepted.message}</FormError>
+                <div className="auth-error">{errors.termsAccepted.message}</div>
               )}
-            </FormGroup>
 
-            <Button type="submit" fullWidth isLoading={isLoading} className="mt-6">
-              Create Account
-            </Button>
+              <button 
+                type="submit" 
+                disabled={isLoading} 
+                className="auth-button"
+              >
+                {isLoading ? 'Creating Account...' : 'Create Account'}
+              </button>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-neutral-medium">
-                Already have an account?{' '}
-                <button 
-                  type="button"
-                  className="text-primary hover:underline"
-                  onClick={handleLogin}
-                >
-                  Sign in
-                </button>
-              </p>
-            </div>
-          </Form>
+              <div className="auth-footer">
+                <p>
+                  Already have an account?{' '}
+                  <button 
+                    type="button"
+                    className="auth-link"
+                    onClick={handleLogin}
+                  >
+                    Sign in
+                  </button>
+                </p>
+              </div>
+            </Form>
+          </>
         )}
-      </CardContent>
+      </div>
     </div>
   );
 };

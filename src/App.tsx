@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Loading from './components/common/Loading';
 import { AuthModalProvider } from './context/AuthModalContext';
@@ -7,7 +7,7 @@ import AuthInit from './components/auth/AuthInit';
 
 // Lazy loaded components
 const AuthModalContainer = lazy(() => import('./components/auth/AuthModalContainer'));
-const Layout = lazy(() => import('./components/layout/Layout'));
+const DashboardLayout = lazy(() => import('./components/layout/DashboardLayout'));
 
 // Lazy loaded pages with named chunks for better code splitting
 const Landing = lazy(() => import(/* webpackChunkName: "landing" */ './pages/Landing'));
@@ -46,21 +46,65 @@ function App() {
             {/* Auth pages */}
             <Route path="/auth/*" element={<Auth />} />
             
-            {/* App routes - protected by layout */}
+            {/* Dashboard routes */}
             <Route 
-              path="/app" 
+              path="/dashboard" 
               element={
                 <Suspense fallback={<Loading />}>
-                  <Layout />
+                  <DashboardLayout>
+                    <Dashboard />
+                  </DashboardLayout>
                 </Suspense>
-              }
-            >
-              <Route index element={<Dashboard />} />
-              <Route path="generator" element={<ContentGenerator />} />
-              <Route path="library" element={<ContentLibrary />} />
-              <Route path="profile" element={<Profile />} />
-              <Route path="*" element={<NotFound />} />
-            </Route>
+              } 
+            />
+            
+            {/* Content Generator routes */}
+            <Route 
+              path="/generator" 
+              element={
+                <Suspense fallback={<Loading />}>
+                  <DashboardLayout>
+                    <ContentGenerator />
+                  </DashboardLayout>
+                </Suspense>
+              } 
+            />
+            
+            {/* Content Library routes */}
+            <Route 
+              path="/projects" 
+              element={
+                <Suspense fallback={<Loading />}>
+                  <DashboardLayout>
+                    <ContentLibrary />
+                  </DashboardLayout>
+                </Suspense>
+              } 
+            />
+            
+            <Route 
+              path="/library" 
+              element={<Navigate to="/projects" replace />} 
+            />
+            
+            {/* Profile routes */}
+            <Route 
+              path="/profile/*" 
+              element={
+                <Suspense fallback={<Loading />}>
+                  <DashboardLayout>
+                    <Profile />
+                  </DashboardLayout>
+                </Suspense>
+              } 
+            />
+            
+            {/* Legacy /app routes - redirect to new routes */}
+            <Route path="/app" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/app/generator" element={<Navigate to="/generator" replace />} />
+            <Route path="/app/library" element={<Navigate to="/projects" replace />} />
+            <Route path="/app/profile" element={<Navigate to="/profile" replace />} />
+            <Route path="/app/profile/*" element={<Navigate to="/profile/*" replace />} />
             
             {/* Catch all */}
             <Route path="*" element={<NotFound />} />

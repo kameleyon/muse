@@ -1,0 +1,369 @@
+/* 
+ * MagicMuse Dashboard Styling
+ * Based on AfroWiki-inspired design
+ */
+
+/* Dashboard Container */
+.dashboard-container {
+  background-color: #EDEAE2;
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+/* Welcome Panel */
+.welcome-panel {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 1rem;
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.greeting {
+  color: #333;
+  font-family: 'Comfortaa', cursive;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.quote-container {
+  background-color: #faf9f5;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-top: 1rem;
+  font-style: italic;
+  color: #333;
+}
+
+.quote-author {
+  text-align: right;
+  color: #666;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+/* Navigation Menu */
+.dashboard-menu {
+  display: flex;
+  overflow-x: auto;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 1rem;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  color: #333;
+  text-decoration: none;
+  border-radius: 0.75rem;
+  margin-right: 0.5rem;
+  white-space: nowrap;
+}
+
+.menu-item:hover {
+  background-color: rgba(250, 249, 245, 0.6);
+  color: #ae5630;
+}
+
+.menu-item.active {
+  background-color: #faf9f5;
+  color: #ae5630;
+}
+
+.menu-icon {
+  margin-right: 0.5rem;
+}
+
+/* Dashboard Panels and Cards */
+.dashboard-panel {
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.panel-title {
+  color: #333;
+  font-family: 'Comfortaa', cursive;
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.view-all-link {
+  color: #ae5630;
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.view-all-link:hover {
+  text-decoration: underline;
+}
+
+/* Stat Cards */
+.stat-card {
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 1rem;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.stat-icon {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  margin-right: 1rem;
+  color: #ae5630;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-title {
+  color: #666;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  color: #333;
+  font-family: 'Comfortaa', cursive;
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.stat-change {
+  color: #666;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+/* Project List */
+.project-list {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.project-list th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  color: #666;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-bottom: 1px solid #ddd;
+}
+
+.project-list td {
+  padding: 0.75rem 1rem;
+  color: #333;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.project-list tr:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.project-status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.status-draft {
+  background-color: rgba(174, 86, 48, 0.1);
+  color: #ae5630;
+}
+
+.status-published {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+/* Activity List */
+.activity-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.activity-item {
+  display: flex;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-icon {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 0.5rem;
+  border-radius: 50%;
+  margin-right: 0.75rem;
+  color: #ae5630;
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-text {
+  color: #333;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.activity-highlight {
+  color: #222;
+  font-weight: 500;
+}
+
+.activity-time {
+  color: #666;
+  font-size: 0.75rem;
+}
+
+/* Token Usage Meter */
+.token-usage {
+  margin-bottom: 1rem;
+}
+
+.token-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-size: 0.875rem;
+}
+
+.token-bar-container {
+  width: 100%;
+  height: 0.5rem;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.token-bar-fill {
+  height: 100%;
+  background-color: #ae5630;
+  border-radius: 1rem;
+}
+
+.token-description {
+  margin-top: 0.5rem;
+  color: #666;
+  font-size: 0.75rem;
+}
+
+/* Quick Actions */
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.quick-action-button {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 0.75rem;
+  color: #333;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.quick-action-button:hover {
+  background-color: rgba(174, 86, 48, 0.1);
+  color: #ae5630;
+}
+
+.quick-action-icon {
+  margin-right: 0.5rem;
+}
+
+/* Tip of the Day */
+.tip-container {
+  padding: 1rem;
+  background-color: rgba(174, 86, 48, 0.05);
+  border-left: 3px solid #ae5630;
+  border-radius: 0.75rem;
+  margin-top: 1rem;
+}
+
+.tip-title {
+  font-weight: 600;
+  color: #ae5630;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.tip-title svg {
+  margin-right: 0.5rem;
+}
+
+.tip-content {
+  color: #333;
+  font-size: 0.875rem;
+}
+
+/* Charts and Graphs */
+.chart-container {
+  width: 100%;
+  height: 300px;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 1rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 0.75rem;
+  }
+  
+  .welcome-panel, .dashboard-panel {
+    padding: 1rem;
+  }
+  
+  .greeting {
+    font-size: 1.25rem;
+  }
+  
+  .panel-title {
+    font-size: 1.125rem;
+  }
+  
+  .menu-text {
+    display: none;
+  }
+  
+  .menu-item {
+    padding: 0.5rem;
+  }
+  
+  .menu-icon {
+    margin-right: 0;
+  }
+}

@@ -3,6 +3,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700&display=swap');
 
+/* Import authentication styles */
+@import './auth.css';
+
+/* Import dashboard styles */
+@import './dashboard/dashboard.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -16,7 +22,7 @@
   }
 
   body {
-    @apply bg-neutral-white text-secondary       transition-colors duration-200;
+    @apply bg-neutral-white text-secondary transition-colors duration-200;
   }
 
   h1, h2, h3 {
@@ -75,11 +81,11 @@
   }
 
   .card {
-    @apply bg-neutral-white    rounded-lg shadow-card p-6 transition-all duration-200 border border-neutral-light   ;
+    @apply bg-neutral-white rounded-lg shadow-card p-6 transition-all duration-200 border border-neutral-light;
   }
 
   .input {
-    @apply w-full px-4 py-2 rounded-md border border-neutral-light    bg-neutral-white    text-secondary    focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200;
+    @apply w-full px-4 py-2 rounded-md border border-neutral-light bg-neutral-white text-secondary focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200;
   }
 
   .badge {
@@ -116,4 +122,41 @@
   .elegant-border {
     @apply border border-neutral-light;
   }
+}
+
+/* Chat panel styling */
+.chat-panel {
+  background-color: #ae5630;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.chat-area {
+  background-color: #edeae2;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.chat-bubble-user {
+  background-color: #faf9f5;
+  color: #3d3d3a;
+  border-radius: 1rem 1rem 0.25rem 1rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  max-width: 80%;
+  align-self: flex-end;
+  box-shadow: 0 2px 4px rgba(61, 61, 58, 0.3);
+}
+
+.chat-bubble-ai {
+  background-color: #bcb7af;
+  color: #3d3d3a;
+  border-radius: 1rem 1rem 1rem 0.25rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  max-width: 80%;
+  align-self: flex-start;
+  box-shadow: 0 2px 4px rgba(61, 61, 58, 0.3);
 }

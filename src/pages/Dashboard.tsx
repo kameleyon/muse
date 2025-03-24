@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const Dashboard: React.FC = () => {
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -269,9 +270,46 @@ const Dashboard: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
-        ))}
       </motion.div>
+      ))}
+    </motion.div>
+
+      {/* Usage Analytics */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold font-heading mb-4">Usage Analytics</h2>
+        <Card>
+          <CardContent className="p-6">
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={[
+                    { date: 'Mon', content: 4 },
+                    { date: 'Tue', content: 3 },
+                    { date: 'Wed', content: 7 },
+                    { date: 'Thu', content: 5 },
+                    { date: 'Fri', content: 8 },
+                    { date: 'Sat', content: 6 },
+                    { date: 'Sun', content: 9 }
+                  ]}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line
+                    type="monotone"
+                    dataKey="content"
+                    name="Content Generated"
+                    stroke="#8884d8"
+                    strokeWidth={2}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Content Generation Options */}
       <div className="mb-8">

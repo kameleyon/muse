@@ -1,0 +1,392 @@
+/* 
+ * MagicMuse Authentication Forms Styling
+ * Based on AfroWiki-inspired design with specified color scheme
+ */
+
+/* Main Authentication Container/Overlay Styling */
+.auth-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 1rem;
+  font-family: 'Questrial', sans-serif;
+}
+
+/* Authentication Card Styling - Floating Modal Style */
+.auth-modal {
+  position: relative;
+  background-color: #EDEAE2;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px -5px rgba(61, 61, 58, 0.6), 0 10px 10px -5px rgba(61, 61, 58, 0.3);
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem 2.5rem;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.auth-logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.auth-logo {
+  height: 3.5rem;
+  width: auto;
+}
+
+/* Authentication Form Headings */
+.auth-heading {
+  color: #ae5630;
+  font-family: 'Comfortaa', cursive;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  font-size: 1.75rem;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.auth-subheading {
+  color: #3d3d3a;
+  font-family: 'Questrial', sans-serif;
+  font-weight: 400;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Form Label Styling */
+.auth-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #3d3d3a;
+  margin-bottom: 0.4rem;
+}
+
+.auth-label-link {
+  float: right;
+  font-size: 0.8rem;
+  color: #ae5630;
+  text-decoration: none;
+}
+
+/* Form Input Styling - Matching AfroWiki Aesthetic */
+.auth-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background-color: #faf9f5;
+  border: 1px solid #bcb7af;
+  border-radius: 0.5rem;
+  color: #3d3d3a;
+  font-family: 'Questrial', sans-serif;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 2px 4px rgba(61, 61, 58, 0.6);
+}
+
+.auth-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #30302e;
+  border-color: #30302e;
+}
+
+.auth-input::placeholder {
+  color: #3d3d3a;
+  opacity: 0.6;
+}
+
+/* Form Hint */
+.auth-hint {
+  font-size: 0.8rem;
+  color: #3d3d3a;
+  margin-top: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+/* Authentication Button Styling */
+.auth-button {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  margin-top: 1rem;
+  background-color: #ae5630;
+  color: #faf9f5;
+  border: none;
+  border-radius: 0.5rem;
+  font-family: 'Comfortaa', cursive;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(61, 61, 58, 0.6), 0 2px 4px -1px rgba(61, 61, 58, 0.6);
+}
+
+.auth-button:hover {
+  background-color: #6d371f;
+  box-shadow: 0 4px 8px -1px rgba(61, 61, 58, 0.6), 0 2px 5px -1px rgba(61, 61, 58, 0.6);
+}
+
+.auth-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(174, 86, 48, 0.3), 0 4px 6px -1px rgba(61, 61, 58, 0.6);
+}
+
+/* Secondary Button (Outlined) */
+.auth-button-secondary {
+  background-color: transparent;
+  color: #ae5630;
+  border: 1px solid #ae5630;
+  font-weight: 400;
+  box-shadow: 0 2px 4px rgba(61, 61, 58, 0.3);
+}
+
+.auth-button-secondary:hover {
+  background-color: rgba(174, 86, 48, 0.05);
+  color: #6d371f;
+  border-color: #6d371f;
+}
+
+/* Authentication Links */
+.auth-link {
+  color: #ae5630;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  font-weight: 500;
+}
+
+.auth-link:hover {
+  color: #6d371f;
+}
+
+/* Form Error Messages */
+.auth-error {
+  color: #ae5630;
+  font-size: 0.875rem;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Form Success Messages */
+.auth-success {
+  color: #3d3d3a;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: rgba(250, 249, 245, 0.6);
+  border-radius: 0.25rem;
+  border-left: 3px solid #ae5630;
+}
+
+/* Divider with text (e.g., "or") */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0;
+  color: #3d3d3a;
+  font-size: 0.85rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #bcb7af;
+}
+
+.auth-divider::before {
+  margin-right: 0.75rem;
+}
+
+.auth-divider::after {
+  margin-left: 0.75rem;
+}
+
+/* Social Authentication Options */
+.auth-social {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.auth-social-button {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #3d3d3a;
+  border: 1px solid rgba(188, 183, 175, 0.4);
+  border-radius: 0.5rem;
+  padding: 0.7rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(61, 61, 58, 0.3);
+}
+
+.auth-social-button:hover {
+  background-color: #faf9f5;
+  border-color: #30302e;
+}
+
+.auth-social-icon {
+  height: 1.25rem;
+  width: 1.25rem;
+  color: #6d371f;
+}
+
+/* Bottom link container */
+.auth-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #3d3d3a;
+}
+
+/* Checkbox and Terms styling */
+.auth-terms-container {
+  display: flex;
+  margin-bottom: 1.25rem;
+}
+
+.auth-checkbox {
+  appearance: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 1px solid #bcb7af;
+  border-radius: 0.25rem;
+  background-color: #faf9f5;
+  margin-right: 0.5rem;
+  display: grid;
+  place-content: center;
+  box-shadow: inset 0 1px 2px rgba(61, 61, 58, 0.3);
+}
+
+.auth-checkbox:checked {
+  background-color: #ae5630;
+  border-color: #ae5630;
+}
+
+.auth-checkbox:checked::before {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: white;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.auth-terms-text {
+  font-size: 0.85rem;
+  color: #3d3d3a;
+  padding-top: 0.1rem;
+}
+
+/* Close button */
+.auth-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: #3d3d3a;
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.25rem;
+}
+
+.auth-close:hover {
+  color: #ae5630;
+}
+
+/* Animation for modal */
+.auth-modal-animate {
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-1rem) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Card styling for auth forms - inspired by AfroWiki */
+.auth-card {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(188, 183, 175, 0.5);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 6px rgba(61, 61, 58, 0.6);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .auth-modal {
+    padding: 1.5rem;
+    max-width: 90%;
+  }
+  
+  .auth-logo {
+    height: 2.75rem;
+  }
+  
+  .auth-heading {
+    font-size: 1.5rem;
+  }
+}
+
+/* Adding chat panel styling for MagicMuse */
+.chat-panel {
+  background-color: #ae5630;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.chat-area {
+  background-color: #edeae2;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.chat-bubble-user {
+  background-color: #faf9f5;
+  color: #3d3d3a;
+  border-radius: 1rem 1rem 0.25rem 1rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  max-width: 80%;
+  align-self: flex-end;
+  box-shadow: 0 2px 4px rgba(61, 61, 58, 0.3);
+}
+
+.chat-bubble-ai {
+  background-color: #bcb7af;
+  color: #3d3d3a;
+  border-radius: 1rem 1rem 1rem 0.25rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  max-width: 80%;
+  align-self: flex-start;
+  box-shadow: 0 2px 4px rgba(61, 61, 58, 0.3);
+}

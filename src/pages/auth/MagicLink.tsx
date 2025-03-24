@@ -1,20 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signInWithMagicLink } from '@/services/supabase';
 import { addToast } from '@/store/slices/uiSlice';
+import { useAuthModal } from '@/context/AuthModalContext';
 
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from '@/components/ui/Card';
 import {
   Form,
   FormGroup,
@@ -22,8 +14,6 @@ import {
   FormError,
   FormActions,
 } from '@/components/ui/Form';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
 
 const magicLinkSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -35,6 +25,7 @@ const MagicLink: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const dispatch = useDispatch();
+  const { openForm, closeForm } = useAuthModal();
 
   const {
     register,
@@ -76,85 +67,102 @@ const MagicLink: React.FC = () => {
     }
   };
 
-  if (isSubmitted) {
-    return (
-      <Card>
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Check your email</CardTitle>
-          <CardDescription className="text-center">
-            We've sent a magic link to {watchedEmail}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-16 w-16 text-success mb-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-            />
-          </svg>
-          <p className="text-center text-neutral-medium mb-4">
-            Click the link in the email to sign in. If you don't see the email, check your spam folder.
-          </p>
-        </CardContent>
-        <CardFooter className="flex justify-center gap-4">
-          <Button variant="outline" onClick={() => setIsSubmitted(false)}>
-            Try Again
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/auth/login">Other Sign-In Options</Link>
-          </Button>
-        </CardFooter>
-      </Card>
-    );
-  }
+  const handleLogin = () => {
+    openForm('login');
+  };
 
   return (
-    <Card>
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">Passwordless Sign In</CardTitle>
-        <CardDescription className="text-center">
-          Enter your email address and we'll send you a magic link to sign in.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form onSubmit={handleSubmit(onSubmit)}>
-          <FormGroup>
-            <FormLabel htmlFor="email" required>
-              Email
-            </FormLabel>
-            <Input
-              id="email"
-              type="email"
-              placeholder="example@email.com"
-              {...register('email')}
-              error={errors.email?.message}
-              disabled={isLoading}
-            />
-          </FormGroup>
-
-          <Button type="submit" fullWidth isLoading={isLoading} className="mt-6">
-            Send Magic Link
-          </Button>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-neutral-medium">
-              Prefer to use a password?{' '}
-              <Link to="/auth/login" className="text-accent-teal hover:underline">
-                Sign in with password
-              </Link>
+    <div className="auth-overlay">
+      <div className="auth-modal auth-modal-animate">
+        <button className="auth-close" onClick={closeForm}>×</button>
+        
+        <div className="auth-logo-container">
+          <img src="/mmlogo.png" alt="MagicMuse Logo" className="auth-logo" />
+        </div>
+        
+        {isSubmitted ? (
+          <>
+            <h1 className="auth-heading">Check Your Email</h1>
+            <p className="auth-subheading">
+              We've sent a magic link to {watchedEmail}
             </p>
-          </div>
-        </Form>
-      </CardContent>
-    </Card>
+            
+            <div className="flex flex-col items-center mb-6">
+              <div className="bg-primary/10 text-primary w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <p className="text-center text-sm">
+                Click the link in the email to sign in. If you don't see the email, check your spam folder.
+              </p>
+            </div>
+            
+            <div className="flex flex-col space-y-3">
+              <button 
+                onClick={() => setIsSubmitted(false)}
+                className="auth-button-secondary"
+              >
+                Try Again
+              </button>
+              <button 
+                onClick={handleLogin}
+                className="auth-button"
+              >
+                Other Sign-In Options
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <h1 className="auth-heading">Passwordless Sign In</h1>
+            <p className="auth-subheading">
+              Enter your email and we'll send you a magic link to sign in
+            </p>
+            
+            <Form onSubmit={handleSubmit(onSubmit)}>
+              <div className="mb-4">
+                <label className="auth-label" htmlFor="email">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  className="auth-input"
+                  placeholder="your@email.com"
+                  {...register('email')}
+                  disabled={isLoading}
+                />
+                {errors.email && (
+                  <div className="auth-error">{errors.email.message}</div>
+                )}
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={isLoading} 
+                className="auth-button"
+              >
+                {isLoading ? 'Sending...' : 'Send Magic Link'}
+              </button>
+
+              <div className="auth-footer">
+                <p>
+                  Prefer to use a password?{' '}
+                  <button 
+                    type="button"
+                    className="auth-link"
+                    onClick={handleLogin}
+                  >
+                    Sign in with password
+                  </button>
+                </p>
+              </div>
+            </Form>
+          </>
+        )}
+      </div>
+    </div>
   );
 };
 
