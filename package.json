@@ -7,13 +7,14 @@
         "dev": "vite",
         "dev:server": "cd server && npm run dev",
         "dev:all": "concurrently \"npm run dev\" \"npm run dev:server\"",
-        "build": "npx tsc && npx vite build",
+        "build": "./node_modules/.bin/tsc && ./node_modules/.bin/vite build",
         "build:server": "cd server && npm run build",
         "build:all": "npm run build && npm run build:server",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "preview": "vite preview",
         "test": "jest",
-        "prepare": "[ -z \"$CI\" ] && husky install || echo \"Skipping husky install in CI environment\""
+        "prepare": "[ -z \"$CI\" ] && husky install || echo \"Skipping husky install in CI environment\"",
+        "postinstall": "chmod +x ./node_modules/.bin/*"
     },
     "dependencies": {
         "@headlessui/react": "^1.7.17",
