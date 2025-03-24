@@ -2,7 +2,7 @@ services:
   - type: web
     name: magicmuse
     env: static
-    buildCommand: npm install && chmod +x node_modules/.bin/* && npm run build
+    buildCommand: bash ./build.sh
     staticPublishPath: ./dist
     routes:
       - type: rewrite
