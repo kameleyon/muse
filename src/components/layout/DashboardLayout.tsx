@@ -36,7 +36,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <span className="text-3xl font-comfortaa hidden md:inline">magicmuse</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm font-questrial hidden md:inline">{userName}</span>
+          <span className="text-sm font-questrial inline">{userName}</span>
           <div className="w-8 h-8 rounded-full bg-[#ae5630] flex items-center justify-center">
             <span className="text-sm font-medium">{userName[0]?.toUpperCase()}</span>
           </div>
