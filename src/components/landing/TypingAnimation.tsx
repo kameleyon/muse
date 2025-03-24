@@ -103,10 +103,10 @@ const TypingAnimation: React.FC = () => {
     <div className="h-full flex flex-col">
       {/* Scenario header */}
       <div className="mb-4 p-2 bg-secondary/60 rounded-md flex items-center">
-        <div className="p-1.5 bg-primary/20 rounded-md mr-2 text-primary">
+        <div className="p-1.5 bg-[#bcb7af]/20 rounded-md mr-2 text-[#bcb7af]">
           {SCENARIOS[currentScenario].icon}
         </div>
-        <h3 className="text-primary font-heading text-sm sm:text-base">
+        <h3 className="text-[#bcb7af] font-heading text-sm sm:text-base">
           {SCENARIOS[currentScenario].title}
         </h3>
       </div>
@@ -123,10 +123,10 @@ const TypingAnimation: React.FC = () => {
             className="flex-1 bg-secondary/40 rounded-md p-3 font-mono text-xs sm:text-sm text-neutral-light"
           >
             <div className="flex items-start">
-              <span className="text-primary mr-2">&gt;</span>
+              <span className="text-[#bcb7af] mr-2">&gt;</span>
               <span>{text}</span>
               {showCursor && (
-                <span className="ml-0.5 inline-block w-2 h-4 bg-primary animate-pulse"></span>
+                <span className="ml-0.5 inline-block w-2 h-4 bg-[#bcb7af] animate-pulse"></span>
               )}
             </div>
           </motion.div>
@@ -140,7 +140,7 @@ const TypingAnimation: React.FC = () => {
               <div 
                 key={index} 
                 className={`w-2 h-2 rounded-full ${
-                  index === currentScenario ? 'bg-primary' : 'bg-neutral-medium/30'
+                  index === currentScenario ? 'bg-[#bcb7af]' : 'bg-neutral-medium/30'
                 }`}
               ></div>
             ))}

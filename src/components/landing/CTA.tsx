@@ -13,7 +13,7 @@ const CTA: React.FC = () => {
   };
 
   return (
-    <section className="py-20 bg-secondary relative overflow-hidden">
+    <section className="py-20 bg-primary-hover relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-10 left-10 w-32 h-32 bg-primary rounded-full blur-3xl"></div>
@@ -26,14 +26,14 @@ const CTA: React.FC = () => {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="bg-secondary-hover rounded-xl shadow-lg p-8 md:p-12 text-center max-w-4xl mx-auto border border-primary/20"
+          className="bg-secondary-hover/50 rounded-2xl shadow-md shadow-black/40 p-8 md:p-12 text-center max-w-4xl mx-auto border border-[#bcb7af]/40"
         >
           <motion.h2 
             initial={{ opacity: 0, y: -10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-3xl md:text-4xl font-heading font-light text-primary mb-6"
+            className="text-3xl md:text-4xl font-heading font-light text-[#bcb7af] mb-6"
           >
             Ready to Transform Your Content Creation?
           </motion.h2>
@@ -57,13 +57,13 @@ const CTA: React.FC = () => {
           >
             <Button 
               size="lg" 
-              className="bg-primary text-secondary hover:bg-primary/90"
+              className="bg-[#bcb7af] text-secondary hover:bg-[#bcb7af]/90"
               onClick={handleRegister}
             >
               Start Your Free Trial
             </Button>
             <Link to="#how-it-works">
-              <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/10">
+              <Button size="lg" variant="outline" className="border-[#bcb7af] text-[#bcb7af] hover:bg-[#bcb7af]/10">
                 See How It Works
               </Button>
             </Link>

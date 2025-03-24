@@ -198,13 +198,13 @@ const Pricing: React.FC = () => {
               className={`
                 rounded-xl shadow-sm shadow-black/30 overflow-hidden relative 
                 ${plan.highlighted 
-                  ? 'bg-secondary text-neutral-light border-2 border-primary transform -translate-y-4 md:scale-105' 
-                  : 'bg-white dark:bg-secondary-hover text-secondary dark:text-neutral-light border border-neutral-medium/30'
+                  ? 'bg-[#bcb7af]/40 text-[#3d3d3a] border-2 border-neutral-medium/10 transform -translate-y-4 md:scale-105' 
+                  : 'bg-white dark:bg-secondary-hover text-secondary  border border-neutral-medium/30'
                 }
               `}
             >
               {plan.highlighted && (
-                <div className="bg-primary text-secondary text-xs font-bold py-1 px-4 absolute top-0 right-0 rounded-bl-lg">
+                <div className="bg-white text-secondary shadow-sm text-sm font-bold py-1 px-4 absolute top-0 right-0 rounded-bl-lg">
                   MOST POPULAR
                 </div>
               )}
@@ -237,7 +237,7 @@ const Pricing: React.FC = () => {
                   <Button 
                     fullWidth 
                     variant={plan.highlighted ? 'primary' : 'outline'}
-                    className={plan.highlighted ? 'bg-primary text-secondary font-regular rounded-xl' : 'border-primary font-regular text-primary rounded-xl'}
+                    className={plan.highlighted ? 'bg-primary/90 text-white/80 font-regular rounded-xl' : 'border-primary font-regular text-primary rounded-xl'}
                   >
                     {plan.cta}
                   </Button>

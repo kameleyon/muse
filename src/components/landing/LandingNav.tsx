@@ -40,8 +40,8 @@ const LandingNav: React.FC = () => {
     <header
       className={`fixed w-full top-0 z-40 transition-all duration-300 ${
         isScrolled
-          ? 'bg-secondary py-4 shadow-md border-b border-primary/50'
-          : 'bg-transparent py-4 shadow-sm shadow-black/10 border-b border-primary/50'
+          ? 'bg-[#edeae2] py-4 shadow-md border-b border-[#3d3d3a]/50'
+          : 'bg-transparent py-4 shadow-sm shadow-black/10 border-b border-[#edeae2]/90'
       }`}
     >
       <div className="container mx-auto px-4 lg:px-8">
@@ -51,23 +51,23 @@ const LandingNav: React.FC = () => {
             <img
               src="/mmlogo.png"
               alt="magicmuse Logo"
-              className="h-10 w-auto mr-2"
+              className="h-12 w-auto mr-2"
             />
-            <span className="font-heading text-3xl mt-3 text-primary web-only">magicmuse</span>
+            <span className="font-heading text-4xl mt-3 text-[#3d3d3a] web-only">magicmuse</span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8 font-medium">
-            <Link to="#features" className="text-[#9195a1] hover:text-primary transition-colors">
+            <Link to="#features" className="text-[#3d3d3a] hover:text-[#3d3d3a] transition-colors">
               FEATURES
             </Link>
-            <Link to="#how-it-works" className="text-[#9195a1] hover:text-primary transition-colors">
+            <Link to="#how-it-works" className="text-[#3d3d3a] hover:text-[#3d3d3a] transition-colors">
               HOW IT WORKS
             </Link>
-            <Link to="#prices" className="text-[#9195a1] hover:text-primary transition-colors">
+            <Link to="#prices" className="text-[#3d3d3a] hover:text-[#3d3d3a] transition-colors">
               PRICES
             </Link>
-            <Link to="#api" className="text-[#9195a1] hover:text-primary transition-colors">
+            <Link to="#api" className="text-[#3d3d3a] hover:text-[#3d3d3a] transition-colors">
               API
             </Link>
           </div>
@@ -77,14 +77,14 @@ const LandingNav: React.FC = () => {
             <Button 
               variant="outline" 
               size="md" 
-              className="border-primary px-6 rounded-lg text-primary hover:text-secondary hover:bg-primary/90 font-light shadow-sm"
+              className="border-[#3d3d3a] px-6 rounded-lg text-[#3d3d3a] hover:text-[#edeae2] hover:bg-[#3d3d3a]/90 font-light shadow-sm"
               onClick={handleOpenLogin}
             >
               Login
             </Button>
             <Button 
               size="md"
-              className="bg-primary px-6 rounded-lg text-secondary hover:bg-primary/90 font-light shadow-sm"
+              className="bg-[#3d3d3a] px-6 rounded-lg text-[#edeae2] hover:bg-[#3d3d3a]/90 font-light shadow-sm"
               onClick={handleOpenRegister}
             >
               Sign Up
@@ -95,7 +95,7 @@ const LandingNav: React.FC = () => {
           <div className="flex md:hidden items-center space-x-4">
             <button
               onClick={toggleMobileMenu}
-              className="p-2 text-primary hover:text-primary/80 transition-colors"
+              className="p-2 text-[#3d3d3a] hover:text-[#3d3d3a]/80 transition-colors"
               aria-label="Toggle mobile menu"
             >
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -110,33 +110,33 @@ const LandingNav: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="md:hidden bg-secondary/90 backdrop-blur-sm mt-2 rounded-xl p-4 shadow-lg"
+            className="md:hidden bg-[#edeae2]/90 backdrop-blur-sm mt-2 rounded-xl p-4 shadow-md"
           >
             <div className="flex flex-col space-y-4">
               <Link
                 to="#features"
-                className="text-primary hover:text-primary/80 py-2 transition-colors"
+                className="text-[#3d3d3a] hover:text-[#3d3d3a]/80 py-2 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 FEATURES
               </Link>
               <Link
                 to="#how-it-works"
-                className="text-primary hover:text-primary/80 py-2 transition-colors"
+                className="text-[#3d3d3a] hover:text-[#3d3d3a]/80 py-2 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 HOW IT WORKS
               </Link>
               <Link
                 to="#prices"
-                className="text-primary hover:text-primary/80 py-2 transition-colors"
+                className="text-[#3d3d3a] hover:text-[#3d3d3a]/80 py-2 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 PRICES
               </Link>
               <Link
                 to="#api"
-                className="text-primary hover:text-primary/80 py-2 transition-colors"
+                className="text-[#3d3d3a] hover:text-[#3d3d3a]/80 py-2 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 API
@@ -145,7 +145,7 @@ const LandingNav: React.FC = () => {
                 <Button 
                   variant="outline" 
                   fullWidth
-                  className="border-primary text-primary hover:bg-primary/10"
+                  className="border-[#3d3d3a] text-[#3d3d3a] hover:text-[#edeae2] hover:bg-[#3d3d3a]/90"
                   onClick={(e) => {
                     setIsMobileMenuOpen(false);
                     handleOpenLogin(e);
@@ -155,7 +155,7 @@ const LandingNav: React.FC = () => {
                 </Button>
                 <Button 
                   fullWidth
-                  className="bg-primary text-secondary hover:bg-primary/90"
+                  className="bg-[#3d3d3a] text-[#edeae2] hover:bg-[#3d3d3a]/90"
                   onClick={(e) => {
                     setIsMobileMenuOpen(false);
                     handleOpenRegister(e);

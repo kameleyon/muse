@@ -8,31 +8,49 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#fcbf23', // Yellow
-          hover: '#e3ab16',
-          active: '#d9a315',
+          DEFAULT: '#ae5630', // Terracotta - based on #ae5630 from the image
+          hover: '#9d4e2b',
+          active: '#8b4526',
         },
         secondary: {
-          DEFAULT: '#1b1e27', // Dark Gray
-          hover: '#16191f',
-          active: '#12151a',
+          DEFAULT: '#232321', // Nearly black - based on #232321 from the image
+          hover: '#1e1e1c',
+          active: '#191917',
         },
         neutral: {
-          white: '#F9F9F9', // Off-White
-          light: '#E5E5E5', // Light Grey
-          medium: '#9195A1', // Medium Grey
-          dark: '#fcbf23', // Deep Grey (Note: This matches the yellow color as specified)
+          white: '#faf9f5', // Soft cream - based on #faf9f5 from the image
+          light: '#edeae2', // Light beige - based on #edeae2 from the image
+          medium: '#3d3d3a', // Dark olive - based on #3d3d3a from the image
+          dark: '#30302e', // Charcoal - based on #30302e from the image
         },
-        success: '#00b81e', // Success Green
-        error: '#f40000', // Alert Red
-        warning: '#ff9856', // Orange
-        accent: {
-          // Removed teal accent color
+        terracotta: {
+          light: '#9d4e2c', // Lighter terracotta - based on #9d4e2c from the image
+          DEFAULT: '#ae5630', // Terracotta
+          dark: '#8b4526', // Darker terracotta
         },
+        earth: {
+          light: '#edeae2', // Light earth tone - based on #edeae2 from the image
+          DEFAULT: '#9d4e2c', // Earth tone - based on #9d4e2c from the image
+          dark: '#3d3d3a', // Dark earth tone - based on #3d3d3a from the image
+        },
+        clay: {
+          DEFAULT: '#ae5630', // Clay - based on #ae5630 from the image
+          dark: '#9d4e2c', // Dark clay
+        },
+        stone: {
+          light: '#edeae2', // Light stone - based on #edeae2 from the image
+          DEFAULT: '#30302e', // Stone - based on #30302e from the image
+          dark: '#232321', // Dark stone - based on #232321 from the image
+        },
+        success: '#1a1918', // Dark success - based on #1a1918 from the image
+        error: '#ae5630', // Error - using terracotta color
+        warning: '#9d4e2c', // Warning - using darker terracotta
       },
       fontFamily: {
         heading: ['Comfortaa', 'cursive'],
         body: ['Questrial', 'sans-serif'],
+        display: ['Montserrat', 'sans-serif'],
+        accent: ['Nunito Sans', 'sans-serif'],
       },
       boxShadow: {
         'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',

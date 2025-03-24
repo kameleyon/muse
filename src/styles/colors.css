@@ -1,30 +1,30 @@
 :root {
-  /* Primary Colors */
-  --color-yellow: #1b1e27;
-  --color-dark-gray: #fcbf23;
+  /* Primary Colors from Image 1 */
+  --color-terracotta: #ae5630;
+  --color-deep-black: #232321;
   
-  /* Neutral Colors */
-  --color-off-white: #F9F9F9;
-  --color-light-grey: #E5E5E5;
-  --color-medium-grey: #9195A1;
-  --color-deep-grey: #fcbf23;
+  /* Neutral Colors from Image 1 */
+  --color-cream: #faf9f5;
+  --color-beige: #edeae2;
+  --color-olive: #3d3d3a;
+  --color-charcoal: #30302e;
   
-  /* UI Accents */
-  --color-success-green: #00b81e;
-  --color-alert-red: #f40000;
-  --color-orange: #ff9856;
+  /* Additional Colors from Image 1 */
+  --color-terracotta-light: #9d4e2c;
+  --color-terracotta-dark: #1a1918;
 
-  /* Light Theme */
-  --color-background-light: var(--color-off-white);
-  --color-text-primary-light: var(--color-yellow);
-  --color-text-secondary-light: var(--color-medium-grey);
-  --color-border-light: var(--color-light-grey);
+  /* Light Theme - Elegant, soft, natural and sophisticated */
+  --color-background-light: var(--color-cream);
+  --color-text-primary-light: var(--color-deep-black);
+  --color-text-secondary-light: var(--color-olive);
+  --color-border-light: var(--color-beige);
   
-  /* Dark Theme */
-  --color-background-dark: var(--color-yellow);
-  --color-text-primary-dark: var(--color-dark-gray);
-  --color-text-secondary-dark: var(--color-medium-grey);
-  --color-border-dark: var(--color-deep-grey);
+  /* Dark Theme - Elegant, soft, natural and sophisticated */
+  --color-background-dark: var(--color-deep-black);
+  --color-text-primary-dark: var(--color-cream);
+  --color-text-secondary-dark: var(--color-beige);
+  --color-border-dark: var(--color-charcoal);
+  --color-accent-dark: var(--color-terracotta);
 }
 
 @tailwind base;
@@ -33,42 +33,44 @@
 
 @layer base {
   .light {
+    /* Light elegant theme inspired by Claude.ai */
     --background: var(--color-background-light);
     --foreground: var(--color-text-primary-light);
-    --primary: var(--color-dark-gray);
-    --primary-foreground: var(--color-yellow);
-    --secondary: var(--color-yellow);
-    --secondary-foreground: var(--color-dark-gray);
-    --accent: var(--color-dark-gray);
-    --accent-foreground: var(--color-yellow);
-    --success: var(--color-success-green);
-    --error: var(--color-alert-red);
-    --warning: var(--color-orange);
-    --info: var(--color-medium-grey);
+    --primary: var(--color-terracotta);
+    --primary-foreground: var(--color-cream);
+    --secondary: var(--color-deep-black);
+    --secondary-foreground: var(--color-cream);
+    --accent: var(--color-terracotta-light);
+    --accent-foreground: var(--color-cream);
+    --success: var(--color-olive);
+    --error: var(--color-terracotta);
+    --warning: var(--color-terracotta-light);
+    --info: var(--color-olive);
     --border: var(--color-border-light);
-    --neutral-white: var(--color-off-white);
-    --neutral-light: var(--color-light-grey);
-    --neutral-medium: var(--color-medium-grey);
-    --neutral-dark: var(--color-deep-grey);
+    --neutral-white: var(--color-cream);
+    --neutral-light: var(--color-beige);
+    --neutral-medium: var(--color-olive);
+    --neutral-dark: var(--color-charcoal);
   }
 
   .dark {
+    /* Dark elegant theme inspired by Claude.ai */
     --background: var(--color-background-dark);
     --foreground: var(--color-text-primary-dark);
-    --primary: var(--color-dark-gray);
-    --primary-foreground: var(--color-yellow);
-    --secondary: var(--color-dark-gray);
-    --secondary-foreground: var(--color-yellow);
-    --accent: var(--color-dark-gray);
-    --accent-foreground: var(--color-yellow);
-    --success: var(--color-success-green);
-    --error: var(--color-alert-red);
-    --warning: var(--color-orange);
-    --info: var(--color-medium-grey);
+    --primary: var(--color-terracotta);
+    --primary-foreground: var(--color-cream);
+    --secondary: var(--color-cream);
+    --secondary-foreground: var(--color-deep-black);
+    --accent: var(--color-terracotta-light);
+    --accent-foreground: var(--color-cream);
+    --success: var(--color-olive);
+    --error: var(--color-terracotta);
+    --warning: var(--color-terracotta-light);
+    --info: var(--color-beige);
     --border: var(--color-border-dark);
-    --neutral-white: var(--color-yellow);
-    --neutral-light: var(--color-light-grey);
-    --neutral-medium: var(--color-medium-grey);
-    --neutral-dark: var(--color-deep-grey);
+    --neutral-white: var(--color-cream);
+    --neutral-light: var(--color-beige);
+    --neutral-medium: var(--color-olive);
+    --neutral-dark: var(--color-charcoal);
   }
 }
