@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { Link } from 'react-router-dom';
-import { NavigationMenu } from '@/components/dashboard';
+
 import LandingFooter from '@/components/landing/LandingFooter';
 import { 
   Home, FolderOpen, FileText, Bookmark, Users, Bell, Settings, LogOut
@@ -45,8 +45,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       
       {/* Dashboard Content */}
       <div className="px-6 py-8 max-w-7xl mx-auto">
-        {/* Horizontal Navigation Menu */}
-        <NavigationMenu items={navigationItems} />
+        
         
         {/* Main Content */}
         <main>
