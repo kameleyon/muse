@@ -2,7 +2,11 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { Link } from 'react-router-dom';
+import { NavigationMenu } from '@/components/dashboard';
 import LandingFooter from '@/components/landing/LandingFooter';
+import { 
+  Home, FolderOpen, FileText, Bookmark, Users, Bell, Settings, LogOut
+} from 'lucide-react';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -10,68 +14,72 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user } = useSelector((state: RootState) => state.auth);
+  const userName = user?.email?.split('@')[0] || 'User';
+  
+  const navigationItems = [
+    { path: '/dashboard', label: 'Home', icon: <Home size={20} color="#3d3d3a" /> },
+    { path: '/projects', label: 'My Projects', icon: <FolderOpen size={20} color="#3d3d3a" /> },
+    { path: '/templates', label: 'Templates', icon: <FileText size={20} color="#3d3d3a" /> },
+    { path: '/bookmarks', label: 'Bookmarks', icon: <Bookmark size={20} color="#3d3d3a" /> },
+    { path: '/team', label: 'Team', icon: <Users size={20} color="#3d3d3a" /> },
+    { path: '/notifications', label: 'Notifications', icon: <Bell size={20} color="#3d3d3a" /> },
+    { path: '/settings', label: 'Settings', icon: <Settings size={20} color="#3d3d3a" /> },
+    { path: '/logout', label: 'Logout', icon: <LogOut size={20} color="#3d3d3a" /> }
+  ];
   
   return (
-    <div className="min-h-screen bg-neutral-white flex flex-col">
-      {/* Header - No Sidebar */}
-      <header className="bg-white border-b border-neutral-light/40 shadow-sm">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center">
-            {/* Logo */}
-            <Link to="/dashboard" className="flex items-center">
-              <div className="w-8 h-8 bg-secondary flex items-center justify-center text-neutral-white rounded-md mr-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-              </div>
-              <h1 className="text-xl font-bold text-secondary font-heading">MagicMuse</h1>
-            </Link>
-          </div>
-          
-          {/* Navigation Links in Header */}
-          <div className="flex items-center space-x-4">
-            <Link to="/dashboard" className="text-neutral-medium hover:text-primary px-3 py-2">
-              Dashboard
-            </Link>
-            <Link to="/generator" className="text-neutral-medium hover:text-primary px-3 py-2">
-              Content Generator
-            </Link>
-            <Link to="/projects" className="text-neutral-medium hover:text-primary px-3 py-2">
-              Content Library
-            </Link>
-            <Link to="/profile/settings" className="text-neutral-medium hover:text-primary px-3 py-2">
-              Settings
-            </Link>
-            
-            {/* User avatar */}
-            <div className="flex items-center ml-4">
-              <div className="h-8 w-8 rounded-full bg-primary text-neutral-white flex items-center justify-center">
-                {user?.fullName?.charAt(0) || 'A'}
-              </div>
-              <span className="ml-2 text-neutral-medium">{user?.email || 'arcamadraconi@gmail.com'}</span>
-            </div>
+    <div className="bg-[#EDEAE2] min-h-screen">
+      {/* Top Bar */}
+      <div className="bg-[#1a1918]/80 text-white px-6 py-3 flex justify-between items-center sticky top-0 z-50 shadow-md">
+        <div className="flex items-center">
+          <img src="/mmlogolight.png" alt="MagicMuse Logo" className="h-8 w-auto mr-3" />
+          <span className="text-3xl font-comfortaa">magicmuse</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="text-sm font-questrial">{userName}</span>
+          <div className="w-8 h-8 rounded-full bg-[#ae5630] flex items-center justify-center">
+            <span className="text-sm font-medium">{userName[0]?.toUpperCase()}</span>
           </div>
         </div>
-      </header>
+      </div>
       
-      {/* Main content - No sidebar */}
-      <main className="flex-1 container mx-auto px-4 py-6">
-        {children}
-      </main>
-      
-      {/* Landing Footer instead of regular Footer */}
+      {/* Dashboard Content */}
+      <div className="px-6 py-8 max-w-9xl mx-auto">
+        {/* Horizontal Navigation Menu 
+        <NavigationMenu items={navigationItems} />*/}
+        
+        {/* Main Content */}
+        <main>
+          {children}
+        </main>
+      </div>
       <LandingFooter />
+      {/* Footer 
+      <div className="mt-12 py-6 px-6 bg-[#1a1918] text-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h4 className="text-lg font-comfortaa mb-4">MagicMuse</h4>
+              <p className="text-sm text-[#bcb7af]">Your AI-powered content creation platform</p>
+            </div>
+            <div>
+              <h4 className="text-lg font-comfortaa mb-4">Quick Links</h4>
+              <ul className="space-y-2 text-sm text-[#bcb7af]">
+                <li>Help Center</li>
+                <li>Privacy Policy</li>
+                <li>Terms of Service</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-lg font-comfortaa mb-4">Contact</h4>
+              <p className="text-sm text-[#bcb7af]">support@magicmuse.io</p>
+            </div>
+          </div>
+          <div className="mt-8 pt-6 border-t border-[#3d3d3a] text-center text-sm text-[#bcb7af]">
+            © {new Date().getFullYear()} MagicMuse. All rights reserved.
+          </div>
+        </div>
+      </div>*/}
     </div>
   );
 };

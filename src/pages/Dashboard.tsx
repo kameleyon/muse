@@ -1,430 +1,413 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
-import { motion } from 'framer-motion';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Link } from 'react-router-dom';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  WelcomeSection,
+  NavigationMenu,
+  DashboardStats,
+  RecentActivity,
+  TokenUsage,
+  QuickActions,
+  TipOfTheDay,
+  ChartSection,
+  RecentProjects
+} from '@/components/dashboard';
+import { 
+  BarChart, Bar, AreaChart, Area, PieChart, Pie, LineChart, Line,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell
+} from 'recharts';
+// Import interfaces from component files
+import { ActivityType } from '@/components/dashboard/RecentActivity';
+// Define the interfaces based on the component props
+interface ActivityItem {
+  id: string;
+  type: ActivityType;
+  timestamp: string;
+  title?: string;
+  amount?: string;
+}
+
+interface RecentActivityProps {
+  activities: ActivityItem[];
+}
+
+interface Project {
+  id: string;
+  title: string;
+  date: string;
+  views: number;
+  status: 'Draft' | 'Published';
+}
+
+interface RecentProjectsProps {
+  projects: Project[];
+}
+import { 
+  Home, FolderOpen, FileText, Bookmark, Users, Bell, Settings, LogOut, 
+  BarChart2, Calendar, Clock, TrendingUp 
+} from 'lucide-react';
 
 const Dashboard: React.FC = () => {
-  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
-  const { items: contentItems } = useSelector((state: RootState) => state.content);
+  const { user } = useSelector((state: RootState) => state.auth);
+  const userName = user?.email?.split('@')[0] || 'User';
+  const [viewType, setViewType] = useState<'month' | 'week' | 'year'>('month');
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
+  const navigationItems = [
+    { path: '/dashboard', label: 'Home', icon: <Home size={20} color="#3d3d3a" /> },
+    { path: '/projects', label: 'My Projects', icon: <FolderOpen size={20} color="#3d3d3a" /> },
+    { path: '/templates', label: 'Templates', icon: <FileText size={20} color="#3d3d3a" /> },
+    { path: '/bookmarks', label: 'Bookmarks', icon: <Bookmark size={20} color="#3d3d3a" /> },
+    { path: '/team', label: 'Team', icon: <Users size={20} color="#3d3d3a" /> },
+    { path: '/notifications', label: 'Notifications', icon: <Bell size={20} color="#3d3d3a" /> },
+    { path: '/settings', label: 'Settings', icon: <Settings size={20} color="#3d3d3a" /> },
+    { path: '/logout', label: 'Logout', icon: <LogOut size={20} color="#3d3d3a" /> }
+  ];
 
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.3,
-      },
-    },
-  };
-
-  // Dashboard stats
   const stats = [
     {
-      title: 'Generated Content',
-      value: contentItems.length || 0,
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 text-accent-teal"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-          />
-        </svg>
-      ),
+      title: 'Total Projects',
+      value: 12,
+      change: '+2 from last month',
+      icon: <FolderOpen size={20} color="#3d3d3a" />
     },
     {
-      title: 'AI Models',
-      value: 4,
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 text-accent-purple"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-          />
-        </svg>
-      ),
+      title: 'Active Projects',
+      value: 3,
+      change: 'No change',
+      icon: <FileText size={20} color="#3d3d3a" />
     },
     {
-      title: 'Templates',
-      value: 15,
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 text-primary"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
-          />
-        </svg>
-      ),
+      title: 'Completed Projects',
+      value: 9,
+      change: '+1 this week',
+      icon: <FileText size={20} color="#3d3d3a" />
     },
     {
-      title: 'Content Types',
+      title: 'Team Members',
       value: 5,
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 text-success"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-          />
-        </svg>
-      ),
-    },
+      change: '+2 new members',
+      icon: <Users size={20} color="#3d3d3a" />
+    }
   ];
 
-  // Content generation options
-  const contentTypes = [
-    {
-      name: 'Blog Posts',
-      description: 'Create engaging blog content for your audience',
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-10 w-10 text-accent-teal"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
-          />
-        </svg>
-      ),
-      path: '/generator?type=blog',
-    },
-    {
-      name: 'Marketing Copy',
-      description: 'Persuasive copy for ads, emails, and landing pages',
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-10 w-10 text-primary"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
-          />
-        </svg>
-      ),
-      path: '/generator?type=marketing',
-    },
-    {
-      name: 'Creative Writing',
-      description: 'Stories, poems, and creative narratives',
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-10 w-10 text-accent-purple"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-          />
-        </svg>
-      ),
-      path: '/generator?type=creative',
-    },
-    {
-      name: 'Academic Content',
-      description: 'Research papers, essays, and educational material',
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-10 w-10 text-secondary"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path d="M12 14l9-5-9-5-9 5 9 5z" />
-          <path
-            d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"
-          />
-        </svg>
-      ),
-      path: '/generator?type=academic',
-    },
-    {
-      name: 'Social Media',
-      description: 'Engaging posts for various social platforms',
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-10 w-10 text-success"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-          />
-        </svg>
-      ),
-      path: '/generator?type=social',
-    },
+  const activities: RecentActivityProps['activities'] = [
+    { id: 'act1', type: 'project_created' as ActivityType, title: 'New Project Created', timestamp: new Date().toISOString() },
+    { id: 'act2', type: 'template_used' as ActivityType, title: 'Character Template', timestamp: new Date().toISOString() },
+    { id: 'act3', type: 'tokens_purchased' as ActivityType, amount: '1000 tokens', timestamp: new Date().toISOString() },
+    { id: 'act4', type: 'team_joined' as ActivityType, title: 'Writing Team', timestamp: new Date().toISOString() },
+    { id: 'act5', type: 'project_created' as ActivityType, title: 'Sci-Fi Story Outline', timestamp: new Date(Date.now() - 86400000).toISOString() }
   ];
+
+  const tokenUsage = {
+    used: 7500,
+    total: 10000,
+    percentage: 75
+  };
+  
+  // Sample data for charts
+  const monthlyContentData = [
+    { name: 'Jan', documents: 4, edits: 8 },
+    { name: 'Feb', documents: 3, edits: 5 },
+    { name: 'Mar', documents: 5, edits: 9 },
+    { name: 'Apr', documents: 7, edits: 12 },
+    { name: 'May', documents: 2, edits: 4 },
+    { name: 'Jun', documents: 6, edits: 10 },
+    { name: 'Jul', documents: 8, edits: 14 }
+  ];
+  
+  const weeklyContentData = [
+    { name: 'Mon', documents: 2, edits: 4 },
+    { name: 'Tue', documents: 3, edits: 6 },
+    { name: 'Wed', documents: 1, edits: 2 },
+    { name: 'Thu', documents: 4, edits: 8 },
+    { name: 'Fri', documents: 3, edits: 5 },
+    { name: 'Sat', documents: 0, edits: 1 },
+    { name: 'Sun', documents: 1, edits: 2 }
+  ];
+  
+  const contentTypeData = [
+    { name: 'Blog Posts', value: 8 },
+    { name: 'Social Media', value: 15 },
+    { name: 'Email', value: 5 },
+    { name: 'Scripts', value: 2 },
+    { name: 'Stories', value: 10 }
+  ];
+  
+  const COLORS = ['#ae5630', '#6d371f', '#bcb7af', '#1a1918', '#3d3d3a'];
+
+  const recentProjects: RecentProjectsProps['projects'] = [
+    { id: 'proj1', title: 'Fantasy Novel', date: new Date().toISOString(), views: 12, status: 'Draft' },
+    { id: 'proj2', title: 'Character Profiles', date: new Date().toISOString(), views: 8, status: 'Published' },
+    { id: 'proj3', title: 'World Building', date: new Date().toISOString(), views: 15, status: 'Draft' },
+    { id: 'proj4', title: 'Plot Outline', date: new Date().toISOString(), views: 5, status: 'Draft' }
+  ];
+
+  const handleViewTypeChange = (type: 'month' | 'week' | 'year') => {
+    setViewType(type);
+  };
+
+  const getChartData = () => {
+    return viewType === 'week' ? weeklyContentData : monthlyContentData;
+  };
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold font-heading mb-2">
-          {isAuthenticated
-            ? `Welcome back, ${user?.fullName || 'there'}!`
-            : 'Welcome to MagicMuse'}
-        </h1>
-        <p className="text-neutral-medium max-w-3xl">
-          Your AI-powered content generation platform. Create professional, creative, and
-          engaging content in seconds.
-        </p>
-      </div>
-
-      {/* Dashboard Stats */}
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-      >
-        {stats.map((stat, index) => (
-          <motion.div key={index} variants={itemVariants}>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <div className="p-2 rounded-md bg-neutral-light/20    mr-4">
-                    {stat.icon}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-neutral-medium mb-1">
-                      {stat.title}
-                    </p>
-                    <h3 className="text-2xl font-bold font-heading">{stat.value}</h3>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-      </motion.div>
-      ))}
-    </motion.div>
-
-      {/* Usage Analytics */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold font-heading mb-4">Usage Analytics</h2>
-        <Card>
-          <CardContent className="p-6">
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={[
-                    { date: 'Mon', content: 4 },
-                    { date: 'Tue', content: 3 },
-                    { date: 'Wed', content: 7 },
-                    { date: 'Thu', content: 5 },
-                    { date: 'Fri', content: 8 },
-                    { date: 'Sat', content: 6 },
-                    { date: 'Sun', content: 9 }
-                  ]}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="content"
-                    name="Content Generated"
-                    stroke="#8884d8"
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Content Generation Options */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold font-heading mb-4">Generate Content</h2>
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {contentTypes.map((type, index) => (
-            <motion.div key={index} variants={itemVariants}>
-              <Card hover>
-                <CardContent className="p-6">
-                  <div className="flex flex-col h-full">
-                    <div className="mb-4">{type.icon}</div>
-                    <h3 className="text-xl font-bold font-heading mb-2">{type.name}</h3>
-                    <p className="text-neutral-medium mb-6 flex-grow">
-                      {type.description}
-                    </p>
-                    <Button asChild fullWidth>
-                      <Link to={type.path}>Create Now</Link>
+    <div className="bg-[#EDEAE2] min-h-screen">
+      {/* Top Bar 
+      <div className="bg-[#1a1918] text-white px-6 py-3 flex justify-between items-center sticky top-0 z-50 shadow-md">
+        <div className="flex items-center">
+          <img src="/mmiologo.png" alt="MagicMuse Logo" className="h-8 w-auto mr-3" />
+          <span className="text-xl font-comfortaa font-bold">MagicMuse</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="text-sm font-questrial">{userName}</span>
+          <div className="w-8 h-8 rounded-full bg-[#ae5630] flex items-center justify-center">
+            <span className="text-sm font-medium">{userName[0]?.toUpperCase()}</span>
+          </div>
+        </div>
+      </div>*/}
+      
+      {/* Dashboard Content */}
+      <div className="px-6 py-8 max-w-7xl mx-auto">
+        {/* Welcome Section */}
+        <WelcomeSection 
+          userName={userName}
+          draftCount={3} 
+          publishedCount={8}
+        />
+        
+        {/* Horizontal Navigation Menu */}
+        <NavigationMenu items={navigationItems} />
+        
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-12 gap-6">
+          {/* Left Column - Stats and Charts */}
+          <div className="col-span-12 lg:col-span-8">
+            {/* Statistics Section */}
+            <Card className="mb-6 overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+              <div className="border-b border-neutral-light/40 p-4 bg-white/5">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-comfortaa text-[#1a1918] flex items-center">
+                    <BarChart2 size={20} className="mr-2 text-[#ae5630]" />
+                    Statistics
+                  </h2>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant={viewType === 'month' ? 'primary' : 'outline'} 
+                      size="sm"
+                      onClick={() => handleViewTypeChange('month')}
+                    >
+                      <Calendar size={14} className="mr-1" />
+                      Month
+                    </Button>
+                    <Button 
+                      variant={viewType === 'week' ? 'primary' : 'outline'} 
+                      size="sm"
+                      onClick={() => handleViewTypeChange('week')}
+                    >
+                      <Clock size={14} className="mr-1" />
+                      Week
+                    </Button>
+                    <Button 
+                      variant={viewType === 'year' ? 'primary' : 'outline'} 
+                      size="sm"
+                      onClick={() => handleViewTypeChange('year')}
+                    >
+                      <TrendingUp size={14} className="mr-1" />
+                      Year
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold font-heading mb-4">Quick Actions</h2>
-        <div className="flex flex-wrap gap-4">
-          <Button variant="outline" leftIcon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
-          }>
-            New Content
-          </Button>
-          <Button variant="outline" leftIcon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"
-              />
-            </svg>
-          }>
-            View Library
-          </Button>
-          <Button variant="outline" leftIcon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-          }>
-            Settings
-          </Button>
-          <Button variant="outline" leftIcon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          }>
-            Help & Support
-          </Button>
+                </div>
+              </div>
+              <div className="p-4">
+                <DashboardStats stats={stats} viewType={viewType} onViewTypeChange={handleViewTypeChange} />
+                
+                {/* Recharts Area Chart */}
+                <div className="mt-6 p-4 bg-white/20 rounded-lg">
+                  <h3 className="text-lg font-comfortaa mb-4 text-[#1a1918]">Content Creation Trends</h3>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <AreaChart
+                      data={getChartData()}
+                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                    >
+                      <defs>
+                        <linearGradient id="colorDocuments" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#ae5630" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#ae5630" stopOpacity={0.1}/>
+                        </linearGradient>
+                        <linearGradient id="colorEdits" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#6d371f" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#6d371f" stopOpacity={0.1}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#bcb7af" opacity={0.3} />
+                      <XAxis dataKey="name" stroke="#3d3d3a" />
+                      <YAxis stroke="#3d3d3a" />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#faf9f5', 
+                          borderColor: '#bcb7af',
+                          borderRadius: '0.375rem'
+                        }} 
+                      />
+                      <Legend />
+                      <Area 
+                        type="monotone" 
+                        dataKey="documents" 
+                        stroke="#ae5630" 
+                        fillOpacity={1} 
+                        fill="url(#colorDocuments)" 
+                        name="Documents"
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="edits" 
+                        stroke="#6d371f" 
+                        fillOpacity={1} 
+                        fill="url(#colorEdits)" 
+                        name="Edits"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+                
+                {/* Recharts Bar Chart for Content Types */}
+                <div className="mt-6 p-4 bg-white/20 rounded-lg">
+                  <h3 className="text-lg font-comfortaa mb-4 text-[#1a1918]">Content Types Distribution</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart
+                        data={contentTypeData}
+                        margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#bcb7af" opacity={0.3} />
+                        <XAxis dataKey="name" stroke="#3d3d3a" />
+                        <YAxis stroke="#3d3d3a" />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#faf9f5', 
+                            borderColor: '#bcb7af',
+                            borderRadius: '0.375rem'
+                          }} 
+                        />
+                        <Legend />
+                        <Bar dataKey="value" name="Content Count" fill="#ae5630" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                    
+                    <ResponsiveContainer width="100%" height={250}>
+                      <PieChart>
+                        <Pie
+                          data={contentTypeData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {contentTypeData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#faf9f5', 
+                            borderColor: '#bcb7af',
+                            borderRadius: '0.375rem'
+                          }} 
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            </Card>
+            
+            {/* Token Usage */}
+            <Card className="mb-6 shadow-md hover:shadow-lg transition-shadow">
+              <div className="p-4 border-b border-neutral-light/40 bg-white/5">
+                <h2 className="text-xl font-comfortaa text-[#1a1918]">Token Usage</h2>
+              </div>
+              <div className="p-4">
+                <TokenUsage {...tokenUsage} />
+              </div>
+            </Card>
+            
+            {/* Quick Actions */}
+            <Card className="mb-6 shadow-md hover:shadow-lg transition-shadow">
+              <div className="p-4 border-b border-neutral-light/40 bg-white/5">
+                <h2 className="text-xl font-comfortaa text-[#1a1918]">Quick Actions</h2>
+              </div>
+              <div className="p-4">
+                <QuickActions />
+              </div>
+            </Card>
+          </div>
+          
+          {/* Right Column - Activity and Tips */}
+          <div className="col-span-12 lg:col-span-4">
+            {/* Recent Activity */}
+            <Card className="mb-6 shadow-md hover:shadow-lg transition-shadow">
+              <div className="p-4 border-b border-neutral-light/40 bg-white/5">
+                <h2 className="text-xl font-comfortaa text-[#1a1918]">Recent Activity</h2>
+              </div>
+              <div className="p-4">
+                <RecentActivity activities={activities} />
+              </div>
+            </Card>
+            
+            {/* Tips of the Day */}
+            <Card className="mb-6 shadow-md hover:shadow-lg transition-shadow">
+              <div className="p-4 border-b border-neutral-light/40 bg-white/5">
+                <h2 className="text-xl font-comfortaa text-[#1a1918]">Tip of the Day</h2>
+              </div>
+              <div className="p-4">
+                <TipOfTheDay />
+              </div>
+            </Card>
+            
+            {/* Recent Files */}
+            <Card className="shadow-md hover:shadow-lg transition-shadow">
+              <div className="p-4 border-b border-neutral-light/40 bg-white/5">
+                <h2 className="text-xl font-comfortaa text-[#1a1918]">Recent Files</h2>
+              </div>
+              <div className="p-4">
+                <RecentProjects projects={recentProjects} />
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
+      
+      {/* Footer 
+      <div className="mt-12 py-6 px-6 bg-[#1a1918] text-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h4 className="text-lg font-comfortaa mb-4">MagicMuse</h4>
+              <p className="text-sm text-[#bcb7af]">Your AI-powered content creation platform</p>
+            </div>
+            <div>
+              <h4 className="text-lg font-comfortaa mb-4">Quick Links</h4>
+              <ul className="space-y-2 text-sm text-[#bcb7af]">
+                <li>Help Center</li>
+                <li>Privacy Policy</li>
+                <li>Terms of Service</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-lg font-comfortaa mb-4">Contact</h4>
+              <p className="text-sm text-[#bcb7af]">support@magicmuse.io</p>
+            </div>
+          </div>
+          <div className="mt-8 pt-6 border-t border-[#3d3d3a] text-center text-sm text-[#bcb7af]">
+            © {new Date().getFullYear()} MagicMuse. All rights reserved.
+          </div>
+        </div>
+      </div>*/}
     </div>
   );
 };

@@ -12,14 +12,14 @@ const Layout: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-neutral-white overflow-hidden">
-      {/* Main Content - No Sidebar */}
-      <Header />
+      {/* Main Content - No Sidebar 
+      <Header />*/}
       <main className="flex-1 overflow-y-auto px-4 py-6 md:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <Outlet />
         </div>
       </main>
-      <LandingFooter />
+      {/*<LandingFooter />
 
       {/* Toast notifications */}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
