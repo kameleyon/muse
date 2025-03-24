@@ -38,7 +38,9 @@ export default defineConfig({
     }
   },
   preview: {
-    port: 4000
+    port: 4000,
+    host: true,
+    allowedHosts: ['.onrender.com']
   },
   build: {
     outDir: 'dist',
