@@ -154,22 +154,10 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="bg-[#EDEAE2] min-h-screen">
-      {/* Top Bar 
-      <div className="bg-[#1a1918] text-white px-6 py-3 flex justify-between items-center sticky top-0 z-50 shadow-md">
-        <div className="flex items-center">
-          <img src="/mmiologo.png" alt="MagicMuse Logo" className="h-8 w-auto mr-3" />
-          <span className="text-xl font-comfortaa font-bold">MagicMuse</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm font-questrial">{userName}</span>
-          <div className="w-8 h-8 rounded-full bg-[#ae5630] flex items-center justify-center">
-            <span className="text-sm font-medium">{userName[0]?.toUpperCase()}</span>
-          </div>
-        </div>
-      </div>*/}
+      
       
       {/* Dashboard Content */}
-      <div className="px-6 py-8 max-w-7xl mx-auto">
+      <div className="px-3 sm:px-6 py-8 w-full sm:max-w-8xl mx-auto">
         {/* Welcome Section */}
         <WelcomeSection 
           userName={userName}
@@ -184,8 +172,17 @@ const Dashboard: React.FC = () => {
         <div className="grid grid-cols-12 gap-6">
           {/* Left Column - Stats and Charts */}
           <div className="col-span-12 lg:col-span-8">
+            {/* Recent Files */}
+            <Card className="shadow-sm sm:shadow-md hover:shadow-lg transition-shadow mb-6">
+              <div className="p-4 border-b border-neutral-light/40 bg-white/5">
+                <h2 className="text-xl font-comfortaa text-[#1a1918]">Recent Files</h2>
+              </div>
+              <div className="p-4">
+                <RecentProjects projects={recentProjects} />
+              </div>
+            </Card>
             {/* Statistics Section */}
-            <Card className="mb-6 overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+            <Card className="mb-6 overflow-hidden shadow-sm sm:shadow-md hover:shadow-lg transition-shadow">
               <div className="border-b border-neutral-light/40 p-4 bg-white/5">
                 <div className="flex justify-between items-center">
                   <h2 className="text-xl font-comfortaa text-[#1a1918] flex items-center">
@@ -197,39 +194,42 @@ const Dashboard: React.FC = () => {
                       variant={viewType === 'month' ? 'primary' : 'outline'} 
                       size="sm"
                       onClick={() => handleViewTypeChange('month')}
+                      className={viewType === 'month' ? 'text-[#faf9f5]' : ''}
                     >
-                      <Calendar size={14} className="mr-1" />
-                      Month
+                      <Calendar size={14} className="mr-1 md:mr-2" />
+                      <span className="hidden md:inline">Month</span>
                     </Button>
                     <Button 
                       variant={viewType === 'week' ? 'primary' : 'outline'} 
                       size="sm"
                       onClick={() => handleViewTypeChange('week')}
+                      className={viewType === 'week' ? 'text-[#faf9f5]' : ''}
                     >
-                      <Clock size={14} className="mr-1" />
-                      Week
+                      <Clock size={14} className="mr-1 md:mr-2" />
+                      <span className="hidden md:inline">Week</span>
                     </Button>
                     <Button 
                       variant={viewType === 'year' ? 'primary' : 'outline'} 
                       size="sm"
                       onClick={() => handleViewTypeChange('year')}
+                      className={viewType === 'year' ? 'text-[#faf9f5]' : ''}
                     >
-                      <TrendingUp size={14} className="mr-1" />
-                      Year
+                      <TrendingUp size={14} className="mr-1 md:mr-2" />
+                      <span className="hidden md:inline">Year</span>
                     </Button>
                   </div>
                 </div>
               </div>
-              <div className="p-4">
+              <div className=" max-w-full">
                 <DashboardStats stats={stats} viewType={viewType} onViewTypeChange={handleViewTypeChange} />
                 
                 {/* Recharts Area Chart */}
-                <div className="mt-6 p-4 bg-white/20 rounded-lg">
+                <div className="mt-6 bg-neutral-white rounded-xl p-4 sm:p-6 border border-neutral-light/40">
                   <h3 className="text-lg font-comfortaa mb-4 text-[#1a1918]">Content Creation Trends</h3>
-                  <ResponsiveContainer width="100%" height={250}>
+                  <ResponsiveContainer width="100%" height={200} className="sm:h-[250px]">
                     <AreaChart
                       data={getChartData()}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                      margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
                     >
                       <defs>
                         <linearGradient id="colorDocuments" x1="0" y1="0" x2="0" y2="1">
@@ -273,10 +273,10 @@ const Dashboard: React.FC = () => {
                 </div>
                 
                 {/* Recharts Bar Chart for Content Types */}
-                <div className="mt-6 p-4 bg-white/20 rounded-lg">
+                <div className="mt-6 p-4 bg-white/20 rounded-xl">
                   <h3 className="text-lg font-comfortaa mb-4 text-[#1a1918]">Content Types Distribution</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <ResponsiveContainer width="100%" height={250}>
+                    <ResponsiveContainer width="100%" height={180} className="sm:h-[250px]">
                       <BarChart
                         data={contentTypeData}
                         margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
@@ -296,17 +296,17 @@ const Dashboard: React.FC = () => {
                       </BarChart>
                     </ResponsiveContainer>
                     
-                    <ResponsiveContainer width="100%" height={250}>
+                    <ResponsiveContainer width="100%" height={180} className="sm:h-[250px]">
                       <PieChart>
                         <Pie
                           data={contentTypeData}
                           cx="50%"
                           cy="50%"
-                          labelLine={false}
-                          outerRadius={80}
+                          labelLine={true}
+                          outerRadius={70}
                           fill="#8884d8"
                           dataKey="value"
-                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                          label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
                         >
                           {contentTypeData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -327,7 +327,7 @@ const Dashboard: React.FC = () => {
             </Card>
             
             {/* Token Usage */}
-            <Card className="mb-6 shadow-md hover:shadow-lg transition-shadow">
+            <Card className="mb-6 shadow-sm sm:shadow-md hover:shadow-lg transition-shadow">
               <div className="p-4 border-b border-neutral-light/40 bg-white/5">
                 <h2 className="text-xl font-comfortaa text-[#1a1918]">Token Usage</h2>
               </div>
@@ -337,7 +337,7 @@ const Dashboard: React.FC = () => {
             </Card>
             
             {/* Quick Actions */}
-            <Card className="mb-6 shadow-md hover:shadow-lg transition-shadow">
+            <Card className="mb-6 shadow-sm sm:shadow-md hover:shadow-lg transition-shadow">
               <div className="p-4 border-b border-neutral-light/40 bg-white/5">
                 <h2 className="text-xl font-comfortaa text-[#1a1918]">Quick Actions</h2>
               </div>
@@ -350,7 +350,7 @@ const Dashboard: React.FC = () => {
           {/* Right Column - Activity and Tips */}
           <div className="col-span-12 lg:col-span-4">
             {/* Recent Activity */}
-            <Card className="mb-6 shadow-md hover:shadow-lg transition-shadow">
+            <Card className="mb-6 shadow-sm sm:shadow-md hover:shadow-lg transition-shadow">
               <div className="p-4 border-b border-neutral-light/40 bg-white/5">
                 <h2 className="text-xl font-comfortaa text-[#1a1918]">Recent Activity</h2>
               </div>
@@ -360,7 +360,7 @@ const Dashboard: React.FC = () => {
             </Card>
             
             {/* Tips of the Day */}
-            <Card className="mb-6 shadow-md hover:shadow-lg transition-shadow">
+            <Card className="mb-6 shadow-sm sm:shadow-md hover:shadow-lg transition-shadow">
               <div className="p-4 border-b border-neutral-light/40 bg-white/5">
                 <h2 className="text-xl font-comfortaa text-[#1a1918]">Tip of the Day</h2>
               </div>
@@ -370,7 +370,7 @@ const Dashboard: React.FC = () => {
             </Card>
             
             {/* Recent Files */}
-            <Card className="shadow-md hover:shadow-lg transition-shadow">
+            <Card className="shadow-sm sm:shadow-md hover:shadow-lg transition-shadow">
               <div className="p-4 border-b border-neutral-light/40 bg-white/5">
                 <h2 className="text-xl font-comfortaa text-[#1a1918]">Recent Files</h2>
               </div>

@@ -33,10 +33,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       <div className="bg-[#1a1918]/80 text-white px-6 py-3 flex justify-between items-center sticky top-0 z-50 shadow-md">
         <div className="flex items-center">
           <img src="/mmlogolight.png" alt="MagicMuse Logo" className="h-8 w-auto mr-3" />
-          <span className="text-3xl font-comfortaa">magicmuse</span>
+          <span className="text-3xl font-comfortaa hidden md:inline">magicmuse</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm font-questrial">{userName}</span>
+          <span className="text-sm font-questrial hidden md:inline">{userName}</span>
           <div className="w-8 h-8 rounded-full bg-[#ae5630] flex items-center justify-center">
             <span className="text-sm font-medium">{userName[0]?.toUpperCase()}</span>
           </div>
@@ -44,7 +44,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </div>
       
       {/* Dashboard Content */}
-      <div className="px-6 py-8 max-w-9xl mx-auto">
+      <div className="px-6 py-8 max-w-7xl mx-auto">
         {/* Horizontal Navigation Menu 
         <NavigationMenu items={navigationItems} />*/}
         

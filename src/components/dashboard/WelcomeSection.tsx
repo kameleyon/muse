@@ -39,16 +39,16 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
   }, []);
 
   return (
-    <div className="mb-8 bg-neutral-white rounded-lg p-6 border border-neutral-light/40 shadow-md">
+    <div className="mb-8 bg-neutral-white rounded-2xl p-6 border border-neutral-light/40 shadow-md">
       <h1 className="text-2xl md:text-3xl font-bold font-heading text-secondary mb-2">
-        Good {timeOfDay}, {userName || 'there'}!
+        Good {timeOfDay}, <span className="hidden md:inline">{userName}</span><span className="inline md:hidden">!</span>
       </h1>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <p className="text-neutral-medium max-w-xl">
-          You have {draftCount} unpublished project{draftCount !== 1 ? 's' : ''} and {publishedCount} published project{publishedCount !== 1 ? 's' : ''}.
+          You have {draftCount} project{draftCount !== 1 ? 's' : ''} in progress and {publishedCount} completed project{publishedCount !== 1 ? 's' : ''}.
         </p>
         <div className="flex gap-2">
-          <Button variant="primary" leftIcon={
+          <Button variant="primary" className="text-[#faf9f5]" leftIcon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-4 w-4"
@@ -88,7 +88,7 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
       </div>
       
       {/* Quote of the Day */}
-      <div className="mt-4 p-4 bg-neutral-light/30 rounded-md border border-neutral-light">
+      <div className="mt-4 p-4 bg-neutral-light/30 rounded-xl border border-neutral-light">
         <p className="text-neutral-medium italic">"{quote.text}"</p>
         <p className="text-right text-sm text-neutral-medium mt-1">— {quote.author}</p>
       </div>

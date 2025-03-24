@@ -42,9 +42,9 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
   };
 
   return (
-    <div className="bg-neutral-white rounded-lg p-6 border border-neutral-light/40 shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold font-heading text-secondary">Statistics</h2>
+    <div className=" py-6">
+      {/*<div className="flex justify-between items-center mb-4">
+       
         <div className="flex gap-2 bg-neutral-light/30 rounded-md p-1">
           <button
             onClick={() => onViewTypeChange('month')}
@@ -65,20 +65,20 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
             Year
           </button>
         </div>
-      </div>
+      </div>*/}
       
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-6"
       >
         {stats.map((stat, index) => (
           <motion.div key={index} variants={itemVariants}>
             <Card>
               <div className="p-4">
                 <div className="flex items-center">
-                  <div className="p-2 rounded-md bg-neutral-light/20 mr-4">
+                  <div className="p-2 rounded-xl bg-neutral-light/20 mr-4">
                     {stat.icon}
                   </div>
                   <div>
