@@ -16,9 +16,9 @@ interface RecentProjectsProps {
 
 const RecentProjects: React.FC<RecentProjectsProps> = ({ projects }) => {
   return (
-    <div className="bg-neutral-white rounded-lg p-6 border border-neutral-light/40 shadow-md">
+    <div className="py-2 ">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold font-heading text-secondary">Recent Projects</h2>
+        <h4 className="text-xl font-bold font-heading text-secondary"></h4>
         <Link to="/projects" className="text-primary text-sm hover:underline">
           View all
         </Link>

@@ -9,6 +9,9 @@
 /* Import dashboard styles */
 @import './dashboard/dashboard.css';
 
+/* Import settings styles */
+@import './settings.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

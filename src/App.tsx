@@ -16,6 +16,7 @@ const Auth = lazy(() => import(/* webpackChunkName: "auth" */ './pages/Auth'));
 const ContentGenerator = lazy(() => import(/* webpackChunkName: "content-generator" */ './pages/ContentGenerator'));
 const ContentLibrary = lazy(() => import(/* webpackChunkName: "content-library" */ './pages/ContentLibrary'));
 const Profile = lazy(() => import(/* webpackChunkName: "profile" */ './pages/Profile'));
+const Settings = lazy(() => import(/* webpackChunkName: "settings" */ './pages/Settings'));
 const NotFound = lazy(() => import(/* webpackChunkName: "not-found" */ './pages/NotFound'));
 
 function App() {
@@ -94,6 +95,18 @@ function App() {
                 <Suspense fallback={<Loading />}>
                   <DashboardLayout>
                     <Profile />
+                  </DashboardLayout>
+                </Suspense>
+              } 
+            />
+            
+            {/* Settings routes */}
+            <Route 
+              path="/settings" 
+              element={
+                <Suspense fallback={<Loading />}>
+                  <DashboardLayout>
+                    <Settings />
                   </DashboardLayout>
                 </Suspense>
               } 

@@ -173,8 +173,8 @@ const Dashboard: React.FC = () => {
           {/* Left Column - Stats and Charts */}
           <div className="col-span-12 lg:col-span-8">
             {/* Recent Files */}
-            <Card className="shadow-sm sm:shadow-md hover:shadow-lg transition-shadow mb-6">
-              <div className="p-4 border-b border-neutral-light/40 bg-white/5">
+            <Card className="shadow-sm sm:shadow-md hover:shadow-lg transition-shadow mb-6 bg-white border border-neutral-light rounded-2xl">
+              <div className="p-4 border-b border-neutral-light/40 ">
                 <h2 className="text-xl font-comfortaa text-[#1a1918]">Recent Files</h2>
               </div>
               <div className="p-4">
