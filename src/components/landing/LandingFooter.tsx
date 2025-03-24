@@ -61,16 +61,7 @@ const LandingFooter: React.FC = () => {
                   API
                 </Link>
               </li>
-              <li>
-                <Link to="/auth/login" className="text-neutral-white/80 hover:text-neutral-white transition-colors">
-                  Login
-                </Link>
-              </li>
-              <li>
-                <Link to="/auth/register" className="text-neutral-white/80 hover:text-neutral-white transition-colors">
-                  Sign Up
-                </Link>
-              </li>
+              
             </ul>
           </div>
           

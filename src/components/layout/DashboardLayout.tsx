@@ -45,8 +45,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       
       {/* Dashboard Content */}
       <div className="px-6 py-8 max-w-7xl mx-auto">
-        {/* Horizontal Navigation Menu 
-        <NavigationMenu items={navigationItems} />*/}
+        {/* Horizontal Navigation Menu */}
+        <NavigationMenu items={navigationItems} />
         
         {/* Main Content */}
         <main>
