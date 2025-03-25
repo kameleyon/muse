@@ -80,26 +80,7 @@ const ChatPanel: React.FC = () => {
               <h2 className="text-lg font-comfortaa text-[#faf9f5]">magicmuse chat</h2>
             </div>
             <div className="flex items-center gap-2">
-              <button 
-                onClick={() => setChatMode('chat')}
-                className={`text-white p-1 rounded-md transition-colors ${
-                  chatMode === 'chat' ? 'bg-white/20' : 'hover:bg-white/10'
-                }`}
-                aria-label="Chat Mode"
-                title="Chat Mode"
-              >
-                <MessageSquare size={16} />
-              </button>
-              <button 
-                onClick={() => setChatMode('research')}
-                className={`text-white p-1 rounded-md transition-colors ${
-                  chatMode === 'research' ? 'bg-white/20' : 'hover:bg-white/10'
-                }`}
-                aria-label="Research Mode"
-                title="Research Mode (Web Search)"
-              >
-                <Search size={16} />
-              </button>
+              
               <button 
                 onClick={toggleChat}
                 className="text-white hover:text-gray-300 transition-colors ml-2"

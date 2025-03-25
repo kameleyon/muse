@@ -1,0 +1,15 @@
+2025-03-25 00:37:52 [error]: OpenRouter API error: 401 - {"error":{"message":"No auth credentials found","code":401}}
+2025-03-25 00:37:52 [error]: AI content generation error: OpenRouter API error: No auth credentials found
+2025-03-25 00:37:52 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: No auth credentials found
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:40:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 00:38:44 [error]: OpenRouter API error: 401 - {"error":{"message":"No auth credentials found","code":401}}
+2025-03-25 00:38:44 [error]: AI content generation error: OpenRouter API error: No auth credentials found
+2025-03-25 00:38:44 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: No auth credentials found
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:40:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 00:45:28 [error]: OpenRouter API error: 401 - {"error":{"message":"No auth credentials found","code":401}}
+2025-03-25 00:45:28 [error]: AI content generation error: OpenRouter API error: No auth credentials found
+2025-03-25 00:45:28 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: No auth credentials found
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:40:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
