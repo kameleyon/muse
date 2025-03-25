@@ -17,12 +17,7 @@ interface RecentProjectsProps {
 const RecentProjects: React.FC<RecentProjectsProps> = ({ projects }) => {
   return (
     <div className="py-2 ">
-      <div className="flex justify-between items-center mb-4">
-        <h4 className="text-xl font-bold font-heading text-secondary"></h4>
-        <Link to="/projects" className="text-primary text-sm hover:underline">
-          View all
-        </Link>
-      </div>
+      
       
       {projects.length > 0 ? (
         <div className="overflow-x-auto">

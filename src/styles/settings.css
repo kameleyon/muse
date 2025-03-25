@@ -263,8 +263,83 @@ input:checked + .toggle-slider:before {
     padding-bottom: 1.5rem;
   }
   
+  .settings-form-title {
+    font-size: 1rem;
+  }
+  
+  .settings-form-description {
+    font-size: 0.75rem;
+  }
+  
+  .settings-label {
+    font-size: 0.8125rem;
+  }
+  
+  .settings-input,
+  .settings-select,
+  .settings-textarea {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .toggle-label {
+    font-size: 0.8125rem;
+  }
+  
+  .settings-field-group {
+    margin-bottom: 1.25rem;
+  }
+  
   .theme-preview-card {
     max-width: 100%;
+  }
+  
+  .theme-preset-card,
+  .new-theme-preset-card {
+    height: 5rem;
+    width: 7rem;
+  }
+  
+  .color-picker-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .color-picker {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  .settings-footer {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .settings-footer button {
+    width: 100%;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .settings-form-title {
+    font-size: 0.9375rem;
+  }
+  
+  .settings-form-description {
+    font-size: 0.6875rem;
+  }
+  
+  .settings-input,
+  .settings-select,
+  .settings-textarea {
+    padding: 0.5rem 0.625rem;
+  }
+  
+  .settings-form-section {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
   }
 }
 

@@ -153,13 +153,8 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) => {
   };
 
   return (
-    <div className="bg-neutral-white rounded-lg p-6 border border-neutral-light/40 shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold font-heading text-secondary">Recent Activity</h2>
-        <Link to="/activity" className="text-primary text-sm hover:underline">
-          View all
-        </Link>
-      </div>
+    <div className="py-2">
+      
       
       {activities.length > 0 ? (
         <div className="space-y-4">

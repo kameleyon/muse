@@ -10,20 +10,16 @@ interface TokenUsageProps {
 
 const TokenUsage: React.FC<TokenUsageProps> = ({ used, total, percentage }) => {
   return (
-    <div className="bg-neutral-white rounded-lg p-6 border border-neutral-light/40 shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold font-heading text-secondary">Token Usage</h2>
-        <Button variant="outline" size="sm">Top Up</Button>
-      </div>
+    <div className="py-2 px-6">
       
       <div className="mb-2 flex justify-between items-center">
         <span className="text-sm text-neutral-medium">Monthly tokens</span>
         <span className="text-sm font-medium">{used} / {total}</span>
       </div>
       
-      <div className="w-full bg-neutral-light/30 rounded-full h-2.5 mb-4">
+      <div className="w-full bg-neutral-light/80 rounded-full h-2 mb-4">
         <div
-          className="bg-primary h-2.5 rounded-full"
+          className="bg-primary h-2 rounded-full"
           style={{ width: `${percentage}%` }}
         ></div>
       </div>

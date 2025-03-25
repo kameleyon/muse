@@ -42,7 +42,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
   };
 
   return (
-    <div className=" py-6">
+    <div className=" py-6 ">
       {/*<div className="flex justify-between items-center mb-4">
        
         <div className="flex gap-2 bg-neutral-light/30 rounded-md p-1">
@@ -75,7 +75,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
       >
         {stats.map((stat, index) => (
           <motion.div key={index} variants={itemVariants}>
-            <Card>
+            <Card className="bg-white/80">
               <div className="p-4">
                 <div className="flex items-center">
                   <div className="p-2 rounded-xl bg-neutral-light/20 mr-4">

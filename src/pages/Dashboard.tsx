@@ -12,6 +12,7 @@ import {
   QuickActions,
   TipOfTheDay,
   ChartSection,
+  NotificationsPanel,
   RecentProjects
 } from '@/components/dashboard';
 import { 
@@ -100,6 +101,13 @@ const Dashboard: React.FC = () => {
     { id: 'act5', type: 'project_created' as ActivityType, title: 'Sci-Fi Story Outline', timestamp: new Date(Date.now() - 86400000).toISOString() }
   ];
 
+  const notifications = [
+    { id: 'not1', title: 'New Comment', message: 'John commented on your Fantasy Novel', timestamp: new Date().toISOString(), read: false },
+    { id: 'not2', title: 'Template Update', message: 'Character Template has been updated', timestamp: new Date().toISOString(), read: false },
+    { id: 'not3', title: 'Plan Renewal', message: 'Your subscription will renew in 3 days', timestamp: new Date(Date.now() - 86400000).toISOString(), read: true },
+    { id: 'not4', title: 'Team Invitation', message: 'You have been invited to join the Fiction Writers team', timestamp: new Date(Date.now() - 172800000).toISOString(), read: true }
+  ];
+
   const tokenUsage = {
     used: 7500,
     total: 10000,
@@ -174,15 +182,90 @@ const Dashboard: React.FC = () => {
           <div className="col-span-12 lg:col-span-8">
             {/* Recent Files */}
             <Card className="shadow-sm sm:shadow-md hover:shadow-lg transition-shadow mb-6 bg-white border border-neutral-light rounded-2xl">
-              <div className="p-4 border-b border-neutral-light/40 ">
-                <h2 className="text-xl font-comfortaa text-[#1a1918]">Recent Files</h2>
+              <div className="p-4 border-b border-neutral-light/40 flex justify-between items-center">
+                <h2 className="text-xl font-bold font-heading text-secondary mb-4">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 inline-block mr-2 text-primary"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  Recent Files
+                </h2>
+                <a href="/files" className="text-primary text-sm hover:underline">
+                  View all
+                </a>
               </div>
               <div className="p-4">
                 <RecentProjects projects={recentProjects} />
               </div>
             </Card>
+
+            {/* Tips of the Day */}
+            <Card className="mb-6 shadow-sm sm:shadow-md hover:shadow-lg transition-shadow">
+              <div className="px-4 border-b border-neutral-light/40 bg-white/5 flex justify-between items-center">
+                <h2 className="text-xl font-bold font-heading text-secondary mb-4">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 inline-block mr-2 text-primary"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                    />
+                  </svg>
+                  Tip of the Day
+                </h2>
+              </div>
+              <div className="py-2">
+                <TipOfTheDay />
+              </div>
+            </Card>
+
+            {/* Token Usage */}
+            <Card className="mb-6 shadow-sm sm:shadow-md hover:shadow-lg transition-shadow ">
+              <div className="p-4 border-b border-neutral-light/40 bg-white/5 flex justify-between items-center">
+                <h2 className="text-xl font-bold font-heading text-secondary mb-4">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 inline-block mr-2 text-primary"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  Token Usage
+                </h2>
+                <Button variant="outline" size="sm">Top Up</Button>
+              </div>
+              
+              <div className="p-4">
+                <TokenUsage {...tokenUsage} />
+              </div>
+            </Card>
+
+
             {/* Statistics Section */}
-            <Card className="mb-6 overflow-hidden shadow-sm sm:shadow-md hover:shadow-lg transition-shadow">
+            <Card className="mb-6 overflow-hidden shadow-sm sm:shadow-md hover:shadow-lg transition-shadow bg-[#bcb7af]/30 border border-neutral-light rounded-2xl">
               <div className="border-b border-neutral-light/40 p-4 bg-white/5">
                 <div className="flex justify-between items-center">
                   <h2 className="text-xl font-comfortaa text-[#1a1918] flex items-center">
@@ -224,7 +307,7 @@ const Dashboard: React.FC = () => {
                 <DashboardStats stats={stats} viewType={viewType} onViewTypeChange={handleViewTypeChange} />
                 
                 {/* Recharts Area Chart */}
-                <div className="mt-6 bg-neutral-white rounded-xl p-4 sm:p-6 border border-neutral-light/40">
+                <div className="mt-6 bg-white rounded-xl p-4 sm:p-6 border border-neutral-light/40">
                   <h3 className="text-lg font-comfortaa mb-4 text-[#1a1918]">Content Creation Trends</h3>
                   <ResponsiveContainer width="100%" height={200} className="sm:h-[250px]">
                     <AreaChart
@@ -273,7 +356,7 @@ const Dashboard: React.FC = () => {
                 </div>
                 
                 {/* Recharts Bar Chart for Content Types */}
-                <div className="mt-6 p-4 bg-white/20 rounded-xl">
+                <div className="mt-6 p-4 bg-white/80 rounded-xl">
                   <h3 className="text-lg font-comfortaa mb-4 text-[#1a1918]">Content Types Distribution</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <ResponsiveContainer width="100%" height={180} className="sm:h-[250px]">
@@ -326,58 +409,103 @@ const Dashboard: React.FC = () => {
               </div>
             </Card>
             
-            {/* Token Usage */}
-            <Card className="mb-6 shadow-sm sm:shadow-md hover:shadow-lg transition-shadow">
-              <div className="p-4 border-b border-neutral-light/40 bg-white/5">
-                <h2 className="text-xl font-comfortaa text-[#1a1918]">Token Usage</h2>
+            
+          </div>
+          
+          {/* Right Column - Activity and Tips */}
+          <div className="col-span-12 lg:col-span-4">
+
+            {/* Notifications */}
+            <Card className="mb-6 shadow-sm sm:shadow-md hover:shadow-lg transition-shadow bg-[#bcb7af]/30 border border-neutral-light rounded-2xl">
+              <div className="p-4 border-b border-neutral-light/40 bg-white/5 flex justify-between items-center">
+                <h2 className="text-xl font-bold font-heading text-secondary mb-4">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 inline-block mr-2 text-primary"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                    />
+                  </svg>
+                  Notifications
+                </h2>
+                <span className="bg-neutral-light/80 text-neutral-medium text-xs px-2 py-1 rounded-full">
+                  {notifications.filter(n => !n.read).length} new
+                </span>
               </div>
-              <div className="p-4">
-                <TokenUsage {...tokenUsage} />
+              <div className="py-4">
+                <NotificationsPanel notifications={notifications}/>
               </div>
             </Card>
+
+            
             
             {/* Quick Actions */}
             <Card className="mb-6 shadow-sm sm:shadow-md hover:shadow-lg transition-shadow">
               <div className="p-4 border-b border-neutral-light/40 bg-white/5">
-                <h2 className="text-xl font-comfortaa text-[#1a1918]">Quick Actions</h2>
+                <h2 className="text-xl font-bold font-heading text-secondary mb-4">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 inline-block mr-2 text-primary"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                  Quick Actions
+                </h2>
               </div>
               <div className="p-4">
                 <QuickActions />
               </div>
             </Card>
-          </div>
-          
-          {/* Right Column - Activity and Tips */}
-          <div className="col-span-12 lg:col-span-4">
+
             {/* Recent Activity */}
-            <Card className="mb-6 shadow-sm sm:shadow-md hover:shadow-lg transition-shadow">
-              <div className="p-4 border-b border-neutral-light/40 bg-white/5">
-                <h2 className="text-xl font-comfortaa text-[#1a1918]">Recent Activity</h2>
+            <Card className="mb-6 shadow-sm sm:shadow-md hover:shadow-lg transition-shadow bg-[#bcb7af]/30 border border-neutral-light rounded-2xl">
+              <div className="p-4 border-b border-neutral-light/40 bg-white/5 flex justify-between items-center">
+                <h2 className="text-xl font-bold font-heading text-secondary mb-4">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 inline-block mr-2 text-primary"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  Recent Activity
+                </h2>
+                <a href="/activity" className="text-primary text-sm hover:underline">
+                  View all
+                </a>
               </div>
-              <div className="p-4">
+              <div className="py-4">
                 <RecentActivity activities={activities} />
               </div>
             </Card>
+
             
-            {/* Tips of the Day */}
-            <Card className="mb-6 shadow-sm sm:shadow-md hover:shadow-lg transition-shadow">
-              <div className="p-4 border-b border-neutral-light/40 bg-white/5">
-                <h2 className="text-xl font-comfortaa text-[#1a1918]">Tip of the Day</h2>
-              </div>
-              <div className="p-4">
-                <TipOfTheDay />
-              </div>
-            </Card>
             
-            {/* Recent Files */}
-            <Card className="shadow-sm sm:shadow-md hover:shadow-lg transition-shadow">
-              <div className="p-4 border-b border-neutral-light/40 bg-white/5">
-                <h2 className="text-xl font-comfortaa text-[#1a1918]">Recent Files</h2>
-              </div>
-              <div className="p-4">
-                <RecentProjects projects={recentProjects} />
-              </div>
-            </Card>
+            
+            
+            
           </div>
         </div>
       </div>

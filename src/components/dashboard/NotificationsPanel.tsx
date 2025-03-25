@@ -17,23 +17,18 @@ const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ notifications }
   const unreadCount = notifications.filter(n => !n.read).length;
   
   return (
-    <div className="bg-neutral-white rounded-lg p-6 border border-neutral-light/40 shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold font-heading text-secondary">Notifications</h2>
-        <span className="bg-neutral-light/30 text-neutral-medium text-xs px-2 py-1 rounded-full">
-          {unreadCount} new
-        </span>
-      </div>
+    <div className="py-2">
+      
       
       {notifications.length > 0 ? (
         <div className="space-y-3">
           {notifications.map((notification) => (
             <div 
               key={notification.id} 
-              className={`p-3 rounded-md border ${!notification.read ? 'bg-neutral-light/20 border-primary/20' : 'bg-transparent border-neutral-light/30'}`}
+              className={`p-3 rounded-xl border ${!notification.read ? 'bg-white/30 border-neutral-light' : 'bg-transparent border-neutral-light'}`}
             >
               <div className="flex justify-between">
-                <h3 className="font-medium text-secondary">{notification.title}</h3>
+                <h2 className="font-medium text-secondary">{notification.title}</h2>
                 <span className="text-xs text-neutral-medium">{notification.timestamp}</span>
               </div>
               <p className="text-sm text-neutral-medium mt-1">{notification.message}</p>

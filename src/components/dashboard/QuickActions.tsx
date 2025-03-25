@@ -117,8 +117,8 @@ const QuickActions: React.FC = () => {
   ];
 
   return (
-    <div className="bg-white/10 rounded-xl p-6 border border-neutral-light/40 shadow-md mb-6">
-      <h2 className="text-xl font-bold font-heading text-secondary mb-4">Quick Actions</h2>
+    <div className="bp-2">
+      
       
       <div className="flex flex-wrap gap-3">
         {actions.map((action) => (
