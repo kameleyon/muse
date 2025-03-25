@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import fs from 'fs';
 
 // Define environment variables for TypeScript
 interface ImportMetaEnv {
@@ -14,9 +15,58 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
+// Custom plugin to handle raw query parameter security
+const secureRawQueryPlugin = () => {
+  return {
+    name: 'secure-raw-query',
+    configureServer(server) {
+      // Add middleware to enforce deny restrictions for raw query parameter
+      server.middlewares.use((req, res, next) => {
+        const url = new URL(req.url, 'http://localhost');
+        
+        // Check if using the ?raw query parameter
+        if (url.searchParams.has('raw')) {
+          const requestPath = url.pathname;
+          
+          // Apply deny patterns to raw requests
+          const denyPatterns = [
+            '.env', '.env.*', 
+            '**/.git/**', '**/.github/**', '**/node_modules/**',
+            '**/server/**', '**/docs/**', '**/.husky/**'
+          ];
+          
+          // Check if the path matches any deny pattern
+          const isDenied = denyPatterns.some(pattern => {
+            if (pattern.includes('*')) {
+              // Simple wildcard check
+              const regexPattern = pattern
+                .replace(/\./g, '\\.')
+                .replace(/\*\*/g, '.*')
+                .replace(/\*/g, '[^/]*');
+              return new RegExp(`^${regexPattern}$`).test(requestPath);
+            }
+            return requestPath.includes(pattern);
+          });
+          
+          if (isDenied) {
+            res.statusCode = 403;
+            res.end('Access Denied: This file cannot be accessed with raw parameter');
+            return;
+          }
+        }
+        
+        next();
+      });
+    }
+  };
+};
+
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    secureRawQueryPlugin()
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -35,6 +85,23 @@ export default defineConfig({
     port: 3000,
     hmr: {
       overlay: true
+    },
+    fs: {
+      // Explicitly allow only specific directories
+      allow: ['./src', './public'],
+      
+      // Strictly deny access to sensitive directories and files
+      // Use case-insensitive patterns to prevent Windows bypass
+      deny: [
+        '**/.env', '**/.env.*', 
+        '**/.git/**', '**/.github/**', 
+        '**/node_modules/**',
+        '**/server/**', 
+        '**/docs/**', 
+        '**/.husky/**'
+      ],
+      // Set strict mode to be more secure
+      strict: true
     }
   },
   preview: {
