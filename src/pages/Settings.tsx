@@ -1,8 +1,8 @@
-import React, { ReactElement } from 'react';
-import { Settings as SettingsComponent } from '@/features/settings';
+import React from 'react';
+import SettingsContainer from '@/features/settings/components/SettingsContainer';
 
-const Settings: React.FC = (): ReactElement => {
-  return <SettingsComponent />;
+const Settings: React.FC = () => {
+  return <SettingsContainer />;
 };
 
 export default Settings;

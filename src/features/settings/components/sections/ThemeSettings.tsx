@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/Button';
-import { Check as CheckIcon, PlusCircle } from 'lucide-react';
+import { CheckIcon, PlusCircle } from 'lucide-react';
 
 const ThemeSettings: React.FC = () => {
   return (
@@ -70,12 +70,12 @@ const ThemeSettings: React.FC = () => {
               <input
                 type="color"
                 className="color-picker"
-                defaultValue="#ae5630"
+                value="#ae5630"
               />
               <input
                 type="text"
                 className="settings-input"
-                defaultValue="#ae5630"
+                value="#ae5630"
               />
             </div>
           </div>
@@ -88,12 +88,12 @@ const ThemeSettings: React.FC = () => {
               <input
                 type="color"
                 className="color-picker"
-                defaultValue="#6d371f"
+                value="#6d371f"
               />
               <input
                 type="text"
                 className="settings-input"
-                defaultValue="#6d371f"
+                value="#6d371f"
               />
             </div>
           </div>

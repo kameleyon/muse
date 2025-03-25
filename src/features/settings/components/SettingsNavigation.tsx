@@ -1,32 +1,27 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { Card } from '@/components/ui/Card';
 import { ChevronUp, ChevronDown } from 'lucide-react';
-import { SettingsCategory } from '../types';
+import { SettingsCategory } from '../types/settings';
 
 interface SettingsNavigationProps {
-  settingsCategories: SettingsCategory[];
   activeCategory: string;
   activeSubcategory: string;
   setActiveCategory: (categoryId: string) => void;
   setActiveSubcategory: (subcategoryId: string) => void;
   mobileMenuExpanded: boolean;
-  setMobileMenuExpanded: (expanded: boolean) => void;
+  toggleMobileMenu: () => void;
+  settingsCategories: SettingsCategory[];
 }
 
 const SettingsNavigation: React.FC<SettingsNavigationProps> = ({
-  settingsCategories,
   activeCategory,
   activeSubcategory,
   setActiveCategory,
   setActiveSubcategory,
   mobileMenuExpanded,
-  setMobileMenuExpanded,
-}) => {
-  // Toggle mobile menu visibility
-  const toggleMobileMenu = () => {
-    setMobileMenuExpanded(!mobileMenuExpanded);
-  };
-
+  toggleMobileMenu,
+  settingsCategories
+}): ReactElement => {
   return (
     <Card className="settings-menu shadow-sm sm:shadow-md hover:shadow-lg transition-shadow mb-4 lg:mb-6 sticky top-0">
       <div className="p-3 sm:p-4 border-b border-neutral-light/40 bg-white/5 flex items-center justify-between">
@@ -58,7 +53,7 @@ const SettingsNavigation: React.FC<SettingsNavigationProps> = ({
                     setActiveCategory(category.id);
                     setActiveSubcategory(category.subcategories[0].id);
                     if (window.innerWidth < 1024) {
-                      setMobileMenuExpanded(false);
+                      toggleMobileMenu();
                     }
                   }}
                 >
@@ -80,7 +75,7 @@ const SettingsNavigation: React.FC<SettingsNavigationProps> = ({
                           onClick={() => {
                             setActiveSubcategory(subcategory.id);
                             if (window.innerWidth < 1024) {
-                              setMobileMenuExpanded(false);
+                              toggleMobileMenu();
                             }
                           }}
                         >

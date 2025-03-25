@@ -12,37 +12,15 @@ import logger from '../utils/logger';
  * @access  Private
  */
 export const generateContent = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  // Log the entire body for debugging
-  logger.info(`AI Request Body: ${JSON.stringify(req.body, null, 2)}`);
-  
-  // Extract fields
-  const { prompt, type, parameters, messages } = req.body;
-  
-  // Detailed debugging
-  logger.info(`Request details:
-    - prompt: ${prompt ? 'present' : 'missing'} (${typeof prompt})
-    - messages: ${messages ? 'present' : 'missing'} (${typeof messages}) 
-    - type: ${type || 'not specified'}
-    - parameters: ${parameters ? JSON.stringify(parameters) : 'not specified'}
-  `);
+  const { prompt, type, parameters } = req.body;
 
-  if (!prompt && !messages) {
-    logger.error('Missing required fields: Both prompt and messages are empty or undefined');
-    return next(new ApiError(StatusCodes.BAD_REQUEST, 'Either prompt or messages is required'));
+  if (!prompt) {
+    return next(new ApiError(StatusCodes.BAD_REQUEST, 'Prompt is required'));
   }
-  
-  logger.info(`Processing AI content generation: ${JSON.stringify({
-    type,
-    model: parameters?.model,
-    hasPrompt: !!prompt,
-    hasMessages: !!messages,
-    messagesCount: messages?.length
-  })}`);
 
   try {
     const response = await executeOpenRouterRequest({
       prompt,
-      messages,
       model: parameters?.model || config.openRouter.defaultContentModel,
       max_tokens: parameters?.max_tokens || 1000,
       temperature: parameters?.temperature || 0.7,

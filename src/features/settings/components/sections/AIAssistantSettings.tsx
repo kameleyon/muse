@@ -176,6 +176,85 @@ const AIAssistantSettings: React.FC = () => {
         </div>
       </div>
       
+      <div className="settings-form-section">
+        <h3 className="settings-form-title">Citation Preferences</h3>
+        <p className="settings-form-description">Configure citation style and source quality preferences</p>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          <div>
+            <label className="settings-label">Citation Style</label>
+            <select className="settings-select">
+              <option>APA (7th Edition)</option>
+              <option>MLA (8th Edition)</option>
+              <option>Chicago (17th Edition)</option>
+              <option>Harvard</option>
+              <option>IEEE</option>
+              <option>Custom</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="settings-label">Source Quality Priority</label>
+            <select className="settings-select">
+              <option>Academic Sources Only</option>
+              <option>High-quality Publications</option>
+              <option>Balanced Mix</option>
+              <option>Diverse Sources</option>
+              <option>All Available Sources</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div className="settings-form-section">
+        <h3 className="settings-form-title">AI Intervention Timing</h3>
+        <p className="settings-form-description">Control when the AI offers suggestions</p>
+        
+        <div className="space-y-4 mt-4">
+          <div>
+            <label className="settings-label">Suggestion Timing</label>
+            <div className="space-y-2">
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="intervention-timing"
+                  className="form-radio text-[#ae5630]"
+                  defaultChecked
+                />
+                <span className="ml-2">Real-time (as you type)</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="intervention-timing"
+                  className="form-radio text-[#ae5630]"
+                />
+                <span className="ml-2">On pause (when you stop typing)</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="intervention-timing"
+                  className="form-radio text-[#ae5630]"
+                />
+                <span className="ml-2">On-demand only (when requested)</span>
+              </label>
+            </div>
+          </div>
+          
+          <div>
+            <label className="settings-label">Pause Threshold</label>
+            <select className="settings-select">
+              <option>Short (1 second)</option>
+              <option>Medium (3 seconds)</option>
+              <option>Long (5 seconds)</option>
+              <option>Very Long (10 seconds)</option>
+              <option>Custom</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
       <div className="settings-footer">
         <Button variant="outline" className="mr-2">
           Reset to Default

@@ -6,11 +6,11 @@ const CollaborationSettings: React.FC = () => {
     <div className="space-y-6">
       <div className="settings-form-section">
         <h3 className="settings-form-title">Collaboration Settings</h3>
-        <p className="settings-form-description">Configure collaboration preferences</p>
+        <p className="settings-form-description">Configure your Collaboration preferences</p>
         
-        {/* Content would go here - this is just a placeholder for now */}
-        <div className="p-4 text-center text-gray-500">
-          Collaboration Settings content would go here
+        {/* Content will be implemented here */}
+        <div className="p-4 bg-[#f9f7f1] rounded-md text-center mt-4">
+          <p>Collaboration Settings content will be implemented here</p>
         </div>
       </div>
       

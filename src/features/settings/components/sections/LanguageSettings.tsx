@@ -5,12 +5,12 @@ const LanguageSettings: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="settings-form-section">
-        <h3 className="settings-form-title">Language Preferences</h3>
-        <p className="settings-form-description">Configure language settings</p>
+        <h3 className="settings-form-title">Language Settings</h3>
+        <p className="settings-form-description">Configure your language preferences</p>
         
-        {/* Content would go here - this is just a placeholder for now */}
-        <div className="p-4 text-center text-gray-500">
-          Language Settings content would go here
+        {/* Content will be implemented here */}
+        <div className="p-4 bg-[#f9f7f1] rounded-md text-center mt-4">
+          <p>Language Settings content will be implemented here</p>
         </div>
       </div>
       

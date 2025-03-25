@@ -1,42 +1,38 @@
-import React, { useState, useEffect, ReactElement } from 'react';
+import React, { useState, ReactElement } from 'react';
 import '@/styles/settings.css';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { Card } from '@/components/ui/Card';
-import SettingsNavigation from './components/SettingsNavigation';
-import SettingsContent from './components/SettingsContent';
-import { settingsCategories } from './data/settingsCategories';
+import SettingsNavigation from './SettingsNavigation';
+import SettingsContent from './SettingsContent';
+import { settingsCategories } from '../data/settingsData';
 
-const Settings: React.FC = (): ReactElement => {
-  interface AuthState {
-    user: {
-      email?: string;
-    };
-  }
-
-  const { user } = useSelector<RootState, AuthState>((state: RootState) => state.auth as AuthState);
-  const userName = user?.email?.split('@')[0] || 'User';
+const SettingsContainer: React.FC = (): ReactElement => {
   const [activeCategory, setActiveCategory] = useState('account-profile');
   const [activeSubcategory, setActiveSubcategory] = useState('user-profile');
   const [mobileMenuExpanded, setMobileMenuExpanded] = useState(false);
   
+  // Toggle mobile menu visibility
+  const toggleMobileMenu = () => {
+    setMobileMenuExpanded(!mobileMenuExpanded);
+  };
+
   return (
     <div className="bg-[#EDEAE2] min-h-screen">
       {/* Dashboard Content */}
-      <div className=" w-full sm:max-w-full mx-auto">
-        
+      <div className="py-8 w-full mx-auto">
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
           {/* Left Column - Settings Navigation */}
           <div className="lg:col-span-3">
             <SettingsNavigation 
-              settingsCategories={settingsCategories}
               activeCategory={activeCategory}
               activeSubcategory={activeSubcategory}
               setActiveCategory={setActiveCategory}
               setActiveSubcategory={setActiveSubcategory}
               mobileMenuExpanded={mobileMenuExpanded}
-              setMobileMenuExpanded={setMobileMenuExpanded}
+              toggleMobileMenu={toggleMobileMenu}
+              settingsCategories={settingsCategories}
             />
           </div>
           
@@ -60,4 +56,4 @@ const Settings: React.FC = (): ReactElement => {
   );
 };
 
-export default Settings;
+export default SettingsContainer;

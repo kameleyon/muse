@@ -17,6 +17,9 @@ import contentRoutes from './routes/content';
 import userRoutes from './routes/user';
 import aiRoutes from './routes/ai';
 
+// Load environment variables
+dotenv.config();
+
 const app = express();
 const PORT = config.port || 5000;
 

@@ -5,12 +5,12 @@ const ContentPrivacySettings: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="settings-form-section">
-        <h3 className="settings-form-title">Content Privacy</h3>
-        <p className="settings-form-description">Configure privacy settings for your content</p>
+        <h3 className="settings-form-title">Content Privacy Settings</h3>
+        <p className="settings-form-description">Configure your content privacy preferences</p>
         
-        {/* Content would go here - this is just a placeholder for now */}
-        <div className="p-4 text-center text-gray-500">
-          Content Privacy Settings content would go here
+        {/* Content will be implemented here */}
+        <div className="p-4 bg-[#f9f7f1] rounded-md text-center mt-4">
+          <p>Content Privacy Settings content will be implemented here</p>
         </div>
       </div>
       

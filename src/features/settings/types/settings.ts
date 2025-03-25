@@ -1,14 +1,14 @@
-import { ReactElement } from 'react';
+import { ReactNode } from 'react';
 
 export interface SettingsSubcategory {
   id: string;
   label: string;
-  icon: ReactElement;
+  icon: ReactNode;
 }
 
 export interface SettingsCategory {
   id: string;
   label: string;
-  icon: ReactElement;
+  icon: ReactNode;
   subcategories: SettingsSubcategory[];
 }

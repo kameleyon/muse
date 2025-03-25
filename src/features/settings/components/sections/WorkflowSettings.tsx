@@ -1,16 +1,16 @@
 import React from 'react';
 import { Button } from '@/components/ui/Button';
 
-const WritingStyleSettings: React.FC = () => {
+const WorkflowSettings: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="settings-form-section">
-        <h3 className="settings-form-title">Writing Style Settings</h3>
-        <p className="settings-form-description">Configure your writing style preferences</p>
+        <h3 className="settings-form-title">Workflow Settings</h3>
+        <p className="settings-form-description">Configure your Workflow preferences</p>
         
         {/* Content will be implemented here */}
         <div className="p-4 bg-[#f9f7f1] rounded-md text-center mt-4">
-          <p>Writing Style Settings content will be implemented here</p>
+          <p>Workflow Settings content will be implemented here</p>
         </div>
       </div>
       
@@ -26,4 +26,4 @@ const WritingStyleSettings: React.FC = () => {
   );
 };
 
-export default WritingStyleSettings;
+export default WorkflowSettings;

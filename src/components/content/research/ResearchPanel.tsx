@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
 import { addToast } from '@/store/slices/uiSlice';
-import openRouterService, { availableModels } from '@/services/ai/openrouter';
+import openRouterService from '@/services/ai/openrouter';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/Card';
 import { Form, FormGroup, FormLabel } from '@/components/ui/Form';
 import { Input } from '@/components/ui/Input';
@@ -47,8 +47,8 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({ onAddToContent }) => {
       `;
 
       // Research model (gpt-4o-search-preview)
-      const researchModel = availableModels.find(
-        (model) => model.category === 'research'
+      const researchModel = openRouterService.getAvailableModels().find(
+        model => model.category === 'research'
       )?.id || 'openai/gpt-4o-search-preview';
 
       // Generate content with progress tracking
@@ -58,7 +58,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({ onAddToContent }) => {
         maxTokens: 1500,
         temperature: 0.3,
         systemPrompt: "You are a research assistant with access to the latest information. Your task is to provide accurate, factual information with proper citations.",
-        onProgress: (progress: number) => setSearchProgress(progress)
+        onProgress: (progress) => setSearchProgress(progress)
       });
 
       // Get generated content

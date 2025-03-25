@@ -165,9 +165,8 @@ const Dashboard: React.FC = () => {
       
       
       {/* Dashboard Content */}
-      <div className=" w-full sm:max-w-full mx-auto">
-       
-        
+      <div className="py-8 w-full mx-auto">
+                
         {/* Main Content Grid */}
         <div className="grid grid-cols-12 gap-6">
           {/* Left Column - Stats and Charts */}

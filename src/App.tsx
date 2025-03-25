@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Loading from './components/common/Loading';
 import { AuthModalProvider } from './context/AuthModalContext';
-import { ChatProvider } from './context/ChatContext';
 import AuthInit from './components/auth/AuthInit';
 
 // Lazy loaded components
@@ -39,10 +38,9 @@ function App() {
       {/* Initialize authentication state */}
       <AuthInit />
       
-      <ChatProvider>
-        <AnimatePresence mode="wait">
-          <Suspense fallback={<Loading />}>
-            <Routes>
+      <AnimatePresence mode="wait">
+        <Suspense fallback={<Loading />}>
+          <Routes>
             {/* Landing page as root */}
             <Route index element={<Landing />} />
             
@@ -131,7 +129,6 @@ function App() {
       <Suspense fallback={null}>
         <AuthModalContainer />
       </Suspense>
-      </ChatProvider>
     </AuthModalProvider>
   );
 }

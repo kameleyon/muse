@@ -1,12 +1,12 @@
 import React from 'react';
-import { SettingsCategory } from '../types';
 import { 
   User as UserIcon, Shield as ShieldIcon, CreditCard, Key, PaintBucket, Type, Layout, Accessibility,
   Keyboard, Globe, Lock, Shield, Bell as BellIcon, Sliders, Database, Server,
   Cloud, Workflow, Zap, User, Users as UsersIcon, History, Save, BookOpen, Mic,
-  Smartphone, Monitor, Link
+  Smartphone, Monitor, Radio, Mail, Clock, Link, RefreshCw, GraduationCap
 } from 'lucide-react';
 import FileTemplate from '@/components/icons/FileTemplate';
+import { SettingsCategory } from '../types/settings';
 
 // Define settings categories and subcategories
 export const settingsCategories: SettingsCategory[] = [
@@ -57,9 +57,9 @@ export const settingsCategories: SettingsCategory[] = [
     label: 'Notifications',
     icon: <BellIcon size={20} />,
     subcategories: [
-      { id: 'email-notifications', label: 'Email Notifications', icon: <Link size={16} /> },
+      { id: 'email-notifications', label: 'Email Notifications', icon: <Mail size={16} /> },
       { id: 'in-app-notifications', label: 'In-App Notifications', icon: <BellIcon size={16} /> },
-      { id: 'reminders', label: 'Reminder Settings', icon: <Link size={16} /> }
+      { id: 'reminders', label: 'Reminder Settings', icon: <Clock size={16} /> }
     ]
   },
   {
@@ -68,7 +68,7 @@ export const settingsCategories: SettingsCategory[] = [
     icon: <Link size={20} />,
     subcategories: [
       { id: 'connected-services', label: 'Connected Services', icon: <Cloud size={16} /> },
-      { id: 'import-export', label: 'Import/Export Preferences', icon: <Link size={16} /> },
+      { id: 'import-export', label: 'Import/Export Preferences', icon: <RefreshCw size={16} /> },
       { id: 'workflow', label: 'Workflow Integration', icon: <Workflow size={16} /> }
     ]
   },
@@ -115,7 +115,7 @@ export const settingsCategories: SettingsCategory[] = [
     icon: <BookOpen size={20} />,
     subcategories: [
       { id: 'responsible-ai', label: 'Responsible AI Settings', icon: <Shield size={16} /> },
-      { id: 'learning', label: 'Learning and Development', icon: <Link size={16} /> }
+      { id: 'learning', label: 'Learning and Development', icon: <GraduationCap size={16} /> }
     ]
   },
   {

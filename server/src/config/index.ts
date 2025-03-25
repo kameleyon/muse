@@ -1,12 +1,11 @@
 import dotenv from 'dotenv';
-import path from 'path';
 
-// Load environment variables from server directory
-dotenv.config({ path: path.resolve(process.cwd(), '.env.development') });
+// Load environment variables
+dotenv.config();
 
 const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
-  port: process.env.PORT ? parseInt(process.env.PORT, 10) : 9998,
+  port: process.env.PORT ? parseInt(process.env.PORT, 10) : 9999,
   
   // Database (Supabase)
   supabase: {
@@ -17,7 +16,7 @@ const config = {
   
   // OpenRouter API
   openRouter: {
-    apiKey: process.env.OPENROUTER_API_KEY,
+    apiKey: process.env.OPENROUTER_API_KEY || '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',
     baseUrl: 'https://openrouter.ai/api/v1',
     defaultContentModel: process.env.DEFAULT_CONTENT_MODEL || 'anthropic/claude-3.7-sonnet',
     defaultResearchModel: process.env.DEFAULT_RESEARCH_MODEL || 'openai/gpt-4o-search-preview',
