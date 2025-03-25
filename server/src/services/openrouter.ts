@@ -39,15 +39,38 @@ interface OpenRouterResponse {
 }
 
 export const executeOpenRouterRequest = async (params: OpenRouterRequestParams): Promise<OpenRouterResponse> => {
+  logger.info(`OpenRouter params received: ${JSON.stringify({
+    has_prompt: !!params.prompt,
+    has_messages: !!(params.messages && params.messages.length > 0),
+    model: params.model,
+    params_type: typeof params,
+    messages_type: params.messages ? typeof params.messages : 'undefined'
+  }, null, 2)}`);
+
   try {
-    const requestData = {
-      model: params.model,
-      messages: params.messages || [
+    // Ensure we have either a prompt or messages
+    if (!params.prompt && (!params.messages || params.messages.length === 0)) {
+      logger.error(`Missing required input: prompt=${typeof params.prompt}, messages=${typeof params.messages}`);
+      throw new Error('Either prompt or messages must be provided');
+    }
+    
+    // Build the messages array
+    let messages: Message[] = [];
+    if (params.messages && params.messages.length > 0) {
+      messages = params.messages;
+    } else if (params.prompt) {
+      messages = [
         {
           role: 'user',
-          content: params.prompt || '',
+          content: params.prompt,
         },
-      ],
+      ];
+    }
+    // The empty array case is now covered by the initialization
+    
+    const requestData = {
+      model: params.model,
+      messages: messages,
       max_tokens: params.max_tokens || 1000,
       temperature: params.temperature || 0.7,
       top_p: params.top_p || 1,
@@ -57,6 +80,7 @@ export const executeOpenRouterRequest = async (params: OpenRouterRequestParams):
     };
 
     logger.info(`Making OpenRouter request to model: ${params.model}`);
+    logger.debug(`Request data: ${JSON.stringify(requestData, null, 2)}`);
     
     const response = await axios.post(
       `${config.openRouter.baseUrl}/chat/completions`,

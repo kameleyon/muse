@@ -18,3 +18,43 @@
 2025-03-25 08:30:05 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: No auth credentials found
     at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:40:17
     at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 08:36:14 [error]: OpenRouter API error: 400 - {"error":{"message":"anthropic/claude-3-haiku-20240307 is not a valid model ID","code":400},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-03-25 08:36:14 [error]: AI content generation error: OpenRouter API error: anthropic/claude-3-haiku-20240307 is not a valid model ID
+2025-03-25 08:36:14 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: anthropic/claude-3-haiku-20240307 is not a valid model ID
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:40:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 12:13:01 [error]: OpenRouter API error: 401 - {"error":{"message":"No auth credentials found","code":401}}
+2025-03-25 12:13:01 [error]: AI content generation error: OpenRouter API error: No auth credentials found
+2025-03-25 12:13:01 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: No auth credentials found
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:40:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 14:35:06 [error]: OpenRouter API error: 401 - {"error":{"message":"No auth credentials found","code":401}}
+2025-03-25 14:35:06 [error]: AI content generation error: OpenRouter API error: No auth credentials found
+2025-03-25 14:35:06 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: No auth credentials found
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:69:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 14:37:39 [error]: OpenRouter API error: 401 - {"error":{"message":"No auth credentials found","code":401}}
+2025-03-25 14:37:39 [error]: AI content generation error: OpenRouter API error: No auth credentials found
+2025-03-25 14:37:39 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: No auth credentials found
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:69:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 14:38:45 [error]: OpenRouter API error: 401 - {"error":{"message":"No auth credentials found","code":401}}
+2025-03-25 14:38:45 [error]: AI content generation error: OpenRouter API error: No auth credentials found
+2025-03-25 14:38:45 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: No auth credentials found
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:69:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 14:43:10 [error]: OpenRouter API key is missing. Check your environment variables.
+2025-03-25 14:43:10 [error]: AI content generation error: OpenRouter API key is not configured. Please check your environment variables.
+2025-03-25 14:43:10 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API key is not configured. Please check your environment variables.
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:69:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 14:44:03 [error]: OpenRouter API key is missing. Check your environment variables.
+2025-03-25 14:44:03 [error]: AI content generation error: OpenRouter API key is not configured. Please check your environment variables.
+2025-03-25 14:44:03 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API key is not configured. Please check your environment variables.
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:69:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 14:51:19 [error]: OpenRouter API error: 400 - {"error":{"message":"anthropic/claude-3-haiku-20240307 is not a valid model ID","code":400},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-03-25 14:51:19 [error]: AI content generation error: OpenRouter API error: anthropic/claude-3-haiku-20240307 is not a valid model ID
+2025-03-25 14:51:19 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: anthropic/claude-3-haiku-20240307 is not a valid model ID
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:69:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)

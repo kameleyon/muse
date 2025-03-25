@@ -7,6 +7,9 @@ const API_BASE_URL = '/api/ai';
 const RESEARCH_MODEL = import.meta.env.VITE_DEFAULT_RESEARCH_MODEL || "openai/gpt-4o-mine";
 const CONVERSATION_MODEL = 'anthropic/claude-3-haiku-20240307';
 
+// For proper API payload formatting - not all models use the same API schema
+const isClaudeModel = (model: string) => model.includes('anthropic/claude');
+
 // Model definitions
 export interface AIModel {
   id: string;
@@ -163,6 +166,12 @@ export const generateChatResponse = async (messages: ChatMessage[]): Promise<str
   try {
     console.log('Sending request to OpenRouter API with Claude 3 Haiku model');
     
+    // Check if messages array is properly formatted
+    if (!messages || messages.length === 0) {
+      console.error('Error: Messages array is empty or undefined');
+      return 'I apologize, but there was an error with the conversation history. Please try again.';
+    }
+    
     // Create a properly formatted request payload
     const payload = {
       model: CONVERSATION_MODEL,
@@ -171,7 +180,22 @@ export const generateChatResponse = async (messages: ChatMessage[]): Promise<str
       max_tokens: 1024
     };
     
-    console.log('Request payload:', JSON.stringify(payload, null, 2));
+    // Add detailed logging to help debug the issue
+    console.log('Complete request payload for debugging:');
+    console.log(JSON.stringify({
+      endpoint: `${API_BASE_URL}/generate`,
+      method: 'POST',
+      body: {
+        prompt: messages[messages.length - 1].content,
+        messages: messages,
+        type: 'chat',
+        parameters: {
+          model: CONVERSATION_MODEL,
+          temperature: 0.7,
+          max_tokens: 1024
+        }
+      }
+    }, null, 2));
     
     const response = await axios.post<OpenRouterResponse>(
       `${API_BASE_URL}/generate`,
@@ -180,7 +204,6 @@ export const generateChatResponse = async (messages: ChatMessage[]): Promise<str
         type: 'chat',
         parameters: {
           model: CONVERSATION_MODEL,
-          messages: messages,
           temperature: 0.7,
           max_tokens: 1024
         }
@@ -202,6 +225,13 @@ export const generateChatResponse = async (messages: ChatMessage[]): Promise<str
       console.error('API Error Details:', error.response?.data);
       console.error('API Error Status:', error.response?.status);
       console.error('API Error Headers:', error.response?.headers);
+      console.error('API Request Details:', error.config);
+      
+      if (error.response?.status === 500) {
+        console.error('Server error occurred. Payload may be malformed.');
+      }
+      
+      return `I apologize, but there was an error processing your request (Status: ${error.response?.status || 'Unknown'}). Please try again later.`;
     }
     return 'I apologize, but there was an error processing your request. Please try again later.';
   }
@@ -233,10 +263,6 @@ export const generateResearchResponse = async (query: string): Promise<string> =
         type: 'research',
         parameters: {
           model: RESEARCH_MODEL,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: query }
-          ],
           temperature: 0.5,
           max_tokens: 1500,
           tools: [{ type: "web-search" }]
@@ -286,10 +312,6 @@ export const generateContent = async (options: GenerateContentOptions): Promise<
         type: model.includes('search') ? 'research' : 'chat',
         parameters: {
           model,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: prompt }
-          ],
           temperature,
           max_tokens: maxTokens
         }

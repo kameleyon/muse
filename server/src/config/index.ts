@@ -1,12 +1,12 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load environment variables from root directory
-dotenv.config({ path: path.resolve(process.cwd(), '../.env.development') });
+// Load environment variables from server directory
+dotenv.config({ path: path.resolve(process.cwd(), '.env.development') });
 
 const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
-  port: process.env.PORT ? parseInt(process.env.PORT, 10) : 9999,
+  port: process.env.PORT ? parseInt(process.env.PORT, 10) : 9998,
   
   // Database (Supabase)
   supabase: {

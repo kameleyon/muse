@@ -144,6 +144,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
           // Add the current user message
           apiMessages.push({ role: 'user', content });
           
+          console.log('Chat context - Sending messages to API:', JSON.stringify(apiMessages, null, 2));
           response = await generateChatResponse(apiMessages);
         }
       }

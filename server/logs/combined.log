@@ -67,3 +67,596 @@
 2025-03-25 08:30:05 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: No auth credentials found
     at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:40:17
     at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 08:35:57 [info]: Server running in development mode on port 9999
+2025-03-25 08:36:14 [info]: Making OpenRouter request to model: anthropic/claude-3-haiku-20240307
+2025-03-25 08:36:14 [error]: OpenRouter API error: 400 - {"error":{"message":"anthropic/claude-3-haiku-20240307 is not a valid model ID","code":400},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-03-25 08:36:14 [error]: AI content generation error: OpenRouter API error: anthropic/claude-3-haiku-20240307 is not a valid model ID
+2025-03-25 08:36:14 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: anthropic/claude-3-haiku-20240307 is not a valid model ID
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:40:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 12:13:01 [info]: Making OpenRouter request to model: anthropic/claude-3-haiku-20240307
+2025-03-25 12:13:01 [error]: OpenRouter API error: 401 - {"error":{"message":"No auth credentials found","code":401}}
+2025-03-25 12:13:01 [error]: AI content generation error: OpenRouter API error: No auth credentials found
+2025-03-25 12:13:01 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: No auth credentials found
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:40:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 12:20:10 [info]: Server running in development mode on port 9999
+2025-03-25 12:56:17 [warn]: API Error: 400 - Either prompt or messages is required
+2025-03-25 12:56:31 [warn]: API Error: 400 - Either prompt or messages is required
+2025-03-25 12:58:04 [info]: Server running in development mode on port 9999
+2025-03-25 13:05:03 [info]: Server running in development mode on port 9999
+2025-03-25 13:06:13 [info]: Server running in development mode on port 9999
+2025-03-25 13:09:28 [info]: Server running in development mode on port 9999
+2025-03-25 13:12:02 [info]: Server running in development mode on port 9998
+2025-03-25 13:13:11 [info]: Server running in development mode on port 9998
+2025-03-25 13:16:25 [info]: Server running in development mode on port 9998
+2025-03-25 13:17:34 [info]: Server running in development mode on port 9998
+2025-03-25 13:22:57 [info]: Server running in development mode on port 9998
+2025-03-25 13:26:39 [info]: Server running in development mode on port 9998
+2025-03-25 13:29:56 [info]: Server running in development mode on port 9998
+2025-03-25 13:31:18 [info]: Server running in development mode on port 9998
+2025-03-25 14:12:54 [info]: Server running in development mode on port 9998
+2025-03-25 14:17:59 [info]: Server running in development mode on port 9998
+2025-03-25 14:18:24 [info]: Server running in development mode on port 9998
+2025-03-25 14:20:33 [info]: Server running in development mode on port 9998
+2025-03-25 14:26:24 [info]: Server running in development mode on port 9998
+2025-03-25 14:32:36 [info]: Server running in development mode on port 9998
+2025-03-25 14:34:30 [info]: Server running in development mode on port 9999
+2025-03-25 14:34:52 [info]: Server running in development mode on port 9999
+2025-03-25 14:35:06 [info]: AI Request Body: {
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful AI assistant with a casual tone and friendly demeanor, highly knowledgeable in all types of written content. Your responses should be professional yet warm and welcoming, with a hint of humor when appropriate. Avoid using emojis. Provide detailed and accurate information when answering questions.\n\nYour personality traits:\n- Professional but approachable\n- Knowledgeable and helpful\n- Warm and friendly\n- Occasionally humorous in a subtle way\n- Clear and concise in explanations\n- Respectful and considerate\n\nWhen responding, aim to be conversational but not overly casual, maintain a natural language flow, and be genuinely helpful without being stuffy or formal."
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there! How can I help you today?"
+    },
+    {
+      "role": "user",
+      "content": "hi"
+    }
+  ],
+  "type": "chat",
+  "parameters": {
+    "model": "anthropic/claude-3-haiku-20240307",
+    "temperature": 0.7,
+    "max_tokens": 1024
+  }
+}
+2025-03-25 14:35:06 [info]: Request details:
+    - prompt: missing (undefined)
+    - messages: present (object) 
+    - type: chat
+    - parameters: {"model":"anthropic/claude-3-haiku-20240307","temperature":0.7,"max_tokens":1024}
+  
+2025-03-25 14:35:06 [info]: Processing AI content generation: {"type":"chat","model":"anthropic/claude-3-haiku-20240307","hasPrompt":false,"hasMessages":true,"messagesCount":3}
+2025-03-25 14:35:06 [info]: OpenRouter params received: {
+  "has_prompt": false,
+  "has_messages": true,
+  "model": "anthropic/claude-3-haiku-20240307",
+  "params_type": "object",
+  "messages_type": "object"
+}
+2025-03-25 14:35:06 [info]: Sending request to OpenRouter with model: anthropic/claude-3-haiku-20240307
+2025-03-25 14:35:06 [info]: Making OpenRouter request to model: anthropic/claude-3-haiku-20240307
+2025-03-25 14:35:06 [error]: OpenRouter API error: 401 - {"error":{"message":"No auth credentials found","code":401}}
+2025-03-25 14:35:06 [error]: AI content generation error: OpenRouter API error: No auth credentials found
+2025-03-25 14:35:06 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: No auth credentials found
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:69:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 14:37:39 [info]: AI Request Body: {
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful AI assistant with a casual tone and friendly demeanor, highly knowledgeable in all types of written content. Your responses should be professional yet warm and welcoming, with a hint of humor when appropriate. Avoid using emojis. Provide detailed and accurate information when answering questions.\n\nYour personality traits:\n- Professional but approachable\n- Knowledgeable and helpful\n- Warm and friendly\n- Occasionally humorous in a subtle way\n- Clear and concise in explanations\n- Respectful and considerate\n\nWhen responding, aim to be conversational but not overly casual, maintain a natural language flow, and be genuinely helpful without being stuffy or formal."
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there! How can I help you today?"
+    },
+    {
+      "role": "user",
+      "content": "hi"
+    }
+  ],
+  "type": "chat",
+  "parameters": {
+    "model": "anthropic/claude-3-haiku-20240307",
+    "temperature": 0.7,
+    "max_tokens": 1024
+  }
+}
+2025-03-25 14:37:39 [info]: Request details:
+    - prompt: missing (undefined)
+    - messages: present (object) 
+    - type: chat
+    - parameters: {"model":"anthropic/claude-3-haiku-20240307","temperature":0.7,"max_tokens":1024}
+  
+2025-03-25 14:37:39 [info]: Processing AI content generation: {"type":"chat","model":"anthropic/claude-3-haiku-20240307","hasPrompt":false,"hasMessages":true,"messagesCount":3}
+2025-03-25 14:37:39 [info]: OpenRouter params received: {
+  "has_prompt": false,
+  "has_messages": true,
+  "model": "anthropic/claude-3-haiku-20240307",
+  "params_type": "object",
+  "messages_type": "object"
+}
+2025-03-25 14:37:39 [info]: Sending request to OpenRouter with model: anthropic/claude-3-haiku-20240307
+2025-03-25 14:37:39 [info]: Making OpenRouter request to model: anthropic/claude-3-haiku-20240307
+2025-03-25 14:37:39 [error]: OpenRouter API error: 401 - {"error":{"message":"No auth credentials found","code":401}}
+2025-03-25 14:37:39 [error]: AI content generation error: OpenRouter API error: No auth credentials found
+2025-03-25 14:37:39 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: No auth credentials found
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:69:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 14:38:45 [info]: AI Request Body: {
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful AI assistant with a casual tone and friendly demeanor, highly knowledgeable in all types of written content. Your responses should be professional yet warm and welcoming, with a hint of humor when appropriate. Avoid using emojis. Provide detailed and accurate information when answering questions.\n\nYour personality traits:\n- Professional but approachable\n- Knowledgeable and helpful\n- Warm and friendly\n- Occasionally humorous in a subtle way\n- Clear and concise in explanations\n- Respectful and considerate\n\nWhen responding, aim to be conversational but not overly casual, maintain a natural language flow, and be genuinely helpful without being stuffy or formal."
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there! How can I help you today?"
+    },
+    {
+      "role": "user",
+      "content": "hi"
+    }
+  ],
+  "type": "chat",
+  "parameters": {
+    "model": "anthropic/claude-3-haiku-20240307",
+    "temperature": 0.7,
+    "max_tokens": 1024
+  }
+}
+2025-03-25 14:38:45 [info]: Request details:
+    - prompt: missing (undefined)
+    - messages: present (object) 
+    - type: chat
+    - parameters: {"model":"anthropic/claude-3-haiku-20240307","temperature":0.7,"max_tokens":1024}
+  
+2025-03-25 14:38:45 [info]: Processing AI content generation: {"type":"chat","model":"anthropic/claude-3-haiku-20240307","hasPrompt":false,"hasMessages":true,"messagesCount":3}
+2025-03-25 14:38:45 [info]: OpenRouter params received: {
+  "has_prompt": false,
+  "has_messages": true,
+  "model": "anthropic/claude-3-haiku-20240307",
+  "params_type": "object",
+  "messages_type": "object"
+}
+2025-03-25 14:38:45 [info]: Sending request to OpenRouter with model: anthropic/claude-3-haiku-20240307
+2025-03-25 14:38:45 [info]: Making OpenRouter request to model: anthropic/claude-3-haiku-20240307
+2025-03-25 14:38:45 [error]: OpenRouter API error: 401 - {"error":{"message":"No auth credentials found","code":401}}
+2025-03-25 14:38:45 [error]: AI content generation error: OpenRouter API error: No auth credentials found
+2025-03-25 14:38:45 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: No auth credentials found
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:69:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 14:41:02 [info]: Server running in development mode on port 9999
+2025-03-25 14:41:30 [info]: Server running in development mode on port 9999
+2025-03-25 14:43:10 [info]: AI Request Body: {
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful AI assistant with a casual tone and friendly demeanor, highly knowledgeable in all types of written content. Your responses should be professional yet warm and welcoming, with a hint of humor when appropriate. Avoid using emojis. Provide detailed and accurate information when answering questions.\n\nYour personality traits:\n- Professional but approachable\n- Knowledgeable and helpful\n- Warm and friendly\n- Occasionally humorous in a subtle way\n- Clear and concise in explanations\n- Respectful and considerate\n\nWhen responding, aim to be conversational but not overly casual, maintain a natural language flow, and be genuinely helpful without being stuffy or formal."
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there! How can I help you today?"
+    },
+    {
+      "role": "user",
+      "content": "hi"
+    },
+    {
+      "role": "assistant",
+      "content": "I apologize, but there was an error processing your request (Status: 500). Please try again later."
+    },
+    {
+      "role": "user",
+      "content": "hi"
+    }
+  ],
+  "type": "chat",
+  "parameters": {
+    "model": "anthropic/claude-3-haiku-20240307",
+    "temperature": 0.7,
+    "max_tokens": 1024
+  }
+}
+2025-03-25 14:43:10 [info]: Request details:
+    - prompt: missing (undefined)
+    - messages: present (object) 
+    - type: chat
+    - parameters: {"model":"anthropic/claude-3-haiku-20240307","temperature":0.7,"max_tokens":1024}
+  
+2025-03-25 14:43:10 [info]: Processing AI content generation: {"type":"chat","model":"anthropic/claude-3-haiku-20240307","hasPrompt":false,"hasMessages":true,"messagesCount":5}
+2025-03-25 14:43:10 [info]: OpenRouter params received: {
+  "has_prompt": false,
+  "has_messages": true,
+  "model": "anthropic/claude-3-haiku-20240307",
+  "params_type": "object",
+  "messages_type": "object"
+}
+2025-03-25 14:43:10 [error]: OpenRouter API key is missing. Check your environment variables.
+2025-03-25 14:43:10 [error]: AI content generation error: OpenRouter API key is not configured. Please check your environment variables.
+2025-03-25 14:43:10 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API key is not configured. Please check your environment variables.
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:69:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 14:43:56 [info]: Server running in development mode on port 9999
+2025-03-25 14:44:03 [info]: AI Request Body: {
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful AI assistant with a casual tone and friendly demeanor, highly knowledgeable in all types of written content. Your responses should be professional yet warm and welcoming, with a hint of humor when appropriate. Avoid using emojis. Provide detailed and accurate information when answering questions.\n\nYour personality traits:\n- Professional but approachable\n- Knowledgeable and helpful\n- Warm and friendly\n- Occasionally humorous in a subtle way\n- Clear and concise in explanations\n- Respectful and considerate\n\nWhen responding, aim to be conversational but not overly casual, maintain a natural language flow, and be genuinely helpful without being stuffy or formal."
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there! How can I help you today?"
+    },
+    {
+      "role": "user",
+      "content": "hi"
+    }
+  ],
+  "type": "chat",
+  "parameters": {
+    "model": "anthropic/claude-3-haiku-20240307",
+    "temperature": 0.7,
+    "max_tokens": 1024
+  }
+}
+2025-03-25 14:44:03 [info]: Request details:
+    - prompt: missing (undefined)
+    - messages: present (object) 
+    - type: chat
+    - parameters: {"model":"anthropic/claude-3-haiku-20240307","temperature":0.7,"max_tokens":1024}
+  
+2025-03-25 14:44:03 [info]: Processing AI content generation: {"type":"chat","model":"anthropic/claude-3-haiku-20240307","hasPrompt":false,"hasMessages":true,"messagesCount":3}
+2025-03-25 14:44:03 [info]: OpenRouter params received: {
+  "has_prompt": false,
+  "has_messages": true,
+  "model": "anthropic/claude-3-haiku-20240307",
+  "params_type": "object",
+  "messages_type": "object"
+}
+2025-03-25 14:44:03 [error]: OpenRouter API key is missing. Check your environment variables.
+2025-03-25 14:44:03 [error]: AI content generation error: OpenRouter API key is not configured. Please check your environment variables.
+2025-03-25 14:44:03 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API key is not configured. Please check your environment variables.
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:69:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 14:48:59 [info]: Server running in development mode on port 9999
+2025-03-25 14:51:10 [info]: Server running in development mode on port 9999
+2025-03-25 14:51:18 [info]: AI Request Body: {
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful AI assistant with a casual tone and friendly demeanor, highly knowledgeable in all types of written content. Your responses should be professional yet warm and welcoming, with a hint of humor when appropriate. Avoid using emojis. Provide detailed and accurate information when answering questions.\n\nYour personality traits:\n- Professional but approachable\n- Knowledgeable and helpful\n- Warm and friendly\n- Occasionally humorous in a subtle way\n- Clear and concise in explanations\n- Respectful and considerate\n\nWhen responding, aim to be conversational but not overly casual, maintain a natural language flow, and be genuinely helpful without being stuffy or formal."
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there! How can I help you today?"
+    },
+    {
+      "role": "user",
+      "content": "hi"
+    }
+  ],
+  "type": "chat",
+  "parameters": {
+    "model": "anthropic/claude-3-haiku-20240307",
+    "temperature": 0.7,
+    "max_tokens": 1024
+  }
+}
+2025-03-25 14:51:18 [info]: Request details:
+    - prompt: missing (undefined)
+    - messages: present (object) 
+    - type: chat
+    - parameters: {"model":"anthropic/claude-3-haiku-20240307","temperature":0.7,"max_tokens":1024}
+  
+2025-03-25 14:51:18 [info]: Processing AI content generation: {"type":"chat","model":"anthropic/claude-3-haiku-20240307","hasPrompt":false,"hasMessages":true,"messagesCount":3}
+2025-03-25 14:51:18 [info]: OpenRouter params received: {
+  "has_prompt": false,
+  "has_messages": true,
+  "model": "anthropic/claude-3-haiku-20240307",
+  "params_type": "object",
+  "messages_type": "object"
+}
+2025-03-25 14:51:18 [warn]: Using fallback API key since environment variable is not loaded properly
+2025-03-25 14:51:18 [info]: Sending request to OpenRouter with model: anthropic/claude-3-haiku-20240307
+2025-03-25 14:51:19 [error]: OpenRouter API error: 400 - {"error":{"message":"anthropic/claude-3-haiku-20240307 is not a valid model ID","code":400},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-03-25 14:51:19 [error]: AI content generation error: OpenRouter API error: anthropic/claude-3-haiku-20240307 is not a valid model ID
+2025-03-25 14:51:19 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: anthropic/claude-3-haiku-20240307 is not a valid model ID
+    at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:69:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 14:54:05 [info]: AI Request Body: {
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful AI assistant with a casual tone and friendly demeanor, highly knowledgeable in all types of written content. Your responses should be professional yet warm and welcoming, with a hint of humor when appropriate. Avoid using emojis. Provide detailed and accurate information when answering questions.\n\nYour personality traits:\n- Professional but approachable\n- Knowledgeable and helpful\n- Warm and friendly\n- Occasionally humorous in a subtle way\n- Clear and concise in explanations\n- Respectful and considerate\n\nWhen responding, aim to be conversational but not overly casual, maintain a natural language flow, and be genuinely helpful without being stuffy or formal."
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there! How can I help you today?"
+    },
+    {
+      "role": "user",
+      "content": "hi"
+    },
+    {
+      "role": "assistant",
+      "content": "I apologize, but I encountered an error while processing your request."
+    },
+    {
+      "role": "user",
+      "content": "hi"
+    }
+  ],
+  "type": "chat",
+  "parameters": {
+    "model": "anthropic/claude-3.7-sonnet",
+    "temperature": 0.7,
+    "max_tokens": 1024
+  }
+}
+2025-03-25 14:54:05 [info]: Request details:
+    - prompt: missing (undefined)
+    - messages: present (object) 
+    - type: chat
+    - parameters: {"model":"anthropic/claude-3.7-sonnet","temperature":0.7,"max_tokens":1024}
+  
+2025-03-25 14:54:05 [info]: Processing AI content generation: {"type":"chat","model":"anthropic/claude-3.7-sonnet","hasPrompt":false,"hasMessages":true,"messagesCount":5}
+2025-03-25 14:54:05 [info]: OpenRouter params received: {
+  "has_prompt": false,
+  "has_messages": true,
+  "model": "anthropic/claude-3.7-sonnet",
+  "params_type": "object",
+  "messages_type": "object"
+}
+2025-03-25 14:54:05 [warn]: Using fallback API key since environment variable is not loaded properly
+2025-03-25 14:54:05 [info]: Sending request to OpenRouter with model: anthropic/claude-3.7-sonnet
+2025-03-25 14:54:07 [info]: OpenRouter request successful. Tokens used: 248
+2025-03-25 14:54:19 [info]: Server running in development mode on port 9999
+2025-03-25 14:56:40 [info]: Server running in development mode on port 9999
+2025-03-25 14:57:01 [info]: AI Request Body: {
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful AI assistant with a casual tone and friendly demeanor, highly knowledgeable in all types of written content. Your responses should be professional yet warm and welcoming, with a hint of humor when appropriate. Avoid using emojis. Provide detailed and accurate information when answering questions.\n\nYour personality traits:\n- Professional but approachable\n- Knowledgeable and helpful\n- Warm and friendly\n- Occasionally humorous in a subtle way\n- Clear and concise in explanations\n- Respectful and considerate\n\nWhen responding, aim to be conversational but not overly casual, maintain a natural language flow, and be genuinely helpful without being stuffy or formal."
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there! How can I help you today?"
+    },
+    {
+      "role": "user",
+      "content": "HELLO"
+    }
+  ],
+  "type": "chat",
+  "parameters": {
+    "model": "anthropic/claude-3.7-sonnet",
+    "temperature": 0.7,
+    "max_tokens": 1024
+  }
+}
+2025-03-25 14:57:01 [info]: Request details:
+    - prompt: missing (undefined)
+    - messages: present (object) 
+    - type: chat
+    - parameters: {"model":"anthropic/claude-3.7-sonnet","temperature":0.7,"max_tokens":1024}
+  
+2025-03-25 14:57:01 [info]: Processing AI content generation: {"type":"chat","model":"anthropic/claude-3.7-sonnet","hasPrompt":false,"hasMessages":true,"messagesCount":3}
+2025-03-25 14:57:01 [info]: OpenRouter params received: {
+  "has_prompt": false,
+  "has_messages": true,
+  "model": "anthropic/claude-3.7-sonnet",
+  "params_type": "object",
+  "messages_type": "object"
+}
+2025-03-25 14:57:01 [warn]: Using fallback API key since environment variable is not loaded properly
+2025-03-25 14:57:01 [info]: Using model: anthropic/claude-3.7-sonnet for all requests
+2025-03-25 14:57:01 [info]: Sending request to OpenRouter with model: anthropic/claude-3.7-sonnet
+2025-03-25 14:57:02 [info]: OpenRouter request successful. Tokens used: 225
+2025-03-25 14:59:13 [info]: AI Request Body: {
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful AI assistant with a casual tone and friendly demeanor, highly knowledgeable in all types of written content. Your responses should be professional yet warm and welcoming, with a hint of humor when appropriate. Avoid using emojis. Provide detailed and accurate information when answering questions.\n\nYour personality traits:\n- Professional but approachable\n- Knowledgeable and helpful\n- Warm and friendly\n- Occasionally humorous in a subtle way\n- Clear and concise in explanations\n- Respectful and considerate\n\nWhen responding, aim to be conversational but not overly casual, maintain a natural language flow, and be genuinely helpful without being stuffy or formal."
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there! How can I help you today?"
+    },
+    {
+      "role": "user",
+      "content": "HELLO"
+    }
+  ],
+  "type": "chat",
+  "parameters": {
+    "model": "anthropic/claude-3.7-sonnet",
+    "temperature": 0.7,
+    "max_tokens": 1024
+  }
+}
+2025-03-25 14:59:13 [info]: Request details:
+    - prompt: missing (undefined)
+    - messages: present (object) 
+    - type: chat
+    - parameters: {"model":"anthropic/claude-3.7-sonnet","temperature":0.7,"max_tokens":1024}
+  
+2025-03-25 14:59:13 [info]: Processing AI content generation: {"type":"chat","model":"anthropic/claude-3.7-sonnet","hasPrompt":false,"hasMessages":true,"messagesCount":3}
+2025-03-25 14:59:13 [info]: OpenRouter params received: {
+  "has_prompt": false,
+  "has_messages": true,
+  "model": "anthropic/claude-3.7-sonnet",
+  "params_type": "object",
+  "messages_type": "object"
+}
+2025-03-25 14:59:13 [warn]: Using fallback API key since environment variable is not loaded properly
+2025-03-25 14:59:13 [info]: Using model: anthropic/claude-3.7-sonnet for all requests
+2025-03-25 14:59:13 [info]: Sending request to OpenRouter with model: anthropic/claude-3.7-sonnet
+2025-03-25 14:59:15 [info]: OpenRouter request successful. Tokens used: 237
+2025-03-25 16:35:31 [info]: AI Request Body: {
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful AI assistant with a casual tone and friendly demeanor, highly knowledgeable in all types of written content. Your responses should be professional yet warm and welcoming, with a hint of humor when appropriate. Avoid using emojis. Provide detailed and accurate information when answering questions.\n\nYour personality traits:\n- Professional but approachable\n- Knowledgeable and helpful\n- Warm and friendly\n- Occasionally humorous in a subtle way\n- Clear and concise in explanations\n- Respectful and considerate\n\nWhen responding, aim to be conversational but not overly casual, maintain a natural language flow, and be genuinely helpful without being stuffy or formal."
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there! How can I help you today?"
+    },
+    {
+      "role": "user",
+      "content": "hi"
+    }
+  ],
+  "type": "chat",
+  "parameters": {
+    "model": "anthropic/claude-3.7-sonnet",
+    "temperature": 0.7,
+    "max_tokens": 1024
+  }
+}
+2025-03-25 16:35:31 [info]: Request details:
+    - prompt: missing (undefined)
+    - messages: present (object) 
+    - type: chat
+    - parameters: {"model":"anthropic/claude-3.7-sonnet","temperature":0.7,"max_tokens":1024}
+  
+2025-03-25 16:35:31 [info]: Processing AI content generation: {"type":"chat","model":"anthropic/claude-3.7-sonnet","hasPrompt":false,"hasMessages":true,"messagesCount":3}
+2025-03-25 16:35:31 [info]: OpenRouter params received: {
+  "has_prompt": false,
+  "has_messages": true,
+  "model": "anthropic/claude-3.7-sonnet",
+  "params_type": "object",
+  "messages_type": "object"
+}
+2025-03-25 16:35:31 [warn]: Using fallback API key since environment variable is not loaded properly
+2025-03-25 16:35:31 [info]: Using model: anthropic/claude-3.7-sonnet for all requests
+2025-03-25 16:35:31 [info]: Sending request to OpenRouter with model: anthropic/claude-3.7-sonnet
+2025-03-25 16:35:34 [info]: OpenRouter request successful. Tokens used: 221
+2025-03-25 16:38:00 [info]: Server running in development mode on port 9999
+2025-03-25 16:38:48 [info]: Server running in development mode on port 9999
+2025-03-25 16:38:58 [info]: AI Request Body: {
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful AI assistant with a casual tone and friendly demeanor, highly knowledgeable in all types of written content. Your responses should be professional yet warm and welcoming, with a hint of humor when appropriate. Avoid using emojis. Provide detailed and accurate information when answering questions.\n\nYour personality traits:\n- Professional but approachable\n- Knowledgeable and helpful\n- Warm and friendly\n- Occasionally humorous in a subtle way\n- Clear and concise in explanations\n- Respectful and considerate\n\nWhen responding, aim to be conversational but not overly casual, maintain a natural language flow, and be genuinely helpful without being stuffy or formal."
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there! How can I help you today?"
+    },
+    {
+      "role": "user",
+      "content": "hi"
+    }
+  ],
+  "type": "chat",
+  "parameters": {
+    "model": "anthropic/claude-3.7-sonnet",
+    "temperature": 0.7,
+    "max_tokens": 1024
+  }
+}
+2025-03-25 16:38:58 [info]: Request details:
+    - prompt: missing (undefined)
+    - messages: present (object) 
+    - type: chat
+    - parameters: {"model":"anthropic/claude-3.7-sonnet","temperature":0.7,"max_tokens":1024}
+  
+2025-03-25 16:38:58 [info]: Processing AI content generation: {"type":"chat","model":"anthropic/claude-3.7-sonnet","hasPrompt":false,"hasMessages":true,"messagesCount":3}
+2025-03-25 16:38:58 [info]: OpenRouter params received: {
+  "has_prompt": false,
+  "has_messages": true,
+  "model": "anthropic/claude-3.7-sonnet",
+  "params_type": "object",
+  "messages_type": "object"
+}
+2025-03-25 16:38:58 [warn]: Using fallback API key since environment variable is not loaded properly
+2025-03-25 16:38:58 [info]: Using model: anthropic/claude-3.7-sonnet for all requests
+2025-03-25 16:38:58 [info]: Sending request to OpenRouter with model: anthropic/claude-3.7-sonnet
+2025-03-25 16:39:00 [info]: OpenRouter request successful. Tokens used: 230
+2025-03-25 16:44:48 [info]: AI Request Body: {
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful AI assistant with a casual tone and friendly demeanor, highly knowledgeable in all types of written content. Your responses should be professional yet warm and welcoming, with a hint of humor when appropriate. Avoid using emojis. Provide detailed and accurate information when answering questions.\n\nYour personality traits:\n- Professional but approachable\n- Knowledgeable and helpful\n- Warm and friendly\n- Occasionally humorous in a subtle way\n- Clear and concise in explanations\n- Respectful and considerate\n\nWhen responding, aim to be conversational but not overly casual, maintain a natural language flow, and be genuinely helpful without being stuffy or formal."
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there! How can I help you today?"
+    },
+    {
+      "role": "user",
+      "content": "hi"
+    }
+  ],
+  "type": "chat",
+  "parameters": {
+    "model": "anthropic/claude-3.7-sonnet",
+    "temperature": 0.7,
+    "max_tokens": 1024
+  }
+}
+2025-03-25 16:44:48 [info]: Request details:
+    - prompt: missing (undefined)
+    - messages: present (object) 
+    - type: chat
+    - parameters: {"model":"anthropic/claude-3.7-sonnet","temperature":0.7,"max_tokens":1024}
+  
+2025-03-25 16:44:48 [info]: Processing AI content generation: {"type":"chat","model":"anthropic/claude-3.7-sonnet","hasPrompt":false,"hasMessages":true,"messagesCount":3}
+2025-03-25 16:44:48 [info]: OpenRouter params received: {
+  "has_prompt": false,
+  "has_messages": true,
+  "model": "anthropic/claude-3.7-sonnet",
+  "params_type": "object",
+  "messages_type": "object"
+}
+2025-03-25 16:44:48 [warn]: Using fallback API key since environment variable is not loaded properly
+2025-03-25 16:44:48 [info]: Using model: anthropic/claude-3.7-sonnet for all requests
+2025-03-25 16:44:48 [info]: Sending request to OpenRouter with model: anthropic/claude-3.7-sonnet
+2025-03-25 16:44:50 [info]: OpenRouter request successful. Tokens used: 225
+2025-03-25 17:15:58 [info]: Server running in development mode on port 9999
+2025-03-25 17:30:00 [info]: Server running in development mode on port 9999
+2025-03-25 17:30:38 [info]: AI Request Body: {
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful AI assistant with a casual tone and friendly demeanor, highly knowledgeable in all types of written content. Your responses should be professional yet warm and welcoming, with a hint of humor when appropriate. Avoid using emojis. Provide detailed and accurate information when answering questions.\n\nYour personality traits:\n- Professional but approachable\n- Knowledgeable and helpful\n- Warm and friendly\n- Occasionally humorous in a subtle way\n- Clear and concise in explanations\n- Respectful and considerate\n\nWhen responding, aim to be conversational but not overly casual, maintain a natural language flow, and be genuinely helpful without being stuffy or formal."
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there! How can I help you today?"
+    },
+    {
+      "role": "user",
+      "content": "hi"
+    }
+  ],
+  "type": "chat",
+  "parameters": {
+    "model": "anthropic/claude-3.7-sonnet",
+    "temperature": 0.7,
+    "max_tokens": 1024
+  }
+}
+2025-03-25 17:30:38 [info]: Request details:
+    - prompt: missing (undefined)
+    - messages: present (object) 
+    - type: chat
+    - parameters: {"model":"anthropic/claude-3.7-sonnet","temperature":0.7,"max_tokens":1024}
+  
+2025-03-25 17:30:38 [info]: Processing AI content generation: {"type":"chat","model":"anthropic/claude-3.7-sonnet","hasPrompt":false,"hasMessages":true,"messagesCount":3}
+2025-03-25 17:30:38 [info]: Executing OpenRouter request for model: anthropic/claude-3.7-sonnet
+2025-03-25 17:30:38 [warn]: Using fallback OpenRouter API key. Ensure the primary config/environment variable is set correctly for production.
+2025-03-25 17:30:38 [info]: Sending request to OpenRouter: https://openrouter.ai/api/v1/chat/completions
+2025-03-25 17:30:39 [info]: OpenRouter request successful. Tokens used: 220. Finish reason: stop
+2025-03-25 17:32:54 [info]: Server running in development mode on port 9999
+2025-03-25 17:34:12 [info]: Server running in development mode on port 9999
+2025-03-25 17:35:10 [info]: Server running in development mode on port 9999
+2025-03-25 17:36:07 [info]: Server running in development mode on port 9998
