@@ -2,8 +2,14 @@ import axios from 'axios';
 import config from '../config';
 import logger from '../utils/logger';
 
+interface Message {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
 interface OpenRouterRequestParams {
-  prompt: string;
+  prompt?: string;
+  messages?: Message[];
   model: string;
   max_tokens?: number;
   temperature?: number;
@@ -36,10 +42,10 @@ export const executeOpenRouterRequest = async (params: OpenRouterRequestParams):
   try {
     const requestData = {
       model: params.model,
-      messages: [
+      messages: params.messages || [
         {
           role: 'user',
-          content: params.prompt,
+          content: params.prompt || '',
         },
       ],
       max_tokens: params.max_tokens || 1000,

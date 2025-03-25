@@ -32,9 +32,16 @@ export default defineConfig({
     }
   },
   server: {
-    port: 3000,
+    port: 3002,
     hmr: {
       overlay: true
+    },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:9999',
+        changeOrigin: true,
+        secure: false
+      }
     }
   },
   preview: {

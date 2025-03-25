@@ -19,7 +19,13 @@ import {
 import FileTemplate from '@/components/icons/FileTemplate';
 
 const Settings: React.FC = (): ReactElement => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  interface AuthState {
+    user: {
+      email?: string;
+    };
+  }
+
+  const { user } = useSelector<RootState, AuthState>((state: RootState) => state.auth as AuthState);
   const userName = user?.email?.split('@')[0] || 'User';
   const [activeCategory, setActiveCategory] = useState('account-profile');
   const [activeSubcategory, setActiveSubcategory] = useState('user-profile');
@@ -165,27 +171,7 @@ const Settings: React.FC = (): ReactElement => {
   return (
     <div className="bg-[#EDEAE2] min-h-screen">
       {/* Dashboard Content */}
-      <div className="px-1 sm:px-5 py-8 w-full sm:max-w-8xl mx-auto">
-        {/* Welcome Section */}
-        <WelcomeSection 
-          userName={userName}
-          draftCount={3} 
-          publishedCount={8}
-        />
-        
-        {/* Horizontal Navigation Menu */}
-        <NavigationMenu items={navigationItems} />
-        
-        {/* Settings Title 
-        <Card className="mb-6 overflow-hidden shadow-sm sm:shadow-md hover:shadow-lg transition-shadow">
-          <div className="p-4 border-b border-neutral-light/40 bg-white/5">
-            <h1 className="text-2xl font-comfortaa text-[#ae5630] flex items-center">
-              <SettingsIcon size={24} className="mr-2" />
-              Settings
-            </h1>
-            <p className="text-[#3d3d3a] mt-1">Configure your MagicMuse experience</p>
-          </div>
-        </Card>*/}
+      <div className=" w-full sm:max-w-full mx-auto">
         
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">

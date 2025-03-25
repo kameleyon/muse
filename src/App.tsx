@@ -3,11 +3,12 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Loading from './components/common/Loading';
 import { AuthModalProvider } from './context/AuthModalContext';
+import { ChatProvider } from './context/ChatContext';
 import AuthInit from './components/auth/AuthInit';
 
 // Lazy loaded components
 const AuthModalContainer = lazy(() => import('./components/auth/AuthModalContainer'));
-const DashboardLayout = lazy(() => import('./components/layout/DashboardLayout'));
+const MainLayout = lazy(() => import('./components/layout/MainLayout'));
 
 // Lazy loaded pages with named chunks for better code splitting
 const Landing = lazy(() => import(/* webpackChunkName: "landing" */ './pages/Landing'));
@@ -38,9 +39,10 @@ function App() {
       {/* Initialize authentication state */}
       <AuthInit />
       
-      <AnimatePresence mode="wait">
-        <Suspense fallback={<Loading />}>
-          <Routes>
+      <ChatProvider>
+        <AnimatePresence mode="wait">
+          <Suspense fallback={<Loading />}>
+            <Routes>
             {/* Landing page as root */}
             <Route index element={<Landing />} />
             
@@ -52,9 +54,9 @@ function App() {
               path="/dashboard" 
               element={
                 <Suspense fallback={<Loading />}>
-                  <DashboardLayout>
+                  <MainLayout>
                     <Dashboard />
-                  </DashboardLayout>
+                  </MainLayout>
                 </Suspense>
               } 
             />
@@ -64,9 +66,9 @@ function App() {
               path="/generator" 
               element={
                 <Suspense fallback={<Loading />}>
-                  <DashboardLayout>
+                  <MainLayout>
                     <ContentGenerator />
-                  </DashboardLayout>
+                  </MainLayout>
                 </Suspense>
               } 
             />
@@ -76,9 +78,9 @@ function App() {
               path="/projects" 
               element={
                 <Suspense fallback={<Loading />}>
-                  <DashboardLayout>
+                  <MainLayout>
                     <ContentLibrary />
-                  </DashboardLayout>
+                  </MainLayout>
                 </Suspense>
               } 
             />
@@ -93,9 +95,9 @@ function App() {
               path="/profile/*" 
               element={
                 <Suspense fallback={<Loading />}>
-                  <DashboardLayout>
+                  <MainLayout>
                     <Profile />
-                  </DashboardLayout>
+                  </MainLayout>
                 </Suspense>
               } 
             />
@@ -105,9 +107,9 @@ function App() {
               path="/settings" 
               element={
                 <Suspense fallback={<Loading />}>
-                  <DashboardLayout>
+                  <MainLayout>
                     <Settings />
-                  </DashboardLayout>
+                  </MainLayout>
                 </Suspense>
               } 
             />
@@ -129,6 +131,7 @@ function App() {
       <Suspense fallback={null}>
         <AuthModalContainer />
       </Suspense>
+      </ChatProvider>
     </AuthModalProvider>
   );
 }

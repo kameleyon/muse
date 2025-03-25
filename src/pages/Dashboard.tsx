@@ -165,16 +165,8 @@ const Dashboard: React.FC = () => {
       
       
       {/* Dashboard Content */}
-      <div className="px-1 sm:px-5 py-8 w-full sm:max-w-8xl mx-auto">
-        {/* Welcome Section */}
-        <WelcomeSection 
-          userName={userName}
-          draftCount={3} 
-          publishedCount={8}
-        />
-        
-        {/* Horizontal Navigation Menu */}
-        <NavigationMenu items={navigationItems} />
+      <div className=" w-full sm:max-w-full mx-auto">
+       
         
         {/* Main Content Grid */}
         <div className="grid grid-cols-12 gap-6">

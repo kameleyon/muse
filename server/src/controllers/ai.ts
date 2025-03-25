@@ -12,15 +12,16 @@ import logger from '../utils/logger';
  * @access  Private
  */
 export const generateContent = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  const { prompt, type, parameters } = req.body;
+  const { prompt, type, parameters, messages } = req.body;
 
-  if (!prompt) {
-    return next(new ApiError(StatusCodes.BAD_REQUEST, 'Prompt is required'));
+  if (!prompt && !messages) {
+    return next(new ApiError(StatusCodes.BAD_REQUEST, 'Either prompt or messages is required'));
   }
 
   try {
     const response = await executeOpenRouterRequest({
       prompt,
+      messages,
       model: parameters?.model || config.openRouter.defaultContentModel,
       max_tokens: parameters?.max_tokens || 1000,
       temperature: parameters?.temperature || 0.7,
