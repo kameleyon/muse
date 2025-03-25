@@ -60,3 +60,4 @@
 2025-03-25 00:45:28 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: No auth credentials found
     at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:40:17
     at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-25 00:46:31 [info]: Server running in development mode on port 9999

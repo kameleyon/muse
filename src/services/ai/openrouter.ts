@@ -7,9 +7,130 @@ const API_BASE_URL = '/api/ai';
 const RESEARCH_MODEL = import.meta.env.VITE_DEFAULT_RESEARCH_MODEL || "openai/gpt-4o-mine";
 const CONVERSATION_MODEL = 'anthropic/claude-3-haiku-20240307';
 
+// Model definitions
+export interface AIModel {
+  id: string;
+  name: string;
+  description: string;
+  strengths: string;
+  costPer1KTokens: number;
+  category: 'chat' | 'research' | 'creative';
+}
+
+// Available models
+export const availableModels: AIModel[] = [
+  {
+    id: 'anthropic/claude-3-haiku-20240307',
+    name: 'Claude 3 Haiku',
+    description: 'Fast, affordable AI assistant for everyday tasks',
+    strengths: 'Quick responses, balanced quality and speed',
+    costPer1KTokens: 0.00025,
+    category: 'chat'
+  },
+  {
+    id: 'anthropic/claude-3-opus-20240229',
+    name: 'Claude 3 Opus',
+    description: 'Most powerful Claude model for complex tasks',
+    strengths: 'Complex reasoning, nuanced instructions, creative tasks',
+    costPer1KTokens: 0.00300,
+    category: 'creative'
+  },
+  {
+    id: 'openai/gpt-4o-mine',
+    name: 'GPT-4o',
+    description: 'OpenAI\'s latest and most capable model',
+    strengths: 'Versatile performance, balanced reasoning, knowledge',
+    costPer1KTokens: 0.00100,
+    category: 'chat'
+  },
+  {
+    id: 'openai/gpt-4o-search-preview',
+    name: 'GPT-4o Search',
+    description: 'Research model with web search capability',
+    strengths: 'Up-to-date information, factual responses, research',
+    costPer1KTokens: 0.00200,
+    category: 'research'
+  }
+];
+
+// Content preset definitions
+export interface ContentPreset {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
+  parameters: {
+    model: string;
+    temperature: number;
+    maxTokens: number;
+    systemPrompt: string;
+  };
+}
+
+// Content presets
+export const contentPresets: ContentPreset[] = [
+  {
+    id: 'blog-expert',
+    name: 'Expert Blog Post',
+    description: 'Creates in-depth, authoritative blog content with research',
+    type: 'blog',
+    parameters: {
+      model: 'anthropic/claude-3-opus-20240229',
+      temperature: 0.7,
+      maxTokens: 1500,
+      systemPrompt: 'You are an expert content writer with deep knowledge in the topic. Create an authoritative blog post with well-researched information, relevant examples, and actionable insights.'
+    }
+  },
+  {
+    id: 'blog-casual',
+    name: 'Conversational Blog',
+    description: 'Friendly, approachable blog style with personal voice',
+    type: 'blog',
+    parameters: {
+      model: 'anthropic/claude-3-haiku-20240307',
+      temperature: 0.8,
+      maxTokens: 1200,
+      systemPrompt: 'You are a friendly, conversational writer creating an engaging blog post. Use a personal, approachable tone with casual language. Include personal anecdotes, conversational asides, and a warm, authentic voice.'
+    }
+  },
+  {
+    id: 'social-engaging',
+    name: 'Engaging Social Post',
+    description: 'Creates attention-grabbing social content',
+    type: 'social',
+    parameters: {
+      model: 'openai/gpt-4o-mine',
+      temperature: 0.9,
+      maxTokens: 300,
+      systemPrompt: 'You are a social media expert creating engaging, shareable content. Write attention-grabbing posts that encourage engagement. Use concise, impactful language with appropriate hooks and calls-to-action.'
+    }
+  },
+  {
+    id: 'email-professional',
+    name: 'Professional Email',
+    description: 'Formal business emails with clarity and professionalism',
+    type: 'email',
+    parameters: {
+      model: 'anthropic/claude-3-haiku-20240307',
+      temperature: 0.6,
+      maxTokens: 600,
+      systemPrompt: 'You are a professional business writer creating a formal email. Use clear, concise language with appropriate business etiquette. Maintain a professional tone while being direct and purpose-driven.'
+    }
+  }
+];
+
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
+}
+
+export interface GenerateContentOptions {
+  prompt: string;
+  model: string;
+  maxTokens?: number;
+  temperature?: number;
+  systemPrompt?: string;
+  onProgress?: (progress: number) => void;
 }
 
 interface OpenRouterResponse {
@@ -142,6 +263,54 @@ export const generateResearchResponse = async (query: string): Promise<string> =
   }
 };
 
+// Generate content with progress tracking
+export const generateContent = async (options: GenerateContentOptions): Promise<OpenRouterResponse> => {
+  try {
+    const { prompt, model, maxTokens = 1000, temperature = 0.7, systemPrompt = CHAT_SYSTEM_PROMPT, onProgress } = options;
+    
+    // Mock progress updates for UI
+    if (onProgress) {
+      const mockProgressInterval = setInterval(() => {
+        const randomIncrement = Math.random() * 10;
+        onProgress(Math.min((mockProgressCount += randomIncrement), 95));
+      }, 300);
+      
+      // Clear interval after completion or failure
+      setTimeout(() => clearInterval(mockProgressInterval), 5000);
+    }
+    
+    const response = await axios.post<OpenRouterResponse>(
+      `${API_BASE_URL}/generate`,
+      {
+        prompt,
+        type: model.includes('search') ? 'research' : 'chat',
+        parameters: {
+          model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: prompt }
+          ],
+          temperature,
+          max_tokens: maxTokens
+        }
+      }
+    );
+
+    // Complete progress
+    if (onProgress) {
+      onProgress(100);
+    }
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error generating content:', error);
+    throw new Error('Failed to generate content. Please try again later.');
+  }
+};
+
+// Variable to track mock progress
+let mockProgressCount = 0;
+
 // Mock implementation for testing in case the API is not available
 export const generateMockResponse = (prompt: string): string => {
   if (prompt.toLowerCase().includes('weather')) {
@@ -155,6 +324,11 @@ export const generateMockResponse = (prompt: string): string => {
   }
 };
 
+// Get available models
+export const getAvailableModels = (): AIModel[] => {
+  return availableModels;
+};
+
 // Direct access to system prompt for use in the context
 export const getChatSystemPrompt = (): string => {
   return CHAT_SYSTEM_PROMPT;
@@ -164,3 +338,15 @@ export const getChatSystemPrompt = (): string => {
 export const isConfigured = (): boolean => {
   return true; // Always return true since we're using the server API
 };
+
+// Default export for the service
+const openRouterService = {
+  generateChatResponse,
+  generateResearchResponse,
+  generateContent,
+  getAvailableModels,
+  getChatSystemPrompt,
+  isConfigured
+};
+
+export default openRouterService;
