@@ -102,6 +102,25 @@ export default defineConfig({
       ],
       // Set strict mode to be more secure
       strict: true
+    },
+    cors: {
+      // Restrict CORS to only allowed origins in development
+      origin: (origin, callback) => {
+        // In development, only allow localhost and the application origin
+        const allowedOrigins = [
+          'http://localhost:3000', 
+          'http://127.0.0.1:3000'
+        ];
+        
+        // Check if the origin is allowed or if it's a same-site request (origin is null/undefined)
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('CORS policy violation'), false);
+        }
+      },
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      credentials: true
     }
   },
   preview: {
