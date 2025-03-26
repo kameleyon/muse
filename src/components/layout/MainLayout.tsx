@@ -63,7 +63,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       
       {/* Main Content */}
       <div className="flex-grow">
-        <div className="px-4 sm:px-6 py-8 max-w-7xl mx-auto">
+        <div className="px-4 sm:px-6 py-14 max-w-7xl mx-auto">
           {/* Welcome Section */}
           <WelcomeSection 
             userName={userName}
