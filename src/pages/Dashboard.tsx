@@ -165,7 +165,7 @@ const Dashboard: React.FC = () => {
       
       
       {/* Dashboard Content */}
-      <div className=" py-8 w-full mx-auto">
+      <div className=" py-4 w-full mx-auto">
         
         {/* Main Content Grid */}
         <div className="grid grid-cols-12 gap-6">
