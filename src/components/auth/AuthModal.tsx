@@ -47,7 +47,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center ">
       {/* Backdrop with blur effect */}
       <div 
-        className="fixed inset-0 bg-black/40 backdrop-blur-md" 
+        className="fixed inset-0 bg-black/10 backdrop-blur-md" 
         onClick={onClose}
       ></div>
       
