@@ -1,5 +1,6 @@
 // Dashboard component exports
 export { default as DashboardStats } from './DashboardStats';
+export { default as DashboardCard } from './DashboardCard';
 export { default as NavigationMenu } from './NavigationMenu';
 export { default as NotificationsPanel } from './NotificationsPanel';
 export { default as RecentActivity } from './RecentActivity';

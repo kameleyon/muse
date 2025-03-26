@@ -84,7 +84,67 @@ export default {
       backdropBlur: {
         'xl': '30px',
       },
+      // Add typography customization here
+      typography: (theme) => ({
+        DEFAULT: {
+          css: {
+            color: theme('colors.neutral.dark'), // Default text color - Charcoal
+            a: {
+              color: theme('colors.primary.DEFAULT'), // Links - Terracotta
+              '&:hover': {
+                color: theme('colors.primary.hover'),
+              },
+              textDecoration: 'none', // Optional: remove underline
+            },
+            'h1, h2, h3, h4, h5, h6': {
+              fontFamily: theme('fontFamily.heading').join(', '), // Heading font - Comfortaa
+              color: theme('colors.secondary.DEFAULT'), // Heading color - Nearly black
+              fontWeight: '600', // Adjust weight as needed
+            },
+            p: {
+              fontFamily: theme('fontFamily.body').join(', '), // Body font - Questrial
+              color: theme('colors.neutral.medium'), // Paragraph color - Dark olive
+            },
+            strong: {
+              color: theme('colors.secondary.DEFAULT'), // Bold text - Nearly black
+              fontWeight: '600',
+            },
+            blockquote: {
+              color: theme('colors.neutral.medium'), // Blockquote text - Dark olive
+              borderLeftColor: theme('colors.primary.DEFAULT'), // Blockquote border - Terracotta
+              fontStyle: 'italic',
+            },
+            'code': {
+              color: theme('colors.primary.DEFAULT'), // Inline code - Terracotta
+              backgroundColor: theme('colors.neutral.light'), // Code background - Light beige
+              padding: '0.2em 0.4em',
+              borderRadius: '0.25rem',
+              fontWeight: '400',
+            },
+            'pre code': { // Code blocks
+              backgroundColor: 'transparent', // Reset background for prism/highlight.js
+              padding: '0',
+              borderRadius: '0',
+            },
+            'pre': {
+              backgroundColor: theme('colors.neutral.dark'), // Code block background - Charcoal
+              color: theme('colors.neutral.light'), // Code block text - Light beige
+              padding: theme('spacing.4'),
+              borderRadius: theme('borderRadius.md'),
+            },
+            'ul > li::marker': { // Unordered list bullets
+              color: theme('colors.primary.DEFAULT'), // Terracotta
+            },
+            'ol > li::marker': { // Ordered list numbers
+              color: theme('colors.primary.DEFAULT'), // Terracotta
+            },
+            // Add more customizations as needed for lists, tables, etc.
+          },
+        },
+      }),
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'), // Add the plugin here
+  ],
 }
