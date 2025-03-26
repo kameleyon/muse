@@ -165,27 +165,8 @@ const Settings: React.FC = (): ReactElement => {
   return (
     <div className="bg-[#EDEAE2] min-h-screen">
       {/* Dashboard Content */}
-      <div className="px-1 sm:px-5 py-8 w-full sm:max-w-8xl mx-auto">
-        {/* Welcome Section */}
-        <WelcomeSection 
-          userName={userName}
-          draftCount={3} 
-          publishedCount={8}
-        />
+      <div className=" py-8 w-full mx-auto">
         
-        {/* Horizontal Navigation Menu */}
-        <NavigationMenu items={navigationItems} />
-        
-        {/* Settings Title 
-        <Card className="mb-6 overflow-hidden shadow-sm sm:shadow-md hover:shadow-lg transition-shadow">
-          <div className="p-4 border-b border-neutral-light/40 bg-white/5">
-            <h1 className="text-2xl font-comfortaa text-[#ae5630] flex items-center">
-              <SettingsIcon size={24} className="mr-2" />
-              Settings
-            </h1>
-            <p className="text-[#3d3d3a] mt-1">Configure your MagicMuse experience</p>
-          </div>
-        </Card>*/}
         
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
