@@ -1,5 +1,11 @@
-import express from 'express';
+// Load environment variables first, before any other imports
 import dotenv from 'dotenv';
+import path from 'path';
+
+// Configure dotenv to load from the project root .env file
+dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
+
+import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -16,9 +22,6 @@ import authRoutes from './routes/auth';
 import contentRoutes from './routes/content';
 import userRoutes from './routes/user';
 import aiRoutes from './routes/ai';
-
-// Load environment variables
-dotenv.config();
 
 const app = express();
 const PORT = config.port || 5000;

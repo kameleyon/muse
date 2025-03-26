@@ -2,6 +2,17 @@ import { createClient } from '@supabase/supabase-js';
 import config from '../config';
 import logger from '../utils/logger';
 
+// Validate required Supabase config
+if (!config.supabase.url) {
+  throw new Error('Missing required environment variable: SUPABASE_URL');
+}
+if (!config.supabase.anonKey) {
+  throw new Error('Missing required environment variable: SUPABASE_ANON_KEY');
+}
+if (!config.supabase.serviceKey) {
+  throw new Error('Missing required environment variable: SUPABASE_SERVICE_KEY');
+}
+
 // Create an anonymous client (for auth operations)
 export const supabaseClient = createClient(
   config.supabase.url,

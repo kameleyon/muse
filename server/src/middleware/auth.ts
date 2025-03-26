@@ -4,6 +4,14 @@ import { createClient } from '@supabase/supabase-js';
 import config from '../config';
 import { ApiError } from './error';
 
+// Validate required Supabase config for auth middleware
+if (!config.supabase.url) {
+  throw new Error('Missing required environment variable: SUPABASE_URL');
+}
+if (!config.supabase.anonKey) {
+  throw new Error('Missing required environment variable: SUPABASE_ANON_KEY');
+}
+
 // Create a Supabase client
 const supabase = createClient(
   config.supabase.url,
