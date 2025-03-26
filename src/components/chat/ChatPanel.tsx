@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { IoSend, IoClose, IoSearch, IoChatbubble } from 'react-icons/io5';
+import { useLocation } from 'react-router-dom';
 import qwenService from '../../services/ai/qwen';
+import { containsMarkdown, MarkdownContent } from '../../lib/markdown';
 import './ChatPanel.css';
 
 interface Message {
@@ -12,6 +14,9 @@ interface Message {
 }
 
 const ChatPanel: React.FC = () => {
+  const location = useLocation();
+  const isLandingPage = location.pathname === '/';
+  
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -143,9 +148,14 @@ const ChatPanel: React.FC = () => {
     setIsOpen(!isOpen);
   };
 
+  // Don't render anything on the landing page
+  if (isLandingPage) {
+    return null;
+  }
+
   return (
     <>
-      {/* Chat Toggle Button - Always visible */}
+      {/* Chat Toggle Button - Only visible when not on landing page */}
       <button 
         className="chat-toggle-button"
         onClick={toggleChat}
@@ -158,26 +168,15 @@ const ChatPanel: React.FC = () => {
 
       {/* Chat Panel */}
       {isOpen && (
-        <div className="chat-panel">
+        <div className="chat-panel rounded-xl">
           {/* Chat Header */}
-          <div className="chat-header">
+          <div className="chat-header  rounded-xl">
             <div className="chat-brand">
-              <IoChatbubble size={24} />
-              <span>magicmuse chat</span>
+              <IoChatbubble size={20} />
+              <span className="text-xl">magicmuse chat</span>
             </div>
             <div className="chat-actions">
-              <button 
-                className="icon-button" 
-                aria-label="New chat"
-                onClick={() => setMessages([{
-                  id: 'welcome',
-                  content: 'Hey there! I\'m MagicMuse, your content writing assistant. How can I help you today? Need some creative help or just want to chat about your writing project?',
-                  isUser: false,
-                  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                }])}
-              >
-                <IoSearch size={18} />
-              </button>
+              
               <button className="icon-button" aria-label="Close chat" onClick={toggleChat}>
                 <IoClose size={18} />
               </button>
@@ -198,7 +197,13 @@ const ChatPanel: React.FC = () => {
                     <span></span>
                   </div>
                 ) : (
-                  <div className="message-content">{message.content}</div>
+                  <div className="message-content">
+                    {containsMarkdown(message.content) ? (
+                      <MarkdownContent content={message.content} />
+                    ) : (
+                      message.content
+                    )}
+                  </div>
                 )}
                 <div className="message-timestamp">{message.timestamp}</div>
               </div>
