@@ -16,6 +16,7 @@ const Dashboard = lazy(() => import(/* webpackChunkName: "dashboard" */ './pages
 const Auth = lazy(() => import(/* webpackChunkName: "auth" */ './pages/Auth'));
 const ContentGenerator = lazy(() => import(/* webpackChunkName: "content-generator" */ './pages/ContentGenerator'));
 const ContentLibrary = lazy(() => import(/* webpackChunkName: "content-library" */ './pages/ContentLibrary'));
+const Chat = lazy(() => import(/* webpackChunkName: "chat" */ './pages/Chat'));
 const Profile = lazy(() => import(/* webpackChunkName: "profile" */ './pages/Profile'));
 const Settings = lazy(() => import(/* webpackChunkName: "settings" */ './pages/Settings'));
 const NotFound = lazy(() => import(/* webpackChunkName: "not-found" */ './pages/NotFound'));
@@ -87,6 +88,18 @@ function App() {
             <Route 
               path="/library" 
               element={<Navigate to="/projects" replace />} 
+            />
+
+            {/* Chat with MagicMuse */}
+            <Route 
+              path="/chat" 
+              element={
+                <Suspense fallback={<Loading />}>
+                  <MainLayout>
+                    <Chat />
+                  </MainLayout>
+                </Suspense>
+              } 
             />
             
             {/* Profile routes */}
