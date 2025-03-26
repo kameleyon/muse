@@ -171,9 +171,9 @@ export class OpenRouterService {
     baseUrl: string = 'https://openrouter.ai/api/v1',
     defaultModel?: string
   ) {
-    this.apiKey = apiKey || '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';
+    this.apiKey = apiKey || import.meta.env.VITE_OPENROUTER_API_KEY;
     this.baseUrl = baseUrl;
-    this.defaultModel = defaultModel || 'anthropic/claude-3.7-sonnet';
+    this.defaultModel = defaultModel || import.meta.env.VITE_DEFAULT_CONTENT_MODEL || 'anthropic/claude-3.7-sonnet';
   }
 
   // Get the API key

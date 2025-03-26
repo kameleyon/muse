@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import Loading from './components/common/Loading';
 import { AuthModalProvider } from './context/AuthModalContext';
 import AuthInit from './components/auth/AuthInit';
+import ChatPanel from './components/chat/ChatPanel';
 
 // Lazy loaded components
 const AuthModalContainer = lazy(() => import('./components/auth/AuthModalContainer'));
@@ -129,6 +130,9 @@ function App() {
       <Suspense fallback={null}>
         <AuthModalContainer />
       </Suspense>
+      
+      {/* Chat Panel - available throughout the app */}
+      <ChatPanel />
     </AuthModalProvider>
   );
 }
