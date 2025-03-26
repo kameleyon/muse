@@ -38,10 +38,16 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
     }
   }, []);
 
+  // Extract first name for greeting
+  const getFirstName = (fullName: string) => {
+    // Split by spaces and take the first part
+    return fullName.split(' ')[0];
+  };
+
   return (
     <div className="mb-8 bg-neutral-white rounded-2xl p-6 border border-neutral-light/40 shadow-md">
       <h1 className="text-2xl md:text-3xl font-bold font-heading text-secondary mb-2">
-        Good {timeOfDay}, <span className="inline">{userName}</span><span className="inline">!</span>
+        Good {timeOfDay}, <span className="inline">{getFirstName(userName)}</span><span className="inline">!</span>
       </h1>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <p className="text-neutral-medium max-w-xl">

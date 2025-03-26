@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { supabaseAdmin } from '../services/supabase'; // Use supabaseAdmin
 
 // Get user profile
 export const getProfile = async (req: Request, res: Response) => {
@@ -77,5 +78,47 @@ export const getUserAnalytics = async (req: Request, res: Response) => {
     res.status(200).json({ message: `Get analytics for user ${userId}` });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Save onboarding data
+export const saveOnboardingData = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const {
+      primaryContentPurpose,
+      mainGoals,
+      contentFrequency,
+      industry,
+      customIndustry,
+      writingStyle,
+      aiAssistanceLevel
+    } = req.body;
+
+    // Update profile with onboarding data
+    const { error } = await supabaseAdmin // Use supabaseAdmin
+      .from('profiles')
+      .update({
+        primary_content_purpose: primaryContentPurpose,
+        main_goals: mainGoals,
+        content_frequency: contentFrequency,
+        industry: industry,
+        custom_industry: customIndustry,
+        writing_style: writingStyle,
+        ai_assistance_level: aiAssistanceLevel,
+        updated_at: new Date()
+      })
+      .eq('id', userId);
+
+    if (error) throw error;
+
+    // Always return a complete JSON response, even if Supabase returns no data
+    res.status(200).json({ 
+      success: true,
+      message: 'Onboarding data saved successfully'
+    });
+  } catch (error) {
+    console.error('Error saving onboarding data:', error);
+    res.status(500).json({ error: 'Failed to save onboarding data' });
   }
 };

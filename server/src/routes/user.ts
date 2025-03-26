@@ -20,4 +20,7 @@ router.put('/preferences', userController.updatePreferences);
 // User analytics
 router.get('/analytics', userController.getUserAnalytics);
 
+// Onboarding data
+router.patch('/profile/onboarding', userController.saveOnboardingData); // Add onboarding route
+
 export default router;

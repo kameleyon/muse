@@ -67,12 +67,16 @@ const Register: React.FC = () => {
       // Configure to require email verification
       const redirectUrl = `${window.location.origin}/auth/login`;
       
-      // Simplified registration approach to fix database error by not passing user metadata to the signup function.
+      // Pass full_name as user metadata to ensure it's saved in the Supabase user record
+      // and properly propagated to the profile by the database trigger
       const { error: signUpError, data: signUpData } = await signUpWithEmail(
         data.email, 
         data.password,
         { 
-          emailRedirectTo: redirectUrl
+          emailRedirectTo: redirectUrl,
+          data: {
+            full_name: data.fullName
+          }
         }
       );
 
@@ -193,6 +197,13 @@ const Register: React.FC = () => {
               <button 
                 onClick={handleGoToLogin}
                 className="auth-button-secondary"
+                style={{ 
+                  borderRadius: '12px',
+                  padding: '12px 24px',
+                  border: '1px solid #bcb7af',
+                  fontFamily: "'Comfortaa', cursive",
+                  transition: 'all 0.2s ease'
+                }}
               >
                 Go to Login
               </button>
@@ -200,6 +211,16 @@ const Register: React.FC = () => {
                 onClick={handleResendVerification}
                 disabled={isLoading}
                 className="auth-button"
+                style={{ 
+                  borderRadius: '12px',
+                  padding: '12px 24px',
+                  backgroundColor: '#ae5630',
+                  color: '#EDEAE2',
+                  fontFamily: "'Comfortaa', cursive",
+                  border: 'none',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 2px 4px rgba(61, 61, 58, 0.3)'
+                }}
               >
                 {isLoading ? 'Sending...' : 'Resend Verification Email'}
               </button>

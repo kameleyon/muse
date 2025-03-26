@@ -1,44 +1,66 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { getSession } from '@/services/supabase';
-import { setUser, setSession } from '@/store/slices/authSlice';
+import { supabase } from '@/services/supabase'; // Import supabase client directly
+import { setUser, setSession, setAuthLoading } from '@/store/slices/authSlice'; // Corrected: Import setAuthLoading action
 
 // This component initializes authentication state when the app loads
-// by checking for existing sessions and loading user data if available
+// by setting up the onAuthStateChange listener
 const AuthInit: React.FC = () => {
-  const [isInitialized, setIsInitialized] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        // Check if there's an existing session
-        const { data, error } = await getSession();
-        
-        if (error) {
-          console.error('Auth initialization error:', error);
-          return;
-        }
-        
-        if (data.session) {
-          // User is logged in
-          // Fix: Access user from data.session, not directly from data
-          const user = data.session.user;
-          
-          if (user) {
-            // Set user info in Redux
-            dispatch(setUser(user));
-            dispatch(setSession(data.session.access_token));
-          }
-        }
-      } catch (error) {
-        console.error('Failed to initialize auth:', error);
-      } finally {
-        setIsInitialized(true);
-      }
-    };
+    // Set loading state initially
+    dispatch(setAuthLoading(true));
+    
+    let authStateResolved = false;
 
-    initAuth();
+    // Immediately check the current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        dispatch(setUser(session.user));
+        dispatch(setSession(session.access_token));
+      }
+      
+      // Important: Set loading to false after initial session check
+      // This ensures we don't leave the app in a loading state if the listener takes time
+      if (!authStateResolved) {
+        authStateResolved = true;
+        dispatch(setAuthLoading(false));
+      }
+    }).catch(error => {
+      console.error('Session retrieval error:', error);
+      // Still need to complete loading even on error
+      dispatch(setAuthLoading(false));
+      authStateResolved = true;
+    });
+
+    // Set up the listener for auth state changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('Auth State Change Event:', event, 'Session:', session ? 'exists' : 'null'); // More secure logging
+        
+        if (session) {
+          // User is signed in or session restored
+          dispatch(setUser(session.user));
+          dispatch(setSession(session.access_token));
+          dispatch(setAuthLoading(false));
+        } else if (event === 'SIGNED_OUT') {
+          // Only clear user data on explicit sign out
+          dispatch(setUser(null));
+          dispatch(setSession(null));
+          dispatch(setAuthLoading(false));
+        } else if (!authStateResolved) {
+          // Only set loading false if we haven't already done it from getSession
+          authStateResolved = true;
+          dispatch(setAuthLoading(false));
+        }
+      }
+    );
+
+    // Cleanup function to unsubscribe from the listener when the component unmounts
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
   }, [dispatch]);
 
   return null; // This component doesn't render anything

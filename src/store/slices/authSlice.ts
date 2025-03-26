@@ -19,7 +19,7 @@ const initialState: AuthState = {
   user: null,
   session: null,
   isAuthenticated: false,
-  isLoading: false,
+  isLoading: true, // Start with loading true to prevent premature auth decisions
   error: null,
 };
 
@@ -44,11 +44,14 @@ const authSlice = createSlice({
           fullName: supabaseUser.user_metadata?.full_name,
           avatar_url: supabaseUser.user_metadata?.avatar_url,
         };
+        state.isAuthenticated = true;
       } else {
+        // Only clear user if explicitly passed null
         state.user = null;
+        state.isAuthenticated = false;
       }
-      state.isAuthenticated = !!action.payload;
-      state.isLoading = false;
+      
+      // Note: Don't set isLoading to false here, let AuthInit component control that
       state.error = null;
     },
     setSession: (state, action: PayloadAction<string | null>) => {

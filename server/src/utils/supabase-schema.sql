@@ -9,6 +9,14 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name TEXT,
   avatar_url TEXT,
+  -- Onboarding data
+  primary_content_purpose TEXT,
+  main_goals TEXT[],
+  content_frequency TEXT,
+  industry TEXT,
+  custom_industry TEXT,
+  writing_style JSONB,
+  ai_assistance_level TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );

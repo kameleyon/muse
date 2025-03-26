@@ -71,7 +71,7 @@ const Header: React.FC = () => {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <span className="text-sm font-medium text-secondary">
+                        <span className="text-sm font-medium text-white">
                           {user.fullName
                             ? user.fullName.substring(0, 1)
                             : user.email.substring(0, 1).toUpperCase()}

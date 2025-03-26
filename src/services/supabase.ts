@@ -14,10 +14,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // Authentication functions
 
 export const signUpWithEmail = async (email: string, password: string, options?: any) => {
-  // Removed user metadata from signup options to avoid database errors;
-  // profile creation will be handled separately.
+  // Include userData in the signup options (especially full_name) to ensure
+  // the database trigger can properly set it in the profile
   const signUpOptions = {
-    emailRedirectTo: options?.emailRedirectTo || `${window.location.origin}/auth/login`
+    emailRedirectTo: options?.emailRedirectTo || `${window.location.origin}/auth/login`,
+    data: options?.data || {}
   };
 
   return await supabase.auth.signUp({
@@ -144,9 +145,14 @@ export const createProfileIfNotExists = async (userId: string, userData = {}) =>
         created_at: new Date().toISOString(),
         ...userData 
       }]);
+  } else {
+    // If profile exists, update it with the provided data
+    // This ensures fields like full_name are set correctly after the trigger runs
+    return await supabase
+      .from('profiles')
+      .update(userData)
+      .eq('id', userId);
   }
-  
-  return { data: existingProfile, error: null };
 };
 
 export const uploadAvatar = async (userId: string, file: File) => {

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import ProfileSidebar from './components/ProfileSidebar';
 import ProfileInfo from './components/ProfileInfo';
 import SecuritySettings from './components/SecuritySettings';
+import ChatHistorySettings from './components/ChatHistorySettings';
 import NotificationSettings from './components/NotificationSettings';
 import AppearanceSettings from './components/AppearanceSettings';
 import SubscriptionSettings from './components/SubscriptionSettings';
@@ -35,6 +36,9 @@ const ProfilePage: React.FC = () => {
 
           {/* Password/Security */}
           {activeTab === 'password' && <SecuritySettings />}
+          
+          {/* Chat History */}
+          {activeTab === 'chat-history' && <ChatHistorySettings />}
 
           {/* Notifications */}
           {activeTab === 'notifications' && <NotificationSettings />}

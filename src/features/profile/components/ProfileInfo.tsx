@@ -108,7 +108,7 @@ const ProfileInfo: React.FC = () => {
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <span className="text-2xl font-medium text-secondary">
+                  <span className="text-2xl font-medium text-white">
                     {user?.fullName
                       ? user.fullName.substring(0, 1)
                       : user?.email?.substring(0, 1).toUpperCase()}

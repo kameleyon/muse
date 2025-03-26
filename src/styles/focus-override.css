@@ -18,16 +18,34 @@ select:focus-visible,
 textarea:focus-visible,
 [tabindex]:focus-visible {
   outline: none !important;
-  box-shadow: 0 0 0 2px rgba(252, 191, 35, 0.4) !important;
+  box-shadow: 0 0 0 2px rgba(174, 86, 48, 0.4) !important;
 }
 
 .badge-secondary {
-  background-color: rgba(252, 191, 35, 0.2) !important;
-  color: #fcbf23 !important;
+  background-color: rgba(174, 86, 48, 0.2) !important;
+  color: #ae5630 !important;
 }
 
 /* Remove focus rings for buttons */
 .btn:focus-visible {
   outline: none !important;
-  box-shadow: 0 0 0 2px rgba(252, 191, 35, 0.4) !important;
+  box-shadow: 0 0 0 2px rgba(174, 86, 48, 0.4) !important;
+}
+
+/* Ensure all inputs have a standardized focus style */
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #ae5630 !important;
+  box-shadow: 0 0 0 2px rgba(174, 86, 48, 0.3) !important;
+}
+
+/* Ensure primary buttons have light text */
+.btn-primary,
+button[class*="primary"],
+[type="submit"],
+.save-button,
+button[style*="background-color: #ae5630"] {
+  color: #EDEAE2 !important;
+  text-color: #EDEAE2 !important;
 }
