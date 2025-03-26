@@ -4,9 +4,10 @@ type AuthFormType = 'login' | 'register' | 'forgotPassword' | 'resetPassword' | 
 
 interface AuthModalContextType {
   activeForm: AuthFormType;
-  openForm: (form: AuthFormType) => void;
+  openForm: (form: AuthFormType, message?: string) => void;
   closeForm: () => void;
   isModalOpen: boolean;
+  message: string | null;
 }
 
 const AuthModalContext = createContext<AuthModalContextType | undefined>(undefined);
@@ -14,10 +15,12 @@ const AuthModalContext = createContext<AuthModalContextType | undefined>(undefin
 export const AuthModalProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [activeForm, setActiveForm] = useState<AuthFormType>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
-  const openForm = (form: AuthFormType) => {
+  const openForm = (form: AuthFormType, message?: string) => {
     setActiveForm(form);
     setIsModalOpen(true);
+    setMessage(message || null);
   };
 
   const closeForm = () => {
@@ -27,7 +30,7 @@ export const AuthModalProvider: React.FC<{ children: ReactNode }> = ({ children 
   };
 
   return (
-    <AuthModalContext.Provider value={{ activeForm, openForm, closeForm, isModalOpen }}>
+    <AuthModalContext.Provider value={{ activeForm, openForm, closeForm, isModalOpen, message }}>
       {children}
     </AuthModalContext.Provider>
   );

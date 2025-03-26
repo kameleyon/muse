@@ -5,6 +5,7 @@ import Loading from './components/common/Loading';
 import { AuthModalProvider } from './context/AuthModalContext';
 import AuthInit from './components/auth/AuthInit';
 import ChatPanel from './components/chat/ChatPanel';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Lazy loaded components
 const AuthModalContainer = lazy(() => import('./components/auth/AuthModalContainer'));
@@ -54,9 +55,11 @@ function App() {
               path="/dashboard" 
               element={
                 <Suspense fallback={<Loading />}>
-                  <MainLayout>
-                    <Dashboard />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Dashboard />
+                    </MainLayout>
+                  </ProtectedRoute>
                 </Suspense>
               } 
             />
@@ -66,9 +69,11 @@ function App() {
               path="/generator" 
               element={
                 <Suspense fallback={<Loading />}>
-                  <MainLayout>
-                    <ContentGenerator />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <ContentGenerator />
+                    </MainLayout>
+                  </ProtectedRoute>
                 </Suspense>
               } 
             />
@@ -78,9 +83,11 @@ function App() {
               path="/projects" 
               element={
                 <Suspense fallback={<Loading />}>
-                  <MainLayout>
-                    <ContentLibrary />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <ContentLibrary />
+                    </MainLayout>
+                  </ProtectedRoute>
                 </Suspense>
               } 
             />
@@ -95,9 +102,11 @@ function App() {
               path="/chat" 
               element={
                 <Suspense fallback={<Loading />}>
-                  <MainLayout>
-                    <Chat />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Chat />
+                    </MainLayout>
+                  </ProtectedRoute>
                 </Suspense>
               } 
             />
@@ -107,9 +116,11 @@ function App() {
               path="/profile/*" 
               element={
                 <Suspense fallback={<Loading />}>
-                  <MainLayout>
-                    <Profile />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Profile />
+                    </MainLayout>
+                  </ProtectedRoute>
                 </Suspense>
               } 
             />
@@ -119,9 +130,11 @@ function App() {
               path="/settings" 
               element={
                 <Suspense fallback={<Loading />}>
-                  <MainLayout>
-                    <Settings />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Settings />
+                    </MainLayout>
+                  </ProtectedRoute>
                 </Suspense>
               } 
             />
