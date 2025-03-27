@@ -17,7 +17,6 @@ const Dashboard = lazy(() => import(/* webpackChunkName: "dashboard" */ './pages
 const Auth = lazy(() => import(/* webpackChunkName: "auth" */ './pages/Auth'));
 const ContentGenerator = lazy(() => import(/* webpackChunkName: "content-generator" */ './pages/ContentGenerator'));
 const ContentLibrary = lazy(() => import(/* webpackChunkName: "content-library" */ './pages/ContentLibrary'));
-const ProjectEditor = lazy(() => import(/* webpackChunkName: "project-editor" */ './pages/ProjectEditor')); // Added ProjectEditor
 const Chat = lazy(() => import(/* webpackChunkName: "chat" */ './pages/Chat'));
 const Profile = lazy(() => import(/* webpackChunkName: "profile" */ './pages/Profile'));
 const Settings = lazy(() => import(/* webpackChunkName: "settings" */ './pages/Settings'));
@@ -90,25 +89,12 @@ function App() {
                     </MainLayout>
                   </ProtectedRoute>
                 </Suspense>
-              }
-            />
-            {/* Individual Project Editor route */}
-            <Route
-              path="/projects/:projectId" // Added dynamic route
-              element={
-                <Suspense fallback={<Loading />}>
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <ProjectEditor />
-                    </MainLayout>
-                  </ProtectedRoute>
-                </Suspense>
-              }
+              } 
             />
             
-            <Route
-              path="/library"
-              element={<Navigate to="/projects" replace />}
+            <Route 
+              path="/library" 
+              element={<Navigate to="/projects" replace />} 
             />
 
             {/* Chat with MagicMuse */}
