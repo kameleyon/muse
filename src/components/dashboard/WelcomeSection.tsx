@@ -87,11 +87,8 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
       // Call the service function
       const newProjectId = await createProject({
         userId: user.id,
-        projectName: details.projectName,
-        category: details.category,
-        subcategory: details.subcategory,
-        section: details.section,
-        item: details.item,
+        project_name: details.projectName,
+        project_type: `${details.category}/${details.subcategory}/${details.section}/${details.item}`,
       });
 
       dispatch(addToast({ type: 'success', message: `Project "${details.projectName}" created successfully!` }));
