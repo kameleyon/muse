@@ -8,13 +8,14 @@ import {
 } from '@/features/project_creation/data/projectCategories'; // Assuming path is correct
 
 // --- Existing Interfaces/Types ---
-interface CreateProjectDetails {
+// Modified to be more flexible for different creation flows
+export interface CreateProjectParams {
   userId: string;
-  projectName: string;
-  category: ProjectCategory;
-  subcategory: ProjectSubcategory;
-  section: ProjectSection;
-  item: ProjectItem;
+  project_name: string; // Use snake_case
+  project_type: string; // Use snake_case
+  initialModuleName?: string;
+  initialBlockType?: string;
+  initialContent?: any; // Optional: Initial content for the first block
 }
 
 // --- New Interfaces/Types for Fetched Data ---
@@ -70,20 +71,27 @@ export interface ContentBlock {
 }
 
 
-// --- Existing createProject function ---
-export const createProject = async (details: CreateProjectDetails): Promise<string> => {
-  // ... (setup logic) ...
-  const { userId, projectName, category, subcategory, section, item } = details;
-  const projectType = `${category.id}:${subcategory.id}:${section.id}:${item.id}`;
-  const moduleType = `${section.id}:${item.id}`;
+
+// --- Modified createProject function ---
+export const createProject = async (params: CreateProjectParams): Promise<string> => {
+  const {
+    userId,
+    project_name, // Use snake_case
+    project_type, // Use snake_case
+    initialModuleName = 'Main Content',
+    initialBlockType = 'markdown',
+    initialContent = { text: '' } // Default empty content
+  } = params;
+  // moduleType can be derived or simplified if needed, using project_type for now
+  const moduleType = project_type; // Use snake_case
 
   // --- 1. Insert into 'projects' table ---
   const { data: projectData, error: projectError } = await supabase
     .from('projects')
     .insert({
       user_id: userId,
-      project_name: projectName,
-      project_type: projectType,
+      project_name: project_name, // Use snake_case
+      project_type: project_type, // Use snake_case
       creation_date: new Date().toISOString(),
       last_modified: new Date().toISOString(),
       status: 'Draft',
@@ -107,7 +115,7 @@ export const createProject = async (details: CreateProjectDetails): Promise<stri
     .from('content_modules')
     .insert({
       project_id: newProjectId,
-      module_name: item.name,
+      module_name: initialModuleName, // Use initialModuleName from params
       module_type: moduleType,
       display_order: 1,
       creation_date: new Date().toISOString(),
@@ -265,29 +273,42 @@ export const updateContentBlock = async (blockId: string, htmlContent: string, u
  */
 export const updateProjectSetupDetails = async (
     projectId: string,
-    setupData: Record<string, any>,
-    templateId: string | null // Allow null if no template selected
+    setupData: Record<string, any>, // This already includes templateId from the form
+    templateId: string | null // Keep param for clarity, but don't use for default_template_id column
 ): Promise<Project | null> => {
+    // Ensure templateId from the form is part of the setupData JSON
+    const dataToSave = {
+        ...setupData,
+        templateId: templateId // Explicitly include templateId in the JSONB data
+    };
+
     const { data, error } = await supabase
         .from('projects')
         .update({
-            setup_details: setupData,
-            default_template_id: templateId,
+            setup_details: dataToSave, // Save the combined data including templateId
+            // default_template_id: templateId, // REMOVE this line - don't update the UUID column with the name
             last_modified: new Date().toISOString(), // Update last modified timestamp
         })
         .eq('project_id', projectId)
         .select('*, setup_details') // Return the updated project data including setup_details
         .single();
 
-    if (error) {
-        console.error(`Error updating setup details for project ${projectId}:`, error);
-        throw error;
-    }
-    return data;
-};
+    
+        if (error) {
+            // Log more details from the Supabase error object
+            console.error(`Error updating setup details for project ${projectId}:`, {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code,
+            });
+            throw error; // Re-throw the original error
+        }
+        return data;
+}; // REMOVE semicolon after closing brace
 
 
-// --- NEW Function to Fetch Versions ---
+   // --- NEW Function to Fetch Versions ---
 
 /** Fetches all versions for a given module ID, ordered by version number */
 export const getVersionsByModuleId = async (moduleId: string): Promise<Version[]> => {
@@ -305,4 +326,7 @@ export const getVersionsByModuleId = async (moduleId: string): Promise<Version[]
 };
 
 
+
+
 // Add other project-related service functions here as needed
+// Removed potentially extra closing brace

@@ -1,0 +1,180 @@
+/* src/features/pitch_deck_setup/components/GenerationProgress.css */
+
+.generation-progress {
+  padding: 2rem;
+  background-color: var(--background-color-light);
+  color: var(--text-color-primary);
+  max-width: 700px;
+  margin: 2rem auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.generation-progress h2 {
+  color: var(--text-color-headings);
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.generation-progress > p { /* Target the introductory paragraph */
+  color: var(--text-color-secondary);
+  margin-bottom: 2rem;
+}
+
+.overall-progress-bar {
+  width: 100%;
+  height: 20px;
+  background-color: var(--background-color-medium);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+  border: 1px solid var(--border-color-light);
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  transition: width 0.5s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--button-primary-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.stage-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem 0;
+  text-align: left;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--background-color);
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.stage-item {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1.2rem;
+  border-bottom: 1px solid var(--border-color-light);
+  font-size: 0.95rem;
+  transition: background-color 0.3s ease;
+}
+
+.stage-item:last-child {
+  border-bottom: none;
+}
+
+.stage-item .status-icon {
+  margin-right: 0.8rem;
+  font-size: 1.1rem;
+  line-height: 1;
+  width: 20px; /* Ensure consistent width */
+  text-align: center;
+}
+
+.stage-item .spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--primary-color-light);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.stage-item .stage-label {
+  flex-grow: 1;
+}
+
+.stage-item .error-details {
+    color: var(--error-color-dark, #b91c1c);
+    font-size: 0.85rem;
+    margin-left: 0.5rem;
+}
+
+/* Status-specific styles */
+.stage-item.status-pending {
+  color: var(--text-color-secondary);
+}
+
+.stage-item.status-in_progress {
+  background-color: var(--primary-color-xlight, #f0f9ff); /* Very light primary color */
+  font-weight: 500;
+}
+
+.stage-item.status-completed {
+  color: var(--success-color-dark, #15803d); /* Darker success color for text */
+}
+.stage-item.status-completed .status-icon {
+    color: var(--success-color, #22c55e);
+}
+
+
+.stage-item.status-error {
+  background-color: var(--error-background-color, #fee2e2);
+  color: var(--error-color-dark, #b91c1c);
+  font-weight: 500;
+}
+.stage-item.status-error .status-icon {
+    color: var(--error-color, #ef4444);
+}
+
+
+.generation-progress .error-message {
+  color: var(--error-color);
+  background-color: var(--error-background-color);
+  border: 1px solid var(--error-border-color);
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+.generation-progress .error-message p {
+    margin: 0.3rem 0;
+}
+
+.generation-controls {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.generation-controls button {
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  background-color: var(--button-secondary-background);
+  color: var(--button-secondary-text);
+  border: 1px solid var(--button-secondary-border);
+}
+
+.generation-controls button:hover:not(:disabled) {
+  background-color: var(--button-secondary-hover-background);
+}
+
+.generation-controls button:disabled {
+  background-color: var(--button-disabled-background);
+  color: var(--button-disabled-text);
+  cursor: not-allowed;
+  opacity: 0.7;
+  border-color: transparent;
+}
+
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

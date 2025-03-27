@@ -1,0 +1,138 @@
+/* src/features/pitch_deck_setup/components/RequirementsForm.css */
+
+.requirements-form {
+  background-color: var(--background-color-light);
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 800px; /* Wider form for more content */
+  margin: 2rem auto;
+  color: var(--text-color-primary);
+}
+
+.requirements-form h2 {
+  color: var(--text-color-headings);
+  margin-bottom: 0.5rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-transform: capitalize; /* Nicely format deck type ID */
+}
+
+.requirements-form > p { /* Target introductory paragraph */
+  color: var(--text-color-secondary);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.requirements-form .form-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color-light);
+}
+
+.requirements-form .form-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 1rem; /* Reduce margin before submit button */
+}
+
+
+.requirements-form .form-section h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-color-headings);
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+.requirements-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.requirements-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-color-secondary);
+}
+
+.requirements-form input[type="text"],
+.requirements-form textarea,
+.requirements-form select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--input-background-color);
+  color: var(--input-text-color);
+  font-size: 1rem;
+  transition: border-color 0.2s ease-in-out;
+  line-height: 1.4; /* Improve textarea readability */
+}
+
+.requirements-form textarea {
+    min-height: 80px; /* Ensure textareas have a decent minimum height */
+    resize: vertical; /* Allow vertical resizing */
+}
+
+.requirements-form input[type="text"]:focus,
+.requirements-form textarea:focus,
+.requirements-form select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-color-light); /* Focus ring */
+}
+
+.requirements-form input[type="text"]::placeholder,
+.requirements-form textarea::placeholder {
+  color: var(--text-color-placeholder);
+}
+
+/* Style select dropdown arrow */
+.requirements-form select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.25em 1.25em;
+  padding-right: 2.5rem; /* Make space for the arrow */
+}
+
+.requirements-form button[type="submit"] {
+  width: 100%;
+  padding: 0.8rem 1.5rem;
+  background-color: var(--primary-color);
+  color: var(--button-primary-text);
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  margin-top: 1rem; /* Add space above the button */
+}
+
+.requirements-form button[type="submit"]:hover:not(:disabled) {
+  background-color: var(--primary-color-dark);
+}
+
+.requirements-form button:disabled {
+  background-color: var(--button-disabled-background);
+  color: var(--button-disabled-text);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.requirements-form .error-message {
+  color: var(--error-color);
+  background-color: var(--error-background-color);
+  border: 1px solid var(--error-border-color);
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* TODO: Add styles for AI assist buttons, timeline builder, etc. */

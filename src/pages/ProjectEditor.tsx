@@ -88,7 +88,7 @@ const ProjectEditor: React.FC = () => {
       const fetchedVersions = await getVersionsByModuleId(currentModule.module_id);
       setAllVersions(fetchedVersions);
 
-      let initialVersion = fetchedVersions.find(v => v.is_current);
+      let initialVersion = fetchedVersions.find((v: Version) => v.is_current); // Add type annotation
       if (!initialVersion && fetchedVersions.length > 0) {
           initialVersion = fetchedVersions[0];
       }
