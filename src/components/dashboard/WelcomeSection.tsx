@@ -1,8 +1,12 @@
 // src/components/dashboard/WelcomeSection.tsx
-import React, { useEffect, useState, lazy, Suspense } from 'react'; // Added lazy, Suspense
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Link } from 'react-router-dom';
-import Loading from '@/components/common/Loading'; // Added Loading for Suspense fallback
+import { Link, useNavigate } from 'react-router-dom'; // Added useNavigate
+import { useSelector, useDispatch } from 'react-redux'; // Added Redux hooks
+import { RootState } from '@/store/store'; // Added RootState
+import { addToast } from '@/store/slices/uiSlice'; // Added addToast
+import Loading from '@/components/common/Loading';
+import { createProject } from '@/services/projectService'; // Added createProject service
 
 // Lazy load the modal
 const NewProjectModal = lazy(() => import('@/features/project_creation/components/NewProjectModal'));
@@ -34,7 +38,10 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
     text: 'The best way to predict the future is to create it.',
     author: 'Abraham Lincoln',
   });
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const dispatch = useDispatch(); // Added dispatch
+  const navigate = useNavigate(); // Added navigate
+  const { user } = useSelector((state: RootState) => state.auth); // Get user from Redux state
 
   // Get the greeting based on time of day
   useEffect(() => {
@@ -64,18 +71,40 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
     setIsModalOpen(false);
   };
 
-  const handleCreateProject = (details: {
+  const handleCreateProject = async (details: { // Added async keyword
     category: ProjectCategory;
     subcategory: ProjectSubcategory;
     section: ProjectSection;
     item: ProjectItem;
     projectName: string;
   }) => {
-    console.log('Creating project with details:', details);
-    // TODO: Implement actual project creation logic here (e.g., API call)
-    // This might involve dispatching an action or calling a service function.
-    // Example: dispatch(createProject(details));
-    handleCloseModal(); // Close modal after handling creation (or on success)
+    if (!user?.id) {
+      dispatch(addToast({ type: 'error', message: 'You must be logged in to create a project.' }));
+      return;
+    }
+
+    try {
+      // Call the service function
+      const newProjectId = await createProject({
+        userId: user.id,
+        projectName: details.projectName,
+        category: details.category,
+        subcategory: details.subcategory,
+        section: details.section,
+        item: details.item,
+      });
+
+      dispatch(addToast({ type: 'success', message: `Project "${details.projectName}" created successfully!` }));
+      handleCloseModal(); // Close modal on success
+      // Navigate to the new project's page (adjust path if needed, e.g., /editor/:projectId)
+      navigate(`/projects/${newProjectId}`);
+
+    } catch (error: any) {
+      console.error('Failed to create project:', error);
+      dispatch(addToast({ type: 'error', message: `Failed to create project: ${error.message || 'Unknown error'}` }));
+      // Close modal even on error for now
+      handleCloseModal();
+    }
   };
   // --- End Modal Handlers ---
 
