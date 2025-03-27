@@ -1,346 +1,1149 @@
-# MagicMuse Project Structure & Version Management Framework
+# MagicMuse: Proposal & Pitch Deck Generation - Comprehensive Implementation Guide
 
-## Executive Summary
+## Overview
 
-This document outlines a comprehensive framework for MagicMuse's project structure and version management system, with special focus on pitch deck generation and multi-part content creation. The proposed framework balances organizational clarity with flexibility, supporting both single-document projects (like pitch decks) and multi-part content (like books or comprehensive reports), while incorporating robust content validation features.
+This document provides a detailed technical specification for implementing the Proposal & Pitch Deck Generation feature within the MagicMuse professional writing platform. The implementation follows a structured 7-step workflow with integrated version control, quality assessment, and collaboration features.
 
-## Project Architecture Framework
+## Sidebar Navigation Structure
 
-### Core Project Structure
+The sidebar menu should include the following hierarchy:
 
-MagicMuse will implement a hierarchical project management system with version control capabilities. This architecture supports various content types while maintaining organizational clarity:
+```
+MAIN NAVIGATION
+├── Dashboard
+├── Projects
+│   └── Recent Projects
+├── Content Creation
+│   ├── Professional Writing
+│   │   ├── Business Documents
+│   │   │   ├── Proposal & Pitch Deck
+│   │   │   ├── Executive Summary
+│   │   │   ├── Report Writing
+│   │   │   ├── Company Policy & SOP
+│   │   │   └── Meeting Agenda & Minutes
+│   │   ├── Marketing Content
+│   │   └── Digital & Social Media
+│   ├── Creative Writing
+│   ├── Academic & Educational
+│   └── Technical & Specialized
+├── Templates
+│   ├── My Templates
+│   └── Public Templates
+├── Resources
+│   ├── AI Assistant
+│   ├── Knowledge Base
+│   └── Tutorials
+├── Analytics
+└── Settings
+```
 
-1. **Project Containers**: The top-level organizational unit housing all related content
-2. **Content Modules**: Distinct sections or documents within a project
-3. **Versions**: Tracked iterations of each content module
-4. **Components**: Reusable elements that can be shared across modules or projects
+Additionally, when working on a specific project, a secondary context-aware sidebar should appear:
 
-This hierarchical system allows for efficient content management while preventing project proliferation and maintaining contextual relationships.
+```
+PROJECT NAVIGATION
+├── Project Overview
+├── Version History
+│   ├── Main Version
+│   └── Branches/Alternatives
+├── Workflow Steps
+│   ├── 1. Project Setup
+│   ├── 2. Requirements Gathering
+│   ├── 3. Design & Structure
+│   ├── 4. Content Generation
+│   ├── 5. Editing & Enhancement
+│   ├── 6. Quality Assurance
+│   └── 7. Finalization & Delivery
+├── Collaboration
+│   ├── Team Members
+│   ├── Comments
+│   └── Activity Log
+├── Quality Metrics
+└── Settings
+```
 
-### Version Management System
+## Version Control System Implementation
 
-The version control system operates at both the project and content module levels:
+### Database Schema
 
-1. **Linear Version Tracking**: Sequential iterations (V1, V2, etc.) showing the evolution of content
-2. **Branched Versions**: Alternative approaches that can be explored simultaneously
-3. **Named States**: Status indicators (Draft, Client Review, Final, etc.)
-4. **Audit Trail**: Complete history of changes with timestamps and user attribution
-5. **Differential Storage**: Backend efficiency through storing only the changes between versions
+```
+Project
+├── project_id (UUID)
+├── project_name (String)
+├── project_type (Enum)
+├── created_at (DateTime)
+├── created_by (User_ID)
+├── last_modified (DateTime)
+├── status (Enum: Draft, In Review, Approved, Archived)
+└── versions (Array of Version objects)
 
-Version notes can be attached to each iteration, explaining changes, incorporating client feedback, or documenting decision rationale.
+Version
+├── version_id (UUID)
+├── version_number (String: "v1.0", "v1.1", etc.)
+├── parent_version_id (UUID or null)
+├── created_at (DateTime)
+├── created_by (User_ID)
+├── name (String: optional custom name)
+├── notes (String: change description)
+├── status (Enum: Draft, In Review, Approved, Archived)
+├── quality_score (Integer: 0-100)
+└── content_modules (Array of ContentModule objects)
 
-## Pitch Deck Specific Implementation
+ContentModule
+├── module_id (UUID)
+├── module_type (Enum: Section, Slide, Chart, Table, etc.)
+├── sequence (Integer: position in document)
+├── content (JSON: structured content data)
+├── previous_version (UUID: reference to previous version's equivalent module)
+└── change_type (Enum: Added, Modified, Removed, Unchanged)
+```
 
-### Single Project Approach for Revisions
+### Version Control UI Components
 
-For pitch decks and similar documents requiring client revisions, all iterations should exist within a single project container:
+1. **Version Timeline**:
+   - Horizontal timeline visualization
+   - Visual indicators for major/minor versions
+   - Branch visualization with merge points
+   - Color-coding by status (Draft, Review, Approved)
 
-1. **Initial Project Creation**:
-   - User selects "New Project" → "Professional Writing" → "Business Documents" → "Proposal & Pitch Deck"
-   - User enters project name (e.g., "JOMAMA Pitch Deck")
-   - System generates a unique project ID and initializes version control
+2. **Version Comparison**:
+   - Side-by-side diff view
+   - Highlighted changes (additions, deletions, modifications)
+   - Section-by-section comparison
+   - Quality metric differential
 
-2. **Version Management Interface**:
-   - Sidebar showing all versions with timestamps and creator information
-   - Visual indicators of major/minor revisions
-   - Quick access to compare any two versions
-   - Option to restore or branch from any previous version
-   - Version naming and annotation capabilities
+3. **Version Actions**:
+   - Create new version (incremental, e.g., v1.0 → v1.1)
+   - Create branch (alternative approach, e.g., v1.0 → v1.0-alt)
+   - Restore previous version
+   - Merge versions
+   - Set status (Draft, In Review, Approved)
+   - Add version notes
 
-3. **Revision Workflow**:
-   - When a client requests changes, user selects "Create Revision" from the current version
-   - System creates a new version while preserving the original
-   - User implements requested changes in the new version
-   - System tracks all modifications for future reference
-   - Client feedback can be attached directly to specific sections or elements
+## Detailed Implementation of 7-Step Workflow
 
-4. **Version Comparison Tools**:
-   - Side-by-side comparison view with change highlighting
-   - Before/after view of individual sections
-   - Quality metric trends across versions
-   - Export of comparison reports for client review
+### Step 1: Project Setup
 
-This approach eliminates the need to create entirely new projects for revisions, maintaining all related content in a unified environment while preserving previous work.
+**UI Components**:
+- Project creation form
+- Project type selection grid with visual thumbnails
+- Project import options
+- Tutorial overlay (dismissible)
 
-## Multi-Part Content Management
+**Form Fields**:
+- Project name (text input, required)
+- Project description (text area, optional)
+- Tags (multi-select, optional)
+- Team members (user selection dropdown, optional)
+- Privacy settings (radio buttons: Private, Team, Public)
+- Import options:
+  - Upload file (supported formats: PDF, PPTX, DOCX)
+  - Import from cloud (Google Drive, Dropbox, OneDrive)
+  - Clone from existing project
 
-### Hierarchical Organization for Complex Projects
+**Pitch Deck Type Selection**:
+- Display grid of card components with:
+  - Type name (e.g., "Investment Pitch")
+  - Icon/illustration
+  - Brief description (3-4 sentences)
+  - Example preview thumbnails (3-5 slides)
+  - Industry relevance indicators
+  - Estimated completion time
+  - Selection button
 
-For multi-part projects like books, comprehensive reports, or multi-section proposals, a nested structure provides optimal organization:
+**Types to Include**:
+1. **Investment Pitch**:
+   - For securing funding from investors or venture capital
+   - Focuses on market opportunity, business model, and growth potential
+   - Financial projections and ROI are emphasized
 
-1. **Master Project Container**:
-   - Serves as the parent container (e.g., "Business Strategy Book")
-   - Maintains global settings, templates, and styling
-   - Provides overview of all sub-components
-   - Tracks overall progress and quality metrics
+2. **Sales Proposal**:
+   - For winning client business
+   - Focuses on client problems and offered solutions
+   - Emphasizes benefits, timeline, and implementation
 
-2. **Chapter/Section Modules**:
-   - Exist as discrete content modules within the master project
-   - Maintain individual version histories
-   - Can be worked on independently or in conjunction
-   - Inherit global settings while allowing local overrides
+3. **Partnership Proposal**:
+   - For strategic alliance opportunities
+   - Focuses on mutual benefits and synergies
+   - Outlines resource sharing and joint opportunities
 
-3. **Navigation and Management**:
-   - Tree-view navigation showing the complete content hierarchy
-   - Drag-and-drop reordering of sections
-   - Ability to expand/collapse sections for focused work
-   - Global search across all content modules
+4. **Business Proposal**:
+   - For general business opportunities
+   - Flexible structure for various business contexts
+   - Balanced focus on opportunity and execution
 
-4. **Unified Export Capabilities**:
-   - Compile all modules into a single cohesive document
-   - Select specific modules for targeted exports
-   - Apply consistent formatting across all components
-   - Generate table of contents and cross-references automatically
+5. **Project Proposal**:
+   - For specific project approval
+   - Detailed implementation plans and milestones
+   - Clear deliverables and success metrics
 
-This structure prevents the creation of thousands of separate projects while maintaining organizational clarity and supporting efficient workflow management.
+6. **Startup Pitch**:
+   - For early-stage companies
+   - Emphasizes vision, market disruption, and team
+   - Product demonstration and early traction
 
-## Content Validation Integration
+7. **Product Launch**:
+   - For introducing new products/services
+   - Focuses on market fit and competitive advantage
+   - Includes marketing strategy and rollout plan
 
-### Comprehensive Quality Assessment
+8. **Custom Proposal**:
+   - Build from scratch
+   - Maximum flexibility for unique needs
+   - AI assistance with structure recommendations
 
-The content validation system will be fully integrated throughout the creation and revision process, providing real-time feedback and improvement tracking:
+**Backend Processing**:
+- Create project entry in database
+- Initialize version control (create v1.0)
+- Set up collaboration permissions if team members added
+- Process any uploaded files for content extraction
+- Record project creation in activity log
 
-1. **Quality Dashboard**:
-   - Overall quality score (0-100) with visual indicators
-   - Breakdown by category (Readability, Grammar & Style, Links, Citations, Duplicates, Quality)
-   - Historical trending of quality metrics
-   - Comparison against industry benchmarks
+### Step 2: Requirements Gathering
 
-2. **Detailed Metrics**:
-   - Readability scores (Flesch-Kincaid, SMOG, etc.)
-   - Grade level assessment
-   - Word, sentence, and paragraph counts
-   - Average sentence and word length
-   - Complex word usage percentage
-   - Passive voice frequency
-   - Repetition detection
-   - Technical jargon density
+**UI Components**:
+- Multi-section smart form with progress indicator
+- AI-assisted field completion tools
+- Content source selection interface
+- Requirement depth configuration
 
-3. **Interactive Improvement Tools**:
-   - One-click implementation of suggested improvements
-   - Alternative phrasing recommendations
-   - Simplified alternatives for complex terms
-   - Grammar and style enhancement suggestions
-   - Section-specific optimization recommendations
+**Core Information Collection Form**:
+- **Target Audience/Client Section**:
+  - Client/audience name (text input)
+  - Organization type (dropdown)
+  - Industry (autocomplete dropdown)
+  - Size/scope (radio buttons: Small, Medium, Enterprise)
+  - Decision-maker persona (optional expandable section):
+    - Role/title (text input)
+    - Primary concerns (multi-select)
+    - Decision criteria (multi-select)
+    - Communication preferences (multi-select)
 
-4. **Validation Workflow Integration**:
-   - Automatic analysis upon content generation
-   - Pre-submission validation checkpoint
-   - Scheduled re-analysis of existing content
-   - Client-appropriate exports with quality certification
-   - Quality improvement tracking across versions
+- **Product/Service Section**:
+  - Name (text input)
+  - Category (dropdown)
+  - Description (text area with AI expansion button)
+  - Key features (dynamic list, up to 10 items)
+  - Current stage (radio buttons: Concept, Development, Market-ready, Established)
+  - Media upload (for product images, videos, demos)
 
-The system will highlight specific areas for improvement, such as complex word usage, with actionable suggestions that users can implement with minimal effort.
+- **Objective Section**:
+  - Primary goal (dropdown with customizable text input):
+    - Investment amount (if funding)
+    - Sales target (if sales)
+    - Partnership scope (if partnership)
+    - Project approval (if project)
+  - Timeline expectations (date range selector)
+  - Budget range (optional numeric input with currency selector)
+  - Success metrics (dynamic list)
 
-## Technical Implementation Considerations
+- **Differentiation Section**:
+  - Unique selling propositions (dynamic list, up to 5 items)
+  - Competitor comparison tool:
+    - Add competitors (dynamic list)
+    - Feature comparison matrix
+    - Strengths/weaknesses analysis
+  - Market positioning visualization tool
 
-### Database Structure
+- **Company Background Section**:
+  - Option to import from website URL (text input with "Import" button)
+  - Founded date (date picker)
+  - Mission statement (text area)
+  - Team highlights (dynamic list)
+  - Previous achievements (dynamic list)
+  - Current customers/clients (optional, dynamic list)
 
-The proposed system requires a sophisticated database architecture:
+**Content Source Options Interface**:
+- Toggle buttons for each section:
+  - AI-generated (full generation)
+  - AI-enhanced (user provides bullet points, AI expands)
+  - User-created (AI assists with refinement)
+  - Import existing (from documents or presentations)
 
-1. **Projects Table**:
-   - project_id (PK)
-   - user_id (FK)
-   - project_name
-   - project_type
-   - creation_date
-   - last_modified
-   - status
-   - default_template_id
-   - visibility_settings
-   - collaborative_settings
+**Control Panel for Each Section**:
+- Depth selector (slider: Brief, Standard, Detailed)
+- Tone selector (dropdown: Formal, Conversational, Persuasive, Technical)
+- Research requirement toggles:
+  - Market data (on/off)
+  - Statistics (on/off)
+  - Case studies (on/off)
+  - Competitive analysis (on/off)
 
-2. **ContentModules Table**:
-   - module_id (PK)
-   - project_id (FK)
-   - module_name
-   - module_type
-   - parent_module_id (for hierarchical structures)
-   - display_order
-   - creation_date
-   - last_modified
-   - status
+**AI Assistance Features**:
+- "Smart Suggest" buttons next to each field (generates field-specific content)
+- "Complete Section" button (fills remaining fields based on existing inputs)
+- Industry-specific recommendation panel (context-aware suggestions)
+- Real-time validation with improvement suggestions
 
-3. **Versions Table**:
-   - version_id (PK)
-   - module_id (FK)
-   - version_number
-   - version_name
-   - creator_id
-   - creation_date
-   - version_notes
-   - is_current (boolean)
-   - quality_score
-   - approval_status
+**Backend Processing**:
+- Progressive saving of form data
+- Content extraction from imported documents
+- Initial research for factual data (if selected)
+- Update project metadata with gathered requirements
 
-4. **ContentBlocks Table**:
-   - block_id (PK)
-   - version_id (FK)
-   - block_type (text, chart, image, etc.)
-   - content_data (or reference to file)
-   - display_order
-   - last_modified
-   - modified_by
+### Step 3: Design & Structure Configuration
 
-5. **ValidationResults Table**:
-   - validation_id (PK)
-   - version_id (FK)
-   - validation_date
-   - overall_score
-   - readability_score
-   - grammar_score
-   - citation_score
-   - duplicate_score
-   - quality_score
-   - detailed_results (JSON)
+**UI Components**:
+- Template gallery with filtering and preview
+- Brand customization interface
+- Structure planning tools with drag-and-drop functionality
+- Preview panel showing real-time changes
 
-This structure supports the complex relationships between projects, modules, versions, and content while enabling efficient querying and analysis.
+**Template Selection Interface**:
+- Grid/carousel view of template thumbnails
+- Filter options:
+  - Industry (multi-select)
+  - Purpose (multi-select)
+  - Style (multi-select)
+  - Color scheme (color picker)
+  - Most used in your industry (toggle)
 
-### API Services
+**Template Categories to Display**:
+1. **Minimalist/Professional**:
+   - Clean, corporate aesthetic
+   - Focus on content over design elements
+   - Suitable for conservative industries
 
-The following microservices will support the implementation:
+2. **Corporate/Enterprise**:
+   - Traditional business presentation style
+   - Formal layout with structured sections
+   - Emphasis on data and analysis
 
-1. **Project Management Service**:
-   - Project creation, modification, and deletion
-   - User permission management
-   - Project structure manipulation
+3. **Creative/Modern**:
+   - Contemporary design elements
+   - More visual storytelling
+   - Suitable for creative industries
+
+4. **Data-focused/Analytical**:
+   - Emphasis on charts, graphs, and data visualization
+   - Clear information hierarchy
+   - Suitable for technical or financial presentations
+
+5. **Storytelling/Narrative**:
+   - Flow designed for compelling narrative
+   - Visual metaphors and journey mapping
+   - Emotional engagement focus
+
+6. **Industry-Specific Templates**:
+   - Healthcare
+   - Technology
+   - Finance
+   - Education
+   - Retail
+   - Manufacturing
+   - Non-profit
+
+7. **Previously Used Templates**:
+   - Templates from user's history
+   - Organization templates (for team accounts)
+
+8. **Custom Brand Templates**:
+   - Premium feature for saved brand templates
+   - Organizationally shared templates
+
+**Brand Customization Tools**:
+- Logo upload:
+  - Drag-and-drop area or file selector
+  - Auto-placement preview
+  - Size and position adjustment
+  - Background removal tool
+
+- Color scheme:
+  - Primary color selector
+  - Secondary color selector
+  - Accent color selector
+  - Logo color extraction tool
+  - Preset palettes
+  - Accessibility checker for color contrast
+
+- Typography:
+  - Font pair selection (heading and body text)
+  - Size adjustment
+  - Weight selection
+  - Custom font upload (premium feature)
+
+- Layout elements:
+  - Header/footer customization
+  - Background pattern/image selection
+  - Slide transition effects
+  - Custom watermark option
+
+**Structure Planning Interface**:
+- Slide structure visualization:
+  - Thumbnail strip of recommended slides
+  - Drag-and-drop reordering
+  - Add/remove slides with AI recommendations
+  - Grouping slides into sections
+
+- Structure tools:
+  - Complexity slider (affects number of slides and depth)
+  - Presentation duration estimator
+  - Section importance weighting (visual emphasis)
+  - Toggle between expanded/condensed versions
+
+- Smart structure recommendations:
+  - Industry-specific section suggestions
+  - Purpose-optimized sequence
+  - Audience-appropriate depth
+  - Content balance visualization
+
+**Slide Categories to Include**:
+- Cover/Title
+- Problem/Opportunity
+- Solution Overview
+- Value Proposition
+- Market Analysis
+- Business Model
+- Product/Service Details
+- Competitive Landscape
+- Team Introduction
+- Timeline/Roadmap
+- Financial Projections
+- Investment/Partnership Terms
+- Risk Assessment
+- Implementation Plan
+- Case Studies/Testimonials
+- Call to Action
+- Contact Information
+- Appendix Slides
+
+**Backend Processing**:
+- Template application to project structure
+- Brand element processing and storage
+- Structure optimization based on content requirements
+- Preview generation for selected design elements
+
+### Step 4: AI-Powered Content Generation
+
+**UI Components**:
+- Generation setup confirmation interface
+- Interactive progress tracking visualization
+- Real-time preview of generated content
+- Content adjustment controls
+
+**Generation Setup Interface**:
+- Pre-generation confirmation panel:
+  - Summary of collected information
+  - Generation preferences:
+    - Depth toggles for each section
+    - Tone selector (master control)
+    - Style consistency enforcement
+  - Fact-checking level selection:
+    - Basic (terminology and obvious errors)
+    - Standard (includes market claims verification)
+    - Thorough (comprehensive research validation)
+  - Visual element inclusion toggles:
+    - Charts and graphs
+    - Tables
+    - Icons and illustrations
+    - Diagrams and flowcharts
+
+- AI guidance panel:
+  - Industry best practices
+  - Audience-specific messaging tips
+  - Competitive differentiation strategies
+  - Persuasion technique recommendations
+  - Potential pitfalls to avoid
+
+**Generation Process Interface**:
+- Dynamic progress visualization:
+  - Overall completion percentage
+  - Current processing stage indicator
+  - Section-by-section progress bars
+  - Estimated time remaining
+
+- Process stage indicators:
+  - "Analyzing industry benchmarks..."
+  - "Researching market data..."
+  - "Crafting compelling narrative..."
+  - "Developing data visualizations..."
+  - "Creating slide structure..."
+  - "Optimizing messaging for target audience..."
+
+- Interactive controls:
+  - Pause generation button
+  - Adjust parameters mid-generation
+  - Skip to specific section
+  - Cancel and restart option
+
+- Real-time preview panel:
+  - Live updates as content is generated
+  - Carousel view of completed slides
+  - Quick edit options for immediate adjustments
+
+**Content Generation Sequence**:
+1. **Executive Summary/Overview**:
+   - Company/product introduction
+   - Vision statement
+   - Key value proposition
+   - Request summary
+
+2. **Problem/Opportunity Statement**:
+   - Market need identification
+   - Pain point articulation
+   - Opportunity sizing
+   - Current solutions assessment
+
+3. **Solution Presentation**:
+   - Product/service description
+   - Key features and benefits
+   - Unique selling propositions
+   - Solution differentiation
+
+4. **Market Analysis**:
+   - Market size and growth
+   - Target segment definition
+   - Customer personas
+   - Market trends and drivers
+
+5. **Business Model**:
+   - Revenue streams
+   - Pricing strategy
+   - Cost structure
+   - Unit economics
+   - Scalability factors
+
+6. **Implementation Roadmap**:
+   - Key milestones
+   - Timeline visualization
+   - Resource requirements
+   - Phased approach
+
+7. **Team Qualifications**:
+   - Key team members
+   - Relevant experience
+   - Advisory support
+   - Strategic partnerships
+
+8. **Financial Projections**:
+   - Revenue forecast
+   - Expense projections
+   - Break-even analysis
+   - Funding requirements
+   - ROI calculations
+
+9. **Competitive Landscape**:
+   - Competitor identification
+   - Competitive positioning
+   - Differentiation matrix
+   - Barrier to entry analysis
+
+10. **Risk Assessment**:
+    - Key risks identification
+    - Mitigation strategies
+    - Contingency planning
+    - Sensitivity analysis
+
+11. **Call to Action**:
+    - Specific request
+    - Next steps outline
+    - Timeline for decision
+    - Contact information
+
+**Alternative Version Generation**:
+- For each section, generate:
+  - Conservative version (safer claims, traditional approach)
+  - Balanced version (moderate stance, mainstream appeal)
+  - Bold version (stronger claims, innovative approach)
+
+**Visual Element Generation**:
+- Data visualization recommendation engine:
+  - Chart type suggestions based on data relationships
+  - Table structure optimization
+  - Diagram type recommendations for processes, hierarchies, etc.
+  - Color scheme application for visual consistency
+
+- Source attribution system:
+  - Citation generation for external data
+  - Source reliability assessment
+  - Citation format standardization
+
+**Backend Processing**:
+- AI model orchestration for content generation
+- Fact verification against knowledge base
+- Data processing for visualization creation
+- Content structuring for slide layout
+- Version tracking for generated alternatives
+- Quality scoring of generated content
+
+### Step 5: Advanced Editing & Enhancement
+
+**UI Components**:
+- Comprehensive editor with split-screen view
+- Content enhancement toolbars and panels
+- Visual element creation studio
+- Collaborative editing interface
+
+**Section-by-Section Editor Interface**:
+- Navigation sidebar:
+  - Hierarchical view of all sections
+  - Completion status indicators
+  - Quality score for each section
+  - Quick jump navigation
+  - Section reordering controls
+
+- Split-screen view:
+  - Content editing pane (structured editor)
+  - Slide preview pane (real-time rendering)
+  - Responsive layout with resizable panels
+
+- Content editor features:
+  - Rich text editing (formatting, lists, etc.)
+  - Section templates library
+  - Slide layout selection
+  - Media embedding tools
+  - Version comparison view
+
+- AI suggestion panel:
+  - Alternative phrasing suggestions
+  - Content enhancement recommendations
+  - Structure improvement ideas
+  - Industry-specific terminology
+  - Example library from successful pitches
+
+**Content Enhancement Tools**:
+- Text enhancement tools:
+  - Clarity improvement suggestions
+  - Redundancy detection and elimination
+  - Persuasive language enhancement
+  - Jargon detector with simplification options
+  - Tone consistency checker
+  - Section regeneration button (with parameter adjustment)
+
+- Narrative tools:
+  - Flow analysis visualization
+  - Transition phrase suggestions
+  - Storytelling structure assessment
+  - Message reinforcement suggestions
+  - Logical progression verification
+
+- Language optimization:
+  - Reading level adjustment
+  - Technical depth calibration
+  - Audience-specific terminology
+  - Cultural sensitivity check
+  - International English options
+
+**Visual Element Creation Studio**:
+- Chart wizard:
+  - Data input interface (manual or import)
+  - Chart type selection with previews
+  - Style customization (colors, labels, legends)
+  - Animation options
+  - Interactive element configuration
+
+- Table generator:
+  - Row/column configuration
+  - Style customization
+  - Data import tools
+  - Sorting and filtering options
+  - Conditional formatting
+
+- Diagram builder:
+  - Process flow creator
+  - Hierarchy visualization
+  - Relationship mapping
+  - Timeline construction
+  - Concept mapping tools
+
+- Image handling:
+  - Image library with search
+  - Stock photo integration (premium)
+  - Image editing tools
+  - Alt text generation
+  - Responsive sizing controls
+
+- Icon and visual element library:
+  - Categorized icon sets
+  - Custom color application
+  - Size and position controls
+  - Animation options
+  - Combination tools for custom graphics
+
+**Data Integration Tools**:
+- Spreadsheet data import:
+  - Excel file upload
+  - CSV import
+  - Google Sheets connection
+  - Table extraction from PDFs
+
+- Data manipulation:
+  - Basic calculation functions
+  - Sorting and filtering
+  - Aggregation options
+  - Transformation tools
+  - Unit conversion
+
+- Live data connection (premium):
+  - API connection configuration
+  - Refresh scheduling
+  - Data mapping interface
+  - Credential management
+  - Caching options
+
+**Visual Consistency Tools**:
+- Design enforcement:
+  - Element alignment guides
+  - Color harmony enforcement
+  - Typography consistency checker
+  - Spacing standardization
+  - Visual hierarchy analysis
+
+- Template adherence:
+  - Layout constraint visualization
+  - Template drift detection
+  - One-click layout restoration
+  - Custom layout saving
+
+**Collaborative Editing Features**:
+- Real-time collaboration:
+  - User presence indicators
+  - Cursor position tracking
+  - Concurrent editing management
+  - Section locking options
+  - Activity feed
+
+- Feedback system:
+  - Comment threads at document or element level
+  - @mentions for team members
+  - Comment resolution tracking
+  - Feedback categorization
+  - Revision requests
+
+- Version management:
+  - Create version snapshot
+  - Compare with previous versions
+  - Restore elements from earlier versions
+  - Branch creation for alternative approaches
+  - Merge functionality for combining changes
+
+**Backend Processing**:
+- Real-time saving and synchronization
+- Collaborative editing conflict resolution
+- Version control for all changes
+- Quality scoring updates based on edits
+- AI processing for enhancement suggestions
+- Chart and diagram rendering
+- Data validation and processing
+
+### Step 6: Quality Assurance & Refinement
+
+**UI Components**:
+- Quality dashboard with comprehensive metrics
+- Content validation interface
+- Impact assessment visualization
+- Refinement recommendation panel
+
+**Content Validation Interface**:
+- Fact verification tools:
+  - Source reliability assessment
+  - Claim verification status indicators
+  - Citation verification
+  - Data accuracy confirmation
+  - Competitor claim validation
+
+- Compliance checking:
+  - Industry regulation adherence
+  - Legal risk assessment
+  - Privacy compliance
+  - Copyright and trademark usage
+  - Disclaimer recommendations
+
+- Financial validation:
+  - Projection reasonability assessment
+  - Calculation verification
+  - Assumption transparency check
+  - Financial model coherence
+  - Investment term standard practices
+
+- Language quality tools:
+  - Grammar and spelling verification
+  - Readability scoring by audience type
+  - Jargon density measurement
+  - Clarity assessment
+  - Persuasiveness evaluation
+  - Messaging consistency check
+
+**Presentation Effectiveness Tools**:
+- Impact assessment:
+  - Key message clarity score
+  - Attention engagement prediction
+  - Narrative flow analysis
+  - Information density visualization
+  - Visual-verbal balance evaluation
+  - Objection anticipation
+
+- Audience optimization:
+  - Technical depth adjustment
+  - Cultural sensitivity check
+  - Industry language appropriateness
+  - Executive summary optimization
+  - Question anticipation and preparation
+
+- Presentation flow:
+  - Timing estimation per slide
+  - Narrative arc visualization
+  - Transition quality assessment
+  - Opening and closing impact scoring
+  - Call-to-action effectiveness
+
+**Refinement Recommendation Panel**:
+- AI-powered suggestions:
+  - Prioritized enhancement opportunities
+  - Impact-effort matrix for improvements
+  - Competitive differentiation strengthening
+  - Credibility enhancement opportunities
+  - Risk mitigation reinforcement
+  - Call-to-action optimization
+
+- Revision workflow:
+  - One-click implementation of suggestions
+  - Before/after comparison view
+  - Improvement tracking
+  - Revision history
+  - Quality score impact prediction
+
+- Final polishing tools:
+  - Consistency enforcement
+  - Design harmony check
+  - Message reinforcement opportunities
+  - Final proofreading
+  - Presentation rehearsal recommendations
+
+**Quality Metrics Dashboard**:
+- Overall quality score (0-100)
+- Category breakdown:
+  - Content quality
+  - Design effectiveness
+  - Narrative structure
+  - Data integrity
+  - Persuasiveness
+  - Technical accuracy
+
+- Benchmark comparison:
+  - Industry average
+  - Purpose-specific benchmarks
+  - Previous project comparison
+  - Version-to-version improvement
+
+- Issue summary:
+  - Critical issues list
+  - Warning level issues
+  - Improvement opportunities
+  - Quick-fix suggestions
+
+**Backend Processing**:
+- Comprehensive quality analysis algorithms
+- Benchmark data comparison
+- AI-powered enhancement recommendations
+- Cross-version quality tracking
+- Pre-export validation checks
+
+### Step 7: Finalization & Delivery
+
+**UI Components**:
+- Presenter support tools interface
+- Export configuration panel
+- Sharing and permission management
+- Project archiving and analytics dashboard
+
+**Presentation Preparation Tools**:
+- Speaker notes generation:
+  - Auto-generated talking points
+  - Time allocation per slide
+  - Key statistics highlighting
+  - Anticipatory Q&A notes
+
+- Presentation assistance:
+  - Slide transition recommendations
+  - Emphasis suggestion for key points
+  - Storytelling enhancement
+  - Technical explanation simplification
+  - Audience engagement prompts
+
+- Practice tools:
+  - Rehearsal mode with timer
+  - Audio recording option
+  - Pace analysis
+  - Filler word detection
+  - Emphasis variation suggestions
+
+- Q&A preparation:
+  - Anticipated question generation
+  - Response framework for tough questions
+  - Data point quick reference
+  - Objection handling strategies
+  - Follow-up meeting preparation
+
+**Supplementary Materials Generator**:
+- Leave-behind document:
+  - Executive summary extraction
+  - Key visual compilation
+  - Contact information formatting
+  - Custom cover design
+
+- Extended information:
+  - Appendix generation
+  - Technical specification compilation
+  - Detailed financial data
+  - Market research summary
+  - Team profiles
+
+- Follow-up materials:
+  - Thank you template
+  - Next steps document
+  - Additional information packet
+  - Custom proposal modifications
+
+**Export Configuration Interface**:
+- Format selection:
+  - PowerPoint (PPTX) with animations
+  - PDF (presentation quality with hyperlinks)
+  - Google Slides with sharing settings
+  - HTML5 interactive presentation
+  - Video walkthrough (premium)
+  - Mobile-optimized version
+  - Print-optimized version with notes
+
+- Advanced PDF options:
+  - Custom styling and branding
+  - Interactive elements configuration
+  - Security settings (password, permissions)
+  - Digital signature integration
+  - Analytics tracking pixels
+  - Accessibility optimization
+
+- Batch export:
+  - Multiple format simultaneous export
+  - Version selection for each format
+  - Custom naming convention
+  - Destination folder selection
+  - Notification options
+
+**Sharing & Permission Management**:
+- Direct sharing:
+  - Email delivery with tracking
+  - Link generation with expiration setting
+  - Password protection option
+  - View-only or editable permission
+  - Download permission control
+
+- Team sharing:
+  - Role-based permissions
+  - Section-specific access control
+  - Comment-only mode
+  - Approval workflow integration
+  - Activity tracking
+
+- Client presentation:
+  - Presentation mode with controls
+  - Remote presentation capability
+  - Screen sharing optimization
+  - Annotation tools
+  - Feedback collection integration
+
+- Integration options:
+  - Calendar event creation
+  - CRM system connection
+  - Project management tool linking
+  - Digital signature request
+  - Follow-up scheduling
+
+**Project Archiving & Analytics**:
+- Storage and retrieval:
+  - Metadata tagging for search
+  - Category assignment
+  - Related project linking
+  - Template creation from project
+  - Project duplication with modifications
+
+- Performance analytics:
+  - Viewer engagement tracking
+  - Section interest heatmap
+  - Slide time allocation analysis
+  - External link click tracking
+  - Download and share counting
+
+- Outcome tracking:
+  - Result recording (won/lost, funded, etc.)
+  - Decision timeline documentation
+  - Feedback summary
+  - Improvement opportunities
+  - ROI calculation
+
+- Knowledge capture:
+  - Successful elements identification
+  - Reusable content tagging
+  - Client preference recording
+  - Industry insight extraction
+  - Best practice documentation
+
+**Backend Processing**:
+- Format conversion and optimization
+- Permission management and access control
+- Analytics data collection and processing
+- Notification system integration
+- Long-term storage optimization
+- Knowledge base integration for improved AI learning
+
+## API Integration Specifications
+
+The following microservice APIs should be implemented to support this functionality:
+
+1. **Project Management Service API**:
+   - Project CRUD operations
    - Version control operations
+   - Permission management
+   - Activity tracking
 
-2. **Content Generation Service**:
-   - AI-powered content creation
+2. **Content Generation Service API**:
+   - AI content generation endpoints
    - Template application
-   - Data integration for charts and tables
-   - Markdown processing
+   - Content enhancement
+   - Fact verification
 
-3. **Validation Service**:
-   - Content analysis algorithms
-   - Quality scoring
-   - Improvement recommendations
-   - Historical tracking
+3. **Media Processing Service API**:
+   - Chart and diagram generation
+   - Image processing
+   - Data visualization
+   - Table formatting
 
-4. **Export Service**:
-   - Format conversion (PDF, PPTX, DOCX, etc.)
-   - Design application
-   - Media optimization
-   - Weezy Friend library integration for advanced PDF generation
+4. **Export Service API**:
+   - Format conversion
+   - Document assembly
+   - Style application
+   - Delivery management
 
-5. **Collaboration Service**:
-   - Real-time editing capabilities
-   - Comment and feedback management
-   - Change tracking and conflict resolution
+5. **Analytics Service API**:
+   - Usage tracking
+   - Quality assessment
+   - Performance metrics
+   - Outcome recording
+
+6. **Collaboration Service API**:
+   - Real-time editing
+   - Comment management
    - Notification distribution
+   - Activity synchronization
 
-These services will operate independently while maintaining seamless integration through standardized APIs and event-driven communication.
+These services should use standardized REST APIs with proper authentication, rate limiting, and error handling. WebSocket connections should be used for real-time collaboration features.
 
-## Tone Configuration for Pitch Decks
+## UI/UX Design Guidelines
 
-### Optimal Parameter Settings
+1. **Visual Hierarchy**:
+   - Primary actions should use gold (#fcbf23) with high visibility
+   - Secondary actions should use dark gray (#2b2b2b)
+   - Background areas should use light gray (#efefef)
+   - Content areas should use white (#FFFFFF)
 
-For professional pitch deck generation, the following tone parameters are recommended:
+2. **Typography**:
+   - Body text: Questrial (#626162)
+   - Headings: Comfortaa (LIGHT/REGULAR) (#2b2b2b)
+   - Code snippets: Fira Code (when applicable)
 
-```
-const temperature = 0.7        // Balanced creativity with professional consistency
-const top_p = 0.8              // Maintains sophisticated vocabulary while ensuring relevance
-const repetition_penalty = 1.8  // Prevents redundant messaging without over-constraining expression
-const length_penalty = 1.2     // Encourages concise, impactful communications
-const style_guidance = 0.9     // Strong adherence to professional presentation formats
-const text_guidance = 0.85     // Aligns closely with pitch deck conventions while allowing customization
-```
+3. **Component Styling**:
+   - Buttons: 4px border radius, subtle hover animations
+   - Cards: White background with soft shadows (box-shadow: 0 4px 6px rgba(0,0,0,0.05))
+   - Inputs: Minimal borders with clear focus states
+   - Modals: Centered with overlay, smooth entrance animations
 
-These settings create content that is:
-- Professional and authoritative
-- Concise and impact-driven
-- Persuasive without being aggressive
-- Technically accurate while remaining accessible
-- Visually complementary to slide-based presentations
-- Adaptable to various industry contexts
+4. **Responsive Design**:
+   - Desktop-optimized workflows with consideration for tablet use
+   - Collapsible panels for space efficiency
+   - Touch-friendly controls for tablet users
+   - Responsive layout with minimum width constraints
 
-The parameters can be adjusted based on specific industries or client preferences, with preset options for different sectors (Finance, Technology, Healthcare, etc.).
+5. **Accessibility**:
+   - WCAG 2.1 AA compliance throughout
+   - Keyboard navigation support
+   - Screen reader compatibility
+   - Sufficient color contrast (minimum 4.5:1 for text)
+   - Focus visibility for all interactive elements
 
-## User Interface Design
+## Implementation Recommendations
 
-### Project Management Interface
+1. **Phased Development Approach**:
+   - Start with core project management and version control
+   - Implement basic content generation capabilities
+   - Add enhancement and editing features
+   - Integrate collaboration tools
+   - Implement advanced export and delivery features
 
-The interface will integrate all components into a cohesive user experience:
+2. **Technology Stack Considerations**:
+   - Frontend: React with Redux Toolkit and React Query
+   - UI Framework: ShadCN UI with Tailwind CSS
+   - Backend: Node.js with Express
+   - Database: MongoDB for flexible document storage
+   - Real-time: Socket.io for collaboration features
+   - AI Integration: Custom wrapper around LLM APIs
 
-1. **Project Dashboard**:
-   - Overview of all projects with filtering options
-   - Visual indicators of project type, status, and quality
-   - Quick access to recently edited content
-   - Creation and import entry points
+3. **Performance Optimization**:
+   - Implement efficient state management
+   - Use code splitting for large component libraries
+   - Optimize asset loading and caching
+   - Implement progressive loading for large documents
+   - Use WebWorkers for complex client-side processing
 
-2. **Project Detail View**:
-   - Hierarchical content navigator
-   - Version management panel
-   - Quality metrics overview
-   - Collaboration status indicators
-   - Export and sharing options
-
-3. **Version Management Panel**:
-   - Timeline visualization of version history
-   - Version comparison tool access
-   - Restore and branch capabilities
-   - Version annotation interface
-   - Quality trend visualization
-
-4. **Content Editor Integration**:
-   - Real-time validation feedback
-   - Improvement suggestions panel
-   - AI assistance access
-   - Collaborative editing indicators
-   - Version creation controls
-
-5. **Export and Delivery Interface**:
-   - Format selection options
-   - Version selection for export
-   - Design customization controls
-   - Delivery method configuration
-   - Export history tracking
-
-The interface will prioritize clarity and efficiency while providing access to the sophisticated underlying capabilities of the system.
-
-## Implementation Roadmap
-
-### Phased Deployment Approach
-
-To efficiently implement this system, a phased approach is recommended:
-
-1. **Phase 1: Core Infrastructure**:
-   - Database schema implementation
-   - Basic project and version management
-   - Initial content editor integration
-   - Fundamental validation metrics
-
-2. **Phase 2: Enhanced Validation**:
-   - Comprehensive quality metrics
-   - Real-time validation feedback
-   - Improvement suggestions
-   - Quality tracking across versions
-
-3. **Phase 3: Advanced Management**:
-   - Hierarchical project organization
-   - Sophisticated version control
-   - Branch and merge capabilities
-   - Version comparison tools
-
-4. **Phase 4: Collaboration Features**:
-   - Real-time collaborative editing
-   - Feedback and approval workflows
-   - Role-based access controls
-   - Activity tracking and notifications
-
-5. **Phase 5: Advanced Export and Integration**:
-   - Weezy Friend library integration
-   - Multi-format export optimization
-   - Third-party platform connections
-   - Analytics and performance tracking
-
-This phased approach allows for incremental delivery of value while managing development complexity.
+4. **Security Considerations**:
+   - Implement robust authentication and authorization
+   - Secure API endpoints with proper validation
+   - Encrypt sensitive content both in transit and at rest
+   - Implement rate limiting to prevent abuse
+   - Regular security audits and vulnerability scanning
 
 ## Conclusion
 
-The proposed framework provides a comprehensive solution for MagicMuse's project structure and version management needs. By implementing a hierarchical system with sophisticated version control and integrated content validation, the platform will support efficient content creation and management for both single-document projects and complex multi-part content.
+This comprehensive implementation guide provides the technical specifications required to build the Proposal & Pitch Deck Generation feature for MagicMuse. Following this structure will ensure a robust, scalable, and user-friendly experience that delivers significant value to users while maintaining technical excellence.
 
-The system balances organizational clarity with flexibility, enabling users to maintain contextual relationships between related content while preventing unnecessary project proliferation. The integrated content validation features provide ongoing quality assurance and improvement tracking, ensuring that all content meets professional standards.
 
-By implementing this framework, MagicMuse will provide a superior user experience that streamlines the content creation process while maintaining the highest standards of quality and organization.
+
+Version Control Integration
+Version Control System Architecture
+The version control system operates at both project and content module levels:
+
+Database Schema:
+CopyProject {
+  id: UUID,
+  name: String,
+  createdAt: DateTime,
+  updatedAt: DateTime,
+  ownerId: UUID,
+  currentVersionId: UUID,
+  projectType: Enum
+}
+
+Version {
+  id: UUID,
+  projectId: UUID,
+  versionNumber: String,
+  majorVersion: Integer,
+  minorVersion: Integer,
+  createdAt: DateTime,
+  createdById: UUID,
+  parentVersionId: UUID,
+  status: Enum,
+  notes: String,
+  contentModules: Array<ContentModule>
+}
+
+ContentModule {
+  id: UUID,
+  versionId: UUID,
+  moduleType: Enum,
+  order: Integer,
+  content: JSON,
+  metadata: JSON
+}
+
+Version Creation Logic:
+
+Major version increments (v1.0 → v2.0) for significant changes
+Minor version increments (v1.0 → v1.1) for refinements
+Branched versions use notation like "v2.0-alternative"
+All versions retain parent references for tree visualization
+
+
+Version Comparison Implementation:
+
+Differential comparison showing added/removed/modified content
+Section-by-section comparison with visual highlighting
+Metrics comparison showing quality improvements
