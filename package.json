@@ -9,7 +9,7 @@
         "dev:all": "concurrently \"npm run dev\" \"npm run dev:server\"",
         "build": "npx tsc && npx vite build",
         "build:server": "cd server && npm run build",
-        "build:all": "npm run build && npm run build:server",
+        "build:all": "npm install && npm run build && npm run build:server",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "preview": "vite preview",
         "test": "jest",
