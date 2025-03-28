@@ -127,6 +127,30 @@
   }
 }
 
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: theme('colors.neutral.light / 0.5'); /* Light beige track, semi-transparent */
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: theme('colors.primary.DEFAULT / 0.6'); /* Primary color thumb, semi-transparent */
+  border-radius: 10px;
+  border: 2px solid transparent; /* Creates padding around thumb */
+  background-clip: content-box;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.primary.hover / 0.8'); /* Darker on hover */
+}
+/* Firefox scrollbar (basic) */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: theme('colors.primary.DEFAULT / 0.6') theme('colors.neutral.light / 0.5');
+}
+
 /* Chat panel styling */
 .chat-panel {
   background-color: #ae5630;

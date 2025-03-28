@@ -4,7 +4,7 @@
 const API_BASE_URL = '/api/export'; 
 
 // --- Types ---
-type ExportFormat = 'pptx' | 'pdf' | 'google_slides' | 'html5' | 'video' | 'mobile' | 'print';
+export type ExportFormat = 'pptx' | 'pdf' | 'google_slides' | 'html5' | 'video' | 'mobile' | 'print'; // Export type
 
 interface ExportOptions {
   format: ExportFormat;
@@ -12,7 +12,7 @@ interface ExportOptions {
   // Add format-specific options, e.g., pdfSecurity, pptxAnimations
 }
 
-interface ExportResult {
+export interface ExportResult { // Export interface
   downloadUrl?: string; // URL to download the exported file
   shareUrl?: string; // URL for sharing (e.g., Google Slides)
   status: 'pending' | 'processing' | 'completed' | 'failed';

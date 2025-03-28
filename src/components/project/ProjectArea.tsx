@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Import useEffect
 import { Card } from '@/components/ui/Card'; // Keep Card
 import { Button } from '@/components/ui/Button'; // Import Button
 import PitchDeckTypeGrid from './setup/PitchDeckTypeGrid';
@@ -22,7 +22,9 @@ import RefinementPanel from './qa/RefinementPanel'; // Import Step 6 component
 import PresenterTools from './delivery/PresenterTools'; // Import Step 7 component
 import ExportConfiguration from './delivery/ExportConfiguration'; // Import Step 7 component
 import SharingPermissions from './delivery/SharingPermissions'; // Import Step 7 component
-import ArchivingAnalytics from './delivery/ArchivingAnalytics'; // Import Step 7 component
+import ArchivingAnalytics from './delivery/ArchivingAnalytics';
+import * as contentGenerationService from '@/services/contentGenerationService';
+import { createResearchPrompt, createPitchDeckContentPrompt } from '@/lib/prompts/pitchDeckPrompts'; // Import prompt functions
 import '@/styles/ProjectArea.css';
 import '@/styles/ProjectSetup.css';
 // Potentially add new CSS files for Steps 6 & 7 later if needed
@@ -47,6 +49,50 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
   // Example:
   // const [audienceName, setAudienceName] = useState<string>('');
   // --- End State for Step 2 ---
+
+  // --- State for Step 3 ---
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [brandLogo, setBrandLogo] = useState<string | null>(null); // URL or data URI
+  const [primaryColor, setPrimaryColor] = useState<string>('#ae5630'); // Default primary
+  const [secondaryColor, setSecondaryColor] = useState<string>('#232321'); // Default secondary
+  const [accentColor, setAccentColor] = useState<string>('#9d4e2c'); // Default accent
+  const [headingFont, setHeadingFont] = useState<string>('Comfortaa'); // Default heading
+  const [bodyFont, setBodyFont] = useState<string>('Questrial'); // Default body
+  const [slideStructure, setSlideStructure] = useState([ // Default structure
+      { id: 's1', title: 'Cover/Title' },
+      { id: 's2', title: 'Problem/Opportunity' },
+      { id: 's3', title: 'Solution Overview' },
+      { id: 's4', title: 'Call to Action' },
+  ]);
+  const [complexityLevel, setComplexityLevel] = useState<number>(50); // Default complexity
+  // --- End State for Step 3 ---
+
+  // --- State for Step 4 ---
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [generationProgress, setGenerationProgress] = useState<number>(0); // Add progress state
+  const [generationStatusText, setGenerationStatusText] = useState<string>(''); // Add status text state
+  const [generatedContentPreview, setGeneratedContentPreview] = useState<string>('');
+  // --- End State for Step 4 ---
+
+  // --- State for Step 6 ---
+  // Define types based on service placeholders (or import if defined elsewhere)
+  type QualityMetrics = { overallScore: number; categories: { name: string; score: number }[]; issues: { id: string; severity: string; text: string }[]; };
+  type FactCheckResult = { claim: string; verified: boolean; source?: string; explanation?: string; };
+  type Suggestion = { id: string; text: string; impact: string; effort: string; };
+
+  const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics | null>(null);
+  const [factCheckResults, setFactCheckResults] = useState<FactCheckResult[]>([]);
+  const [complianceStatus, setComplianceStatus] = useState<'Not Run' | 'Running' | 'Passed' | 'Issues Found'>('Not Run');
+  const [financialValidationStatus, setFinancialValidationStatus] = useState<'Not Run' | 'Running' | 'Passed' | 'Issues Found'>('Not Run');
+  const [languageCheckStatus, setLanguageCheckStatus] = useState<'Not Run' | 'Running' | 'Passed' | 'Issues Found'>('Not Run');
+  const [refinementSuggestions, setRefinementSuggestions] = useState<Suggestion[]>([]);
+  const [isLoadingQA, setIsLoadingQA] = useState<boolean>(false);
+  // --- End State for Step 6 ---
+
+  // --- State for Step 5 ---
+  const [editorContent, setEditorContent] = useState<string>(''); // Content for the rich text editor
+  const [isLoadingEnhancement, setIsLoadingEnhancement] = useState<boolean>(false); // Loading state for enhancements
+  // --- End State for Step 5 ---
 
   // Handler to select/deselect pitch deck type
   const handleSelectType = (id: string) => {
@@ -105,6 +151,205 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
     // TODO: Backend call for Step 6 data saving
     setCurrentStep(7); // Move to Step 7
   };
+
+  // --- Step 6 Handlers ---
+  const loadQualityData = async () => {
+     setIsLoadingQA(true);
+     try {
+       // Simulate fetching quality metrics (replace with actual service call later)
+       // const metrics = await analyticsService.getQualityAssessment('temp-project-id');
+       await new Promise(resolve => setTimeout(resolve, 600)); // Simulate delay
+       const simulatedMetrics: QualityMetrics = {
+         overallScore: Math.floor(Math.random() * 20) + 75, // Score between 75-94
+         categories: [
+           { name: 'Content Quality', score: Math.floor(Math.random() * 20) + 78 },
+           { name: 'Design Effectiveness', score: Math.floor(Math.random() * 25) + 70 },
+           { name: 'Narrative Structure', score: Math.floor(Math.random() * 20) + 75 },
+           { name: 'Data Integrity', score: Math.floor(Math.random() * 15) + 85 },
+           { name: 'Persuasiveness', score: Math.floor(Math.random() * 25) + 70 },
+         ],
+         issues: [
+           { id: 'iss1', severity: ['warning', 'info'][Math.floor(Math.random()*2)], text: 'Consider clarifying the market size source.' },
+           { id: 'iss2', severity: 'info', text: 'Add transition between Solution and Market sections.' },
+         ]
+       };
+       setQualityMetrics(simulatedMetrics);
+
+       // Simulate fetching suggestions (replace with actual service call later)
+       // const suggestions = await contentGenerationService.getRefinementSuggestions('temp-project-id');
+       const simulatedSuggestions: Suggestion[] = [
+         { id: 'sug1', text: 'Refine value proposition for clarity.', impact: 'High', effort: 'Medium' },
+         { id: 'sug2', text: 'Add competitor comparison chart.', impact: 'Medium', effort: 'High' },
+       ];
+       setRefinementSuggestions(simulatedSuggestions);
+
+     } catch (error) {
+        console.error("Failed to load QA data:", error);
+        // Handle error state if needed
+     } finally {
+        setIsLoadingQA(false);
+     }
+  };
+
+  // Add useEffect to load QA data when entering Step 6
+  useEffect(() => {
+    if (currentStep === 6) {
+      loadQualityData();
+      // Reset statuses on re-entering step
+      setFactCheckResults([]);
+      setComplianceStatus('Not Run');
+      setFinancialValidationStatus('Not Run');
+      setLanguageCheckStatus('Not Run');
+    }
+  }, [currentStep]);
+
+
+  const handleRunFactCheck = async () => {
+     setFactCheckResults([]); // Clear previous
+     setIsLoadingQA(true); // Use general QA loading state
+     try {
+        // TODO: Get actual content from Step 5 editor state
+        const contentToVerify = generatedContentPreview || "Sample content with claim: Market size is $10B.";
+        const results = await contentGenerationService.verifyFacts('temp-project-id', contentToVerify);
+        setFactCheckResults(results);
+     } catch (error) {
+        console.error("Fact check failed:", error);
+        setFactCheckResults([{ claim: 'Error', verified: false, explanation: 'Fact check process failed.' }]);
+     } finally {
+        setIsLoadingQA(false);
+     }
+  };
+  
+  // Add similar handlers for handleCheckCompliance, handleValidateFinancials, handleCheckLanguage
+  // These would likely call different backend services or AI prompts
+  const handleRunComplianceCheck = async () => {
+     setComplianceStatus('Running');
+     await new Promise(resolve => setTimeout(resolve, 800)); // Simulate check
+     setComplianceStatus(Math.random() > 0.2 ? 'Passed' : 'Issues Found'); // Simulate result
+  };
+   const handleRunFinancialValidation = async () => {
+     setFinancialValidationStatus('Running');
+     await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate check
+     setFinancialValidationStatus(Math.random() > 0.1 ? 'Passed' : 'Issues Found'); // Simulate result
+  };
+   const handleRunLanguageCheck = async () => {
+     setLanguageCheckStatus('Running');
+     await new Promise(resolve => setTimeout(resolve, 700)); // Simulate check
+     setLanguageCheckStatus(Math.random() > 0.3 ? 'Passed' : 'Issues Found'); // Simulate result
+  };
+
+  // Placeholder handlers for refinement actions
+  const handleImplementSuggestion = (id: string) => console.log(`Implement suggestion: ${id} - (Not Implemented)`);
+  const handleCompareSuggestion = (id: string) => console.log(`Compare suggestion: ${id} - (Not Implemented)`);
+  const handleRunFinalPolish = () => console.log('Run Final Polish - (Not Implemented)');
+  // --- End Step 6 Handlers ---
+
+  // --- Step 5 Handlers ---
+  const handleEnhanceClarity = async () => {
+     if (!editorContent) return; // Don't run if no content
+     setIsLoadingEnhancement(true);
+     try {
+        const result = await contentGenerationService.enhanceContent(
+           'temp-project-id', // Replace later
+           'current-section-id', // Need a way to track current section later
+           editorContent,
+           'clarity'
+        );
+        if (result.content && !result.content.startsWith('Error:')) {
+           setEditorContent(result.content); // Update editor state
+           // Optionally, provide feedback to the user
+        } else {
+           throw new Error(result.content || 'Clarity enhancement failed.');
+        }
+     } catch (error) {
+        console.error("Clarity enhancement failed:", error);
+        // Show error to user
+     } finally {
+        setIsLoadingEnhancement(false);
+     }
+  };
+  // Add handlers for other enhancement buttons later
+  // --- End Step 5 Handlers ---
+
+
+  // --- Step 4 Handler ---
+  const handleGenerateContent = async (options: { factCheckLevel: 'basic' | 'standard' | 'thorough' }) => {
+    setIsGenerating(true);
+    setGenerationProgress(0); // Reset progress
+    setGenerationStatusText('Initiating generation...');
+    setGeneratedContentPreview(''); // Clear previous preview
+    
+    const projectInfo = {
+       projectName: projectName,
+       pitchDeckType: selectedPitchDeckTypeId || 'generic',
+       description: description,
+       // TODO: Add data from Step 2 state here
+    };
+
+    try {
+      // --- Step 1: Research ---
+      setGenerationStatusText('Researching background information...');
+      setGenerationProgress(10); // Start progress
+      const researchPrompt = createResearchPrompt(projectInfo);
+      const researchResult = await contentGenerationService.generateContent({
+         projectId: 'temp-project-id',
+         prompt: researchPrompt,
+         useResearchModel: true,
+         factCheckLevel: options.factCheckLevel
+      });
+
+      if (!researchResult || researchResult.content.startsWith('Error:')) {
+         throw new Error(researchResult?.content || 'Research step failed.');
+      }
+      
+      // --- Update after Research ---
+      setGenerationProgress(50); // Indicate research complete
+      setGenerationStatusText('Generating pitch deck content...');
+      setGeneratedContentPreview(`Research Summary:\n${researchResult.content.substring(0, 300)}...\n\n---`); // Show summary briefly
+
+      // --- Step 2: Content Generation ---
+      const contentPrompt = createPitchDeckContentPrompt(projectInfo, researchResult.content);
+      const contentResult = await contentGenerationService.generateContent({
+         projectId: 'temp-project-id',
+         prompt: contentPrompt,
+         useResearchModel: false,
+      });
+
+       if (!contentResult || contentResult.content.startsWith('Error:')) {
+         throw new Error(contentResult?.content || 'Content generation step failed.');
+      }
+
+      // --- Finalize ---
+      setGenerationProgress(100); // Mark as complete before typing
+      setGenerationStatusText('Generation complete. Displaying content...');
+      simulateTyping(contentResult.content, setGeneratedContentPreview); // Start typing effect
+
+    } catch (error) {
+      console.error("Generation failed:", error);
+      const errorMessage = `Error during generation: ${error instanceof Error ? error.message : String(error)}`;
+      setGeneratedContentPreview(errorMessage);
+      setGenerationStatusText('Generation Failed!');
+      setGenerationProgress(0); // Reset progress on error
+      setIsGenerating(false);
+    }
+    // setIsGenerating(false) is now handled by simulateTyping or catch block
+  };
+
+// Helper for typing effect
+const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateAction<string>>, speed = 1) => { // Further decreased speed from 5 to 1ms
+  let i = 0;
+  setText('');
+  const intervalId = setInterval(() => {
+    if (i < text.length) {
+      setText(prev => prev + text.charAt(i));
+      i++;
+    } else {
+      clearInterval(intervalId);
+      setEditorContent(text); // Set the editor state with the final generated content
+      setIsGenerating(false);
+    }
+  }, speed);
+};
 
 
   return (
@@ -212,15 +457,43 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
             <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
                {/* Left Column: Configuration */}
                <div className="lg:col-span-7 space-y-6">
-                  <TemplateGallery />
-                  <BrandCustomization />
-                  <StructurePlanning />
+                  <TemplateGallery
+                     selectedTemplateId={selectedTemplateId}
+                     onSelectTemplate={setSelectedTemplateId}
+                  />
+                  <BrandCustomization
+                     logo={brandLogo}
+                     onLogoChange={setBrandLogo} // Need to implement handler for file upload -> URL/DataURI
+                     primaryColor={primaryColor}
+                     onPrimaryColorChange={setPrimaryColor}
+                     secondaryColor={secondaryColor}
+                     onSecondaryColorChange={setSecondaryColor}
+                     accentColor={accentColor}
+                     onAccentColorChange={setAccentColor}
+                     headingFont={headingFont}
+                     onHeadingFontChange={setHeadingFont}
+                     bodyFont={bodyFont}
+                     onBodyFontChange={setBodyFont}
+                  />
+                  <StructurePlanning
+                     slides={slideStructure}
+                     onSlidesChange={setSlideStructure}
+                     complexity={complexityLevel}
+                     onComplexityChange={setComplexityLevel}
+                  />
                </div>
                {/* Right Column: Preview */}
                <div className="lg:col-span-5">
-                  {/* Make preview sticky within its column */}
-                  <div className="sticky top-[80px]"> {/* Adjust top offset if needed */}
-                     <DesignPreview />
+                  <div className="sticky top-[80px]">
+                     <DesignPreview
+                        // Pass relevant state to preview
+                        primaryColor={primaryColor}
+                        secondaryColor={secondaryColor}
+                        accentColor={accentColor}
+                        headingFont={headingFont}
+                        bodyFont={bodyFont}
+                        slides={slideStructure} // Pass slide structure
+                     />
                   </div>
                </div>
                {/* Navigation Buttons (Full Width Below Columns) */}
@@ -254,15 +527,19 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
             </div>
             {/* Step 4 Layout: Similar to Step 3? Or maybe different? Let's try 2 columns again */}
             <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-               {/* Left Column: Setup & Progress */}
-               <div className="lg:col-span-7 space-y-6">
-                  <GenerationSetup />
-                  <GenerationProgress />
+               {/* Left Column: Setup & Progress (1/3 width) */}
+               <div className="lg:col-span-4 space-y-6">
+                  <GenerationSetup
+                     onGenerate={handleGenerateContent}
+                     isGenerating={isGenerating}
+                  />
+                  {isGenerating && <GenerationProgress progress={generationProgress} statusText={generationStatusText} />}
                </div>
-               {/* Right Column: Preview */}
-               <div className="lg:col-span-5">
+               {/* Right Column: Preview (2/3 width) */}
+               <div className="lg:col-span-8">
                   <div className="sticky top-[80px]">
-                     <GenerationPreview />
+                     {/* Pass content to GenerationPreview or display directly */}
+                     <GenerationPreview content={generatedContentPreview} />
                   </div>
                </div>
                {/* Navigation Buttons */}
@@ -298,7 +575,10 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
             <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Main Editor Area */}
                 <div className="lg:col-span-8 space-y-6">
-                   <ContentEditor />
+                   <ContentEditor
+                      content={editorContent}
+                      onChange={setEditorContent}
+                   />
                 </div>
                 {/* Right Sidebar: Tools & Collaboration */}
                 <div className="lg:col-span-4 space-y-6">
@@ -341,13 +621,32 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
               <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
                  {/* Left Column: Validation & Refinement */}
                  <div className="lg:col-span-7 space-y-6">
-                    <ValidationInterface />
-                    <RefinementPanel />
+                    <ValidationInterface
+                       onVerifyFacts={handleRunFactCheck}
+                       onCheckCompliance={handleRunComplianceCheck}
+                       onValidateFinancials={handleRunFinancialValidation}
+                       onCheckLanguage={handleRunLanguageCheck}
+                       factCheckResults={factCheckResults}
+                       complianceStatus={complianceStatus}
+                       financialValidationStatus={financialValidationStatus} // Corrected name
+                       languageCheckStatus={languageCheckStatus} // Corrected name
+                       isLoading={isLoadingQA}
+                    />
+                    <RefinementPanel
+                       suggestions={refinementSuggestions}
+                       onImplement={handleImplementSuggestion}
+                       onCompare={handleCompareSuggestion}
+                       onPolish={handleRunFinalPolish}
+                       isLoading={isLoadingQA}
+                    />
                  </div>
                  {/* Right Column: Dashboard */}
                  <div className="lg:col-span-5">
                     <div className="sticky top-[80px]">
-                       <QualityDashboard />
+                       <QualityDashboard
+                          metrics={qualityMetrics}
+                          isLoading={isLoadingQA}
+                       />
                     </div>
                  </div>
                  {/* Navigation Buttons */}

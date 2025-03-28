@@ -1,10 +1,11 @@
 // src/features/editor/EditorToolbar.tsx
 import React from 'react';
 import { Editor } from '@tiptap/react';
+import { Button } from '@/components/ui/Button'; // Import the Button component
 import {
   FaBold, FaItalic, FaStrikethrough, FaHeading,
   FaListUl, FaListOl, FaQuoteLeft, FaCode, FaUndo, FaRedo
-} from 'react-icons/fa'; // Using react-icons for icons
+} from 'react-icons/fa';
 
 interface EditorToolbarProps {
   editor: Editor | null;
@@ -18,19 +19,20 @@ const ToolbarButton: React.FC<{
   children: React.ReactNode;
   title?: string;
 }> = ({ onClick, isActive = false, disabled = false, children, title }) => (
-  <button
-    type="button"
+  <Button // Use the actual Button component
+    variant="ghost"
+    size="icon" // Use icon size
     onClick={onClick}
     disabled={disabled}
     title={title}
     className={`
-      p-2 rounded hover:bg-neutral-light focus:outline-none focus:ring-1 focus:ring-primary
-      ${isActive ? 'bg-neutral-light text-primary' : 'text-neutral-medium hover:text-neutral-dark'}
-      ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+      p-1 w-8 h-8  // Override padding and size for tighter toolbar look
+      ${isActive ? 'bg-neutral-light text-primary' : 'text-secondary hover:text-primary'}
     `}
+    // Pass children directly to Button component
   >
     {children}
-  </button>
+  </Button>
 );
 
 

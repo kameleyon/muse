@@ -1,27 +1,35 @@
-import React from 'react';
+import React from 'react'; // Removed useState, useEffect
 import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button'; // For controls
-import { Pause, Play, SkipForward, X } from 'lucide-react'; // Example icons
 
-const GenerationProgress: React.FC = () => {
+interface GenerationProgressProps {
+   progress: number; // Percentage (0-100)
+   statusText: string;
+   // onCancel?: () => void; // Keep for potential future use
+}
+
+const GenerationProgress: React.FC<GenerationProgressProps> = ({ progress, statusText }) => {
+  // Removed internal state and effects
+
   return (
-    <Card className="p-4 border border-dashed border-neutral-medium bg-neutral-light/20">
-      <h4 className="font-semibold text-neutral-dark mb-2">Generation Process Interface</h4>
-      <p className="text-sm text-neutral-medium mb-4">
-        Placeholder for Dynamic Progress Visualization (Overall %, Section bars, Time remaining), Stage Indicators, and Interactive Controls (Pause, Adjust, Skip, Cancel).
-      </p>
-      {/* Basic placeholders for progress and controls */}
+    <Card className="p-4 border border-neutral-light bg-white/30 shadow-sm"> 
+      <h4 className="font-semibold text-neutral-dark text-lg mb-3">Generation Progress</h4>
       <div className="space-y-2">
-        <div className="w-full bg-neutral-light rounded-full h-2.5">
-          <div className="bg-[#ae5630] h-2.5 rounded-full" style={{ width: '45%' }}></div> {/* Example progress */}
+        {/* Progress Bar */}
+        <div className="w-full bg-neutral-light rounded-full h-2.5 dark:bg-gray-700">
+          <div 
+             className="bg-primary h-2.5 rounded-full transition-all duration-500 ease-out" 
+             style={{ width: `${progress}%` }} // Use progress prop
+          ></div> 
         </div>
-        <p className="text-xs text-neutral-medium text-center">Processing: Crafting compelling narrative... (Est. 2 mins remaining)</p>
-        <div className="flex justify-center gap-2 pt-2">
-           <Button variant="outline" size="sm"><Pause size={14} className="mr-1"/> Pause</Button>
-           <Button variant="outline" size="sm"><SkipForward size={14} className="mr-1"/> Skip Section</Button>
-           <Button variant="danger" size="sm"><X size={14} className="mr-1"/> Cancel</Button> {/* Use "danger" variant */}
-        </div>
+        {/* Status Text */}
+        <p className="text-xs text-neutral-medium text-center"> 
+          {statusText || 'Waiting to start...'} {/* Use statusText prop */}
+        </p>
       </div>
+       {/* Optional Cancel Button */}
+       {/* <div className="flex justify-center mt-3">
+          <Button variant="danger" size="sm" onClick={onCancel}>Cancel</Button>
+       </div> */}
     </Card>
   );
 };
