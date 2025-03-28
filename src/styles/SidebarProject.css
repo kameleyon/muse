@@ -1,10 +1,67 @@
 /* src/styles/SidebarProject.css */
 
 /* Basic styling for the sidebar container */
-.sidebar-project-container {
-  /* Add specific styles for the sidebar project card */
-  /* Example: */
-  min-height: 300px; /* Adjust as needed */
+.sidebar-project-menu {
+  /* Inherit sticky behavior if needed, adjust top offset based on header height */
+  position: sticky;
+  /* top: 4rem; /* Example: Adjust based on actual header height */
+  /* Match settings menu stickiness */
+   top: 80px; /* From SidebarProject.tsx */
 }
+
+/* Project Menu Item Styling (Adapted from settings.css) */
+.project-menu-item {
+  /* Using Tailwind classes in the component now, but keep this for potential overrides */
+  /* display: flex; */
+  /* align-items: center; */
+  /* gap: 0.5rem; */
+  /* padding: 0.75rem 1rem; */ /* Handled by Tailwind */
+  /* border-radius: 0.5rem; */ /* Handled by Tailwind */
+  cursor: pointer;
+  /* transition: all 0.2s ease; */ /* Handled by Tailwind */
+}
+
+/* Hover effect handled by Tailwind hover:bg-neutral-light/50 */
+/* .project-menu-item:hover { */
+/*   background-color: rgba(174, 86, 48, 0.1); */
+/* } */
+
+/* Active state handled by Tailwind bg-[#ae5630]/10 text-[#ae5630] font-medium */
+/* .project-menu-item.active { */
+/*   color: #ae5630; */
+/*   font-weight: 600; */
+/* } */
+
+/* Project Submenu Styling (Adapted from settings.css) */
+.project-submenu {
+  /* Using Tailwind classes in the component now */
+  /* margin-left: 1.5rem; */ /* Handled by pl-6 */
+  /* margin-top: 0.25rem; */ /* Handled by mt-1 */
+  /* border-left: 1px solid #bcb7af; */ /* Handled by border-l */
+  /* margin-left: 0.75rem; */ /* Handled by ml-3 */
+}
+
+.project-submenu-item {
+  /* Using Tailwind classes in the component now */
+  /* display: flex; */
+  /* align-items: center; */
+  /* gap: 0.5rem; */
+  /* padding: 0.5rem 1rem; */ /* Handled by px-3 py-1.5 */
+  /* border-radius: 0.5rem; */ /* Handled by rounded-md */
+  /* font-size: 0.875rem; */ /* Handled by text-xs sm:text-sm */
+  cursor: pointer;
+  /* transition: all 0.2s ease; */ /* Handled by Tailwind */
+}
+
+/* Hover effect handled by Tailwind hover:text-neutral-dark hover:bg-neutral-light/40 */
+/* .project-submenu-item:hover { */
+/*   background-color: rgba(174, 86, 48, 0.1); */
+/* } */
+
+/* Active state handled by Tailwind text-[#ae5630] font-medium */
+/* .project-submenu-item.active { */
+/*   color: #ae5630; */
+/*   font-weight: 600; */
+/* } */
 
 /* Add more specific styles as the component evolves */

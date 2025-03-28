@@ -41,10 +41,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [showProjectView, setShowProjectView] = useState(false); // State for project view
+  const [currentProjectName, setCurrentProjectName] = useState<string | null>(null); // State for project name
 
-  // Handler to switch to project view
-  const handleProjectCreationSuccess = () => {
-    console.log("Switching to project view...");
+  // Handler to switch to project view and store name
+  const handleProjectCreationSuccess = (projectName: string) => {
+    console.log(`Switching to project view for: ${projectName}`);
+    setCurrentProjectName(projectName); // Store the name
     setShowProjectView(true);
   };
 
@@ -194,7 +196,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   <SidebarProject />
                 </div>
                 <div className="lg:col-span-9">
-                  <ProjectArea />
+                  {/* Pass the name down */}
+                  <ProjectArea initialName={currentProjectName} />
                 </div>
               </div>
             ) : (

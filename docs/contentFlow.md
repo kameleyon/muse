@@ -58,6 +58,14 @@ PROJECT NAVIGATION
 │   ├── Comments
 │   └── Activity Log
 ├── Quality Metrics
+├── Templates
+│   ├── My Templates
+│   └── Public Templates
+├── Resources
+│   ├── AI Assistant
+│   ├── Knowledge Base
+│   └── Tutorials
+├── Analytics
 └── Settings
 ```
 
@@ -131,7 +139,9 @@ ContentModule
 
 **Form Fields**:
 - Project name (text input, required)
-- Project description (text area, optional)
+- Category (Proposal & Pitch Deck Generation)
+
+- Project description (text area, or upload file, optional)
 - Tags (multi-select, optional)
 - Team members (user selection dropdown, optional)
 - Privacy settings (radio buttons: Private, Team, Public)

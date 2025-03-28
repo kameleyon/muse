@@ -17,7 +17,7 @@ interface WelcomeSectionProps {
   userName: string;
   draftCount: number;
   publishedCount: number;
-  onProjectCreated: () => void; // Add the new prop type
+  onProjectCreated: (projectName: string) => void; // Update prop type to accept name
 }
 
 interface DailyQuote {
@@ -77,7 +77,7 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
     // TODO: Implement actual project creation logic here (e.g., API call)
     // This might involve dispatching an action or calling a service function.
     // Example: dispatch(createProject(details));
-    onProjectCreated(); // Call the handler passed from MainLayout
+    onProjectCreated(details.projectName); // Pass the project name from modal details
     handleCloseModal(); // Close modal after handling creation (or on success)
   };
   // --- End Modal Handlers ---
