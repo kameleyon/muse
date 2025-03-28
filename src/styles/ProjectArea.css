@@ -1,0 +1,10 @@
+/* src/styles/ProjectArea.css */
+
+/* Basic styling for the project area container */
+.project-area-container {
+  /* Add specific styles for the project area card */
+  /* Example: */
+  min-height: 500px; /* Adjust as needed */
+}
+
+/* Add more specific styles as the component evolves */

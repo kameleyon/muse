@@ -13,14 +13,16 @@ import { OnboardingData } from '@/features/onboarding/components/OnboardingModal
 import LandingFooter from '@/components/landing/LandingFooter';
 import WelcomeSection from '@/components/dashboard/WelcomeSection';
 import NavigationMenu from '@/components/dashboard/NavigationMenu';
-import { 
-  Home, 
-  FolderOpen, 
-  FileText, 
-  Bookmark, 
-  Users, 
-  Bell, 
-  Settings, 
+import SidebarProject from '@/components/project/SidebarProject'; // Added import
+import ProjectArea from '@/components/project/ProjectArea'; // Added import
+import {
+  Home,
+  FolderOpen,
+  FileText,
+  Bookmark,
+  Users,
+  Bell,
+  Settings,
   LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -38,6 +40,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [profile, setProfile] = useState<any>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [showProjectView, setShowProjectView] = useState(false); // State for project view
+
+  // Handler to switch to project view
+  const handleProjectCreationSuccess = () => {
+    console.log("Switching to project view...");
+    setShowProjectView(true);
+  };
 
   // Fetch profile and check onboarding status
   useEffect(() => {
@@ -171,6 +180,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             userName={displayName}
             draftCount={draftCount}
             publishedCount={publishedCount}
+            onProjectCreated={handleProjectCreationSuccess} // Pass handler down
           />
           
           {/* Navigation Menu */}
@@ -178,7 +188,18 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           
           {/* Page Content */}
           <main>
-            {children}
+            {showProjectView ? (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6"> {/* Added mt-6 for spacing */}
+                <div className="lg:col-span-3">
+                  <SidebarProject />
+                </div>
+                <div className="lg:col-span-9">
+                  <ProjectArea />
+                </div>
+              </div>
+            ) : (
+              children // Render the original page content (e.g., Dashboard)
+            )}
           </main>
         </div>
       </div>

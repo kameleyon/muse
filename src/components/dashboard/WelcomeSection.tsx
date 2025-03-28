@@ -17,6 +17,7 @@ interface WelcomeSectionProps {
   userName: string;
   draftCount: number;
   publishedCount: number;
+  onProjectCreated: () => void; // Add the new prop type
 }
 
 interface DailyQuote {
@@ -28,6 +29,7 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
   userName,
   draftCount,
   publishedCount,
+  onProjectCreated, // Destructure the new prop
 }) => {
   const [timeOfDay, setTimeOfDay] = useState<string>('');
   const [quote, setQuote] = useState<DailyQuote>({
@@ -75,6 +77,7 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
     // TODO: Implement actual project creation logic here (e.g., API call)
     // This might involve dispatching an action or calling a service function.
     // Example: dispatch(createProject(details));
+    onProjectCreated(); // Call the handler passed from MainLayout
     handleCloseModal(); // Close modal after handling creation (or on success)
   };
   // --- End Modal Handlers ---

@@ -1,0 +1,10 @@
+/* src/styles/SidebarProject.css */
+
+/* Basic styling for the sidebar container */
+.sidebar-project-container {
+  /* Add specific styles for the sidebar project card */
+  /* Example: */
+  min-height: 300px; /* Adjust as needed */
+}
+
+/* Add more specific styles as the component evolves */
