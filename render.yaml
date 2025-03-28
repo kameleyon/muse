@@ -2,7 +2,7 @@ services:
   - type: web
     name: magicmuse
     env: node
-    buildCommand: npm install && npm run build
+    buildCommand: ./render-build.sh
     startCommand: npm run start
     routes:
       - type: rewrite
@@ -15,3 +15,5 @@ services:
         value: false
       - key: CI
         value: true
+      - key: HUSKY
+        value: 0
