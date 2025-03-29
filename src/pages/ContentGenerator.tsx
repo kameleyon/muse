@@ -59,7 +59,7 @@ const ContentGenerator: React.FC = () => {
       tone: 'professional',
       length: 'medium',
       keywords: '',
-      model: 'anthropic/claude-3-sonnet-20240229',
+      model: 'google/gemini-2.5-pro-exp-03-25:free',
       additionalInstructions: '',
     },
   });

@@ -235,28 +235,28 @@ export const getAvailableModels = asyncHandler(async (req: Request, res: Respons
   // In a real implementation, this would fetch available models from OpenRouter API
   const models = [
     {
-      id: 'anthropic/claude-3-haiku-20240307',
+      id: 'google/gemini-2.5-pro-exp-03-25:free',
       name: 'Claude 3 Haiku',
       description: 'Fast and cost-effective model for efficient tasks',
       maxTokens: 200000,
       costPer1KTokens: 0.00025,
     },
     {
-      id: 'anthropic/claude-3-sonnet-20240229',
+      id: 'google/gemini-2.5-pro-exp-03-25:free',
       name: 'Claude 3 Sonnet',
       description: 'Balanced model for complex reasoning and content creation',
       maxTokens: 200000,
       costPer1KTokens: 0.003,
     },
     {
-      id: 'anthropic/claude-3-opus-20240229',
+      id: 'google/gemini-2.5-pro-exp-03-25:free',
       name: 'Claude 3 Opus',
       description: 'Most powerful model for expert-level analysis and content',
       maxTokens: 200000,
       costPer1KTokens: 0.015,
     },
     {
-      id: 'openai/gpt-4-turbo-preview',
+      id: 'google/gemini-2.5-pro-exp-03-25:free',
       name: 'GPT-4 Turbo',
       description: 'Advanced reasoning and knowledge capabilities',
       maxTokens: 128000,
@@ -283,7 +283,7 @@ export const getContentPresets = asyncHandler(async (req: Request, res: Response
       description: 'Clear, informative content for business blogs',
       type: 'blog',
       parameters: {
-        model: 'anthropic/claude-3-sonnet-20240229',
+        model: 'google/gemini-2.5-pro-exp-03-25:free',
         temperature: 0.7,
         max_tokens: 1500,
       },
@@ -294,7 +294,7 @@ export const getContentPresets = asyncHandler(async (req: Request, res: Response
       description: 'Conversational, engaging content for personal blogs',
       type: 'blog',
       parameters: {
-        model: 'anthropic/claude-3-haiku-20240307',
+        model: 'google/gemini-2.5-pro-exp-03-25:free',
         temperature: 0.8,
         max_tokens: 1200,
       },
@@ -305,7 +305,7 @@ export const getContentPresets = asyncHandler(async (req: Request, res: Response
       description: 'Compelling copy that drives conversions',
       type: 'marketing',
       parameters: {
-        model: 'anthropic/claude-3-sonnet-20240229',
+        model: 'google/gemini-2.5-pro-exp-03-25:free',
         temperature: 0.75,
         max_tokens: 800,
       },
@@ -316,7 +316,7 @@ export const getContentPresets = asyncHandler(async (req: Request, res: Response
       description: 'Attention-grabbing content for social media',
       type: 'social',
       parameters: {
-        model: 'anthropic/claude-3-haiku-20240307',
+        model: 'google/gemini-2.5-pro-exp-03-25:free',
         temperature: 0.9,
         max_tokens: 400,
       },
@@ -327,7 +327,7 @@ export const getContentPresets = asyncHandler(async (req: Request, res: Response
       description: 'Formal, well-structured content for academic purposes',
       type: 'academic',
       parameters: {
-        model: 'anthropic/claude-3-opus-20240229',
+        model: 'google/gemini-2.5-pro-exp-03-25:free',
         temperature: 0.5,
         max_tokens: 2000,
       },

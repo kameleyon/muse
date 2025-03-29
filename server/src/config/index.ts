@@ -18,7 +18,7 @@ const config = {
   openRouter: {
     apiKey: process.env.OPENROUTER_API_KEY,
     baseUrl: 'https://openrouter.ai/api/v1',
-    defaultContentModel: process.env.DEFAULT_CONTENT_MODEL || 'anthropic/claude-3.7-sonnet',
+    defaultContentModel: process.env.DEFAULT_CONTENT_MODEL || 'google/gemini-2.5-pro-exp-03-25:free',
     defaultResearchModel: process.env.DEFAULT_RESEARCH_MODEL || 'openai/gpt-4o-search-preview',
   },
   

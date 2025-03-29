@@ -2,8 +2,8 @@
 
 // Read environment variables (Vite specific)
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const CONTENT_MODEL = import.meta.env.VITE_DEFAULT_CONTENT_MODEL || 'anthropic/claude-3.7-sonnet';
-const RESEARCH_MODEL = import.meta.env.VITE_DEFAULT_RESEARCH_MODEL || 'openai/gpt-4o-search-preview';
+const CONTENT_MODEL = import.meta.env.VITE_DEFAULT_CONTENT_MODEL || 'google/gemini-2.5-pro-exp-03-25:free'; // Changed default model
+const RESEARCH_MODEL = import.meta.env.VITE_DEFAULT_RESEARCH_MODEL || 'openai/gpt-4o-search-preview'; // Keep research model for now, unless specified otherwise
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'http://localhost:5173'; // Get site URL for referrer
 const APP_NAME = import.meta.env.VITE_APP_NAME || 'MagicMuse'; // Get app name for title
 

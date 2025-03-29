@@ -35,41 +35,17 @@ interface OpenRouterResponse {
 // Available models configuration
 export const availableModels = [
   {
-    id: 'anthropic/claude-3.7-sonnet',
-    name: 'Claude 3.7 Sonnet',
-    description: 'Newest and recommended model for content generation',
+    id: 'google/gemini-2.5-pro-exp-03-25:free', // Changed model ID
+    name: 'Gemini 2.5 Pro (Free Tier)', // Changed name
+    description: 'Google\'s Gemini 2.5 Pro model (experimental free tier).', // Updated description
     maxTokens: 200000,
     costPer1KTokens: 0.0035,
     strengths: 'Exceptional quality content with superior reasoning capabilities',
     category: 'content',
   },
-  {
-    id: 'anthropic/claude-3-opus-20240229',
-    name: 'Claude 3 Opus',
-    description: 'Most powerful model for expert-level analysis and content',
-    maxTokens: 200000,
-    costPer1KTokens: 0.015,
-    strengths: 'Premium content with exceptional depth and quality',
-    category: 'content',
-  },
-  {
-    id: 'anthropic/claude-3-sonnet-20240229',
-    name: 'Claude 3 Sonnet',
-    description: 'Balanced model for complex reasoning and content creation',
-    maxTokens: 200000,
-    costPer1KTokens: 0.003,
-    strengths: 'High-quality content with good reasoning capabilities',
-    category: 'content',
-  },
-  {
-    id: 'anthropic/claude-3-haiku-20240307',
-    name: 'Claude 3 Haiku',
-    description: 'Fast and cost-effective model for efficient tasks',
-    maxTokens: 200000,
-    costPer1KTokens: 0.00025,
-    strengths: 'Quick responses, efficient for shorter content',
-    category: 'content',
-  },
+  // Removed Claude 3 Opus definition
+  // Removed Claude 3 Sonnet definition
+  // Removed Claude 3 Haiku definition
   {
     id: 'openai/gpt-4o-search-preview',
     name: 'GPT-4o Search',
@@ -98,7 +74,7 @@ export const contentPresets = [
     description: 'Clear, informative content for business blogs',
     type: 'blog',
     parameters: {
-      model: 'anthropic/claude-3.7-sonnet',
+      model: 'google/gemini-2.5-pro-exp-03-25:free',
       temperature: 0.7,
       max_tokens: 1500,
     },
@@ -109,7 +85,7 @@ export const contentPresets = [
     description: 'Conversational, engaging content for personal blogs',
     type: 'blog',
     parameters: {
-      model: 'anthropic/claude-3.7-sonnet',
+      model: 'google/gemini-2.5-pro-exp-03-25:free', // Changed model
       temperature: 0.8,
       max_tokens: 1200,
     },
@@ -120,7 +96,7 @@ export const contentPresets = [
     description: 'Compelling copy that drives conversions',
     type: 'marketing',
     parameters: {
-      model: 'anthropic/claude-3.7-sonnet',
+      model: 'google/gemini-2.5-pro-exp-03-25:free', // Changed model
       temperature: 0.75,
       max_tokens: 800,
     },
@@ -131,7 +107,7 @@ export const contentPresets = [
     description: 'Attention-grabbing content for social media',
     type: 'social',
     parameters: {
-      model: 'anthropic/claude-3.7-sonnet',
+      model: 'google/gemini-2.5-pro-exp-03-25:free', // Changed model
       temperature: 0.9,
       max_tokens: 400,
     },
@@ -142,7 +118,7 @@ export const contentPresets = [
     description: 'Formal, well-structured content for academic purposes',
     type: 'academic',
     parameters: {
-      model: 'anthropic/claude-3-opus-20240229',
+      model: 'google/gemini-2.5-pro-exp-03-25:free', // Changed model
       temperature: 0.5,
       max_tokens: 2000,
     },
@@ -173,7 +149,7 @@ export class OpenRouterService {
   ) {
     this.apiKey = apiKey || import.meta.env.VITE_OPENROUTER_API_KEY;
     this.baseUrl = baseUrl;
-    this.defaultModel = defaultModel || import.meta.env.VITE_DEFAULT_CONTENT_MODEL || 'anthropic/claude-3.7-sonnet';
+    this.defaultModel = defaultModel || import.meta.env.VITE_DEFAULT_CONTENT_MODEL || 'google/gemini-2.5-pro-exp-03-25:free';
   }
 
   // Get the API key
