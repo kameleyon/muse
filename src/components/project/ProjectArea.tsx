@@ -27,7 +27,8 @@ import * as contentGenerationService from '@/services/contentGenerationService';
 import { createResearchPrompt, createPitchDeckContentPrompt } from '@/lib/prompts/pitchDeckPrompts'; // Import prompt functions
 import ReactDOMServer from 'react-dom/server'; // Import for rendering component to string
 import html2pdf from 'html2pdf.js'; // Import html2pdf
-import { MarkdownContent } from '@/lib/markdown'; // Import Markdown renderer
+import { marked } from 'marked'; // Import marked for Markdown -> HTML conversion
+import { MarkdownContent } from '@/lib/markdown'; // Re-add import for PDF generation
 import '@/styles/ProjectArea.css';
 import '@/styles/ProjectSetup.css';
 // Potentially add new CSS files for Steps 6 & 7 later if needed
@@ -432,7 +433,10 @@ const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateActi
       i++;
     } else {
       clearInterval(intervalId);
-      setEditorContent(text); // Set the editor state with the final generated content
+      // Convert final Markdown to HTML before setting editor state
+      const htmlContent = marked(text) as string; // Use marked to parse
+      console.log("Generated HTML for Editor:", htmlContent); // Log the generated HTML
+      setEditorContent(htmlContent);
       setIsGenerating(false);
     }
   }, speed);
@@ -485,10 +489,10 @@ const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateActi
              <div className="flex justify-end pt-6 border-t border-neutral-light/40">
                <Button
                  variant="primary"
-                 size="lg"
+                 size="lg" // Revert to original size prop
                  onClick={handleContinueFromStep1} // Use updated handler
                  disabled={!projectName || !selectedPitchDeckTypeId}
-                 className="text-white"
+                 className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base" // Added responsive padding/text size
                >
                  Continue to Requirements
                </Button>
@@ -513,13 +517,13 @@ const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateActi
              {/* Add other Step 2 sections here later */}
              
               <div className="flex justify-between pt-6 mt-6 border-t border-neutral-light/40">
-                 <Button variant="outline" onClick={() => setCurrentStep(1)}>
+                 <Button variant="outline" onClick={() => setCurrentStep(1)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base"> {/* Removed size props, kept className */}
                    Back to Setup
                  </Button>
                  <Button
                    variant="primary"
-                   size="lg"
-                   className="text-white"
+                   // Removed size props
+                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base" // Kept responsive classes
                    onClick={handleContinueFromStep2} // Use updated handler
                  >
                    Continue to Design & Structure
@@ -584,17 +588,17 @@ const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateActi
                   </div>
                </div>
                {/* Navigation Buttons (Full Width Below Columns) */}
-               <div className="lg:col-span-12 flex justify-between pt-6 mt-6 border-t border-neutral-light/40">
-                  <Button variant="outline" onClick={() => setCurrentStep(2)}>
-                    Back to Requirements
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    className="text-white"
-                    onClick={handleContinueFromStep3} // Use new handler
-                  >
-                    Continue to Content Generation
+              <div className="lg:col-span-12 flex justify-between pt-6 mt-6 border-t border-neutral-light/40">
+                 <Button variant="outline" onClick={() => setCurrentStep(2)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base"> {/* Added responsive classes */}
+                   Back to Requirements
+                 </Button>
+                 <Button
+                   variant="primary"
+                   // size prop removed
+                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base" // Added responsive classes
+                   onClick={handleContinueFromStep3} // Use new handler
+                 >
+                   Continue to Content Generation
                   </Button>
                </div>
             </div>
@@ -630,17 +634,17 @@ const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateActi
                   </div>
                </div>
                {/* Navigation Buttons */}
-               <div className="lg:col-span-12 flex justify-between pt-6 mt-6 border-t border-neutral-light/40">
-                 <Button variant="outline" onClick={() => setCurrentStep(3)}>
-                   Back to Design
-                 </Button>
-                 <Button
-                   variant="primary"
-                   size="lg"
-                   className="text-white"
-                   onClick={handleContinueFromStep4}
-                 >
-                   Continue to Editing
+              <div className="lg:col-span-12 flex justify-between pt-6 mt-6 border-t border-neutral-light/40">
+                <Button variant="outline" onClick={() => setCurrentStep(3)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base"> {/* Added responsive classes */}
+                  Back to Design
+                </Button>
+                <Button
+                  variant="primary"
+                  // size prop removed
+                  className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base" // Added responsive classes
+                  onClick={handleContinueFromStep4}
+                >
+                  Continue to Editing
                  </Button>
                </div>
             </div>
@@ -679,17 +683,17 @@ const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateActi
                    </div>
                 </div>
                 {/* Navigation Buttons */}
-                <div className="lg:col-span-12 flex justify-between pt-6 mt-6 border-t border-neutral-light/40">
-                  <Button variant="outline" onClick={() => setCurrentStep(4)}>
-                    Back to Generation
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    className="text-white"
-                    onClick={handleContinueFromStep5} // Use new handler
-                  >
-                    Continue to QA & Refinement
+               <div className="lg:col-span-12 flex justify-between pt-6 mt-6 border-t border-neutral-light/40">
+                 <Button variant="outline" onClick={() => setCurrentStep(4)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base"> {/* Added responsive classes */}
+                   Back to Generation
+                 </Button>
+                 <Button
+                   variant="primary"
+                   // size prop removed
+                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base" // Added responsive classes
+                   onClick={handleContinueFromStep5} // Use new handler
+                 >
+                   Continue to QA & Refinement
                   </Button>
                 </div>
               </div>
@@ -740,17 +744,17 @@ const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateActi
                     </div>
                  </div>
                  {/* Navigation Buttons */}
-                 <div className="lg:col-span-12 flex justify-between pt-6 mt-6 border-t border-neutral-light/40">
-                   <Button variant="outline" onClick={() => setCurrentStep(5)}>
-                     Back to Editing
-                   </Button>
-                   <Button
-                     variant="primary"
-                     size="lg"
-                     className="text-white"
-                     onClick={handleContinueFromStep6}
-                   >
-                     Continue to Finalization
+                <div className="lg:col-span-12 flex justify-between pt-6 mt-6 border-t border-neutral-light/40">
+                  <Button variant="outline" onClick={() => setCurrentStep(5)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base"> {/* Added responsive classes */}
+                    Back to Editing
+                  </Button>
+                  <Button
+                    variant="primary"
+                    // size prop removed
+                    className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base" // Added responsive classes
+                    onClick={handleContinueFromStep6}
+                  >
+                    Continue to Finalization
                    </Button>
                  </div>
               </div>
@@ -779,13 +783,13 @@ const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateActi
                  <SharingPermissions />
                  <ArchivingAnalytics />
                  {/* Navigation Buttons */}
-                 <div className="flex justify-between pt-6 mt-6 border-t border-neutral-light/40">
-                   <Button variant="outline" onClick={() => setCurrentStep(6)}>
-                     Back to QA
-                   </Button>
-                   <Button variant="primary" size="lg" className="text-white">
-                     Finish Project {/* Placeholder */}
+                <div className="flex justify-between pt-6 mt-6 border-t border-neutral-light/40">
+                  <Button variant="outline" onClick={() => setCurrentStep(6)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base"> {/* Added responsive classes */}
+                    Back to QA
                   </Button>
+                  <Button variant="primary" className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base"> {/* Added responsive classes, removed size */}
+                    Finish Project {/* Placeholder */}
+                 </Button>
                 </div>
               </div>
             </>

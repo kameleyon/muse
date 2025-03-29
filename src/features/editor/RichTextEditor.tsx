@@ -1,5 +1,5 @@
 // src/features/editor/RichTextEditor.tsx
-import React from 'react';
+import React, { useEffect } from 'react'; // Import useEffect
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { EditorToolbar } from './EditorToolbar'; // Import the toolbar
@@ -33,6 +33,20 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       }
     },
   });
+
+  // Add useEffect to update content when initialContent prop changes
+  useEffect(() => {
+    if (editor && initialContent !== editor.getHTML()) { // Check if content differs
+      // Parse the incoming HTML (which was converted from Markdown)
+      // Use try-catch in case setContent fails
+      try {
+        editor.commands.setContent(initialContent, true); // true to parse HTML
+      } catch (error) {
+         console.error("Tiptap failed to set content:", error, initialContent);
+      }
+    }
+  // Only run when initialContent changes, editor instance should be stable
+  }, [initialContent, editor]);
 
   if (!editor) {
     return null; // Or a loading state
