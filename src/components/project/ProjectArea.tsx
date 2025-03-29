@@ -486,13 +486,14 @@ const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateActi
                setTeamInput={setTeamInput}
              />
              <ImportOptions />
-             <div className="flex justify-end pt-6 border-t border-neutral-light/40">
+             {/* Make button container stack on mobile */}
+             <div className="flex flex-col md:flex-row md:justify-end pt-6 border-t border-neutral-light/40 gap-2">
                <Button
                  variant="primary"
-                 size="lg" // Revert to original size prop
+                 // size prop removed
                  onClick={handleContinueFromStep1} // Use updated handler
                  disabled={!projectName || !selectedPitchDeckTypeId}
-                 className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base" // Added responsive padding/text size
+                 className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" // Responsive width and sizing
                >
                  Continue to Requirements
                </Button>
@@ -516,14 +517,14 @@ const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateActi
              <TargetAudienceForm />
              {/* Add other Step 2 sections here later */}
              
-              <div className="flex justify-between pt-6 mt-6 border-t border-neutral-light/40">
-                 <Button variant="outline" onClick={() => setCurrentStep(1)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base"> {/* Removed size props, kept className */}
+              {/* Make button container stack on mobile */}
+              <div className="flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
+                 <Button variant="outline" onClick={() => setCurrentStep(1)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
                    Back to Setup
                  </Button>
                  <Button
                    variant="primary"
-                   // Removed size props
-                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base" // Kept responsive classes
+                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" // Responsive width
                    onClick={handleContinueFromStep2} // Use updated handler
                  >
                    Continue to Design & Structure
@@ -588,14 +589,14 @@ const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateActi
                   </div>
                </div>
                {/* Navigation Buttons (Full Width Below Columns) */}
-              <div className="lg:col-span-12 flex justify-between pt-6 mt-6 border-t border-neutral-light/40">
-                 <Button variant="outline" onClick={() => setCurrentStep(2)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base"> {/* Added responsive classes */}
+              {/* Make button container stack on mobile */}
+              <div className="lg:col-span-12 flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
+                 <Button variant="outline" onClick={() => setCurrentStep(2)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
                    Back to Requirements
                  </Button>
                  <Button
                    variant="primary"
-                   // size prop removed
-                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base" // Added responsive classes
+                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" // Responsive width
                    onClick={handleContinueFromStep3} // Use new handler
                  >
                    Continue to Content Generation
@@ -634,14 +635,14 @@ const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateActi
                   </div>
                </div>
                {/* Navigation Buttons */}
-              <div className="lg:col-span-12 flex justify-between pt-6 mt-6 border-t border-neutral-light/40">
-                <Button variant="outline" onClick={() => setCurrentStep(3)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base"> {/* Added responsive classes */}
+              {/* Make button container stack on mobile */}
+              <div className="lg:col-span-12 flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
+                <Button variant="outline" onClick={() => setCurrentStep(3)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
                   Back to Design
                 </Button>
                 <Button
                   variant="primary"
-                  // size prop removed
-                  className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base" // Added responsive classes
+                  className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" // Responsive width
                   onClick={handleContinueFromStep4}
                 >
                   Continue to Editing
@@ -683,14 +684,14 @@ const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateActi
                    </div>
                 </div>
                 {/* Navigation Buttons */}
-               <div className="lg:col-span-12 flex justify-between pt-6 mt-6 border-t border-neutral-light/40">
-                 <Button variant="outline" onClick={() => setCurrentStep(4)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base"> {/* Added responsive classes */}
+               {/* Make button container stack on mobile */}
+               <div className="lg:col-span-12 flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
+                 <Button variant="outline" onClick={() => setCurrentStep(4)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
                    Back to Generation
                  </Button>
                  <Button
                    variant="primary"
-                   // size prop removed
-                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base" // Added responsive classes
+                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" // Responsive width
                    onClick={handleContinueFromStep5} // Use new handler
                  >
                    Continue to QA & Refinement
@@ -744,14 +745,14 @@ const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateActi
                     </div>
                  </div>
                  {/* Navigation Buttons */}
-                <div className="lg:col-span-12 flex justify-between pt-6 mt-6 border-t border-neutral-light/40">
-                  <Button variant="outline" onClick={() => setCurrentStep(5)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base"> {/* Added responsive classes */}
+                {/* Make button container stack on mobile */}
+                <div className="lg:col-span-12 flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
+                  <Button variant="outline" onClick={() => setCurrentStep(5)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
                     Back to Editing
                   </Button>
                   <Button
                     variant="primary"
-                    // size prop removed
-                    className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base" // Added responsive classes
+                    className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" // Responsive width
                     onClick={handleContinueFromStep6}
                   >
                     Continue to Finalization
@@ -783,11 +784,12 @@ const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateActi
                  <SharingPermissions />
                  <ArchivingAnalytics />
                  {/* Navigation Buttons */}
-                <div className="flex justify-between pt-6 mt-6 border-t border-neutral-light/40">
-                  <Button variant="outline" onClick={() => setCurrentStep(6)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base"> {/* Added responsive classes */}
+                {/* Make button container stack on mobile */}
+                <div className="flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
+                  <Button variant="outline" onClick={() => setCurrentStep(6)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
                     Back to QA
                   </Button>
-                  <Button variant="primary" className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base"> {/* Added responsive classes, removed size */}
+                  <Button variant="primary" className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
                     Finish Project {/* Placeholder */}
                  </Button>
                 </div>

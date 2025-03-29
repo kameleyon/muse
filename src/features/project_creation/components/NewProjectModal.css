@@ -42,6 +42,38 @@
   position: relative;
 }
 
+/* Add media query for mobile responsiveness */
+@media (max-width: 640px) { /* Tailwind 'sm' breakpoint */
+  .modal-content {
+    min-width: 90vw; /* Use viewport width */
+    max-width: 90vw; /* Make narrower on small screens */
+    padding: 20px 25px; /* Reduce padding */
+    max-height: 90vh; /* Allow slightly more height */
+  }
+
+  .modal-content h2 {
+    font-size: 1.5rem; /* Smaller heading */
+    margin-bottom: 20px;
+  }
+
+  .selector-list {
+     max-height: calc(90vh - 200px); /* Adjust max height */
+  }
+
+  .selector-item {
+    padding: 10px 12px;
+  }
+
+  .project-name-form input[type="text"] {
+    padding: 0.6rem 0.8rem;
+  }
+
+  .submit-button {
+    padding: 0.7rem 1.2rem;
+  }
+}
+
+
 .modal-close-button {
   position: absolute;
   top: 15px; /* Adjusted position */
