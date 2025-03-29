@@ -17,7 +17,13 @@ interface WelcomeSectionProps {
   userName: string;
   draftCount: number;
   publishedCount: number;
-  onProjectCreated: (projectName: string) => void; // Update prop type to accept name
+  onProjectCreated: (details: { /* Keep details structure consistent */
+    category: ProjectCategory;
+    subcategory: ProjectSubcategory;
+    section: ProjectSection;
+    item: ProjectItem;
+    projectName: string;
+  }) => Promise<string | null>; // Change return type
 }
 
 interface DailyQuote {
@@ -66,19 +72,32 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
     setIsModalOpen(false);
   };
 
-  const handleCreateProject = (details: {
+  const handleCreateProject = async (details: { // Added async keyword here
     category: ProjectCategory;
     subcategory: ProjectSubcategory;
     section: ProjectSection;
     item: ProjectItem;
     projectName: string;
-  }) => {
+  }): Promise<string | null> => {
     console.log('Creating project with details:', details);
     // TODO: Implement actual project creation logic here (e.g., API call)
     // This might involve dispatching an action or calling a service function.
-    // Example: dispatch(createProject(details));
-    onProjectCreated(details.projectName); // Pass the project name from modal details
-    handleCloseModal(); // Close modal after handling creation (or on success)
+    // Example: const newProjectId = await dispatch(createProject(details));
+    // Removed incorrect call: onProjectCreated(details.projectName);
+
+    try {
+      // Simulate successful creation and return a dummy ID
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate async operation
+      const newProjectId = `proj_${Date.now()}`;
+      console.log(`Simulated creation, got ID: ${newProjectId}`);
+      
+      handleCloseModal(); // Close modal after handling creation (or on success)
+      return newProjectId; // Return the dummy ID
+    } catch (error) {
+      console.error("Simulated project creation failed:", error);
+      handleCloseModal(); // Close modal even on failure
+      return null; // Return null on failure
+    }
   };
   // --- End Modal Handlers ---
 

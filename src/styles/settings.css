@@ -26,6 +26,7 @@
 .settings-menu-item.active {
   color: #ae5630;
   font-weight: 600;
+  /* background-color: rgba(174, 86, 48, 0.1); */ /* Removed background */
 }
 
 .settings-submenu {
@@ -51,6 +52,7 @@
 .settings-submenu-item.active {
   color: #ae5630;
   font-weight: 600;
+  /* background-color: rgba(174, 86, 48, 0.1); */ /* Removed background */
 }
 
 /* Settings Form Elements */

@@ -43,11 +43,32 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [showProjectView, setShowProjectView] = useState(false); // State for project view
   const [currentProjectName, setCurrentProjectName] = useState<string | null>(null); // State for project name
 
-  // Handler to switch to project view and store name
-  const handleProjectCreationSuccess = (projectName: string) => {
-    console.log(`Switching to project view for: ${projectName}`);
-    setCurrentProjectName(projectName); // Store the name
-    setShowProjectView(true);
+  // Handler for project creation success (now primarily for backend call simulation)
+  const handleProjectCreationSuccess = async (details: {
+    category: any; // Use 'any' or import specific types if needed here
+    subcategory: any;
+    section: any;
+    item: any;
+    projectName: string;
+  }): Promise<string | null> => {
+    console.log('MainLayout: Project creation initiated with details:', details);
+    // TODO: Implement actual backend project creation call here
+    // This function's primary role now is to perform the backend creation
+    // and return the ID. Navigation happens within the modal.
+    try {
+      // Simulate backend call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const newProjectId = `proj_${Date.now()}`; // Generate dummy ID
+      console.log(`MainLayout: Simulated backend creation, got ID: ${newProjectId}`);
+      // Optionally update global state or trigger data refresh here
+      return newProjectId; // Return the ID to the modal
+    } catch (error) {
+      console.error("MainLayout: Project creation failed:", error);
+      dispatch(addToast({ type: 'error', message: 'Failed to create project.' }));
+      return null; // Indicate failure
+    }
+    // Note: We no longer set local state like showProjectView here,
+    // as navigation handles showing the correct project page.
   };
 
   // Fetch profile and check onboarding status

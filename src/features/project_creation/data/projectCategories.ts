@@ -51,13 +51,13 @@ export const projectCategories: ProjectCategory[] = [
           {
             id: 'proposal_pitch_deck_generation',
             name: 'Proposal & Pitch Deck Generation',
-            items: [
-              { id: 'business_proposal', name: 'Business proposal' },
+             items: [
+             //{ id: 'business_proposal', name: 'Business proposal' },
               { id: 'investment_pitch', name: 'Investment pitch' },
-              { id: 'sales_proposal', name: 'Sales proposal' },
+              /*{ id: 'sales_proposal', name: 'Sales proposal' },
               { id: 'partnership_proposal', name: 'Partnership proposal' },
               { id: 'project_proposal', name: 'Project proposal' },
-              { id: 'custom_proposal', name: 'Custom proposal' },
+              { id: 'custom_proposal', name: 'Custom proposal' },*/
             ],
           },
           {

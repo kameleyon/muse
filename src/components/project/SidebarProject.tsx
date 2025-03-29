@@ -41,7 +41,7 @@ const SidebarProject: React.FC<SidebarProjectProps> = () => {
   };
 
   return (
-    <Card className="sidebar-project-menu shadow-sm sm:shadow-md hover:shadow-lg transition-shadow mb-4 lg:mb-6 sticky top-[80px]"> {/* Adjust top offset if needed */}
+    <Card className="sidebar-project-menu shadow-sm sm:shadow-md hover:shadow-lg transition-shadow mb-4 lg:mb-6 sticky top-0"> {/* Adjust top offset if needed */}
       <div className="p-3 sm:p-4 border-b border-neutral-light/40 bg-white/5 flex items-center justify-between">
         <h2 className="text-lg sm:text-xl font-comfortaa text-[#1a1918]">Project Menu</h2>
         <button
@@ -58,10 +58,8 @@ const SidebarProject: React.FC<SidebarProjectProps> = () => {
             {projectMenuItems.map((item: ProjectMenuItem) => (
               <li key={item.id}>
                 <button
-                  className={`project-menu-item w-full text-left flex items-center gap-2 px-3 py-2 rounded-md transition-colors duration-150 ease-in-out ${
-                    activeItem === item.id
-                      ? 'bg-[#ae5630]/10 text-[#ae5630] font-medium' // Active item style
-                      : 'text-neutral-dark hover:bg-neutral-light/50' // Inactive item style
+                  className={`settings-menu-item w-full text-left ${ // Use settings class
+                    activeItem === item.id ? 'active' : '' // Add active class conditionally
                   }`}
                   onClick={() => handleItemClick(item.id, item.subItems)}
                 >
@@ -79,10 +77,8 @@ const SidebarProject: React.FC<SidebarProjectProps> = () => {
                     {item.subItems.map((subItem: ProjectSubItem) => (
                       <li key={subItem.id}>
                         <button
-                          className={`project-submenu-item w-full text-left flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors duration-150 ease-in-out ${
-                            activeSubItem === subItem.id
-                              ? 'text-[#ae5630] font-medium' // Active sub-item style
-                              : 'text-neutral-medium hover:text-neutral-dark hover:bg-neutral-light/40' // Inactive sub-item style
+                          className={`settings-submenu-item w-full text-left ${ // Use settings class
+                            activeSubItem === subItem.id ? 'active' : '' // Add active class conditionally
                           }`}
                           onClick={() => handleSubItemClick(subItem.id)}
                         >

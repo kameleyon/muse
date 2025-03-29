@@ -20,6 +20,8 @@ const ContentLibrary = lazy(() => import(/* webpackChunkName: "content-library" 
 const Chat = lazy(() => import(/* webpackChunkName: "chat" */ './pages/Chat'));
 const Profile = lazy(() => import(/* webpackChunkName: "profile" */ './pages/Profile'));
 const Settings = lazy(() => import(/* webpackChunkName: "settings" */ './pages/Settings'));
+// Removed NewProject import
+const ProjectSetup = lazy(() => import(/* webpackChunkName: "project-setup" */ './pages/ProjectSetup')); // Added ProjectSetup page
 const NotFound = lazy(() => import(/* webpackChunkName: "not-found" */ './pages/NotFound'));
 
 function App() {
@@ -136,7 +138,21 @@ function App() {
                     </MainLayout>
                   </ProtectedRoute>
                 </Suspense>
-              } 
+              }
+            />
+
+            {/* Project Setup Route */}
+            <Route
+              path="/project/:projectId/setup"
+              element={
+                <Suspense fallback={<Loading />}>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <ProjectSetup />
+                    </MainLayout>
+                  </ProtectedRoute>
+                </Suspense>
+              }
             />
             
             {/* Legacy /app routes - redirect to new routes */}

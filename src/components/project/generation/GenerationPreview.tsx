@@ -10,7 +10,7 @@ interface GenerationPreviewProps {
 const GenerationPreview: React.FC<GenerationPreviewProps> = ({ content }) => {
   return (
     // Removed min-h-[400px], added fixed height and flex-col
-    <Card className="p-4 border border-neutral-light bg-white shadow-md h-[500px] flex flex-col"> {/* Example fixed height, adjust as needed */}
+    <Card className="p-4 border border-neutral-light bg-white shadow-md h-[700px] flex flex-col"> {/* Example fixed height, adjust as needed */}
       <h4 className="font-semibold text-neutral-dark mb-2 text-center text-sm border-b pb-2 flex-shrink-0">Real-Time Preview</h4>
       {/* Added custom scrollbar classes (needs definition in global CSS) */}
       <div 

@@ -27,37 +27,32 @@ const GenerationSetup: React.FC<GenerationSetupProps> = ({ onGenerate, isGenerat
       {/* Fact Checking Level */}
       <div className="mb-4">
         <label className="settings-label mb-2">Fact-Checking Level</label>
-        <RadioGroup
-          value={factCheckLevel}
-          onValueChange={(value) => setFactCheckLevel(value as FactCheckLevel)}
-          className="flex flex-row flex-wrap gap-2" // Use flex-wrap
-        >
-          <div className="flex items-center space-x-2 p-2 border rounded-md flex-1 cursor-pointer hover:border-primary has-[:checked]:border-primary has-[:checked]:ring-1 has-[:checked]:ring-primary">
-            <RadioGroupItem value="basic" id="fc-basic" />
-            <label htmlFor="fc-basic" className="text-sm cursor-pointer">Basic</label>
-          </div>
-          <div className="flex items-center space-x-2 p-2 border rounded-md flex-1 cursor-pointer hover:border-primary has-[:checked]:border-primary has-[:checked]:ring-1 has-[:checked]:ring-primary">
-            <RadioGroupItem value="standard" id="fc-standard" />
-            <label htmlFor="fc-standard" className="text-sm cursor-pointer">Standard</label>
-          </div>
-          <div className="flex items-center space-x-2 p-2 border rounded-md flex-1 cursor-pointer hover:border-primary has-[:checked]:border-primary has-[:checked]:ring-1 has-[:checked]:ring-primary">
-            <RadioGroupItem value="thorough" id="fc-thorough" />
-            <label htmlFor="fc-thorough" className="text-sm cursor-pointer">Thorough</label>
-          </div>
-        </RadioGroup>
+        <div className="flex flex-col gap-2"> {/* Changed to flex-col */}
+          {(['basic', 'standard', 'thorough'] as FactCheckLevel[]).map((level) => (
+            <Button
+              key={level}
+              variant={factCheckLevel === level ? 'primary' : 'outline'}
+              onClick={() => setFactCheckLevel(level)}
+              size="sm" // Adjust size as needed
+              className={`flex-1 ${factCheckLevel === level ? 'text-white border-black p-1' : ''}`} // Ensure text color contrast for primary
+            >
+              {level.charAt(0).toUpperCase() + level.slice(1)} {/* Capitalize */}
+            </Button>
+          ))}
+        </div>
          <p className="text-xs text-neutral-medium mt-1">Determines depth of fact verification (uses research model).</p>
       </div>
 
       {/* Add other controls (Tone, Depth, Visuals) later */}
       
-      <div className="flex justify-end mt-4">
-        <Button 
+      <div className="flex justify-center mt-4"> {/* Changed justify-end to justify-center */}
+        <Button
           onClick={handleGenerateClick} // Use updated handler
           disabled={isGenerating}
-          size="lg"
-          className="text-white" 
+          size="sm"
+          className="text-white p-2 rounded-lg w-full" 
         >
-          <Wand2 size={18} className="mr-2" /> 
+          <Wand2 size={18} className="text-xs pr-1" /> 
           {isGenerating ? 'Generating...' : 'Start Content Generation'}
         </Button>
       </div>

@@ -10,8 +10,8 @@ interface PitchDeckTypeGridProps {
 const PitchDeckTypeGrid: React.FC<PitchDeckTypeGridProps> = ({ selectedTypeId, onSelectType }) => {
   return (
     <div className="mb-8 ">
-      <h2 className="text-xl font-semibold font-heading text-secondary mb-4">Choose Your Pitch Deck Type</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 w-full">
+      <h2 className="text-xl font-semibold font-heading text-secondary">Choose Your Pitch Deck Type</h2> {/* Removed mb-4 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 w-full mt-4">
         {pitchDeckTypes.map((type: PitchDeckType) => (
           <PitchDeckTypeCard
             key={type.id}

@@ -1,5 +1,6 @@
 // src/features/project_creation/components/NewProjectModal.tsx
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import {
   projectCategories,
   findCategoryById,
@@ -27,7 +28,7 @@ interface NewProjectModalProps {
     section: ProjectSection;
     item: ProjectItem;
     projectName: string;
-  }) => void;
+  }) => Promise<string | null>; // Assume it returns the new project ID or null on failure
 }
 
 type Step = 'category' | 'subcategory' | 'section' | 'item' | 'name';
@@ -37,6 +38,7 @@ const NewProjectModal: React.FC<NewProjectModalProps> = ({
   onClose,
   onCreateProject,
 }) => {
+  const navigate = useNavigate(); // Add useNavigate hook
   const [currentStep, setCurrentStep] = useState<Step>('category');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string | null>(null);
@@ -69,20 +71,37 @@ const NewProjectModal: React.FC<NewProjectModalProps> = ({
     setCurrentStep('name');
   };
 
-  const handleNameSubmit = (name: string) => {
+  const handleNameSubmit = async (name: string) => { // Make function async
     setProjectName(name);
     // All selections are made, call the final creation function
     if (selectedCategory && selectedSubcategory && selectedSection && selectedItem) {
-      onCreateProject({
-        category: selectedCategory,
-        subcategory: selectedSubcategory,
-        section: selectedSection,
-        item: selectedItem,
-        projectName: name,
-      });
-      resetAndClose(); // Close after creation
+      try {
+        const newProjectId = await onCreateProject({ // Await the result
+          category: selectedCategory,
+          subcategory: selectedSubcategory,
+          section: selectedSection,
+          item: selectedItem,
+          projectName: name,
+        });
+
+        if (newProjectId) {
+          onClose(); // Close the modal first
+          // Pass project name in navigation state
+          navigate(`/project/${newProjectId}/setup`, { state: { projectName: name } });
+        } else {
+          // Handle case where creation succeeded but no ID was returned (shouldn't happen ideally)
+          console.error("Project created but no ID returned.");
+          resetAndClose(); // Reset and close modal
+        }
+      } catch (error) {
+        // Handle error during project creation
+        console.error("Error during project creation:", error);
+        // Optionally show feedback to the user in the modal
+        // For now, just reset and close
+        resetAndClose();
+      }
     } else {
-      // Handle error case - should not happen if logic is correct
+      // Handle error case - missing selections
       console.error("Error: Missing selections for project creation.");
       resetAndClose(); // Close even on error
     }

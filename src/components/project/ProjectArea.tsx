@@ -25,6 +25,9 @@ import SharingPermissions from './delivery/SharingPermissions'; // Import Step 7
 import ArchivingAnalytics from './delivery/ArchivingAnalytics';
 import * as contentGenerationService from '@/services/contentGenerationService';
 import { createResearchPrompt, createPitchDeckContentPrompt } from '@/lib/prompts/pitchDeckPrompts'; // Import prompt functions
+import ReactDOMServer from 'react-dom/server'; // Import for rendering component to string
+import html2pdf from 'html2pdf.js'; // Import html2pdf
+import { MarkdownContent } from '@/lib/markdown'; // Import Markdown renderer
 import '@/styles/ProjectArea.css';
 import '@/styles/ProjectSetup.css';
 // Potentially add new CSS files for Steps 6 & 7 later if needed
@@ -93,6 +96,11 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
   const [editorContent, setEditorContent] = useState<string>(''); // Content for the rich text editor
   const [isLoadingEnhancement, setIsLoadingEnhancement] = useState<boolean>(false); // Loading state for enhancements
   // --- End State for Step 5 ---
+  
+  // --- State for Client-Side PDF Export ---
+  const [isGeneratingClientPdf, setIsGeneratingClientPdf] = useState<boolean>(false);
+  const [clientPdfStatus, setClientPdfStatus] = useState<'idle' | 'generating' | 'success' | 'error'>('idle');
+  // --- End State for Client-Side PDF Export ---
 
   // Handler to select/deselect pitch deck type
   const handleSelectType = (id: string) => {
@@ -271,6 +279,62 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
   // Add handlers for other enhancement buttons later
   // --- End Step 5 Handlers ---
 
+  // --- Client-Side PDF Generation Handler ---
+  const handleGenerateClientPdf = async () => {
+    if (!editorContent) {
+      console.error("No content available to generate PDF.");
+      setClientPdfStatus('error');
+      return;
+    }
+    
+    setIsGeneratingClientPdf(true);
+    setClientPdfStatus('generating');
+    console.log("Generating PDF client-side...");
+
+    try {
+      // 1. Render Markdown to HTML string
+      // We need to wrap MarkdownContent in basic HTML structure for pdf generation
+      const htmlString = ReactDOMServer.renderToString(
+        <html>
+          <head>
+            {/* Basic styling - consider linking a CSS file or adding more inline styles */}
+            <style>{`
+              body { font-family: sans-serif; padding: 20px; }
+              h1, h2, h3 { margin-bottom: 0.5em; }
+              p { margin-bottom: 1em; line-height: 1.4; }
+              ul, ol { margin-left: 20px; margin-bottom: 1em; }
+              /* Add more styles based on MarkdownContent's output if needed */
+            `}</style>
+          </head>
+          <body>
+            <MarkdownContent content={editorContent} />
+          </body>
+        </html>
+      );
+
+      // 2. Configure html2pdf
+      const pdfOptions = {
+        margin:       [1, 1, 1, 1], // Use array for margins [top, left, bottom, right] in inches
+        filename:     `${projectName || 'magicmuse-project'}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true }, // Increase scale for better quality
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+
+      // 3. Generate PDF
+      await html2pdf().set(pdfOptions).from(htmlString).save();
+
+      console.log("Client-side PDF generated successfully.");
+      setClientPdfStatus('success');
+
+    } catch (error) {
+      console.error("Client-side PDF generation failed:", error);
+      setClientPdfStatus('error');
+    } finally {
+      setIsGeneratingClientPdf(false);
+    }
+  };
+  // --- End Client-Side PDF Generation Handler ---
 
   // --- Step 4 Handler ---
   const handleGenerateContent = async (options: { factCheckLevel: 'basic' | 'standard' | 'thorough' }) => {
@@ -287,12 +351,20 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
     };
 
     try {
+      // Calculate dynamic steps
+      const researchSteps = 1;
+      const contentSteps = slideStructure.length > 0 ? slideStructure.length : 1; // Ensure at least 1 content step
+      const finalizationSteps = 1;
+      const totalSteps = researchSteps + contentSteps + finalizationSteps;
+      const progressIncrement = 100 / totalSteps;
+      let currentProgress = 0;
+
       // --- Step 1: Research ---
       setGenerationStatusText('Researching background information...');
-      setGenerationProgress(10); // Start progress
+      setGenerationProgress(Math.round(currentProgress)); // Start progress at 0
       const researchPrompt = createResearchPrompt(projectInfo);
       const researchResult = await contentGenerationService.generateContent({
-         projectId: 'temp-project-id',
+         projectId: 'temp-project-id', // TODO: Use actual project ID
          prompt: researchPrompt,
          useResearchModel: true,
          factCheckLevel: options.factCheckLevel
@@ -303,14 +375,17 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
       }
       
       // --- Update after Research ---
-      setGenerationProgress(50); // Indicate research complete
-      setGenerationStatusText('Generating pitch deck content...');
+      currentProgress += progressIncrement * researchSteps;
+      setGenerationProgress(Math.round(currentProgress));
+      setGenerationStatusText(`Generating content for ${contentSteps} sections...`);
       setGeneratedContentPreview(`Research Summary:\n${researchResult.content.substring(0, 300)}...\n\n---`); // Show summary briefly
 
       // --- Step 2: Content Generation ---
-      const contentPrompt = createPitchDeckContentPrompt(projectInfo, researchResult.content);
+      // Add instruction for Markdown formatting to the prompt
+      const contentPrompt = createPitchDeckContentPrompt(projectInfo, researchResult.content) +
+                            "\n\nPlease format the entire output strictly as Markdown, using appropriate headings (## for sections, ### for subsections), bullet points (*), and bold text (**bold**).";
       const contentResult = await contentGenerationService.generateContent({
-         projectId: 'temp-project-id',
+         projectId: 'temp-project-id', // TODO: Use actual project ID
          prompt: contentPrompt,
          useResearchModel: false,
       });
@@ -318,11 +393,23 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
        if (!contentResult || contentResult.content.startsWith('Error:')) {
          throw new Error(contentResult?.content || 'Content generation step failed.');
       }
+      
+      // --- Update after Content Generation ---
+      currentProgress += progressIncrement * contentSteps; // Add progress for all content steps
+      setGenerationProgress(Math.round(currentProgress));
+      setGenerationStatusText('Finalizing and formatting...');
 
       // --- Finalize ---
-      setGenerationProgress(100); // Mark as complete before typing
+      // Add a small delay for "Finalizing" step before setting to 100%
+      await new Promise(resolve => setTimeout(resolve, 300)); // Simulate finalization
+      currentProgress += progressIncrement * finalizationSteps;
+      setGenerationProgress(100); // Ensure it reaches 100
       setGenerationStatusText('Generation complete. Displaying content...');
-      simulateTyping(contentResult.content, setGeneratedContentPreview); // Start typing effect
+      
+      // Prepend H1 title and ensure Markdown format
+      const finalMarkdownContent = `# ${projectName}\n\n${contentResult.content}`;
+      
+      simulateTyping(finalMarkdownContent, setGeneratedContentPreview); // Start typing effect with formatted content
 
     } catch (error) {
       console.error("Generation failed:", error);
@@ -336,7 +423,7 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
   };
 
 // Helper for typing effect
-const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateAction<string>>, speed = 1) => { // Further decreased speed from 5 to 1ms
+const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateAction<string>>, speed = 0) => { // Changed default speed to 0ms
   let i = 0;
   setText('');
   const intervalId = setInterval(() => {
@@ -577,13 +664,16 @@ const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateActi
                 <div className="lg:col-span-8 space-y-6">
                    <ContentEditor
                       content={editorContent}
-                      onChange={setEditorContent}
+                      onChange={setEditorContent} // Re-add onChange prop
                    />
                 </div>
                 {/* Right Sidebar: Tools & Collaboration */}
                 <div className="lg:col-span-4 space-y-6">
                    <div className="sticky top-[80px] space-y-6"> {/* Make sidebar sticky */}
-                      <EnhancementTools />
+                      <EnhancementTools
+                         editorContent={editorContent}
+                         onContentChange={setEditorContent}
+                      />
                       <VisualElementStudio />
                       <CollaborationTools />
                    </div>
@@ -681,7 +771,11 @@ const simulateTyping = (text: string, setText: React.Dispatch<React.SetStateActi
                {/* Step 7 Layout: Maybe sections in one column? */}
               <div className="p-4 md:p-6 space-y-6">
                  <PresenterTools />
-                 <ExportConfiguration />
+                 <ExportConfiguration
+                    onGenerateClientPdf={handleGenerateClientPdf} // Pass the function
+                    isGeneratingClientPdf={isGeneratingClientPdf} // Pass loading state
+                    clientPdfStatus={clientPdfStatus} // Pass status state
+                 />
                  <SharingPermissions />
                  <ArchivingAnalytics />
                  {/* Navigation Buttons */}

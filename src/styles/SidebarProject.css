@@ -1,67 +1,141 @@
 /* src/styles/SidebarProject.css */
 
-/* Basic styling for the sidebar container */
+/* --- Old Styles (Commented Out) --- */
+/*
 .sidebar-project-menu {
-  /* Inherit sticky behavior if needed, adjust top offset based on header height */
   position: sticky;
-  /* top: 4rem; /* Example: Adjust based on actual header height */
-  /* Match settings menu stickiness */
-   top: 80px; /* From SidebarProject.tsx */
+  top: 2rem; 
 }
 
-/* Project Menu Item Styling (Adapted from settings.css) */
 .project-menu-item {
-  /* Using Tailwind classes in the component now, but keep this for potential overrides */
-  /* display: flex; */
-  /* align-items: center; */
-  /* gap: 0.5rem; */
-  /* padding: 0.75rem 1rem; */ /* Handled by Tailwind */
-  /* border-radius: 0.5rem; */ /* Handled by Tailwind */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem; 
+  border-radius: 0.375rem; 
   cursor: pointer;
-  /* transition: all 0.2s ease; */ /* Handled by Tailwind */
+  transition: background-color 0.2s ease, color 0.2s ease;
+  font-size: 0.875rem; 
 }
 
-/* Hover effect handled by Tailwind hover:bg-neutral-light/50 */
-/* .project-menu-item:hover { */
-/*   background-color: rgba(174, 86, 48, 0.1); */
-/* } */
+.project-menu-item:hover {
+  background-color: var(--neutral-light);
+}
 
-/* Active state handled by Tailwind bg-[#ae5630]/10 text-[#ae5630] font-medium */
-/* .project-menu-item.active { */
-/*   color: #ae5630; */
-/*   font-weight: 600; */
-/* } */
+.project-menu-item.active {
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+  font-weight: 500;
+}
 
-/* Project Submenu Styling (Adapted from settings.css) */
 .project-submenu {
-  /* Using Tailwind classes in the component now */
-  /* margin-left: 1.5rem; */ /* Handled by pl-6 */
-  /* margin-top: 0.25rem; */ /* Handled by mt-1 */
-  /* border-left: 1px solid #bcb7af; */ /* Handled by border-l */
-  /* margin-left: 0.75rem; */ /* Handled by ml-3 */
+  margin-left: 1.5rem; 
+  margin-top: 0.25rem;
+  padding-left: 0.75rem; 
+  border-left: 1px solid var(--neutral-light-border); 
 }
 
 .project-submenu-item {
-  /* Using Tailwind classes in the component now */
-  /* display: flex; */
-  /* align-items: center; */
-  /* gap: 0.5rem; */
-  /* padding: 0.5rem 1rem; */ /* Handled by px-3 py-1.5 */
-  /* border-radius: 0.5rem; */ /* Handled by rounded-md */
-  /* font-size: 0.875rem; */ /* Handled by text-xs sm:text-sm */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem; 
+  border-radius: 0.375rem;
+  font-size: 0.8125rem; 
   cursor: pointer;
-  /* transition: all 0.2s ease; */ /* Handled by Tailwind */
+  transition: background-color 0.2s ease, color 0.2s ease;
+  color: var(--neutral-medium); 
 }
 
-/* Hover effect handled by Tailwind hover:text-neutral-dark hover:bg-neutral-light/40 */
-/* .project-submenu-item:hover { */
-/*   background-color: rgba(174, 86, 48, 0.1); */
-/* } */
+.project-submenu-item:hover {
+  background-color: var(--neutral-light);
+  color: var(--neutral-dark);
+}
 
-/* Active state handled by Tailwind text-[#ae5630] font-medium */
-/* .project-submenu-item.active { */
-/*   color: #ae5630; */
-/*   font-weight: 600; */
-/* } */
+.project-submenu-item.active {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+*/
 
-/* Add more specific styles as the component evolves */
+/* --- New Styles (Copied from settings.css) --- */
+
+.settings-menu { /* Keep this class name for the Card if needed, or adjust if SidebarProject uses sidebar-project-menu */
+  position: sticky;
+  /* Adjust top offset if needed, matching the original component */
+  /* top: 2rem; */ 
+  /* top: 80px; */ /* From original SidebarProject */
+}
+
+.settings-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Match settings */
+  padding: 0.75rem 1rem; /* Match settings */
+  border-radius: 0.5rem; /* Match settings */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  /* Remove explicit font size, rely on parent or defaults */
+  /* Remove explicit text color, rely on parent or defaults */
+  /* Remove explicit width, rely on parent */
+}
+
+.settings-menu-item:hover {
+  background-color: rgba(174, 86, 48, 0.1); /* Match settings hover */
+  /* Remove text color change on hover unless needed */
+}
+
+.settings-menu-item.active {
+  color: #ae5630; /* Match settings active color */
+  font-weight: 600; /* Match settings active weight */
+  /* Removed background-color for active item */
+}
+
+.settings-submenu {
+  margin-left: 1.5rem; /* Match settings */
+  margin-top: 0.25rem; /* Match settings */
+  /* Add padding/border if needed, like original project submenu */
+  padding-left: 0.75rem; 
+  border-left: 1px solid var(--neutral-light-border); 
+}
+
+.settings-submenu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Match settings */
+  padding: 0.5rem 1rem; /* Match settings */
+  border-radius: 0.5rem; /* Match settings */
+  font-size: 0.875rem; /* Match settings */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  /* Remove explicit text color, rely on parent or defaults */
+}
+
+.settings-submenu-item:hover {
+  background-color: rgba(174, 86, 48, 0.1); /* Match settings hover */
+  /* Remove text color change on hover unless needed */
+}
+
+.settings-submenu-item.active {
+  color: #ae5630; /* Match settings active color */
+  font-weight: 600; /* Match settings active weight */
+  /* Removed background-color for active sub-item */
+}
+
+/* Ensure icons inherit the active color */
+.settings-menu-item.active span svg,
+.settings-submenu-item.active span svg {
+  color: #ae5630;
+}
+
+/* Ensure icons in non-active items have default color */
+.settings-menu-item span svg,
+.settings-submenu-item span svg {
+   color: var(--neutral-dark); /* Or inherit, or specific default color */
+}
+
+/* Adjust sticky top position based on original component */
+.sidebar-project-menu { /* Apply sticky to the original root class */
+   position: sticky;
+   top: 80px; /* From original SidebarProject */
+}
