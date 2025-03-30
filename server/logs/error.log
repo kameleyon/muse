@@ -58,3 +58,7 @@
 2025-03-25 14:51:19 [error]: Unhandled Error: Error: AI content generation failed: OpenRouter API error: anthropic/claude-3-haiku-20240307 is not a valid model ID
     at C:\Users\Administrator\myAPP\mm.io\server\src\controllers\ai.ts:69:17
     at processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-03-29 23:08:44 [error]: Supabase error creating project: Could not find the 'description' column of 'projects' in the schema cache
+2025-03-29 23:09:32 [error]: Failed to upload file for project proj_1743304124070: Bucket not found
+2025-03-29 23:09:44 [error]: Supabase error creating project: Could not find the 'description' column of 'projects' in the schema cache
+2025-03-29 23:14:59 [error]: Supabase error creating project: Could not find the 'name' column of 'projects' in the schema cache

@@ -1,45 +1,57 @@
-import React from 'react';
-import { cn } from '@/lib/utils'; // Assuming utils exists for class merging
+import React, { createContext, useContext, useState } from 'react';
+import { cn } from '@/lib/utils';
 
-// Context to share state between RadioGroup and RadioGroupItem
-interface RadioGroupContextProps {
-  value: string;
-  onValueChange: (value: string) => void;
-  name?: string; // Optional name for native radio grouping
+// Create a context for the radio group
+interface RadioGroupContextType {
+  value?: string;
+  onValueChange?: (value: string) => void;
+  name?: string;
 }
 
-const RadioGroupContext = React.createContext<RadioGroupContextProps | null>(null);
+const RadioGroupContext = createContext<RadioGroupContextType>({});
+
+// Export a hook to use the RadioGroup context
+export const useRadioGroupContext = () => useContext(RadioGroupContext);
 
 interface RadioGroupProps extends React.HTMLAttributes<HTMLDivElement> {
-  value: string; // The controlled value of the selected radio item
-  onValueChange: (value: string) => void; // Callback when the value changes
-  name?: string; // Optional name attribute for the radio inputs
-  defaultValue?: string; // Optional default value (if uncontrolled) - Not used in this controlled example
+  value?: string;
+  onValueChange?: (value: string) => void;
+  name?: string;
+  defaultValue?: string;
 }
 
-const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
-  ({ className, value, onValueChange, name, children, ...props }, ref) => {
-    // Provide context to children
-    const contextValue = React.useMemo(() => ({ value, onValueChange, name }), [value, onValueChange, name]);
-    return (
-      <RadioGroupContext.Provider value={contextValue}>
-        {/* The role="radiogroup" is important for accessibility */}
-        <div ref={ref} role="radiogroup" className={cn("grid gap-2", className)} {...props}>
-          {children}
-        </div>
-      </RadioGroupContext.Provider>
-    );
-  }
-);
-RadioGroup.displayName = "RadioGroup";
+const RadioGroup: React.FC<RadioGroupProps> = ({
+  value,
+  onValueChange,
+  name,
+  defaultValue,
+  children,
+  className,
+  ...props
+}) => {
+  const [internalValue, setInternalValue] = useState(defaultValue || '');
+  
+  // If value is passed, component is controlled, otherwise use internal state
+  const isControlled = value !== undefined;
+  const currentValue = isControlled ? value : internalValue;
+  
+  const handleValueChange = (newValue: string) => {
+    if (!isControlled) {
+      setInternalValue(newValue);
+    }
+    onValueChange?.(newValue);
+  };
 
-// Hook for RadioGroupItem to access context
-export const useRadioGroupContext = () => {
-  const context = React.useContext(RadioGroupContext);
-  if (!context) {
-    throw new Error("useRadioGroupContext must be used within a <RadioGroup>");
-  }
-  return context;
+  return (
+    <RadioGroupContext.Provider
+      value={{ value: currentValue, onValueChange: handleValueChange, name }}
+    >
+      <div role="radiogroup" className={className} {...props}>
+        {children}
+      </div>
+    </RadioGroupContext.Provider>
+  );
 };
 
+// Note: RadioGroupItem component is now in its own file
 export { RadioGroup };

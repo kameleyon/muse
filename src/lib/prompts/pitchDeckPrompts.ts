@@ -5,6 +5,7 @@ interface ProjectInfo {
   projectName: string;
   pitchDeckType: string; // e.g., 'investment', 'sales'
   description?: string;
+  tags?: string[]; // Add tags
   audience?: any; // Data from Step 2
   product?: any; // Data from Step 2
   objective?: any; // Data from Step 2
@@ -20,6 +21,9 @@ export const createResearchPrompt = (info: ProjectInfo): string => {
   let prompt = `Gather comprehensive background information for creating a ${info.pitchDeckType} pitch deck for a project named "${info.projectName}".`;
   if (info.description) {
     prompt += ` The project is described as: ${info.description}.`;
+  }
+  if (info.tags && info.tags.length > 0) {
+    prompt += ` Key themes/tags associated with the project are: ${info.tags.join(', ')}.`;
   }
   // Add specifics based on pitch deck type
   if (info.pitchDeckType === 'investment' || info.pitchDeckType === 'startup') {
@@ -57,7 +61,8 @@ export const createPitchDeckContentPrompt = (info: ProjectInfo, researchData: st
 Project Name: ${info.projectName}
 Pitch Deck Type: ${info.pitchDeckType}
 ${info.description ? `Project Description: ${info.description}\n` : ''}
-${info.audience ? `Target Audience Info: ${JSON.stringify(info.audience)}\n` : ''} 
++${info.tags && info.tags.length > 0 ? `Project Tags: ${info.tags.join(', ')}\n` : ''}
+${info.audience ? `Target Audience Info: ${JSON.stringify(info.audience)}\n` : ''}
 ${info.product ? `Product Info: ${JSON.stringify(info.product)}\n` : ''}
 ${info.objective ? `Objective Info: ${JSON.stringify(info.objective)}\n` : ''}
 

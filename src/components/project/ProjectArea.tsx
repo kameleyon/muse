@@ -30,6 +30,7 @@ import html2pdf from 'html2pdf.js';
 import { marked } from 'marked';
 import { MarkdownContent } from '@/lib/markdown';
 import { useProjectWorkflowStore, initializeWorkflowState, QualityMetrics, FactCheckResult, Suggestion } from '@/store/projectWorkflowStore'; // Import Zustand store AND types
+import { createProjectAPI } from '@/services/projectService'; // Import the API function
 import '@/styles/ProjectArea.css';
 import '@/styles/ProjectSetup.css';
 // Potentially add new CSS files for Steps 6 & 7 later if needed
@@ -45,6 +46,7 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
   const {
     // Step 1 State
     selectedPitchDeckTypeId,
+    projectId, // Destructure projectId
     projectName,
     description,
     privacy,
@@ -55,6 +57,7 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
     setProjectName,
     setDescription,
     setPrivacy,
+    setProjectId, // Destructure the action
     setTagsFromString, // Use action that takes string input
     setTeamMembersFromString, // Use action that takes string input
     // Step 2 State & Actions (Audience) - Already added in store, just need to destructure if used directly here
@@ -100,71 +103,13 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
     // Set initial state for other fields if needed, or rely on store defaults
   }, [initialName]); // Run only when initialName changes (typically once)
 
-  // --- State for Step 1 (REMOVED - Now in Zustand) ---
-  // const [selectedPitchDeckTypeId, setSelectedPitchDeckTypeId] = useState<string | null>(null);
-  // const [projectName, setProjectName] = useState<string>(initialName || '');
-  // const [description, setDescription] = useState<string>('');
-  // const [privacy, setPrivacy] = useState<'private' | 'team' | 'public'>('private');
-  // const [tagsInput, setTagsInput] = useState<string>(''); // Input state might move to ProjectSetupForm
-  // const [teamInput, setTeamInput] = useState<string>(''); // Input state might move to ProjectSetupForm
-  // --- End State for Step 1 ---
-
-  // --- State for Step 2 (Add as needed) ---
-  // Example:
-  // const [audienceName, setAudienceName] = useState<string>('');
-  // --- End State for Step 2 ---
-
-  // --- State for Step 3 (REMOVED - Now in Zustand) ---
-  // const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-  // const [brandLogo, setBrandLogo] = useState<string | null>(null);
-  // const [primaryColor, setPrimaryColor] = useState<string>('#ae5630');
-  // const [secondaryColor, setSecondaryColor] = useState<string>('#232321');
-  // const [accentColor, setAccentColor] = useState<string>('#9d4e2c');
-  // const [headingFont, setHeadingFont] = useState<string>('Comfortaa');
-  // const [bodyFont, setBodyFont] = useState<string>('Questrial');
-  // const [slideStructure, setSlideStructure] = useState([ ... ]);
-  // const [complexityLevel, setComplexityLevel] = useState<number>(50);
-  // --- End State for Step 3 ---
-
-  // --- State for Step 4 (REMOVED - Now in Zustand) ---
-  // const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  // const [generationProgress, setGenerationProgress] = useState<number>(0);
-  // const [generationStatusText, setGenerationStatusText] = useState<string>('');
-  // const [generatedContentPreview, setGeneratedContentPreview] = useState<string>('');
-  // --- End State for Step 4 ---
-
-  // --- State for Step 6 (REMOVED - Now in Zustand) ---
-  // Define types based on service placeholders (or import if defined elsewhere)
-  // type QualityMetrics = { overallScore: number; categories: { name: string; score: number }[]; issues: { id: string; severity: string; text: string }[]; };
-  // type FactCheckResult = { claim: string; verified: boolean; source?: string; explanation?: string; };
-  // type Suggestion = { id: string; text: string; impact: string; effort: string; };
-
-  // const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics | null>(null);
-  // const [factCheckResults, setFactCheckResults] = useState<FactCheckResult[]>([]);
-  // const [complianceStatus, setComplianceStatus] = useState<'Not Run' | 'Running' | 'Passed' | 'Issues Found'>('Not Run');
-  // const [financialValidationStatus, setFinancialValidationStatus] = useState<'Not Run' | 'Running' | 'Passed' | 'Issues Found'>('Not Run');
-  // const [languageCheckStatus, setLanguageCheckStatus] = useState<'Not Run' | 'Running' | 'Passed' | 'Issues Found'>('Not Run');
-  // const [refinementSuggestions, setRefinementSuggestions] = useState<Suggestion[]>([]);
-  // const [isLoadingQA, setIsLoadingQA] = useState<boolean>(false);
-  // --- End State for Step 6 ---
-
-  // --- State for Step 5 (REMOVED - Now in Zustand) ---
-  // const [editorContent, setEditorContent] = useState<string>('');
-  // const [isLoadingEnhancement, setIsLoadingEnhancement] = useState<boolean>(false);
-  // --- End State for Step 5 ---
-
-  // --- State for Client-Side PDF Export (REMOVED - Now in Zustand) ---
-  // const [isGeneratingClientPdf, setIsGeneratingClientPdf] = useState<boolean>(false);
-  // const [clientPdfStatus, setClientPdfStatus] = useState<'idle' | 'generating' | 'success' | 'error'>('idle');
-  // --- End State for Client-Side PDF Export ---
-
   // Handler to select/deselect pitch deck type - Use Zustand action
   const handleSelectType = (id: string) => {
     setSelectedPitchDeckTypeId(selectedPitchDeckTypeId === id ? null : id); // Toggle selection using store action
   };
 
-  // Placeholder handler for final project creation/continuation - Use Zustand state
-  const handleContinueFromStep1 = () => {
+  // Handler to save Step 1 data and continue
+  const handleContinueFromStep1 = async () => { // Make async
     if (!projectName) { // Check store state
       alert('Project Name is required.');
       return;
@@ -173,17 +118,32 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
       alert('Please select a Pitch Deck Type.');
       return;
     }
-    console.log('Proceeding from Step 1 with (from store):', {
-      projectName, // From store
-      pitchDeckTypeId: selectedPitchDeckTypeId, // From store
-      description, // From store
-      privacy, // From store
-      tags, // From store (already processed array)
-      teamMembers, // From store (already processed array)
-    });
-    // TODO: Backend call for Step 1 data saving
 
-    setCurrentStep(2); // Move to Step 2
+    // Prepare data for API call from Zustand store state
+    const projectData = {
+      projectName,
+      description,
+      privacy,
+      tags, // Already an array in the store
+      teamMembers, // Pass teamMembers array from store
+      pitchDeckTypeId: selectedPitchDeckTypeId, // Pass selected type ID
+    };
+
+    console.log('Attempting to create project with data:', projectData);
+
+    // Call the API
+    const createdProject = await createProjectAPI(projectData);
+
+    // Only proceed if the project was created successfully
+    if (createdProject) {
+      console.log('Project created successfully:', createdProject);
+      // Store the created project ID in Zustand
+      setProjectId(createdProject.id);
+      setCurrentStep(2); // Move to Step 2
+    } else {
+      console.error('Failed to create project. Staying on Step 1.');
+      // Error toast is handled within createProjectAPI
+    }
   };
 
   const handleContinueFromStep2 = () => {
@@ -270,7 +230,11 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
      try {
         // TODO: Get actual content from Step 5 editor state (use store state)
         const contentToVerify = useProjectWorkflowStore.getState().editorContent || generatedContentPreview || "Sample content with claim: Market size is $10B."; // Prioritize editor content
-        const results = await contentGenerationService.verifyFacts('temp-project-id', contentToVerify);
+        // Add check for projectId before making API call
+        if (!projectId) {
+          throw new Error("Project ID is missing. Cannot run fact check.");
+        }
+        const results = await contentGenerationService.verifyFacts(projectId, contentToVerify); // Use actual projectId
         setFactCheckResults(results); // Use store action
      } catch (error) {
         console.error("Fact check failed:", error);
@@ -309,8 +273,12 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
      if (!editorContent) return; // Use store state
      setIsLoadingEnhancement(true); // Use store action
      try {
+        // Use projectId directly from store hook, add check
+        if (!projectId) {
+          throw new Error("Project ID is missing for enhancement.");
+        }
         const result = await contentGenerationService.enhanceContent(
-           'temp-project-id', // Replace later
+           projectId, // Use actual project ID from store hook
            'current-section-id', // Need a way to track current section later
            editorContent,
            'clarity'
@@ -401,10 +369,11 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
        projectName: currentStoreState.projectName,
        pitchDeckType: currentStoreState.selectedPitchDeckTypeId || 'generic',
        description: currentStoreState.description,
+       tags: currentStoreState.tags, // Add tags
        // TODO: Add data from Step 2 state here (once added to store)
-    };
+     };
 
-    try {
+     try {
       // Calculate dynamic steps
       const researchSteps = 1;
       const contentSteps = slideStructure.length > 0 ? slideStructure.length : 1; // Ensure at least 1 content step
@@ -414,11 +383,13 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
       let currentProgress = 0;
 
       // --- Step 1: Research ---
-      // setGenerationStatusText('Researching background information...'); // Already set
-      // setGenerationProgress(Math.round(currentProgress)); // Progress starts at 0 from reset
+      // Add check for projectId before making API call
+      if (!projectId) {
+        throw new Error("Project ID is missing. Cannot generate content.");
+      }
       const researchPrompt = createResearchPrompt(projectInfo);
       const researchResult = await contentGenerationService.generateContent({
-         projectId: 'temp-project-id', // TODO: Use actual project ID
+         projectId: projectId, // Use actual project ID from store
          prompt: researchPrompt,
          useResearchModel: true,
          factCheckLevel: options.factCheckLevel
@@ -439,7 +410,7 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
       const contentPrompt = createPitchDeckContentPrompt(projectInfo, researchResult.content) +
                             "\n\nPlease format the entire output strictly as Markdown, using appropriate headings (## for sections, ### for subsections), bullet points (*), and bold text (**bold**).";
       const contentResult = await contentGenerationService.generateContent({
-         projectId: 'temp-project-id', // TODO: Use actual project ID
+         projectId: projectId, // Use actual project ID from store
          prompt: contentPrompt,
          useResearchModel: false,
       });
@@ -550,6 +521,7 @@ const simulateTyping = (text: string, setText: (text: string) => void, speed = 0
                  onClick={handleContinueFromStep1} // Uses store state for validation
                  disabled={!projectName || !selectedPitchDeckTypeId} // Use store state
                  className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" // Responsive width and sizing
+                 data-continue-button="true" // Add data attribute for the import options to find
                >
                  Continue to Requirements
                </Button>
@@ -570,6 +542,7 @@ const simulateTyping = (text: string, setText: (text: string) => void, speed = 0
              </p>
            </div>
            <div className="p-4 md:p-6 space-y-6">
+             {/* Import and use the TargetAudienceForm component */}
              <TargetAudienceForm />
              {/* Add other Step 2 sections here later */}
 
@@ -662,197 +635,197 @@ const simulateTyping = (text: string, setText: (text: string) => void, speed = 0
           </>
         )}
 
-        {/* Step 4 Content (Placeholder) */}
-        {currentStep === 4 && (
-          <>
-            <div className="p-4 border-b border-neutral-light/40 bg-white/5">
-              <h2 className="text-lg font-semibold font-heading text-secondary/80">
-                Step 4: AI-Powered Content Generation
-              </h2>
-              <p className="text-sm text-neutral-medium mt-1">
-                Configure and initiate AI content generation.
-              </p>
-            </div>
-            {/* Step 4 Layout: Similar to Step 3? Or maybe different? Let's try 2 columns again */}
-            <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-               {/* Left Column: Setup & Progress (1/3 width) */}
-               <div className="lg:col-span-4 space-y-6">
-                  <GenerationSetup
-                     onGenerate={handleGenerateContent} // Handler remains the same
-                     isGenerating={isGenerating} // Use store state
+       {/* Step 4 Content (Placeholder) */}
+       {currentStep === 4 && (
+         <>
+           <div className="p-4 border-b border-neutral-light/40 bg-white/5">
+             <h2 className="text-lg font-semibold font-heading text-secondary/80">
+               Step 4: AI-Powered Content Generation
+             </h2>
+             <p className="text-sm text-neutral-medium mt-1">
+               Configure and initiate AI content generation.
+             </p>
+           </div>
+           {/* Step 4 Layout: Similar to Step 3? Or maybe different? Let's try 2 columns again */}
+           <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Left Column: Setup & Progress (1/3 width) */}
+              <div className="lg:col-span-4 space-y-6">
+                 <GenerationSetup
+                    onGenerate={handleGenerateContent} // Handler remains the same
+                    isGenerating={isGenerating} // Use store state
+                 />
+                 {isGenerating && <GenerationProgress progress={generationProgress} statusText={generationStatusText} />} {/* Use store state */}
+              </div>
+              {/* Right Column: Preview (2/3 width) */}
+              <div className="lg:col-span-8">
+                 <div className="sticky top-[80px]">
+                    {/* Pass content from store to GenerationPreview */}
+                    <GenerationPreview content={generatedContentPreview} /> {/* Use store state */}
+                 </div>
+              </div>
+              {/* Navigation Buttons */}
+             {/* Make button container stack on mobile */}
+             <div className="lg:col-span-12 flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
+               <Button variant="outline" onClick={() => setCurrentStep(3)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
+                 Back to Design
+               </Button>
+               <Button
+                 variant="primary"
+                 className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" // Responsive width
+                 onClick={handleContinueFromStep4}
+               >
+                 Continue to Editing
+                </Button>
+              </div>
+           </div>
+         </>
+       )}
+
+       {/* Step 5 Content (Placeholder) */}
+       {currentStep === 5 && (
+         <>
+           <div className="p-4 border-b border-neutral-light/40 bg-white/5">
+             <h2 className="text-lg font-semibold font-heading text-secondary/80">
+               Step 5: Advanced Editing & Enhancement
+             </h2>
+             <p className="text-sm text-neutral-medium mt-1">
+               Refine generated content, enhance visuals, and collaborate.
+             </p>
+           </div>
+            {/* Step 5 Layout: Maybe 3 columns? Editor, Tools, Collaboration? */}
+           <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+               {/* Main Editor Area */}
+               <div className="lg:col-span-8 space-y-6">
+                  <ContentEditor
+                     content={editorContent} // Use store state
+                     onChange={setEditorContent} // Use store action
                   />
-                  {isGenerating && <GenerationProgress progress={generationProgress} statusText={generationStatusText} />} {/* Use store state */}
                </div>
-               {/* Right Column: Preview (2/3 width) */}
-               <div className="lg:col-span-8">
-                  <div className="sticky top-[80px]">
-                     {/* Pass content from store to GenerationPreview */}
-                     <GenerationPreview content={generatedContentPreview} /> {/* Use store state */}
+               {/* Right Sidebar: Tools & Collaboration */}
+               <div className="lg:col-span-4 space-y-6">
+                  <div className="sticky top-[80px] space-y-6"> {/* Make sidebar sticky */}
+                     <EnhancementTools
+                        editorContent={editorContent} // Use store state
+                        onContentChange={setEditorContent} // Use store action
+                     />
+                     <VisualElementStudio />
+                     <CollaborationTools />
                   </div>
                </div>
                {/* Navigation Buttons */}
               {/* Make button container stack on mobile */}
               <div className="lg:col-span-12 flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
-                <Button variant="outline" onClick={() => setCurrentStep(3)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
-                  Back to Design
+                <Button variant="outline" onClick={() => setCurrentStep(4)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
+                  Back to Generation
                 </Button>
                 <Button
                   variant="primary"
                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" // Responsive width
-                  onClick={handleContinueFromStep4}
+                  onClick={handleContinueFromStep5} // Use new handler
                 >
-                  Continue to Editing
+                  Continue to QA & Refinement
                  </Button>
                </div>
-            </div>
-          </>
-        )}
+             </div>
+           </>
+         )}
 
-        {/* Step 5 Content (Placeholder) */}
-        {currentStep === 5 && (
-          <>
-            <div className="p-4 border-b border-neutral-light/40 bg-white/5">
-              <h2 className="text-lg font-semibold font-heading text-secondary/80">
-                Step 5: Advanced Editing & Enhancement
-              </h2>
-              <p className="text-sm text-neutral-medium mt-1">
-                Refine generated content, enhance visuals, and collaborate.
-              </p>
-            </div>
-             {/* Step 5 Layout: Maybe 3 columns? Editor, Tools, Collaboration? */}
-            <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Main Editor Area */}
-                <div className="lg:col-span-8 space-y-6">
-                   <ContentEditor
-                      content={editorContent} // Use store state
-                      onChange={setEditorContent} // Use store action
+         {/* Step 6 Content (Placeholder) */}
+         {currentStep === 6 && (
+           <>
+             <div className="p-4 border-b border-neutral-light/40 bg-white/5">
+               <h2 className="text-lg font-semibold font-heading text-secondary/80">
+                 Step 6: Quality Assurance & Refinement
+               </h2>
+               <p className="text-sm text-neutral-medium mt-1">
+                 Validate content, check compliance, assess impact, and refine.
+               </p>
+             </div>
+             {/* Step 6 Layout: Maybe 2 columns? Validation/Refinement + Dashboard? */}
+             <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Left Column: Validation & Refinement */}
+                <div className="lg:col-span-7 space-y-6">
+                   <ValidationInterface
+                      onVerifyFacts={handleRunFactCheck} // Handlers remain the same
+                      onCheckCompliance={handleRunComplianceCheck}
+                      onValidateFinancials={handleRunFinancialValidation}
+                      onCheckLanguage={handleRunLanguageCheck}
+                      factCheckResults={factCheckResults} // Use store state
+                      complianceStatus={complianceStatus} // Use store state
+                      financialValidationStatus={financialValidationStatus} // Use store state
+                      languageCheckStatus={languageCheckStatus} // Use store state
+                      isLoading={isLoadingQA} // Use store state
+                   />
+                   <RefinementPanel
+                      suggestions={refinementSuggestions} // Use store state
+                      onImplement={handleImplementSuggestion} // Handlers remain the same
+                      onCompare={handleCompareSuggestion}
+                      onPolish={handleRunFinalPolish}
+                      isLoading={isLoadingQA} // Use store state
                    />
                 </div>
-                {/* Right Sidebar: Tools & Collaboration */}
-                <div className="lg:col-span-4 space-y-6">
-                   <div className="sticky top-[80px] space-y-6"> {/* Make sidebar sticky */}
-                      <EnhancementTools
-                         editorContent={editorContent} // Use store state
-                         onContentChange={setEditorContent} // Use store action
+                {/* Right Column: Dashboard */}
+                <div className="lg:col-span-5">
+                   <div className="sticky top-[80px]">
+                      <QualityDashboard
+                         metrics={qualityMetrics} // Use store state
+                         isLoading={isLoadingQA} // Use store state
                       />
-                      <VisualElementStudio />
-                      <CollaborationTools />
                    </div>
                 </div>
                 {/* Navigation Buttons */}
                {/* Make button container stack on mobile */}
                <div className="lg:col-span-12 flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
-                 <Button variant="outline" onClick={() => setCurrentStep(4)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
-                   Back to Generation
+                 <Button variant="outline" onClick={() => setCurrentStep(5)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
+                   Back to Editing
                  </Button>
                  <Button
                    variant="primary"
                    className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" // Responsive width
-                   onClick={handleContinueFromStep5} // Use new handler
+                   onClick={handleContinueFromStep6}
                  >
-                   Continue to QA & Refinement
+                   Continue to Finalization
                   </Button>
                 </div>
-              </div>
-            </>
-          )}
+             </div>
+           </>
+         )}
 
-          {/* Step 6 Content (Placeholder) */}
-          {currentStep === 6 && (
-            <>
-              <div className="p-4 border-b border-neutral-light/40 bg-white/5">
-                <h2 className="text-lg font-semibold font-heading text-secondary/80">
-                  Step 6: Quality Assurance & Refinement
-                </h2>
-                <p className="text-sm text-neutral-medium mt-1">
-                  Validate content, check compliance, assess impact, and refine.
-                </p>
-              </div>
-              {/* Step 6 Layout: Maybe 2 columns? Validation/Refinement + Dashboard? */}
-              <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-                 {/* Left Column: Validation & Refinement */}
-                 <div className="lg:col-span-7 space-y-6">
-                    <ValidationInterface
-                       onVerifyFacts={handleRunFactCheck} // Handlers remain the same
-                       onCheckCompliance={handleRunComplianceCheck}
-                       onValidateFinancials={handleRunFinancialValidation}
-                       onCheckLanguage={handleRunLanguageCheck}
-                       factCheckResults={factCheckResults} // Use store state
-                       complianceStatus={complianceStatus} // Use store state
-                       financialValidationStatus={financialValidationStatus} // Use store state
-                       languageCheckStatus={languageCheckStatus} // Use store state
-                       isLoading={isLoadingQA} // Use store state
-                    />
-                    <RefinementPanel
-                       suggestions={refinementSuggestions} // Use store state
-                       onImplement={handleImplementSuggestion} // Handlers remain the same
-                       onCompare={handleCompareSuggestion}
-                       onPolish={handleRunFinalPolish}
-                       isLoading={isLoadingQA} // Use store state
-                    />
-                 </div>
-                 {/* Right Column: Dashboard */}
-                 <div className="lg:col-span-5">
-                    <div className="sticky top-[80px]">
-                       <QualityDashboard
-                          metrics={qualityMetrics} // Use store state
-                          isLoading={isLoadingQA} // Use store state
-                       />
-                    </div>
-                 </div>
-                 {/* Navigation Buttons */}
-                {/* Make button container stack on mobile */}
-                <div className="lg:col-span-12 flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
-                  <Button variant="outline" onClick={() => setCurrentStep(5)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
-                    Back to Editing
-                  </Button>
-                  <Button
-                    variant="primary"
-                    className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" // Responsive width
-                    onClick={handleContinueFromStep6}
-                  >
-                    Continue to Finalization
-                   </Button>
-                 </div>
-              </div>
-            </>
-          )}
-
-          {/* Step 7 Content (Placeholder) */}
-          {currentStep === 7 && (
-            <>
-              <div className="p-4 border-b border-neutral-light/40 bg-white/5">
-                <h2 className="text-lg font-semibold font-heading text-secondary/80">
-                  Step 7: Finalization & Delivery
-                </h2>
-                <p className="text-sm text-neutral-medium mt-1">
-                  Prepare for presentation, export, share, and archive.
-                </p>
-              </div>
-               {/* Step 7 Layout: Maybe sections in one column? */}
-               <div className="p-4 md:p-6 space-y-6">
-                  <PresenterTools />
-                  <ExportConfiguration
-                     onGenerateClientPdf={handleGenerateClientPdf} // Handler remains the same
-                     isGeneratingClientPdf={isGeneratingClientPdf} // Use store state
-                     clientPdfStatus={clientPdfStatus} // Use store state
-                  />
-                  <SharingPermissions />
-                  <ArchivingAnalytics />
-                 {/* Navigation Buttons */}
-                {/* Make button container stack on mobile */}
-                <div className="flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
-                  <Button variant="outline" onClick={() => setCurrentStep(6)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
-                    Back to QA
-                  </Button>
-                  <Button variant="primary" className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
-                    Finish Project {/* Placeholder */}
+         {/* Step 7 Content (Placeholder) */}
+         {currentStep === 7 && (
+           <>
+             <div className="p-4 border-b border-neutral-light/40 bg-white/5">
+               <h2 className="text-lg font-semibold font-heading text-secondary/80">
+                 Step 7: Finalization & Delivery
+               </h2>
+               <p className="text-sm text-neutral-medium mt-1">
+                 Prepare for presentation, export, share, and archive.
+               </p>
+             </div>
+              {/* Step 7 Layout: Maybe sections in one column? */}
+              <div className="p-4 md:p-6 space-y-6">
+                 <PresenterTools />
+                 <ExportConfiguration
+                    onGenerateClientPdf={handleGenerateClientPdf} // Handler remains the same
+                    isGeneratingClientPdf={isGeneratingClientPdf} // Use store state
+                    clientPdfStatus={clientPdfStatus} // Use store state
+                 />
+                 <SharingPermissions />
+                 <ArchivingAnalytics />
+                {/* Navigation Buttons */}
+               {/* Make button container stack on mobile */}
+               <div className="flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
+                 <Button variant="outline" onClick={() => setCurrentStep(6)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
+                   Back to QA
                  </Button>
-                </div>
-              </div>
-            </>
-          )}
-         {/* End of steps */}
+                 <Button variant="primary" className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
+                   Finish Project {/* Placeholder */}
+                </Button>
+               </div>
+             </div>
+           </>
+         )}
+        {/* End of steps */}
 
        {/* Tutorial Overlay Placeholder - Implement later */}
        {/* <div className="absolute inset-0 bg-black/50 text-white p-4">Tutorial Overlay Placeholder</div> */}

@@ -5,6 +5,7 @@ import { create } from 'zustand';
 // Interface for Step 1: Project Setup State
 interface ProjectSetupState {
   selectedPitchDeckTypeId: string | null;
+  projectId: string | null; // Add projectId to store state
   projectName: string;
   description: string;
   privacy: 'private' | 'team' | 'public';
@@ -18,6 +19,7 @@ interface ProjectSetupActions {
   setProjectName: (name: string) => void;
   setDescription: (desc: string) => void;
   setPrivacy: (privacy: 'private' | 'team' | 'public') => void;
+  setProjectId: (id: string | null) => void; // Add action definition here
   setTags: (tags: string[]) => void;
   setTeamMembers: (members: string[]) => void;
   setTagsFromString: (tagsInput: string) => void;
@@ -153,6 +155,7 @@ interface ProjectWorkflowActions extends ProjectSetupActions, RequirementsAction
 export const useProjectWorkflowStore = create<ProjectWorkflowState & ProjectWorkflowActions>((set) => ({
   // --- Step 1: Project Setup Initial State ---
   selectedPitchDeckTypeId: null,
+  projectId: null, // Ensure projectId is in the initial state
   projectName: '',
   description: '',
   privacy: 'private',
@@ -164,6 +167,7 @@ export const useProjectWorkflowStore = create<ProjectWorkflowState & ProjectWork
   setProjectName: (name) => set({ projectName: name }),
   setDescription: (desc) => set({ description: desc }),
   setPrivacy: (privacy) => set({ privacy: privacy }),
+  setProjectId: (id: string | null) => set({ projectId: id }), // Add type annotation
   setTags: (tags) => set({ tags: tags }),
   setTeamMembers: (members) => set({ teamMembers: members }),
   setTagsFromString: (tagsInput) => set({ tags: tagsInput.split(',').map(t => t.trim()).filter(t => t) }),

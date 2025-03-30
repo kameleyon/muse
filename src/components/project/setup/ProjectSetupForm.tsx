@@ -81,7 +81,7 @@ const ProjectSetupForm: React.FC<ProjectSetupFormProps> = ({
           id="description"
           value={description} // Still controlled by prop/store
           onChange={handleDescriptionChange}
-          placeholder="Briefly describe your project or upload a file..."
+          placeholder="Briefly describe your project..."
           className="settings-textarea w-full"
           rows={4}
         />

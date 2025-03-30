@@ -22,7 +22,7 @@ const RadioGroupItem = React.forwardRef<HTMLInputElement, RadioGroupItemProps>(
            id={id} // Ensure ID is passed for label association
            value={value}
            checked={isChecked}
-           onChange={() => context.onValueChange(value)} // Use context handler
+           onChange={() => context.onValueChange?.(value)} // Use context handler with optional chaining
            name={context.name} // Use name from context
            className="absolute opacity-0 w-0 h-0" // Hide native input visually but keep accessible
            {...props}

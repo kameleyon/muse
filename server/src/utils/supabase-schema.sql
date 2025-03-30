@@ -25,16 +25,16 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Policies for profiles
-CREATE POLICY "Public profiles are viewable by everyone" 
-  ON public.profiles 
+CREATE POLICY "Public profiles are viewable by everyone"
+  ON public.profiles
   FOR SELECT USING (true);
 
-CREATE POLICY "Users can update their own profile" 
-  ON public.profiles 
+CREATE POLICY "Users can update their own profile"
+  ON public.profiles
   FOR UPDATE USING (auth.uid() = id);
 
 -- Function to handle new user creation
-CREATE OR REPLACE FUNCTION public.handle_new_user() 
+CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO public.profiles (id, full_name)
@@ -67,20 +67,20 @@ CREATE TABLE IF NOT EXISTS public.contents (
 ALTER TABLE public.contents ENABLE ROW LEVEL SECURITY;
 
 -- Policies for contents
-CREATE POLICY "Users can view their own content" 
-  ON public.contents 
+CREATE POLICY "Users can view their own content"
+  ON public.contents
   FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can create their own content" 
-  ON public.contents 
+CREATE POLICY "Users can create their own content"
+  ON public.contents
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can update their own content" 
-  ON public.contents 
+CREATE POLICY "Users can update their own content"
+  ON public.contents
   FOR UPDATE USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can delete their own content" 
-  ON public.contents 
+CREATE POLICY "Users can delete their own content"
+  ON public.contents
   FOR DELETE USING (auth.uid() = user_id);
 
 -- Content versions table for version history
@@ -97,21 +97,21 @@ CREATE TABLE IF NOT EXISTS public.content_versions (
 ALTER TABLE public.content_versions ENABLE ROW LEVEL SECURITY;
 
 -- Policies for content versions
-CREATE POLICY "Users can view their own content versions" 
-  ON public.content_versions 
+CREATE POLICY "Users can view their own content versions"
+  ON public.content_versions
   FOR SELECT USING (
     auth.uid() = (SELECT user_id FROM public.contents WHERE id = content_id)
   );
 
 -- Function to save version history when content is updated
-CREATE OR REPLACE FUNCTION public.save_content_version() 
+CREATE OR REPLACE FUNCTION public.save_content_version()
 RETURNS TRIGGER AS $$
 BEGIN
   IF (OLD.content <> NEW.content OR OLD.title <> NEW.title) THEN
     -- Increment version
     NEW.version := OLD.version + 1;
     NEW.updated_at := now();
-    
+
     -- Save old version
     INSERT INTO public.content_versions (
       content_id, version, content, metadata
@@ -128,3 +128,42 @@ DROP TRIGGER IF EXISTS on_content_update ON public.contents;
 CREATE TRIGGER on_content_update
   BEFORE UPDATE ON public.contents
   FOR EACH ROW EXECUTE PROCEDURE public.save_content_version();
+
+-- Projects table (NEW)
+CREATE TABLE IF NOT EXISTS public.projects (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT,
+  privacy TEXT DEFAULT 'private' NOT NULL, -- 'private', 'team', 'public'
+  tags TEXT[], -- Array of text for tags
+  team_members TEXT[], -- Array of emails for team members (NEW)
+  pitch_deck_type_id TEXT, -- Identifier for the selected pitch deck type (NEW)
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- RLS for projects (NEW)
+ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
+
+-- Policies for projects (NEW)
+CREATE POLICY "Users can view their own projects"
+  ON public.projects
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own projects"
+  ON public.projects
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own projects"
+  ON public.projects
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own projects"
+  ON public.projects
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- Add indexes for performance (Optional but recommended)
+CREATE INDEX IF NOT EXISTS idx_projects_user_id ON public.projects(user_id);
+CREATE INDEX IF NOT EXISTS idx_contents_user_id ON public.contents(user_id);
+CREATE INDEX IF NOT EXISTS idx_content_versions_content_id ON public.content_versions(content_id);
