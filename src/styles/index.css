@@ -11,6 +11,7 @@
 
 /* Import settings styles */
 @import './settings.css';
+@import './generation.css'; /* Import generation-specific styles */
 
 @tailwind base;
 @tailwind components;

@@ -2,58 +2,84 @@ import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input'; 
 import { Button } from '@/components/ui/Button';
-import { GripVertical, Plus, Trash2, Info } from 'lucide-react'; 
+import { GripVertical, Plus, Trash2, Info } from 'lucide-react';
 import { Tooltip } from '../../ui/Tooltip';
+// Explicitly import the centralized Slide type again
+import { Slide, ComplexityLevel } from '@/store/types';
 
-// Define Slide type
-export interface Slide {
-  id: string;
-  title: string;
-  description?: string;
-  isRequired?: boolean;
-}
-
-// Define Props
+// Define Props using imported types
 interface StructurePlanningProps {
-  slides: Slide[];
-  onSlidesChange: (newSlides: Slide[]) => void;
-  complexity: number;
-  onComplexityChange: (newComplexity: number) => void;
-  primaryColor?: string; // Add primary color prop
+  slides: Slide[]; // Use imported Slide type
+  onSlidesChange: (newSlides: Slide[]) => void; // Use imported Slide type
+  complexity: ComplexityLevel; // Use imported ComplexityLevel type ('basic' | 'intermediate' | 'advanced')
+  onComplexityChange: (newComplexity: ComplexityLevel) => void; // Use imported ComplexityLevel type
+  primaryColor?: string; 
 }
 
-// Default pitch deck structure - the top 4 slides removed as requested
+// Helper function to convert ComplexityLevel string to a number (10-100)
+const complexityLevelToNumber = (level: ComplexityLevel): number => {
+  switch (level) {
+    case 'basic': return 25; // Map 'basic' to a lower percentage, e.g., 25%
+    case 'intermediate': return 50; // Map 'intermediate' to mid-range, e.g., 50%
+    case 'advanced': return 85; // Map 'advanced' to a higher percentage, e.g., 85%
+    default: return 50; // Default to intermediate
+  }
+};
+
+// Helper function to convert number (10-100) back to ComplexityLevel string
+const numberToComplexityLevel = (value: number): ComplexityLevel => {
+  if (value <= 33) return 'basic';
+  if (value <= 66) return 'intermediate';
+  return 'advanced';
+};
+
+// Default pitch deck structure - now includes 'type'
 export const defaultPitchDeckStructure: Slide[] = [
-  { id: 'slide-1', title: 'Cover Slide', description: 'Company Logo, Project Name, Tagline or Short Mission Statement', isRequired: true },
-  { id: 'slide-2', title: 'Problem', description: 'Define the problem your product/service aims to solve', isRequired: true },
-  { id: 'slide-3', title: 'Solution', description: 'Explain how your product/service solves the problem', isRequired: true },
-  { id: 'slide-4', title: 'How It Works', description: 'Explain the mechanics of your solution', isRequired: true },
-  { id: 'slide-5', title: 'Core Features', description: 'Highlight the main features and benefits', isRequired: true },
-  { id: 'slide-6', title: 'Market Opportunity', description: 'Market size, trends, and growth potential', isRequired: true },
-  { id: 'slide-7', title: 'Business Model', description: 'Revenue streams and monetization strategy', isRequired: true },
-  { id: 'slide-8', title: 'Competitive Advantage', description: 'What sets you apart from competitors', isRequired: true },
-  { id: 'slide-9', title: 'Go-to-Market Strategy', description: 'Plan for acquiring customers and scaling', isRequired: true },
-  { id: 'slide-10', title: 'Financial Projections', description: 'Key financial metrics and forecasts', isRequired: true },
-  { id: 'slide-11', title: 'Team & Expertise', description: 'Key team members and their qualifications', isRequired: true },
-  { id: 'slide-12', title: 'Roadmap & Milestones', description: 'Timeline of key achievements and future goals', isRequired: true },
-  { id: 'slide-13', title: 'Call to Action', description: 'Specific ask and next steps', isRequired: true },
-  { id: 'slide-14', title: 'Appendix', description: 'Additional supporting information (optional)', isRequired: false }
+  { id: 'slide-1', title: 'Cover Slide', type: 'cover', description: 'Company Logo, Project Name, Tagline or Short Mission Statement', isRequired: true },
+  { id: 'slide-2', title: 'Problem', type: 'problem', description: 'Define the problem your product/service aims to solve', isRequired: true },
+  { id: 'slide-3', title: 'Solution', type: 'solution', description: 'Explain how your product/service solves the problem', isRequired: true },
+  { id: 'slide-4', title: 'How It Works', type: 'how_it_works', description: 'Explain the mechanics of your solution', isRequired: true },
+  { id: 'slide-5', title: 'Core Features', type: 'features', description: 'Highlight the main features and benefits', isRequired: true },
+  { id: 'slide-6', title: 'Market Opportunity', type: 'market_analysis', description: 'Market size, trends, and growth potential', isRequired: true },
+  { id: 'slide-7', title: 'Business Model', type: 'business_model', description: 'Revenue streams and monetization strategy', isRequired: true },
+  { id: 'slide-8', title: 'Competitive Advantage', type: 'competition', description: 'What sets you apart from competitors', isRequired: true },
+  { id: 'slide-9', title: 'Go-to-Market Strategy', type: 'go_to_market', description: 'Plan for acquiring customers and scaling', isRequired: true },
+  { id: 'slide-10', title: 'Financial Projections', type: 'financials', description: 'Key financial metrics and forecasts', isRequired: true },
+  { id: 'slide-11', title: 'Team & Expertise', type: 'team', description: 'Key team members and their qualifications', isRequired: true },
+  { id: 'slide-12', title: 'Roadmap & Milestones', type: 'roadmap', description: 'Timeline of key achievements and future goals', isRequired: true },
+  { id: 'slide-13', title: 'Call to Action', type: 'call_to_action', description: 'Specific ask and next steps', isRequired: true },
+  { id: 'slide-14', title: 'Appendix', type: 'appendix', description: 'Additional supporting information (optional)', isRequired: false }
 ];
 
 const StructurePlanning: React.FC<StructurePlanningProps> = ({
   slides,
   onSlidesChange,
-  complexity,
-  onComplexityChange,
-  primaryColor = '#AE5630', // Default color
+  complexity, // Receive ComplexityLevel string
+  onComplexityChange, // Expects function taking ComplexityLevel string
+  primaryColor = '#AE5630', 
 }) => {
-  // ALWAYS ensure all 14 slides are present
+  // Convert complexity string to number for the slider
+  const complexityValue = complexityLevelToNumber(complexity);
+
+  // Handle slider change and convert back to ComplexityLevel string
+  const handleSliderChange = (value: number) => {
+    const newLevel = numberToComplexityLevel(value);
+    if (newLevel !== complexity) {
+      onComplexityChange(newLevel);
+    }
+  };
+
+  // ALWAYS ensure all 14 slides are present (or initialize if empty)
   useEffect(() => {
-    // Force loading all slides
-    onSlidesChange(defaultPitchDeckStructure);
-  }, [onSlidesChange]);
+    if (!slides || slides.length === 0) {
+       onSlidesChange(defaultPitchDeckStructure);
+    } else if (slides.length !== defaultPitchDeckStructure.length) {
+       // If somehow the length is wrong, reset (optional, depends on desired behavior)
+       // onSlidesChange(defaultPitchDeckStructure); 
+    }
+  }, [slides, onSlidesChange]);
   
-  // Basic drag-and-drop simulation
+  // Drag-and-drop handlers
   const handleDragStart = (e: React.DragEvent<HTMLLIElement>, index: number) => {
     e.dataTransfer.setData('text/plain', index.toString());
   };
@@ -73,12 +99,12 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
     e.preventDefault(); 
   };
   
+  // Remove slide (disabled as per previous logic)
   const removeSlide = (index: number) => {
-    // Don't allow removal at all - we need to maintain all 14 slides
-    return;
+    return; 
   };
   
-  // State for the new slide modal and inputs
+  // State for modals
   const [showAddSlideModal, setShowAddSlideModal] = useState(false);
   const [newSlideTitle, setNewSlideTitle] = useState('');
   const [newSlideDescription, setNewSlideDescription] = useState('');
@@ -86,22 +112,23 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
   const [editingSlideTitle, setEditingSlideTitle] = useState('');
   const [editingSlideDescription, setEditingSlideDescription] = useState('');
 
-  // Add a custom slide with a title and description
+  // Add slide (disabled as per previous logic)
   const addSlide = () => {
-    // We don't need to add more slides since we're showing all 14 already
     setShowAddSlideModal(false);
     setNewSlideTitle('');
     setNewSlideDescription('');
   }
 
-  // Start editing a slide title and description
+  // Edit slide handlers
   const startEditSlideTitle = (index: number) => {
-    setEditingSlideIndex(index);
-    setEditingSlideTitle(slides[index].title);
-    setEditingSlideDescription(slides[index].description || '');
+    // Allow editing only if not required (or adjust logic if needed)
+    if (!slides[index].isRequired) { 
+      setEditingSlideIndex(index);
+      setEditingSlideTitle(slides[index].title);
+      setEditingSlideDescription(slides[index].description || '');
+    }
   };
 
-  // Save edited slide title and description
   const saveSlideTitle = () => {
     if (editingSlideIndex !== null && editingSlideTitle.trim()) {
       const newSlides = [...slides];
@@ -120,11 +147,11 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
       <h4 className="font-semibold text-neutral-dark text-lg mb-4 border-b border-neutral-light/40 pb-2">Structure Planning</h4>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Slide Structure List (Simulated Drag/Drop) */}
+        {/* Slide Structure List */}
         <div className="md:col-span-2">
           <div className="flex items-center mb-2">
             <label className="settings-label">Slide Order</label>
-            <Tooltip content="Drag to reorder slides. Required slides cannot be removed.">
+            <Tooltip content="Drag to reorder slides. Required slides cannot be removed or renamed.">
               <Info size={14} className="ml-1 text-neutral-medium cursor-help" />
             </Tooltip>
           </div>
@@ -146,8 +173,8 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
                   <div className="flex flex-col flex-1 min-w-0">
                     <div className="flex flex-wrap items-center">
                       <span
-                        className="font-medium break-all cursor-pointer hover:text-primary"
-                        onDoubleClick={() => !slide.isRequired && startEditSlideTitle(index)}
+                        className={`font-medium break-all ${!slide.isRequired ? 'cursor-pointer hover:text-primary' : 'cursor-default'}`}
+                        onDoubleClick={() => startEditSlideTitle(index)}
                         title={slide.isRequired ? "Required slides cannot be renamed" : "Double-click to edit title"}
                       >{`${index + 1}. ${slide.title}`}</span>
                       {slide.isRequired && (
@@ -175,59 +202,24 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
             ))}
           </ul>
           
-          {/* Add Slide Button */}
+          {/* Add Slide Button (kept but functionally disabled) */}
           <div className="pt-2">
-            <Button variant="outline" size="sm" className="w-full" onClick={() => setShowAddSlideModal(true)}>
-              <Plus size={14} className="mr-1"/> Add Custom Slide
+            <Button variant="outline" size="sm" className="w-full" onClick={() => setShowAddSlideModal(true)} disabled>
+              <Plus size={14} className="mr-1"/> Add Custom Slide (Disabled)
             </Button>
           </div>
           <p className="text-xs text-neutral-medium mt-1">Standard pitch deck structure with 13 required slides + optional appendix.</p>
           
-          {/* Add Slide Modal */}
+          {/* Add Slide Modal (kept but functionally disabled) */}
           {showAddSlideModal && (
             <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
               <div className="bg-white p-4 rounded-md shadow-lg max-w-md w-full">
                 <h5 className="font-medium text-lg mb-4">Add Custom Slide</h5>
-                <div className="mb-3">
-                  <label className="block text-sm mb-1">Slide Title <span className="text-red-500">*</span></label>
-                  <Input
-                    type="text"
-                    value={newSlideTitle}
-                    onChange={(e) => setNewSlideTitle(e.target.value)}
-                    placeholder="Enter slide title..."
-                    className="w-full"
-                    autoFocus
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm mb-1">Slide Description</label>
-                  <textarea
-                    value={newSlideDescription}
-                    onChange={(e) => setNewSlideDescription(e.target.value)}
-                    placeholder="Enter slide description or content summary..."
-                    className="w-full h-20 p-2 border rounded-md text-sm resize-none"
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setShowAddSlideModal(false);
-                      setNewSlideTitle('');
-                      setNewSlideDescription('');
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={addSlide}
-                    disabled={!newSlideTitle.trim()}
-                  >
-                    Add Slide
-                  </Button>
-                </div>
+                {/* ... modal content ... */}
+                 <div className="flex justify-end gap-2">
+                   <Button variant="outline" size="sm" onClick={() => setShowAddSlideModal(false)}>Cancel</Button>
+                   <Button size="sm" onClick={addSlide} disabled>Add Slide</Button>
+                 </div>
               </div>
             </div>
           )}
@@ -257,20 +249,8 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
                   />
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditingSlideIndex(null)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={saveSlideTitle}
-                    disabled={!editingSlideTitle.trim()}
-                  >
-                    Save Changes
-                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setEditingSlideIndex(null)}>Cancel</Button>
+                  <Button size="sm" onClick={saveSlideTitle} disabled={!editingSlideTitle.trim()}>Save Changes</Button>
                 </div>
               </div>
             </div>
@@ -281,52 +261,51 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
         <div className="space-y-4">
           <div>
             <label htmlFor="complexity" className="settings-label mb-1">
-              Complexity ({complexity}%)
+              Complexity ({complexityValue}%) {/* Display numeric value */}
             </label>
             <div className="relative mb-2">
               <div className="relative">
                 {/* Custom styled range slider */}
                 <div className="w-full h-2 bg-neutral-200 rounded-lg relative">
-                  {/* Track fill based on value */}
                   <div
                     className="absolute h-2 left-0 top-0 rounded-lg"
                     style={{
-                      width: `${complexity}%`,
+                      width: `${complexityValue}%`, // Use numeric value
                       backgroundColor: primaryColor || '#AE5630',
                       transition: 'width 0.3s ease'
                     }}
                   ></div>
                   
-                  {/* Tick marks for complexity levels */}
+                  {/* Tick marks */}
                   <div className="absolute w-full flex justify-between top-2">
                     {[10, 30, 50, 70, 90].map((tick) => (
                       <div
                         key={tick}
-                        className={`h-1 w-0.5 mt-1 ${complexity >= tick ? 'bg-primary' : 'bg-neutral-300'}`}
+                        className={`h-1 w-0.5 mt-1 ${complexityValue >= tick ? 'bg-primary' : 'bg-neutral-300'}`}
                         style={{ marginLeft: `${tick}%`, transform: 'translateX(-50%)' }}
                       ></div>
                     ))}
                   </div>
                 </div>
                 
-                {/* Larger touch target for better usability */}
+                {/* Input range */}
                 <Input
                   id="complexity"
                   type="range"
                   min="10"
                   max="100"
-                  step="10"
-                  value={complexity}
-                  onChange={(e) => onComplexityChange(parseInt(e.target.value, 10))}
+                  step="1" // Finer steps for conversion
+                  value={complexityValue} // Use numeric value
+                  onChange={(e) => handleSliderChange(parseInt(e.target.value, 10))} // Call conversion handler
                   className="absolute inset-0 opacity-0 cursor-pointer w-full h-8 top-[-10px]"
                   style={{ zIndex: 10 }}
                 />
                 
-                {/* Larger thumb (custom styled) for easier manipulation */}
+                {/* Thumb */}
                 <div
                   className="absolute h-6 w-6 rounded-full bg-white border-2 shadow top-[-7px] cursor-pointer"
                   style={{
-                    left: `${complexity}%`,
+                    left: `${complexityValue}%`, // Use numeric value
                     transform: 'translateX(-50%)',
                     transition: 'left 0.3s ease',
                     backgroundColor: 'white',
@@ -336,28 +315,19 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
                 ></div>
               </div>
               
-              {/* Single label that changes based on complexity */}
+              {/* Label based on string complexity level */}
               <div className="text-center text-xs font-medium mt-3" style={{ color: primaryColor }}>
-                {complexity <= 30 && "Simple"}
-                {complexity > 30 && complexity < 70 && "Balanced"}
-                {complexity >= 70 && "Detailed"}
+                {complexity === 'basic' && "Simple"}
+                {complexity === 'intermediate' && "Balanced"}
+                {complexity === 'advanced' && "Detailed"}
               </div>
             </div>
             
-            {/* Complexity level description */}
+            {/* Description based on string complexity level */}
             <div className="text-xs text-neutral-dark mt-2 p-2 bg-primary/5 border border-primary/10 rounded">
-              {complexity < 30 && (
-                <p>Basic content with essential information only</p>
-              )}
-              {complexity >= 30 && complexity < 60 && (
-                <p>Balanced content with key details and supporting information</p>
-              )}
-              {complexity >= 60 && complexity < 80 && (
-                <p>Comprehensive content with detailed explanations</p>
-              )}
-              {complexity >= 80 && (
-                <p>Maximum detail with in-depth analysis and examples</p>
-              )}
+              {complexity === 'basic' && <p>Basic content with essential information only</p>}
+              {complexity === 'intermediate' && <p>Balanced content with key details and supporting information</p>}
+              {complexity === 'advanced' && <p>Comprehensive content with detailed explanations and analysis</p>}
             </div>
             
             <p className="text-xs text-neutral-medium mt-2">
@@ -365,31 +335,24 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
             </p>
           </div>
           
+          {/* Duration Estimate */}
           <div>
             <label className="settings-label mb-1">Duration Estimate</label>
             <p className="text-sm font-medium">
-              ~ {Math.round(slides.length * (1 + (complexity / 100)))} minutes
+              ~ {Math.round(slides.length * (1 + (complexityValue / 100)))} minutes {/* Use numeric value */}
             </p>
             <p className="text-xs text-neutral-medium">
-              Based on ~{Math.round(60 * (1 + (complexity / 100)))} seconds per slide
+              Based on ~{Math.round(60 * (1 + (complexityValue / 100)))} seconds per slide {/* Use numeric value */}
             </p>
           </div>
           
+          {/* Content Generation Impact */}
           <div className="p-3 bg-primary/10 rounded-md border border-primary/20">
             <h5 className="text-sm font-medium mb-2">Content Generation Impact</h5>
             <ul className="text-xs space-y-1">
-              <li className="flex items-start">
-                <span className="mr-1">•</span>
-                <span>The selected structure defines the slide content framework</span>
-              </li>
-              <li className="flex items-start">
-                <span className="mr-1">•</span>
-                <span>Slide order impacts narrative flow and story progression</span>
-              </li>
-              <li className="flex items-start">
-                <span className="mr-1">•</span>
-                <span>Higher complexity creates more detailed content per slide</span>
-              </li>
+              <li className="flex items-start"><span className="mr-1">•</span><span>The selected structure defines the slide content framework</span></li>
+              <li className="flex items-start"><span className="mr-1">•</span><span>Slide order impacts narrative flow and story progression</span></li>
+              <li className="flex items-start"><span className="mr-1">•</span><span>Higher complexity creates more detailed content per slide</span></li>
             </ul>
           </div>
         </div>

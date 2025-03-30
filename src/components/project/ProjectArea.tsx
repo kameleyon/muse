@@ -24,12 +24,24 @@ import ExportConfiguration from './delivery/ExportConfiguration';
 import SharingPermissions from './delivery/SharingPermissions';
 import ArchivingAnalytics from './delivery/ArchivingAnalytics';
 import * as contentGenerationService from '@/services/contentGenerationService';
-import { createResearchPrompt, createPitchDeckContentPrompt } from '@/lib/prompts/pitchDeckPrompts';
+// Import necessary prompt functions
+import { 
+  createResearchPrompt, 
+  createSlideContentPrompt, 
+  createVisualGenerationPrompt 
+} from '@/lib/prompts/pitchDeckPrompts'; 
 import ReactDOMServer from 'react-dom/server';
 import html2pdf from 'html2pdf.js';
-import { marked } from 'marked';
+import { marked } from 'marked'; // Import marked
 import { MarkdownContent } from '@/lib/markdown';
-import { useProjectWorkflowStore, initializeWorkflowState, QualityMetrics, FactCheckResult, Suggestion } from '@/store/projectWorkflowStore'; // Import Zustand store AND types
+// Import Zustand store AND types, including the new phaseData
+import { 
+  useProjectWorkflowStore, 
+  initializeWorkflowState, 
+  QualityMetrics, 
+  FactCheckResult, 
+  Suggestion 
+} from '@/store/projectWorkflowStore'; 
 import { createProjectAPI } from '@/services/projectService'; // Import the API function
 import '@/styles/ProjectArea.css';
 import '@/styles/ProjectSetup.css';
@@ -46,22 +58,22 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
   const {
     // Step 1 State
     selectedPitchDeckTypeId,
-    projectId, // Destructure projectId
+    projectId, 
     projectName,
     description,
     privacy,
-    tags, // Get processed tags array
-    teamMembers, // Get processed team members array
+    tags, 
+    teamMembers, 
     // Step 1 Actions
     setSelectedPitchDeckTypeId,
     setProjectName,
     setDescription,
     setPrivacy,
-    setProjectId, // Destructure the action
-    setTagsFromString, // Use action that takes string input
-    setTeamMembersFromString, // Use action that takes string input
-    // Step 2 State & Actions (Audience) - Already added in store, just need to destructure if used directly here
-    // name: audienceName, orgType, industry, size, personaRole, personaConcerns, personaCriteria, personaCommPrefs, setAudienceField,
+    setProjectId, 
+    setTagsFromString, 
+    setTeamMembersFromString, 
+    // Step 2 State & Actions (Audience) - Destructure all needed fields
+    audienceName, orgType, industry, size, personaRole, personaConcerns, personaCriteria, personaCommPrefs, setAudienceField,
     // Step 3 State & Actions
     selectedTemplateId, setSelectedTemplateId,
     brandLogo, setBrandLogo,
@@ -72,12 +84,13 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
     bodyFont, setBodyFont,
     slideStructure, setSlideStructure,
     complexityLevel, setComplexityLevel,
-    // Step 4 State & Actions
+    // Step 4 State & Actions - Ensure all are destructured
     isGenerating, setIsGenerating,
     generationProgress, setGenerationProgress,
     generationStatusText, setGenerationStatusText,
     generatedContentPreview, setGeneratedContentPreview,
-    resetGenerationState, // Add reset action
+    resetGenerationState, 
+    phaseData, setPhaseData, // Add phaseData and its setter
     // Step 5 State & Actions
     editorContent, setEditorContent,
     isLoadingEnhancement, setIsLoadingEnhancement,
@@ -89,7 +102,7 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
     languageCheckStatus, setLanguageCheckStatus,
     refinementSuggestions, setRefinementSuggestions,
     isLoadingQA, setIsLoadingQA,
-    resetQAState, // Add reset action
+    resetQAState, 
     // Step 7 State & Actions (Client PDF Export)
     isGeneratingClientPdf, setIsGeneratingClientPdf,
     clientPdfStatus, setClientPdfStatus,
@@ -100,91 +113,82 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
     if (initialName) {
       initializeWorkflowState({ projectName: initialName });
     }
-    // Set initial state for other fields if needed, or rely on store defaults
-  }, [initialName]); // Run only when initialName changes (typically once)
+  }, [initialName]); 
 
-  // Handler to select/deselect pitch deck type - Use Zustand action
+  // Handler to select/deselect pitch deck type
   const handleSelectType = (id: string) => {
-    setSelectedPitchDeckTypeId(selectedPitchDeckTypeId === id ? null : id); // Toggle selection using store action
+    setSelectedPitchDeckTypeId(selectedPitchDeckTypeId === id ? null : id); 
   };
 
   // Handler to save Step 1 data and continue
-  const handleContinueFromStep1 = async () => { // Make async
-    if (!projectName) { // Check store state
+  const handleContinueFromStep1 = async () => { 
+    if (!projectName) { 
       alert('Project Name is required.');
       return;
     }
-    if (!selectedPitchDeckTypeId) { // Check store state
+    if (!selectedPitchDeckTypeId) { 
       alert('Please select a Pitch Deck Type.');
       return;
     }
 
-    // Prepare data for API call from Zustand store state
     const projectData = {
       projectName,
       description,
       privacy,
-      tags, // Already an array in the store
-      teamMembers, // Pass teamMembers array from store
-      pitchDeckTypeId: selectedPitchDeckTypeId, // Pass selected type ID
+      tags, 
+      teamMembers, 
+      pitchDeckTypeId: selectedPitchDeckTypeId, 
     };
 
     console.log('Attempting to create project with data:', projectData);
-
-    // Call the API
     const createdProject = await createProjectAPI(projectData);
 
-    // Only proceed if the project was created successfully
     if (createdProject) {
       console.log('Project created successfully:', createdProject);
-      // Store the created project ID in Zustand
       setProjectId(createdProject.id);
-      setCurrentStep(2); // Move to Step 2
+      setCurrentStep(2); 
     } else {
       console.error('Failed to create project. Staying on Step 1.');
-      // Error toast is handled within createProjectAPI
     }
   };
 
   const handleContinueFromStep2 = () => {
-    console.log('Proceeding from Step 2 with:', { /* Log Step 2 data */ });
+    console.log('Proceeding from Step 2 with:', { audienceName, orgType, industry, size /* Log other Step 2 data */ });
     // TODO: Backend call for Step 2 data saving
-    setCurrentStep(3); // Move to Step 3
+    setCurrentStep(3); 
   };
 
   const handleContinueFromStep3 = () => {
-    console.log('Proceeding from Step 3 with:', { /* Log Step 3 data */ });
+    console.log('Proceeding from Step 3 with:', { selectedTemplateId, primaryColor /* Log other Step 3 data */ });
     // TODO: Backend call for Step 3 data saving
-    setCurrentStep(4); // Move to Step 4
+    setCurrentStep(4); 
   };
 
   const handleContinueFromStep4 = () => {
-    console.log('Proceeding from Step 4 with:', { /* Log Step 4 data */ });
+    console.log('Proceeding from Step 4 with:', { generatedContentPreview /* Log Step 4 data */ });
     // TODO: Backend call for Step 4 data saving
-    setCurrentStep(5); // Move to Step 5
+    setCurrentStep(5); 
   };
 
   const handleContinueFromStep5 = () => {
-    console.log('Proceeding from Step 5 with:', { /* Log Step 5 data */ });
+    console.log('Proceeding from Step 5 with:', { editorContent /* Log Step 5 data */ });
     // TODO: Backend call for Step 5 data saving
-    setCurrentStep(6); // Move to Step 6
+    setCurrentStep(6); 
   };
 
   const handleContinueFromStep6 = () => {
-    console.log('Proceeding from Step 6 with:', { /* Log Step 6 data */ });
+    console.log('Proceeding from Step 6 with:', { qualityMetrics /* Log Step 6 data */ });
     // TODO: Backend call for Step 6 data saving
-    setCurrentStep(7); // Move to Step 7
+    setCurrentStep(7); 
   };
 
   // --- Step 6 Handlers ---
   const loadQualityData = async () => {
-     setIsLoadingQA(true); // Use store action
+     setIsLoadingQA(true); 
      try {
-       // Simulate fetching quality metrics (replace with actual service call later)
-       // const metrics = await analyticsService.getQualityAssessment('temp-project-id');
        await new Promise(resolve => setTimeout(resolve, 600)); // Simulate delay
        const simulatedMetrics: QualityMetrics = {
-         overallScore: Math.floor(Math.random() * 20) + 75, // Score between 75-94
+         overallScore: Math.floor(Math.random() * 20) + 75, 
          categories: [
            { name: 'Content Quality', score: Math.floor(Math.random() * 20) + 78 },
            { name: 'Design Effectiveness', score: Math.floor(Math.random() * 25) + 70 },
@@ -197,72 +201,63 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
            { id: 'iss2', severity: 'info', text: 'Add transition between Solution and Market sections.' },
          ]
        };
-       setQualityMetrics(simulatedMetrics); // Use store action
+       setQualityMetrics(simulatedMetrics); 
 
-       // Simulate fetching suggestions (replace with actual service call later)
-       // const suggestions = await contentGenerationService.getRefinementSuggestions('temp-project-id');
        const simulatedSuggestions: Suggestion[] = [
          { id: 'sug1', text: 'Refine value proposition for clarity.', impact: 'High', effort: 'Medium' },
          { id: 'sug2', text: 'Add competitor comparison chart.', impact: 'Medium', effort: 'High' },
        ];
-       setRefinementSuggestions(simulatedSuggestions); // Use store action
+       setRefinementSuggestions(simulatedSuggestions); 
 
      } catch (error) {
         console.error("Failed to load QA data:", error);
-        // Handle error state if needed
      } finally {
-        setIsLoadingQA(false); // Use store action
+        setIsLoadingQA(false); 
      }
   };
 
-  // Add useEffect to load QA data and reset state when entering Step 6
   useEffect(() => {
     if (currentStep === 6) {
-      resetQAState(); // Use store action to reset all QA state
-      loadQualityData(); // Then load new data
+      resetQAState(); 
+      loadQualityData(); 
     }
-  }, [currentStep, resetQAState]); // Add resetQAState to dependency array
+  }, [currentStep, resetQAState]); 
 
 
   const handleRunFactCheck = async () => {
-     setFactCheckResults([]); // Use store action
-     setIsLoadingQA(true); // Use store action
+     setFactCheckResults([]); 
+     setIsLoadingQA(true); 
      try {
-        // TODO: Get actual content from Step 5 editor state (use store state)
-        const contentToVerify = useProjectWorkflowStore.getState().editorContent || generatedContentPreview || "Sample content with claim: Market size is $10B."; // Prioritize editor content
-        // Add check for projectId before making API call
+        const contentToVerify = useProjectWorkflowStore.getState().editorContent || generatedContentPreview || "Sample content with claim: Market size is $10B."; 
         if (!projectId) {
           throw new Error("Project ID is missing. Cannot run fact check.");
         }
-        const results = await contentGenerationService.verifyFacts(projectId, contentToVerify); // Use actual projectId
-        setFactCheckResults(results); // Use store action
+        const results = await contentGenerationService.verifyFacts(projectId, contentToVerify); 
+        setFactCheckResults(results); 
      } catch (error) {
         console.error("Fact check failed:", error);
-        setFactCheckResults([{ claim: 'Error', verified: false, explanation: 'Fact check process failed.' }]); // Use store action
+        setFactCheckResults([{ claim: 'Error', verified: false, explanation: 'Fact check process failed.' }]); 
      } finally {
-        setIsLoadingQA(false); // Use store action
+        setIsLoadingQA(false); 
      }
   };
 
-  // Add similar handlers for handleCheckCompliance, handleValidateFinancials, handleCheckLanguage
-  // These would likely call different backend services or AI prompts
   const handleRunComplianceCheck = async () => {
-     setComplianceStatus('Running'); // Use store action
-     await new Promise(resolve => setTimeout(resolve, 800)); // Simulate check
-     setComplianceStatus(Math.random() > 0.2 ? 'Passed' : 'Issues Found'); // Use store action
+     setComplianceStatus('Running'); 
+     await new Promise(resolve => setTimeout(resolve, 800)); 
+     setComplianceStatus(Math.random() > 0.2 ? 'Passed' : 'Issues Found'); 
   };
    const handleRunFinancialValidation = async () => {
-     setFinancialValidationStatus('Running'); // Use store action
-     await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate check
-     setFinancialValidationStatus(Math.random() > 0.1 ? 'Passed' : 'Issues Found'); // Use store action
+     setFinancialValidationStatus('Running'); 
+     await new Promise(resolve => setTimeout(resolve, 1000)); 
+     setFinancialValidationStatus(Math.random() > 0.1 ? 'Passed' : 'Issues Found'); 
   };
    const handleRunLanguageCheck = async () => {
-     setLanguageCheckStatus('Running'); // Use store action
-     await new Promise(resolve => setTimeout(resolve, 700)); // Simulate check
-     setLanguageCheckStatus(Math.random() > 0.3 ? 'Passed' : 'Issues Found'); // Use store action
+     setLanguageCheckStatus('Running'); 
+     await new Promise(resolve => setTimeout(resolve, 700)); 
+     setLanguageCheckStatus(Math.random() > 0.3 ? 'Passed' : 'Issues Found'); 
   };
 
-  // Placeholder handlers for refinement actions
   const handleImplementSuggestion = (id: string) => console.log(`Implement suggestion: ${id} - (Not Implemented)`);
   const handleCompareSuggestion = (id: string) => console.log(`Compare suggestion: ${id} - (Not Implemented)`);
   const handleRunFinalPolish = () => console.log('Run Final Polish - (Not Implemented)');
@@ -270,60 +265,52 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
 
   // --- Step 5 Handlers ---
   const handleEnhanceClarity = async () => {
-     if (!editorContent) return; // Use store state
-     setIsLoadingEnhancement(true); // Use store action
+     if (!editorContent) return; 
+     setIsLoadingEnhancement(true); 
      try {
-        // Use projectId directly from store hook, add check
         if (!projectId) {
           throw new Error("Project ID is missing for enhancement.");
         }
         const result = await contentGenerationService.enhanceContent(
-           projectId, // Use actual project ID from store hook
-           'current-section-id', // Need a way to track current section later
+           projectId, 
+           'current-section-id', 
            editorContent,
            'clarity'
         );
         if (result.content && !result.content.startsWith('Error:')) {
-           setEditorContent(result.content); // Use store action
-           // Optionally, provide feedback to the user
+           setEditorContent(result.content); 
         } else {
            throw new Error(result.content || 'Clarity enhancement failed.');
         }
      } catch (error) {
         console.error("Clarity enhancement failed:", error);
-        // Show error to user
      } finally {
-        setIsLoadingEnhancement(false); // Use store action
+        setIsLoadingEnhancement(false); 
      }
   };
-  // Add handlers for other enhancement buttons later
   // --- End Step 5 Handlers ---
 
   // --- Client-Side PDF Generation Handler ---
   const handleGenerateClientPdf = async () => {
-    if (!editorContent) { // Use store state
+    if (!editorContent) { 
       console.error("No content available to generate PDF.");
-      setClientPdfStatus('error'); // Use store action
+      setClientPdfStatus('error'); 
       return;
     }
 
-    setIsGeneratingClientPdf(true); // Use store action
-    setClientPdfStatus('generating'); // Use store action
+    setIsGeneratingClientPdf(true); 
+    setClientPdfStatus('generating'); 
     console.log("Generating PDF client-side...");
 
     try {
-      // 1. Render Markdown to HTML string
-      // We need to wrap MarkdownContent in basic HTML structure for pdf generation
       const htmlString = ReactDOMServer.renderToString(
         <html>
           <head>
-            {/* Basic styling - consider linking a CSS file or adding more inline styles */}
             <style>{`
               body { font-family: sans-serif; padding: 20px; }
               h1, h2, h3 { margin-bottom: 0.5em; }
               p { margin-bottom: 1em; line-height: 1.4; }
               ul, ol { margin-left: 20px; margin-bottom: 1em; }
-              /* Add more styles based on MarkdownContent's output if needed */
             `}</style>
           </head>
           <body>
@@ -332,157 +319,341 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
         </html>
       );
 
-      // 2. Configure html2pdf
       const pdfOptions = {
-        margin:       [1, 1, 1, 1], // Use array for margins [top, left, bottom, right] in inches
-        filename:     `${projectName || 'magicmuse-project'}.pdf`, // Use project name from store
+        margin:       [1, 1, 1, 1], 
+        filename:     `${projectName || 'magicmuse-project'}.pdf`, 
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true }, // Increase scale for better quality
+        html2canvas:  { scale: 2, useCORS: true }, 
         jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
 
-      // 3. Generate PDF
       await html2pdf().set(pdfOptions).from(htmlString).save();
 
       console.log("Client-side PDF generated successfully.");
-      setClientPdfStatus('success'); // Use store action
+      setClientPdfStatus('success'); 
 
     } catch (error) {
       console.error("Client-side PDF generation failed:", error);
-      setClientPdfStatus('error'); // Use store action
+      setClientPdfStatus('error'); 
     } finally {
-      setIsGeneratingClientPdf(false); // Use store action
+      setIsGeneratingClientPdf(false); 
     }
   };
   // --- End Client-Side PDF Generation Handler ---
 
-  // --- Step 4 Handler ---
-  const handleGenerateContent = async (options: { factCheckLevel: 'basic' | 'standard' | 'thorough' }) => {
+  // --- START: Integrated Generation Logic ---
+  
+  // Helper function to get default slide structure based on the selected option
+  const getDefaultSlideStructure = (structureOption: 'default' | 'comprehensive' | 'custom') => {
+    const defaultSlides = [
+      { id: 'slide-1', title: 'Cover/Title', type: 'cover', includeVisual: true },
+      { id: 'slide-2', title: 'Problem/Opportunity', type: 'problem', includeVisual: true },
+      { id: 'slide-3', title: 'Solution Overview', type: 'solution', includeVisual: true },
+      { id: 'slide-4', title: 'Value Proposition', type: 'value_proposition', includeVisual: false },
+      { id: 'slide-5', title: 'Market Analysis', type: 'market_analysis', includeVisual: true, visualType: 'chart' },
+      { id: 'slide-6', title: 'Competitive Landscape', type: 'competition', includeVisual: true, visualType: 'table' },
+      { id: 'slide-7', title: 'Product/Service Details', type: 'product', includeVisual: true },
+      { id: 'slide-8', title: 'Business Model', type: 'business_model', includeVisual: true, visualType: 'diagram' },
+      { id: 'slide-9', title: 'Financial Projections', type: 'financials', includeVisual: true, visualType: 'chart' },
+      { id: 'slide-10', title: 'Call to Action', type: 'call_to_action', includeVisual: false }
+    ];
+    
+    const additionalSlides = [
+      { id: 'slide-11', title: 'Team Introduction', type: 'team', includeVisual: true },
+      { id: 'slide-12', title: 'Timeline/Roadmap', type: 'roadmap', includeVisual: true, visualType: 'diagram' },
+      { id: 'slide-13', title: 'Traction/Validation', type: 'traction', includeVisual: true, visualType: 'chart' },
+      { id: 'slide-14', title: 'Investment/Ask', type: 'investment', includeVisual: false }
+    ];
+    
+    if (structureOption === 'comprehensive') {
+      return [...defaultSlides, ...additionalSlides];
+    }
+    
+    return defaultSlides;
+  };
+
+  // Helper for typing effect with configurable speed
+  const simulateTyping = (text: string, setText: (text: string) => void, speed = 5) => {
+    let i = 0;
+    let currentText = '';
+    setText('');
+    
+    const intervalId = setInterval(() => {
+      if (i < text.length) {
+        currentText += text.charAt(i);
+        setText(currentText);
+        i++;
+      } else {
+        clearInterval(intervalId);
+        // Convert final Markdown to HTML before setting editor state
+        const htmlContent = marked(text) as string;
+        console.log("Generated HTML for Editor:", htmlContent);
+        setEditorContent(htmlContent); // Use store action
+        setIsGenerating(false); // Ensure generation stops (using store action)
+      }
+    }, speed); // Speed in milliseconds - lower is faster
+  };
+
+  // Helper to convert typingSpeed option to actual milliseconds
+  const getTypingSpeedFromOption = (speedOption: number) => {
+    // Map speedOption (0-4) to actual ms values (0=fastest, 4=slowest)
+    const speedMap = [0, 2, 5, 10, 20];
+    return speedMap[speedOption] || 5; // Default to 5ms if invalid option
+  };
+
+  // Main Generation Handler
+  const handleGenerateContent = async (options: { 
+    factCheckLevel: 'basic' | 'standard' | 'thorough',
+    visualsEnabled: boolean,
+    contentTone: 'formal' | 'conversational' | 'persuasive',
+    slideStructure: 'default' | 'comprehensive' | 'custom',
+    typingSpeed: number,
+    includeAllSlides: boolean
+  }) => {
     resetGenerationState(); // Reset store state first
     setIsGenerating(true); // Use store action
     setGenerationStatusText('Initiating generation...'); // Use store action
-    // setGeneratedContentPreview(''); // Covered by resetGenerationState
-
+    
     // Get latest state from store for the prompt
     const currentStoreState = useProjectWorkflowStore.getState();
+    
+    // Prepare comprehensive project info object for prompts
     const projectInfo = {
-       projectName: currentStoreState.projectName,
-       pitchDeckType: currentStoreState.selectedPitchDeckTypeId || 'generic',
-       description: currentStoreState.description,
-       tags: currentStoreState.tags, // Add tags
-       // TODO: Add data from Step 2 state here (once added to store)
-     };
+      projectId: currentStoreState.projectId || 'temp-id', // Use projectId from store
+      projectName: currentStoreState.projectName,
+      pitchDeckType: currentStoreState.selectedPitchDeckTypeId || 'generic',
+      description: currentStoreState.description,
+      tags: currentStoreState.tags,
+      teamMembers: currentStoreState.teamMembers,
+      privacy: currentStoreState.privacy,
+      
+      // Step 2: Audience & Requirements Data
+      audience: {
+        name: currentStoreState.audienceName,
+        orgType: currentStoreState.orgType,
+        industry: currentStoreState.industry,
+        // Ensure size matches ProjectInfo type ('Small' | 'Medium' | 'Enterprise')
+        size: currentStoreState.size || 'Small', // Default to 'Small' if empty
+        personaRole: currentStoreState.personaRole,
+        personaConcerns: currentStoreState.personaConcerns,
+        personaCriteria: currentStoreState.personaCriteria,
+        personaCommPrefs: currentStoreState.personaCommPrefs
+      },
+      
+      // Step 3: Design & Structure Data
+      design: {
+        // Ensure templateId is string | undefined, not string | null
+        templateId: currentStoreState.selectedTemplateId ?? undefined,
+        // Ensure brandLogo is string | undefined, not string | null
+        brandLogo: currentStoreState.brandLogo ?? undefined,
+        primaryColor: currentStoreState.primaryColor,
+        secondaryColor: currentStoreState.secondaryColor,
+        accentColor: currentStoreState.accentColor,
+        headingFont: currentStoreState.headingFont,
+        bodyFont: currentStoreState.bodyFont,
+        complexityLevel: currentStoreState.complexityLevel
+      },
+      
+      // Slide structure (from Step 3) - Use state directly or default
+      slideStructure: currentStoreState.slideStructure || getDefaultSlideStructure(options.slideStructure),
+      
+      // Generation options (from Step 4)
+      generationOptions: {
+        factCheckLevel: options.factCheckLevel,
+        visualsEnabled: options.visualsEnabled,
+        contentTone: options.contentTone
+      }
+    };
 
-     try {
-      // Calculate dynamic steps
+    try {
+      // Calculate dynamic steps based on selected options
       const researchSteps = 1;
-      const contentSteps = slideStructure.length > 0 ? slideStructure.length : 1; // Ensure at least 1 content step
+      // Use the actual slide structure length for calculation
+      const actualSlideStructure = projectInfo.slideStructure; 
+      const slideCount = options.includeAllSlides ? 
+        actualSlideStructure.length : 
+        (options.slideStructure === 'comprehensive' ? 14 : 10);
+      const visualSteps = options.visualsEnabled ? Math.ceil(slideCount * 0.4) : 0; 
       const finalizationSteps = 1;
-      const totalSteps = researchSteps + contentSteps + finalizationSteps;
-      const progressIncrement = 100 / totalSteps;
+      const totalSteps = researchSteps + slideCount + visualSteps + finalizationSteps;
+      const progressIncrement = totalSteps > 0 ? 100 / totalSteps : 0; // Avoid division by zero
       let currentProgress = 0;
-
-      // --- Step 1: Research ---
-      // Add check for projectId before making API call
-      if (!projectId) {
+      
+      // --- PHASE 1: Research ---
+      setGenerationStatusText('Researching information...');
+      setPhaseData({ currentPhase: 'researching', phaseProgress: 0 }); // Corrected phase name
+      
+      // Use projectId from store state
+      if (!projectId) { 
         throw new Error("Project ID is missing. Cannot generate content.");
       }
+      
       const researchPrompt = createResearchPrompt(projectInfo);
+      
       const researchResult = await contentGenerationService.generateContent({
-         projectId: projectId, // Use actual project ID from store
-         prompt: researchPrompt,
-         useResearchModel: true,
-         factCheckLevel: options.factCheckLevel
+        projectId: projectId, // Use projectId from store state
+        prompt: researchPrompt,
+        useResearchModel: true,
+        factCheckLevel: options.factCheckLevel
       });
 
       if (!researchResult || researchResult.content.startsWith('Error:')) {
-         throw new Error(researchResult?.content || 'Research step failed.');
+        throw new Error(researchResult?.content || 'Research step failed.');
       }
 
       // --- Update after Research ---
       currentProgress += progressIncrement * researchSteps;
-      setGenerationProgress(Math.round(currentProgress)); // Use store action
-      setGenerationStatusText(`Generating content for ${contentSteps} sections...`); // Use store action
-      setGeneratedContentPreview(`Research Summary:\n${researchResult.content.substring(0, 300)}...\n\n---`); // Use store action
-
-      // --- Step 2: Content Generation ---
-      // Add instruction for Markdown formatting to the prompt
-      const contentPrompt = createPitchDeckContentPrompt(projectInfo, researchResult.content) +
-                            "\n\nPlease format the entire output strictly as Markdown, using appropriate headings (## for sections, ### for subsections), bullet points (*), and bold text (**bold**).";
-      const contentResult = await contentGenerationService.generateContent({
-         projectId: projectId, // Use actual project ID from store
-         prompt: contentPrompt,
-         useResearchModel: false,
+      setGenerationProgress(Math.round(currentProgress));
+      setPhaseData({ currentPhase: 'researching', phaseProgress: 100 }); // Corrected phase name
+      
+      const researchPreview = `# Research Results\n\n${researchResult.content.substring(0, 300)}...\n\n---\n\n`;
+      setGeneratedContentPreview(researchPreview);
+      
+      // --- PHASE 2: Content Generation (SLIDE BY SLIDE) ---
+      setGenerationStatusText(`Generating content for ${slideCount} slides...`);
+      setPhaseData({
+        currentPhase: 'content',
+        phaseProgress: 0,
+        currentSlide: 1,
+        totalSlides: slideCount
       });
-
-       if (!contentResult || contentResult.content.startsWith('Error:')) {
-         throw new Error(contentResult?.content || 'Content generation step failed.');
+      
+      // Determine the actual slides to generate
+      const slidesToGenerate = options.includeAllSlides ? 
+        actualSlideStructure : 
+        actualSlideStructure?.slice(0, options.slideStructure === 'comprehensive' ? 14 : 10);
+      
+      if (!slidesToGenerate || slidesToGenerate.length === 0) {
+        throw new Error("No slide structure defined for generation.");
       }
+      
+      let allGeneratedContent = '';
+      const generatedSlides: string[] = [];
+      
+      for (let i = 0; i < slidesToGenerate.length; i++) {
+        const slide = slidesToGenerate[i];
+        const slideIndex = i + 1;
+        
+        setGenerationStatusText(`Generating slide ${slideIndex}: ${slide.title}...`);
+        setPhaseData({
+          currentPhase: 'content',
+          phaseProgress: Math.round(((i + 1) / slidesToGenerate.length) * 100),
+          currentSlide: slideIndex,
+          totalSlides: slidesToGenerate.length
+        });
+        
+        const slidePrompt = createSlideContentPrompt(
+          slide, slideIndex, slidesToGenerate.length, projectInfo, researchResult.content, generatedSlides
+        );
+        
+        const slideResult = await contentGenerationService.generateContent({
+          projectId: projectId, // Use projectId from store state
+          prompt: slidePrompt,
+          useResearchModel: false,
+        });
+        
+        if (!slideResult || slideResult.content.startsWith('Error:')) {
+          throw new Error(`Failed to generate content for slide ${slideIndex}. Details: ${slideResult?.content}`);
+        }
+        
+        let formattedSlideContent = `## ${slideIndex}. ${slide.title}\n${slideResult.content}\n\n`;
+        generatedSlides.push(formattedSlideContent);
+        
+        allGeneratedContent = `# ${projectInfo.projectName}\n${projectInfo.description ? `\n${projectInfo.description}\n` : ''}\n\n${generatedSlides.join('\n---\n\n')}`;
+        
+        // Update preview incrementally
+        setGeneratedContentPreview(allGeneratedContent); 
+        
+        currentProgress = Math.round((researchSteps + (i + 1)) / totalSteps * 100);
+        setGenerationProgress(Math.min(currentProgress, 85)); 
+      }
+      
+      // --- PHASE 3: Visual Generation (if enabled) ---
+      if (options.visualsEnabled && visualSteps > 0) {
+        setGenerationStatusText('Creating visual elements...');
+        setPhaseData({ currentPhase: 'visuals', phaseProgress: 0 });
+        
+        const visualSlides = slidesToGenerate.filter(slide => 
+          slide.includeVisual || 
+          ['market_analysis', 'competition', 'financials', 'roadmap', 'product'].some(type => 
+            slide.type.includes(type)
+          )
+        );
+        
+        const slidesForVisuals = visualSlides.slice(0, visualSteps);
+        
+        for (let i = 0; i < slidesForVisuals.length; i++) {
+          const slide = slidesForVisuals[i];
+          const slideIndex = slidesToGenerate.findIndex(s => s.id === slide.id) + 1;
+          
+          setGenerationStatusText(`Creating visuals for slide ${slideIndex}: ${slide.title}...`);
+          setPhaseData({
+            currentPhase: 'visuals',
+            phaseProgress: Math.round(((i + 1) / slidesForVisuals.length) * 100),
+            currentSlide: slideIndex,
+            totalSlides: slidesToGenerate.length
+          });
+          
+          // In a real implementation, call a visual generation service
+          const visualPrompt = createVisualGenerationPrompt(
+            slide, generatedSlides[slideIndex - 1], projectInfo
+          );
+          // Simulate visual generation call
+          await new Promise(resolve => setTimeout(resolve, 300)); 
+          
+          // Append visual placeholder/spec to the slide content in the preview
+          const visualSpecPlaceholder = `\n\n\`\`\`visual-specification\n${visualPrompt.split('```visual-specification')[1]?.split('```')[0]?.trim()}\n\`\`\`\n`;
+          generatedSlides[slideIndex - 1] += visualSpecPlaceholder;
+          allGeneratedContent = `# ${projectInfo.projectName}\n${projectInfo.description ? `\n${projectInfo.description}\n` : ''}\n\n${generatedSlides.join('\n---\n\n')}`;
+          setGeneratedContentPreview(allGeneratedContent); // Update preview with visual spec
 
-      // --- Update after Content Generation ---
-      currentProgress += progressIncrement * contentSteps; // Add progress for all content steps
-      setGenerationProgress(Math.round(currentProgress)); // Use store action
-      setGenerationStatusText('Finalizing and formatting...'); // Use store action
-
-      // --- Finalize ---
-      // Add a small delay for "Finalizing" step before setting to 100%
-      await new Promise(resolve => setTimeout(resolve, 300)); // Simulate finalization
-      currentProgress += progressIncrement * finalizationSteps;
-      setGenerationProgress(100); // Use store action
-      setGenerationStatusText('Generation complete. Displaying content...'); // Use store action
-
-      // Prepend H1 title and ensure Markdown format
-      const finalMarkdownContent = `# ${useProjectWorkflowStore.getState().projectName}\n\n${contentResult.content}`; // Get latest name
-
-      simulateTyping(finalMarkdownContent, setGeneratedContentPreview); // Start typing effect with formatted content
-
+          currentProgress = Math.round((researchSteps + slidesToGenerate.length + (i + 1)) / totalSteps * 100);
+          setGenerationProgress(Math.min(currentProgress, 95)); 
+        }
+      }
+      
+      // --- PHASE 4: Finalization ---
+      setGenerationStatusText('Finalizing presentation...');
+      setPhaseData({ currentPhase: 'finalizing', phaseProgress: 0 });
+      
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      setGenerationProgress(100);
+      setPhaseData({ currentPhase: 'finalizing', phaseProgress: 100 });
+      setGenerationStatusText('Generation complete!');
+      
+      const finalContent = allGeneratedContent;
+      
+      const typingSpeedInMs = getTypingSpeedFromOption(options.typingSpeed);
+      // Call simulateTyping AFTER setting final status, but pass the final content
+      simulateTyping(finalContent, setGeneratedContentPreview, typingSpeedInMs); 
+      // Note: simulateTyping now handles setIsGenerating(false) and setEditorContent
+      
     } catch (error) {
       console.error("Generation failed:", error);
       const errorMessage = `Error during generation: ${error instanceof Error ? error.message : String(error)}`;
-      setGeneratedContentPreview(errorMessage); // Use store action
-      setGenerationStatusText('Generation Failed!'); // Use store action
-      setGenerationProgress(0); // Use store action
-      setIsGenerating(false); // Use store action
+      setGeneratedContentPreview(errorMessage);
+      setGenerationStatusText('Generation Failed!');
+      setGenerationProgress(0);
+      setIsGenerating(false); // Ensure generation stops on error
     }
-    // setIsGenerating(false) is now handled by simulateTyping or catch block
   };
-
-// Helper for typing effect
-const simulateTyping = (text: string, setText: (text: string) => void, speed = 0) => { // Accept Zustand action signature
-  let i = 0;
-  let currentText = ''; // Use a local variable to build the string
-  setText(''); // Clear initial state via action
-  const intervalId = setInterval(() => {
-    if (i < text.length) {
-      currentText += text.charAt(i); // Append to local variable
-      setText(currentText); // Update store with the accumulated string
-      i++;
-    } else {
-      clearInterval(intervalId);
-      // Convert final Markdown to HTML before setting editor state
-      const htmlContent = marked(text) as string; // Use marked to parse
-      console.log("Generated HTML for Editor:", htmlContent); // Log the generated HTML
-      setEditorContent(htmlContent); // Use store action
-      setIsGenerating(false); // Ensure generation stops (using store action)
-    }
-  }, speed);
-};
+  // --- END: Integrated Generation Logic ---
 
 
   return (
     // Use Card component for consistent container styling
     <Card className="project-area-container shadow-md border border-neutral-light">
-       {/* Project Title Header - Reads from Zustand store */}
+       {/* Project Title Header */}
        <div className="p-4 border-b border-neutral-light/40 bg-gradient-to-r from-neutral-light/10 to-transparent">
          <h1 className="text-2xl font-bold font-heading text-secondary truncate">
-           {projectName || "Untitled Project"} {/* Display state from store */}
+           {projectName || "Untitled Project"} 
          </h1>
          <p className="text-sm text-neutral-dark font-medium">
-           Category: Proposal & Pitch Deck Generation {/* Fixed Category */}
+           Category: Proposal & Pitch Deck Generation 
          </p>
        </div>
 
-       {/* Step Header */}
        {/* Step 1 Content */}
        {currentStep === 1 && (
          <>
@@ -496,32 +667,27 @@ const simulateTyping = (text: string, setText: (text: string) => void, speed = 0
            </div>
            <div className="p-2 md:p-4 space-y-8">
              <PitchDeckTypeGrid
-               selectedTypeId={selectedPitchDeckTypeId} // From store
-               onSelectType={handleSelectType} // Uses store action
+               selectedTypeId={selectedPitchDeckTypeId} 
+               onSelectType={handleSelectType} 
              />
              <ProjectSetupForm
-               // Pass state values from store
                projectName={projectName}
                description={description}
                privacy={privacy}
-               // Pass actions from store
                setProjectName={setProjectName}
                setDescription={setDescription}
                setPrivacy={setPrivacy}
-               setTagsInput={setTagsFromString} // Pass store action for string input
-               setTeamInput={setTeamMembersFromString} // Pass store action for string input
-               // tagsInput and teamInput props removed - form will manage its own input state
+               setTagsInput={setTagsFromString} 
+               setTeamInput={setTeamMembersFromString} 
              />
              <ImportOptions />
-             {/* Make button container stack on mobile */}
              <div className="flex flex-col md:flex-row md:justify-end pt-6 border-t border-neutral-light/40 gap-2">
                <Button
                  variant="primary"
-                 // size prop removed
-                 onClick={handleContinueFromStep1} // Uses store state for validation
-                 disabled={!projectName || !selectedPitchDeckTypeId} // Use store state
-                 className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" // Responsive width and sizing
-                 data-continue-button="true" // Add data attribute for the import options to find
+                 onClick={handleContinueFromStep1} 
+                 disabled={!projectName || !selectedPitchDeckTypeId} 
+                 className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" 
+                 data-continue-button="true" 
                >
                  Continue to Requirements
                </Button>
@@ -542,19 +708,16 @@ const simulateTyping = (text: string, setText: (text: string) => void, speed = 0
              </p>
            </div>
            <div className="p-4 md:p-6 space-y-6">
-             {/* Import and use the TargetAudienceForm component */}
              <TargetAudienceForm />
              {/* Add other Step 2 sections here later */}
-
-              {/* Make button container stack on mobile */}
               <div className="flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
-                 <Button variant="outline" onClick={() => setCurrentStep(1)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
+                 <Button variant="outline" onClick={() => setCurrentStep(1)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> 
                    Back to Setup
                  </Button>
                  <Button
                    variant="primary"
-                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" // Responsive width
-                   onClick={handleContinueFromStep2} // Use updated handler
+                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" 
+                   onClick={handleContinueFromStep2} 
                  >
                    Continue to Design & Structure
                  </Button>
@@ -563,7 +726,7 @@ const simulateTyping = (text: string, setText: (text: string) => void, speed = 0
          </>
        )}
 
-       {/* Step 3 Content (Placeholder) */}
+       {/* Step 3 Content */}
        {currentStep === 3 && (
           <>
             <div className="p-4 border-b border-neutral-light/40 bg-white/5">
@@ -574,59 +737,58 @@ const simulateTyping = (text: string, setText: (text: string) => void, speed = 0
                 Select a template, customize branding, and plan the structure.
               </p>
             </div>
-            {/* Step 3 Layout: Two Columns */}
             <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
                {/* Left Column: Configuration */}
                <div className="lg:col-span-7 space-y-6">
                   <TemplateGallery
-                     selectedTemplateId={selectedTemplateId} // From store
-                     onSelectTemplate={setSelectedTemplateId} // Store action
+                     selectedTemplateId={selectedTemplateId}
+                     onSelectTemplate={setSelectedTemplateId}
+                     primaryColor={primaryColor} // Pass primaryColor
                   />
                   <BrandCustomization
-                     logo={brandLogo} // From store
-                     onLogoChange={setBrandLogo} // Store action (handler needed for upload)
-                     primaryColor={primaryColor} // From store
-                     onPrimaryColorChange={setPrimaryColor} // Store action
-                     secondaryColor={secondaryColor} // From store
-                     onSecondaryColorChange={setSecondaryColor} // Store action
-                     accentColor={accentColor} // From store
-                     onAccentColorChange={setAccentColor} // Store action
-                     headingFont={headingFont} // From store
-                     onHeadingFontChange={setHeadingFont} // Store action
-                     bodyFont={bodyFont} // From store
-                     onBodyFontChange={setBodyFont} // Store action
+                     logo={brandLogo} 
+                     onLogoChange={setBrandLogo} 
+                     primaryColor={primaryColor} 
+                     onPrimaryColorChange={setPrimaryColor} 
+                     secondaryColor={secondaryColor} 
+                     onSecondaryColorChange={setSecondaryColor} 
+                     accentColor={accentColor} 
+                     onAccentColorChange={setAccentColor} 
+                     headingFont={headingFont} 
+                     onHeadingFontChange={setHeadingFont} 
+                     bodyFont={bodyFont} 
+                     onBodyFontChange={setBodyFont} 
                   />
                   <StructurePlanning
-                     slides={slideStructure} // From store
-                     onSlidesChange={setSlideStructure} // Store action
-                     complexity={complexityLevel} // From store
-                     onComplexityChange={setComplexityLevel} // Store action
+                     slides={slideStructure} 
+                     onSlidesChange={setSlideStructure} 
+                     complexity={complexityLevel} 
+                     onComplexityChange={setComplexityLevel} 
                   />
                </div>
                {/* Right Column: Preview */}
                <div className="lg:col-span-5">
                   <div className="sticky top-[80px]">
                      <DesignPreview
-                        // Pass relevant state from store to preview
                         primaryColor={primaryColor}
                         secondaryColor={secondaryColor}
                         accentColor={accentColor}
                         headingFont={headingFont}
                         bodyFont={bodyFont}
                         slides={slideStructure}
+                        logo={brandLogo} // Pass logo
+                        templateId={selectedTemplateId} // Pass templateId
                      />
                   </div>
                </div>
-               {/* Navigation Buttons (Full Width Below Columns) */}
-              {/* Make button container stack on mobile */}
               <div className="lg:col-span-12 flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
-                 <Button variant="outline" onClick={() => setCurrentStep(2)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
+                 <Button variant="outline" onClick={() => setCurrentStep(2)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> 
                    Back to Requirements
                  </Button>
                  <Button
                    variant="primary"
-                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" // Responsive width
-                   onClick={handleContinueFromStep3} // Use new handler
+                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" 
+                   onClick={handleContinueFromStep3} 
                  >
                    Continue to Content Generation
                   </Button>
@@ -635,7 +797,7 @@ const simulateTyping = (text: string, setText: (text: string) => void, speed = 0
           </>
         )}
 
-       {/* Step 4 Content (Placeholder) */}
+       {/* Step 4 Content */}
        {currentStep === 4 && (
          <>
            <div className="p-4 border-b border-neutral-light/40 bg-white/5">
@@ -646,33 +808,54 @@ const simulateTyping = (text: string, setText: (text: string) => void, speed = 0
                Configure and initiate AI content generation.
              </p>
            </div>
-           {/* Step 4 Layout: Similar to Step 3? Or maybe different? Let's try 2 columns again */}
            <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Left Column: Setup & Progress (1/3 width) */}
+              {/* Left Column: Setup & Progress */}
               <div className="lg:col-span-4 space-y-6">
                  <GenerationSetup
-                    onGenerate={handleGenerateContent} // Handler remains the same
-                    isGenerating={isGenerating} // Use store state
+                    onGenerate={handleGenerateContent} // Use the integrated handler
+                    isGenerating={isGenerating} 
+                    slideCount={slideStructure?.length || 14} // Pass slide count
                  />
-                 {isGenerating && <GenerationProgress progress={generationProgress} statusText={generationStatusText} />} {/* Use store state */}
+                 {/* Conditionally render progress */}
+                 {isGenerating && (
+                   <GenerationProgress 
+                     progress={generationProgress} 
+                     statusText={generationStatusText}
+                     phaseData={phaseData} // Pass phase data
+                     onCancel={() => { // Add cancel handler
+                       setIsGenerating(false); 
+                       resetGenerationState(); 
+                     }}
+                   />
+                 )}
               </div>
-              {/* Right Column: Preview (2/3 width) */}
+              {/* Right Column: Preview */}
               <div className="lg:col-span-8">
                  <div className="sticky top-[80px]">
-                    {/* Pass content from store to GenerationPreview */}
-                    <GenerationPreview content={generatedContentPreview} /> {/* Use store state */}
+                    <GenerationPreview
+                      content={generatedContentPreview}
+                      templateId={selectedTemplateId ?? undefined} // Ensure undefined if null
+                      brandColors={{ // Pass brand colors
+                        primary: primaryColor || '#333333',
+                        secondary: secondaryColor || '#666666',
+                        accent: accentColor || '#0077cc'
+                      }}
+                      fonts={{ // Pass fonts
+                        headingFont: headingFont || 'Inter, sans-serif',
+                        bodyFont: bodyFont || 'Inter, sans-serif'
+                      }}
+                    /> 
                  </div>
               </div>
-              {/* Navigation Buttons */}
-             {/* Make button container stack on mobile */}
              <div className="lg:col-span-12 flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
-               <Button variant="outline" onClick={() => setCurrentStep(3)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
+               <Button variant="outline" onClick={() => setCurrentStep(3)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> 
                  Back to Design
                </Button>
                <Button
                  variant="primary"
-                 className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" // Responsive width
+                 className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" 
                  onClick={handleContinueFromStep4}
+                 disabled={isGenerating} // Disable continue while generating
                >
                  Continue to Editing
                 </Button>
@@ -681,7 +864,7 @@ const simulateTyping = (text: string, setText: (text: string) => void, speed = 0
          </>
        )}
 
-       {/* Step 5 Content (Placeholder) */}
+       {/* Step 5 Content */}
        {currentStep === 5 && (
          <>
            <div className="p-4 border-b border-neutral-light/40 bg-white/5">
@@ -692,36 +875,33 @@ const simulateTyping = (text: string, setText: (text: string) => void, speed = 0
                Refine generated content, enhance visuals, and collaborate.
              </p>
            </div>
-            {/* Step 5 Layout: Maybe 3 columns? Editor, Tools, Collaboration? */}
            <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
                {/* Main Editor Area */}
                <div className="lg:col-span-8 space-y-6">
                   <ContentEditor
-                     content={editorContent} // Use store state
-                     onChange={setEditorContent} // Use store action
+                     content={editorContent} 
+                     onChange={setEditorContent} 
                   />
                </div>
                {/* Right Sidebar: Tools & Collaboration */}
                <div className="lg:col-span-4 space-y-6">
-                  <div className="sticky top-[80px] space-y-6"> {/* Make sidebar sticky */}
+                  <div className="sticky top-[80px] space-y-6"> 
                      <EnhancementTools
-                        editorContent={editorContent} // Use store state
-                        onContentChange={setEditorContent} // Use store action
+                        editorContent={editorContent} 
+                        onContentChange={setEditorContent} 
                      />
                      <VisualElementStudio />
                      <CollaborationTools />
                   </div>
                </div>
-               {/* Navigation Buttons */}
-              {/* Make button container stack on mobile */}
               <div className="lg:col-span-12 flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
-                <Button variant="outline" onClick={() => setCurrentStep(4)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
+                <Button variant="outline" onClick={() => setCurrentStep(4)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> 
                   Back to Generation
                 </Button>
                 <Button
                   variant="primary"
-                  className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" // Responsive width
-                  onClick={handleContinueFromStep5} // Use new handler
+                  className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" 
+                  onClick={handleContinueFromStep5} 
                 >
                   Continue to QA & Refinement
                  </Button>
@@ -730,7 +910,7 @@ const simulateTyping = (text: string, setText: (text: string) => void, speed = 0
            </>
          )}
 
-         {/* Step 6 Content (Placeholder) */}
+         {/* Step 6 Content */}
          {currentStep === 6 && (
            <>
              <div className="p-4 border-b border-neutral-light/40 bg-white/5">
@@ -741,47 +921,44 @@ const simulateTyping = (text: string, setText: (text: string) => void, speed = 0
                  Validate content, check compliance, assess impact, and refine.
                </p>
              </div>
-             {/* Step 6 Layout: Maybe 2 columns? Validation/Refinement + Dashboard? */}
              <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Left Column: Validation & Refinement */}
                 <div className="lg:col-span-7 space-y-6">
                    <ValidationInterface
-                      onVerifyFacts={handleRunFactCheck} // Handlers remain the same
+                      onVerifyFacts={handleRunFactCheck} 
                       onCheckCompliance={handleRunComplianceCheck}
                       onValidateFinancials={handleRunFinancialValidation}
                       onCheckLanguage={handleRunLanguageCheck}
-                      factCheckResults={factCheckResults} // Use store state
-                      complianceStatus={complianceStatus} // Use store state
-                      financialValidationStatus={financialValidationStatus} // Use store state
-                      languageCheckStatus={languageCheckStatus} // Use store state
-                      isLoading={isLoadingQA} // Use store state
+                      factCheckResults={factCheckResults} 
+                      complianceStatus={complianceStatus} 
+                      financialValidationStatus={financialValidationStatus} 
+                      languageCheckStatus={languageCheckStatus} 
+                      isLoading={isLoadingQA} 
                    />
                    <RefinementPanel
-                      suggestions={refinementSuggestions} // Use store state
-                      onImplement={handleImplementSuggestion} // Handlers remain the same
+                      suggestions={refinementSuggestions} 
+                      onImplement={handleImplementSuggestion} 
                       onCompare={handleCompareSuggestion}
                       onPolish={handleRunFinalPolish}
-                      isLoading={isLoadingQA} // Use store state
+                      isLoading={isLoadingQA} 
                    />
                 </div>
                 {/* Right Column: Dashboard */}
                 <div className="lg:col-span-5">
                    <div className="sticky top-[80px]">
                       <QualityDashboard
-                         metrics={qualityMetrics} // Use store state
-                         isLoading={isLoadingQA} // Use store state
+                         metrics={qualityMetrics} 
+                         isLoading={isLoadingQA} 
                       />
                    </div>
                 </div>
-                {/* Navigation Buttons */}
-               {/* Make button container stack on mobile */}
                <div className="lg:col-span-12 flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
-                 <Button variant="outline" onClick={() => setCurrentStep(5)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
+                 <Button variant="outline" onClick={() => setCurrentStep(5)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> 
                    Back to Editing
                  </Button>
                  <Button
                    variant="primary"
-                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" // Responsive width
+                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto" 
                    onClick={handleContinueFromStep6}
                  >
                    Continue to Finalization
@@ -791,7 +968,7 @@ const simulateTyping = (text: string, setText: (text: string) => void, speed = 0
            </>
          )}
 
-         {/* Step 7 Content (Placeholder) */}
+         {/* Step 7 Content */}
          {currentStep === 7 && (
            <>
              <div className="p-4 border-b border-neutral-light/40 bg-white/5">
@@ -802,33 +979,28 @@ const simulateTyping = (text: string, setText: (text: string) => void, speed = 0
                  Prepare for presentation, export, share, and archive.
                </p>
              </div>
-              {/* Step 7 Layout: Maybe sections in one column? */}
               <div className="p-4 md:p-6 space-y-6">
                  <PresenterTools />
                  <ExportConfiguration
-                    onGenerateClientPdf={handleGenerateClientPdf} // Handler remains the same
-                    isGeneratingClientPdf={isGeneratingClientPdf} // Use store state
-                    clientPdfStatus={clientPdfStatus} // Use store state
+                    onGenerateClientPdf={handleGenerateClientPdf} 
+                    isGeneratingClientPdf={isGeneratingClientPdf} 
+                    clientPdfStatus={clientPdfStatus} 
                  />
                  <SharingPermissions />
                  <ArchivingAnalytics />
-                {/* Navigation Buttons */}
-               {/* Make button container stack on mobile */}
                <div className="flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
-                 <Button variant="outline" onClick={() => setCurrentStep(6)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
+                 <Button variant="outline" onClick={() => setCurrentStep(6)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> 
                    Back to QA
                  </Button>
-                 <Button variant="primary" className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> {/* Responsive width */}
+                 <Button variant="primary" className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> 
                    Finish Project {/* Placeholder */}
                 </Button>
                </div>
              </div>
            </>
          )}
-        {/* End of steps */}
+       {/* End of steps */}
 
-       {/* Tutorial Overlay Placeholder - Implement later */}
-       {/* <div className="absolute inset-0 bg-black/50 text-white p-4">Tutorial Overlay Placeholder</div> */}
     </Card>
   );
 };

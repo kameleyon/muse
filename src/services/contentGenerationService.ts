@@ -2,10 +2,10 @@
 
 // Read environment variables (Vite specific)
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const CONTENT_MODEL = import.meta.env.VITE_DEFAULT_CONTENT_MODEL || 'google/gemini-2.5-pro-exp-03-25:free'; // Changed default model
-const RESEARCH_MODEL = import.meta.env.VITE_DEFAULT_RESEARCH_MODEL || 'openai/gpt-4o-search-preview'; // Keep research model for now, unless specified otherwise
-const SITE_URL = import.meta.env.VITE_SITE_URL || 'http://localhost:5173'; // Get site URL for referrer
-const APP_NAME = import.meta.env.VITE_APP_NAME || 'MagicMuse'; // Get app name for title
+const CONTENT_MODEL = import.meta.env.VITE_DEFAULT_CONTENT_MODEL || 'google/gemini-2.5-pro-exp-03-25:free';
+const RESEARCH_MODEL = import.meta.env.VITE_DEFAULT_RESEARCH_MODEL || 'openai/gpt-4o-search-preview';
+const SITE_URL = import.meta.env.VITE_SITE_URL || 'http://localhost:5173';
+const APP_NAME = import.meta.env.VITE_APP_NAME || 'MagicMuse';
 
 // OpenRouter API Endpoint
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -20,7 +20,6 @@ interface GenerationParams {
   styleConsistency?: boolean;
   factCheckLevel?: 'basic' | 'standard' | 'thorough';
   useResearchModel?: boolean; 
-  // Add other parameters like temperature, max_tokens if needed
   // temperature?: number; 
 }
 
@@ -29,7 +28,6 @@ interface GeneratedContent {
   content: string; 
   modelUsed?: string;
   finishReason?: string;
-  // ... other metadata like model used, tokens, etc.
 }
 
 interface FactCheckResult {
@@ -48,7 +46,7 @@ interface FactCheckResult {
  */
 export const generateContent = async (params: GenerationParams): Promise<GeneratedContent> => {
   const modelToUse = params.useResearchModel ? RESEARCH_MODEL : CONTENT_MODEL;
-  console.log(`API CALL: generateContent using ${modelToUse}`, params.prompt.substring(0, 100) + '...'); // Log start of prompt
+  console.log(`API CALL: generateContent using ${modelToUse}`, params.prompt.substring(0, 100) + '...'); 
 
   if (!OPENROUTER_API_KEY) {
     console.error("OpenRouter API Key is missing.");
@@ -62,45 +60,104 @@ export const generateContent = async (params: GenerationParams): Promise<Generat
       headers: {
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        // Add site URL/App name for OpenRouter tracking
         'HTTP-Referer': SITE_URL, 
         'X-Title': APP_NAME, 
       },
       body: JSON.stringify({
         model: modelToUse,
         messages: [
-          // TODO: Add a more sophisticated system prompt based on role/task
-          { role: "system", content: "You are an expert assistant helping to create professional pitch decks." }, 
+          { 
+            role: "system", 
+            content: "You are an expert assistant helping to create professional pitch decks. " +
+                     "Always format your responses using Markdown with appropriate headings, " +
+                     "bullet points, and formatting. Provide complete, comprehensive content based on the user's prompt." 
+          }, 
           { role: "user", content: params.prompt } 
-          // Add other parameters like temperature, max_tokens based on params
-          // temperature: params.temperature || 0.7, 
         ],
-        // stream: true, // Consider implementing streaming later for better UX
+        // Consider adding max_tokens if responses are truncated
+        // max_tokens: 4000, 
       }),
     });
 
     if (!response.ok) {
       const errorBody = await response.text();
-      console.error(`OpenRouter API Error (${response.status}): ${errorBody}`);
+      console.error(`OpenRouter API Error (${response.status}) calling ${modelToUse}: ${errorBody}`);
       throw new Error(`API Error (${response.status}) calling ${modelToUse}. Check console for details.`);
     }
 
     const result = await response.json();
-    const generatedText = result.choices?.[0]?.message?.content || '';
-    const finishReason = result.choices?.[0]?.finish_reason;
+    
+    // --- Robust Response Parsing ---
+    let generatedText = '';
+    let finishReason = 'unknown'; // Default finish reason
+
+    // Check for OpenAI format (most common)
+    if (result.choices && Array.isArray(result.choices) && result.choices.length > 0) {
+      const choice = result.choices[0];
+      if (choice.message && typeof choice.message.content === 'string') {
+        generatedText = choice.message.content.trim();
+      }
+      if (typeof choice.finish_reason === 'string') {
+        finishReason = choice.finish_reason;
+      }
+    } 
+    // Check for Anthropic format
+    else if (result.content && Array.isArray(result.content) && result.content.length > 0) {
+      const contentBlock = result.content[0];
+      if (contentBlock && contentBlock.type === 'text' && typeof contentBlock.text === 'string') {
+        generatedText = contentBlock.text.trim();
+      }
+      if (typeof result.stop_reason === 'string') {
+        finishReason = result.stop_reason;
+      }
+    }
+    // Check for Google Gemini format (might be nested differently)
+    else if (result.candidates && Array.isArray(result.candidates) && result.candidates.length > 0) {
+        const candidate = result.candidates[0];
+        if (candidate.content && candidate.content.parts && Array.isArray(candidate.content.parts) && candidate.content.parts.length > 0) {
+            generatedText = candidate.content.parts[0].text?.trim() || '';
+        }
+        if (typeof candidate.finishReason === 'string') {
+            finishReason = candidate.finishReason;
+        }
+    }
+    // Fallback for other potential direct text responses
+    else if (typeof result.text === 'string') {
+      generatedText = result.text.trim();
+      finishReason = 'direct_text';
+    } 
+    else if (typeof result.content === 'string') { // Less common, but possible
+      generatedText = result.content.trim();
+      finishReason = 'direct_content';
+    }
+
+    // Handle cases where parsing failed or content is empty
+    if (!generatedText) {
+      console.warn("Could not extract generated text from API response:", JSON.stringify(result, null, 2));
+      generatedText = `Error: Could not parse response from ${modelToUse}. See console for details.`;
+      finishReason = 'parsing_failed';
+    }
     
     console.log(`API Response from ${modelToUse}: Finish Reason - ${finishReason}`);
-    // console.log("Generated Text:", generatedText.substring(0, 200) + '...'); // Log beginning of response
+    console.log("Generated Text Preview:", generatedText.substring(0, 200) + '...');
+
+    // Basic check to ensure some structure if the model failed to provide it
+    if (generatedText && !generatedText.startsWith('#') && !generatedText.startsWith('Error:') && finishReason !== 'parsing_failed') {
+      console.warn("Generated content lacks expected Markdown heading. Prepending a default title.");
+      generatedText = `# Generated Content\n\n${generatedText}`;
+    }
 
     return { 
-        content: generatedText, 
-        modelUsed: modelToUse, 
-        finishReason: finishReason 
+      content: generatedText, 
+      modelUsed: modelToUse, 
+      finishReason: finishReason 
     };
 
   } catch (error) {
     console.error("Error calling OpenRouter API:", error);
-    return { content: `Error generating content: ${error instanceof Error ? error.message : String(error)}` };
+    const errorMessage = `Error generating content: ${error instanceof Error ? error.message : String(error)}`;
+    console.log("Returning error content:", errorMessage);
+    return { content: errorMessage, finishReason: 'exception' };
   }
 };
 
@@ -144,24 +201,40 @@ export const verifyFacts = async (projectId: string, content: string): Promise<F
   try {
     const result = await generateContent({ projectId, prompt, useResearchModel: true });
     console.log("Raw fact check response:", result.content);
-    // TODO: Implement robust parsing of the research model's response 
-    // to extract structured FactCheckResult objects. This is highly dependent 
-    // on the model's output format.
     
-    // Simple placeholder parsing simulation:
-    const simulatedResults: FactCheckResult[] = [];
-    if (result.content.includes("Market size is $10B - Verified")) {
-       simulatedResults.push({ claim: 'Market size is $10B', verified: true, source: 'Simulated Source', explanation: 'Model indicated verification.' });
-    }
-     if (result.content.includes("Competitor X has Y feature - Not Verified")) {
-       simulatedResults.push({ claim: 'Competitor X has Y feature', verified: false, explanation: 'Model indicated lack of verification.' });
-    }
-    if (simulatedResults.length === 0 && !result.content.startsWith('Error:')) {
-       simulatedResults.push({ claim: 'General Content', verified: true, explanation: 'No specific claims parsed from model response.' });
+    // --- Robust Parsing for Fact Check Results ---
+    const results: FactCheckResult[] = [];
+    const lines = result.content.split('\n');
+    
+    lines.forEach(line => {
+      const claimMatch = line.match(/Claim:\s*(.*)/i);
+      const statusMatch = line.match(/Status:\s*(Verified|Not Verified|Uncertain)/i);
+      const sourceMatch = line.match(/Source:\s*(.*)/i);
+      const explanationMatch = line.match(/Explanation:\s*(.*)/i);
+
+      if (claimMatch && statusMatch) {
+        results.push({
+          claim: claimMatch[1].trim(),
+          verified: statusMatch[1].toLowerCase() === 'verified',
+          source: sourceMatch ? sourceMatch[1].trim() : undefined,
+          explanation: explanationMatch ? explanationMatch[1].trim() : (statusMatch[1].toLowerCase() !== 'verified' ? 'No specific explanation provided.' : undefined)
+        });
+      } else if (line.includes("Verified") || line.includes("Not Verified") || line.includes("Uncertain")) {
+        // Attempt to capture less structured lines
+        const claim = line.split(/Verified|Not Verified|Uncertain/i)[0]?.trim() || 'Unknown Claim';
+        const verified = line.includes("Verified");
+        results.push({ claim, verified, explanation: line });
+      }
+    });
+
+    // Handle cases where no structured results were found
+    if (results.length === 0 && !result.content.startsWith('Error:')) {
+       results.push({ claim: 'General Content', verified: true, explanation: 'No specific claims parsed from model response. Content seems generally plausible.' });
     } else if (result.content.startsWith('Error:')) {
-        simulatedResults.push({ claim: 'Verification Process', verified: false, explanation: result.content });
+        results.push({ claim: 'Verification Process', verified: false, explanation: result.content });
     }
-    return simulatedResults;
+    
+    return results;
 
   } catch (error) {
      console.error("Error during fact verification:", error);
