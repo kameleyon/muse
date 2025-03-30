@@ -1,0 +1,22 @@
+Top 20 Largest Source Files:
+
+1. src/features/project_creation/data/projectCategories.ts - 106.8 KB
+2. src/components/project/ProjectArea.tsx - 38.5 KB
+3. src/features/profile/components/KeyboardInputSettings.tsx - 25.4 KB
+4. src/pages/Dashboard.tsx - 22.8 KB
+5. src/features/profile/components/ResourceLibrarySettings.tsx - 22.7 KB
+6. src/features/profile/components/TemplateSettings.tsx - 20.1 KB
+7. src/features/profile/components/VoiceSpeechSettings.tsx - 18.9 KB
+8. src/features/profile/components/ChatHistorySettings.tsx - 18.1 KB
+9. src/features/profile/components/CrossDeviceSettings.tsx - 18.1 KB
+10. src/pages/ContentLibrary.tsx - 17.7 KB
+11. src/features/profile/components/BackupRecoverySettings.tsx - 15.1 KB
+12. src/features/profile/components/VersionHistorySettings.tsx - 14.3 KB
+13. src/features/profile/components/MobileSettings.tsx - 13.9 KB
+14. src/services/ai/openrouter.ts - 12.0 KB
+15. src/pages/auth/Register.tsx - 11.8 KB
+16. src/features/settings/components/notifications/EmailNotificationSettings.tsx - 10.8 KB
+17. src/features/settings/components/integration/ConnectedServicesSettings.tsx - 10.7 KB
+18. src/components/layout/MainLayout.tsx - 10.6 KB
+19. src/features/profile/components/LearningSettings.tsx - 10.3 KB
+20. src/services/ai/qwen.ts - 10.2 KB

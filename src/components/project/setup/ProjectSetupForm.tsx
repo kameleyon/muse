@@ -1,13 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react'; // Import useState and useEffect
 import { Input } from '@/components/ui/Input';
-// Removed incorrect Textarea import
-// Removed incorrect Label import
-import { RadioGroup } from '@/components/ui/RadioGroup'; // Correct import path
-import { RadioGroupItem } from '@/components/ui/RadioGroupItem'; // Correct import path
-import { Button } from '@/components/ui/Button';
-// Assuming Select/MultiSelect components exist or will be created
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
-// import { MultiSelect } from "@/components/ui/MultiSelect";
+import { RadioGroup } from '@/components/ui/RadioGroup';
+import { RadioGroupItem } from '@/components/ui/RadioGroupItem';
 import { Lock, Users, Globe } from 'lucide-react';
 
 interface ProjectSetupFormProps {
@@ -17,10 +11,9 @@ interface ProjectSetupFormProps {
   setDescription: (desc: string) => void;
   privacy: 'private' | 'team' | 'public';
   setPrivacy: (privacy: 'private' | 'team' | 'public') => void;
-  tagsInput: string; // Add prop for tags input value
-  setTagsInput: (tags: string) => void; // Add prop for tags input setter
-  teamInput: string; // Add prop for team input value
-  setTeamInput: (team: string) => void; // Add prop for team input setter
+  // Removed tagsInput and teamInput props
+  setTagsInput: (tags: string) => void; // Renamed prop for clarity (maps to setTagsFromString)
+  setTeamInput: (team: string) => void; // Renamed prop for clarity (maps to setTeamMembersFromString)
 }
 
 const ProjectSetupForm: React.FC<ProjectSetupFormProps> = ({
@@ -30,88 +23,94 @@ const ProjectSetupForm: React.FC<ProjectSetupFormProps> = ({
   setDescription,
   privacy,
   setPrivacy,
-  tagsInput,    // Destructure new prop
-  setTagsInput, // Destructure new prop
-  teamInput,    // Destructure new prop
-  setTeamInput, // Destructure new prop
+  setTagsInput, // Destructure renamed prop
+  setTeamInput, // Destructure renamed prop
 }) => {
-  // Placeholder data/handlers for tags and team members
-  const availableTags = ['Proposal', 'Pitch Deck', 'Investment', 'Sales', 'Startup']; // Keep for placeholder text
-  const availableTeamMembers = [{id: '1', name: 'Jo Constant'}, {id: '2', name: 'AI Assistant'}]; // Example
-  const selectedTags: string[] = [];
-  const selectedTeamMembers: string[] = [];
+  // Local state for input fields
+  const [localTagsInput, setLocalTagsInput] = useState<string>('');
+  const [localTeamInput, setLocalTeamInput] = useState<string>('');
 
-  const handleTagsChange = (newTags: string[]) => console.log('Tags changed:', newTags);
-  const handleTeamChange = (newMembers: string[]) => console.log('Team changed:', newMembers);
+  // Effect to potentially initialize local state if needed (e.g., loading existing project)
+  // This example assumes starting fresh, but you might load initial values here
+  // useEffect(() => {
+  //   // If loading data, set initial local state based on store values if they exist
+  //   // setLocalTagsInput(initialTagsString);
+  //   // setLocalTeamInput(initialTeamString);
+  // }, []); // Run once on mount
 
-  // Explicit type for textarea change event
+  // Handler for description textarea
   const handleDescriptionChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setDescription(event.target.value);
   };
 
-  // Explicit type for radio group change event
+  // Handler for privacy radio group
   const handlePrivacyChange = (value: string) => {
-     // Type assertion is safe here as values are controlled
     setPrivacy(value as 'private' | 'team' | 'public');
   };
 
+  // Update global store when input fields lose focus (onBlur)
+  const handleTagsBlur = () => {
+    setTagsInput(localTagsInput); // Call the prop function (Zustand action)
+  };
+
+  const handleTeamBlur = () => {
+    setTeamInput(localTeamInput); // Call the prop function (Zustand action)
+  };
 
   return (
     <div className="project-setup-form space-y-6 mb-8">
       {/* Project Name */}
       <div>
-        {/* Use standard label tag */}
         <label htmlFor="projectName" className="settings-label">Project Name <span className="text-red-500">*</span></label>
         <Input
           id="projectName"
           type="text"
-          value={projectName}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProjectName(e.target.value)} // Added type to event
+          value={projectName} // Still controlled by prop/store
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProjectName(e.target.value)}
           placeholder="Enter a name for your project"
           required
-          className="settings-input" // Reuse settings input style
+          className="settings-input"
         />
-         <p className="text-xs text-neutral-medium mt-1">Category: Proposal & Pitch Deck Generation</p> {/* Display fixed category */}
+         <p className="text-xs text-neutral-medium mt-1">Category: Proposal & Pitch Deck Generation</p>
       </div>
 
       {/* Project Description */}
       <div>
-         {/* Use standard label tag */}
         <label htmlFor="description" className="settings-label">Project Description (Optional)</label>
-         {/* Use standard textarea tag */}
         <textarea
           id="description"
-          value={description}
-          onChange={handleDescriptionChange} // Use handler with explicit type
+          value={description} // Still controlled by prop/store
+          onChange={handleDescriptionChange}
           placeholder="Briefly describe your project or upload a file..."
-          className="settings-textarea w-full" // Reuse settings textarea style + ensure width
-          rows={4} // Example height
+          className="settings-textarea w-full"
+          rows={4}
         />
-        {/* Add file upload button/area here later */}
       </div>
 
-     {/* Tags Input */}
+     {/* Tags Input - Uses local state */}
      <div>
        <label htmlFor="tagsInput" className="settings-label">Tags (Optional)</label>
        <Input
          id="tagsInput"
          type="text"
-         value={tagsInput}
-         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTagsInput(e.target.value)}
+         value={localTagsInput} // Use local state for value
+         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalTagsInput(e.target.value)} // Update local state
+         onBlur={handleTagsBlur} // Update global store on blur
          placeholder="Enter tags, separated by commas"
          className="settings-input"
        />
        <p className="text-xs text-neutral-medium mt-1">Separate multiple tags with commas (e.g., proposal, investment, tech).</p>
      </div>
 
-     {/* Team Members Input */}
+     {/* Team Members Input - Uses local state */}
      <div>
        <label htmlFor="teamInput" className="settings-label">Team Members (Optional)</label>
        <Input
          id="teamInput"
          type="text"
-         value={teamInput}
-         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTeamInput(e.target.value)}
+         value={localTeamInput} // Use local state for value
+         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalTeamInput(e.target.value)} // Update local state
+         onBlur={handleTeamBlur} // Update global store on blur
          placeholder="Enter team member emails, separated by commas"
          className="settings-input"
        />
@@ -120,30 +119,26 @@ const ProjectSetupForm: React.FC<ProjectSetupFormProps> = ({
 
       {/* Privacy Settings */}
       <div>
-         {/* Use standard label tag */}
         <label className="settings-label">Privacy Settings</label>
         <RadioGroup
-          value={privacy}
-          onValueChange={handlePrivacyChange} // Use handler with explicit type
+          value={privacy} // Still controlled by prop/store
+          onValueChange={handlePrivacyChange}
           className="flex flex-col sm:flex-row gap-4 mt-2"
         >
           <div className="flex items-center space-x-2 p-3 border rounded-md flex-1 cursor-pointer hover:border-[#ae5630] has-[:checked]:border-[#ae5630]  has-[:checked]:ring-1 has-[:checked]:ring-[#ae5630]">
             <RadioGroupItem value="private" id="privacy-private" />
-             {/* Use standard label tag */}
             <label htmlFor="privacy-private" className="flex items-center gap-2 cursor-pointer">
               <Lock size={16} /> Private (Only you)
             </label>
           </div>
           <div className="flex items-center space-x-2 p-3 border rounded-md flex-1 cursor-pointer hover:border-[#ae5630] has-[:checked]:border-[#ae5630] has-[:checked]:ring-1 has-[:checked]:ring-[#ae5630]">
             <RadioGroupItem value="team" id="privacy-team" />
-             {/* Use standard label tag */}
             <label htmlFor="privacy-team" className="flex items-center gap-2 cursor-pointer">
               <Users size={16} /> Team (Invited members)
             </label>
           </div>
           <div className="flex items-center space-x-2 p-3 border rounded-md flex-1 cursor-pointer hover:border-[#ae5630] has-[:checked]:border-[#ae5630] has-[:checked]:ring-1 has-[:checked]:ring-[#ae5630]">
             <RadioGroupItem value="public" id="privacy-public" />
-             {/* Use standard label tag */}
             <label htmlFor="privacy-public" className="flex items-center gap-2 cursor-pointer">
               <Globe size={16} /> Public (Anyone with link)
             </label>

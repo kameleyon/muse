@@ -47,8 +47,20 @@ interface RecentProjectsProps {
 }
 import { 
   Home, FolderOpen, FileText, Bookmark, Users, Bell, Settings, LogOut, 
-  BarChart2, Calendar, Clock, TrendingUp 
+  BarChart2, Calendar, Clock, TrendingUp
 } from 'lucide-react';
+// Import sample data
+import {
+  dashboardStats,
+  recentActivities,
+  sampleNotifications,
+  sampleTokenUsage,
+  monthlyContentData as sampleMonthlyContentData, // Alias to avoid naming conflict
+  weeklyContentData as sampleWeeklyContentData,   // Alias to avoid naming conflict
+  contentTypeData as sampleContentTypeData,       // Alias to avoid naming conflict
+  chartColors,
+  recentProjectsData
+} from '@/data/dashboardSampleData';
 
 const Dashboard: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -66,98 +78,25 @@ const Dashboard: React.FC = () => {
     { path: '/logout', label: 'Logout', icon: <LogOut size={20} color="#3d3d3a" /> }
   ];
 
-  const stats = [
-    {
-      title: 'Total Projects',
-      value: 12,
-      change: '+2 from last month',
-      icon: <FolderOpen size={20} color="#3d3d3a" />
-    },
-    {
-      title: 'Active Projects',
-      value: 3,
-      change: 'No change',
-      icon: <FileText size={20} color="#3d3d3a" />
-    },
-    {
-      title: 'Completed Projects',
-      value: 9,
-      change: '+1 this week',
-      icon: <FileText size={20} color="#3d3d3a" />
-    },
-    {
-      title: 'Team Members',
-      value: 5,
-      change: '+2 new members',
-      icon: <Users size={20} color="#3d3d3a" />
-    }
-  ];
+ // Removed inline stats definition - using imported dashboardStats
 
-  const activities: RecentActivityProps['activities'] = [
-    { id: 'act1', type: 'project_created' as ActivityType, title: 'New Project Created', timestamp: new Date().toISOString() },
-    { id: 'act2', type: 'template_used' as ActivityType, title: 'Character Template', timestamp: new Date().toISOString() },
-    { id: 'act3', type: 'tokens_purchased' as ActivityType, amount: '1000 tokens', timestamp: new Date().toISOString() },
-    { id: 'act4', type: 'team_joined' as ActivityType, title: 'Writing Team', timestamp: new Date().toISOString() },
-    { id: 'act5', type: 'project_created' as ActivityType, title: 'Sci-Fi Story Outline', timestamp: new Date(Date.now() - 86400000).toISOString() }
-  ];
+ // Removed inline activities definition - using imported recentActivities
 
-  const notifications = [
-    { id: 'not1', title: 'New Comment', message: 'John commented on your Fantasy Novel', timestamp: new Date().toISOString(), read: false },
-    { id: 'not2', title: 'Template Update', message: 'Character Template has been updated', timestamp: new Date().toISOString(), read: false },
-    { id: 'not3', title: 'Plan Renewal', message: 'Your subscription will renew in 3 days', timestamp: new Date(Date.now() - 86400000).toISOString(), read: true },
-    { id: 'not4', title: 'Team Invitation', message: 'You have been invited to join the Fiction Writers team', timestamp: new Date(Date.now() - 172800000).toISOString(), read: true }
-  ];
+ // Removed inline notifications definition - using imported sampleNotifications
 
-  const tokenUsage = {
-    used: 7500,
-    total: 10000,
-    percentage: 75
-  };
-  
-  // Sample data for charts
-  const monthlyContentData = [
-    { name: 'Jan', documents: 4, edits: 8 },
-    { name: 'Feb', documents: 3, edits: 5 },
-    { name: 'Mar', documents: 5, edits: 9 },
-    { name: 'Apr', documents: 7, edits: 12 },
-    { name: 'May', documents: 2, edits: 4 },
-    { name: 'Jun', documents: 6, edits: 10 },
-    { name: 'Jul', documents: 8, edits: 14 }
-  ];
-  
-  const weeklyContentData = [
-    { name: 'Mon', documents: 2, edits: 4 },
-    { name: 'Tue', documents: 3, edits: 6 },
-    { name: 'Wed', documents: 1, edits: 2 },
-    { name: 'Thu', documents: 4, edits: 8 },
-    { name: 'Fri', documents: 3, edits: 5 },
-    { name: 'Sat', documents: 0, edits: 1 },
-    { name: 'Sun', documents: 1, edits: 2 }
-  ];
-  
-  const contentTypeData = [
-    { name: 'Blog Posts', value: 8 },
-    { name: 'Social Media', value: 15 },
-    { name: 'Email', value: 5 },
-    { name: 'Scripts', value: 2 },
-    { name: 'Stories', value: 10 }
-  ];
-  
-  const COLORS = ['#ae5630', '#6d371f', '#bcb7af', '#1a1918', '#3d3d3a'];
+ // Removed inline tokenUsage definition - using imported sampleTokenUsage
 
-  const recentProjects: RecentProjectsProps['projects'] = [
-    { id: 'proj1', title: 'Fantasy Novel', date: new Date().toISOString(), views: 12, status: 'Draft' },
-    { id: 'proj2', title: 'Character Profiles', date: new Date().toISOString(), views: 8, status: 'Published' },
-    { id: 'proj3', title: 'World Building', date: new Date().toISOString(), views: 15, status: 'Draft' },
-    { id: 'proj4', title: 'Plot Outline', date: new Date().toISOString(), views: 5, status: 'Draft' }
-  ];
+ // Removed inline chart data definitions - using imported sample data and chartColors
 
-  const handleViewTypeChange = (type: 'month' | 'week' | 'year') => {
-    setViewType(type);
+ // Removed inline recentProjects definition - using imported recentProjectsData
+
+ const handleViewTypeChange = (type: 'month' | 'week' | 'year') => {
+   setViewType(type);
   };
 
   const getChartData = () => {
-    return viewType === 'week' ? weeklyContentData : monthlyContentData;
+    // Use the imported and aliased data
+    return viewType === 'week' ? sampleWeeklyContentData : sampleMonthlyContentData;
   };
 
   return (
@@ -196,7 +135,7 @@ const Dashboard: React.FC = () => {
                 </a>
               </div>
               <div className="p-4">
-                <RecentProjects projects={recentProjects} />
+                <RecentProjects projects={recentProjectsData} /> {/* Use imported data */}
               </div>
             </Card>
 
@@ -248,9 +187,9 @@ const Dashboard: React.FC = () => {
                 </h2>
                 <Button variant="outline" size="sm">Top Up</Button>
               </div>
-              
+
               <div className="p-4">
-                <TokenUsage {...tokenUsage} />
+                <TokenUsage {...sampleTokenUsage} /> {/* Use imported data */}
               </div>
             </Card>
 
@@ -295,8 +234,8 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
               <div className=" max-w-full">
-                <DashboardStats stats={stats} viewType={viewType} onViewTypeChange={handleViewTypeChange} />
-                
+                <DashboardStats stats={dashboardStats} viewType={viewType} onViewTypeChange={handleViewTypeChange} /> {/* Use imported data */}
+
                 {/* Recharts Area Chart */}
                 <div className="mt-6 bg-white rounded-xl p-4 sm:p-6 border border-neutral-light/40">
                   <h3 className="text-lg font-comfortaa mb-4 text-[#1a1918]">Content Creation Trends</h3>
@@ -352,7 +291,7 @@ const Dashboard: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <ResponsiveContainer width="100%" height={180} className="sm:h-[250px]">
                       <BarChart
-                        data={contentTypeData}
+                        data={sampleContentTypeData}
                         margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" stroke="#bcb7af" opacity={0.3} />
@@ -369,26 +308,25 @@ const Dashboard: React.FC = () => {
                         <Bar dataKey="value" name="Content Count" fill="#ae5630" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
-                    
                     <ResponsiveContainer width="100%" height={180} className="sm:h-[250px]">
                       <PieChart>
                         <Pie
-                          data={contentTypeData}
+                          data={sampleContentTypeData}
                           cx="50%"
                           cy="50%"
                           labelLine={true}
                           outerRadius={70}
                           fill="#8884d8"
                           dataKey="value"
-                          label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                          label={({ name, percent }: { name: string, percent: number }) => `${(percent * 100).toFixed(0)}%`} // Added types for label function
                         >
-                          {contentTypeData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          {sampleContentTypeData.map((entry, index) => ( // Use imported data
+                            <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} /> // Use imported colors
                           ))}
                         </Pie>
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: '#faf9f5', 
+                        <Tooltip<number, string>
+                          contentStyle={{
+                            backgroundColor: '#faf9f5',
                             borderColor: '#bcb7af',
                             borderRadius: '0.375rem'
                           }} 
@@ -427,11 +365,11 @@ const Dashboard: React.FC = () => {
                   Notifications
                 </h2>
                 <span className="bg-neutral-light/80 text-neutral-medium text-xs px-2 py-1 rounded-full">
-                  {notifications.filter(n => !n.read).length} new
+                  {sampleNotifications.filter(n => !n.read).length} new {/* Use imported data */}
                 </span>
               </div>
               <div className="py-4">
-                <NotificationsPanel notifications={notifications}/>
+                <NotificationsPanel notifications={sampleNotifications}/> {/* Use imported data */}
               </div>
             </Card>
 
@@ -488,7 +426,7 @@ const Dashboard: React.FC = () => {
                 </a>
               </div>
               <div className="py-4">
-                <RecentActivity activities={activities} />
+                <RecentActivity activities={recentActivities} /> {/* Use imported data */}
               </div>
             </Card>
 

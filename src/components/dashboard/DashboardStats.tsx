@@ -1,24 +1,33 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/Card';
+import { FolderOpen, FileText, Users, LucideProps } from 'lucide-react'; // Import icons
 
-interface StatItem {
+// Map string identifiers to icon components
+const iconMap: { [key: string]: React.ElementType<LucideProps> } = {
+  FolderOpen,
+  FileText,
+  Users,
+};
+
+export interface StatItem {
   title: string;
   value: number;
   change: string;
-  icon: React.ReactNode;
+  icon: string; // String identifier
 }
 
 interface DashboardStatsProps {
   stats: StatItem[];
+  // Restore the viewType and onViewTypeChange props
   viewType: 'month' | 'week' | 'year';
   onViewTypeChange: (type: 'month' | 'week' | 'year') => void;
 }
 
-const DashboardStats: React.FC<DashboardStatsProps> = ({ 
-  stats, 
-  viewType,
-  onViewTypeChange
+const DashboardStats: React.FC<DashboardStatsProps> = ({
+  stats,
+  viewType, // Restored props
+  onViewTypeChange // Restored props
 }) => {
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -41,32 +50,17 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
     },
   };
 
+  // Helper function to render the icon
+  const renderIcon = (iconName: string) => {
+    const IconComponent = iconMap[iconName];
+    // Define default props for the icons
+    const iconProps: LucideProps = { size: 20, color: "#3d3d3a" };
+    return IconComponent ? <IconComponent {...iconProps} /> : null; // Render with props
+  };
+
   return (
     <div className=" py-6 ">
-      {/*<div className="flex justify-between items-center mb-4">
-       
-        <div className="flex gap-2 bg-neutral-light/30 rounded-md p-1">
-          <button
-            onClick={() => onViewTypeChange('month')}
-            className={`px-3 py-1 text-sm rounded-md ${viewType === 'month' ? 'bg-neutral-white text-primary' : 'text-neutral-medium'}`}
-          >
-            Month
-          </button>
-          <button
-            onClick={() => onViewTypeChange('week')}
-            className={`px-3 py-1 text-sm rounded-md ${viewType === 'week' ? 'bg-neutral-white text-primary' : 'text-neutral-medium'}`}
-          >
-            Week
-          </button>
-          <button
-            onClick={() => onViewTypeChange('year')}
-            className={`px-3 py-1 text-sm rounded-md ${viewType === 'year' ? 'bg-neutral-white text-primary' : 'text-neutral-medium'}`}
-          >
-            Year
-          </button>
-        </div>
-      </div>*/}
-      
+      {/* Note: View type buttons are already in Dashboard.tsx, so no need to duplicate them here */}
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -79,7 +73,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
               <div className="p-4">
                 <div className="flex items-center">
                   <div className="p-2 rounded-xl bg-neutral-light/20 mr-4">
-                    {stat.icon}
+                    {renderIcon(stat.icon)} {/* Render icon dynamically */}
                   </div>
                   <div>
                     <p className="text-sm font-medium text-neutral-medium mb-1">

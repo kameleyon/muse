@@ -1,61 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'; // Keep useState for local UI state like accordion
 import { Input } from '@/components/ui/Input';
-import { RadioGroup } from '@/components/ui/RadioGroup'; // Assuming fixed or available
-import { RadioGroupItem } from '@/components/ui/RadioGroupItem'; // Assuming fixed or available
-// Assuming Select/MultiSelect exist or will be created
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
-// import { MultiSelect } from "@/components/ui/MultiSelect";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/Accordion"; // Import the actual Accordion
-import { Button } from '@/components/ui/Button';
-// ChevronDown is now part of AccordionTrigger, so remove import if not used elsewhere
-// import { ChevronDown } from 'lucide-react';
+import { RadioGroup } from '@/components/ui/RadioGroup';
+import { RadioGroupItem } from '@/components/ui/RadioGroupItem';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/Accordion";
+import { useProjectWorkflowStore, AudienceState } from '@/store/projectWorkflowStore'; // Import store and type
 
-// Define state types for this section (can be moved to a central types file later)
-interface AudienceState {
-  name: string;
-  orgType: string;
-  industry: string;
-  size: 'small' | 'medium' | 'enterprise' | '';
-  personaRole: string;
-  personaConcerns: string[];
-  personaCriteria: string[];
-  personaCommPrefs: string[];
-}
+// Props interface might not be needed anymore if all state comes from store
+// interface TargetAudienceFormProps {
+// }
 
-interface TargetAudienceFormProps {
-  // Add props to pass state up to ProjectArea later
-}
+const TargetAudienceForm: React.FC = () => { // Removed props
+  // Get state and actions from Zustand store
+  const {
+    name,
+    orgType,
+    industry,
+    size,
+    personaRole,
+    personaConcerns, // Note: Multi-selects are placeholders, state handling needs implementation
+    personaCriteria, // Note: Multi-selects are placeholders, state handling needs implementation
+    personaCommPrefs, // Note: Multi-selects are placeholders, state handling needs implementation
+    setAudienceField,
+  } = useProjectWorkflowStore();
 
-const TargetAudienceForm: React.FC<TargetAudienceFormProps> = (props) => {
-  // Local state for this form section
-  const [audience, setAudience] = useState<AudienceState>({
-    name: '',
-    orgType: '',
-    industry: '',
-    size: '',
-    personaRole: '',
-    personaConcerns: [],
-    personaCriteria: [],
-    personaCommPrefs: [],
-  });
-  const [isPersonaExpanded, setIsPersonaExpanded] = useState(false);
+  // Local state for UI elements like accordion toggle
+  const [isPersonaExpanded, setIsPersonaExpanded] = useState(false); // Keep local UI state
 
-  // Placeholder data for dropdowns/multi-selects
+  // Remove local state for audience data
+  // const [audience, setAudience] = useState<AudienceState>({ ... });
+
+  // Placeholder data for dropdowns/multi-selects (can remain)
   const orgTypes = ['Corporation', 'Non-profit', 'Government', 'Education', 'Startup', 'Other'];
   const industries = ['Technology', 'Healthcare', 'Finance', 'Retail', 'Manufacturing', 'Other'];
   const concerns = ['Budget', 'ROI', 'Integration', 'Security', 'Scalability', 'Ease of Use'];
   const criteria = ['Price', 'Features', 'Support', 'Reputation', 'Existing Relationship'];
   const commPrefs = ['Email', 'Phone Call', 'Video Conference', 'In-Person Meeting'];
 
-  // Handler for basic input changes
+  // Handler for basic input changes - uses store action
   const handleChange = (field: keyof AudienceState, value: string | string[]) => {
-    setAudience(prev => ({ ...prev, [field]: value }));
+    // For multi-selects (when implemented), ensure value is string[]
+    // For now, assumes string for basic inputs
+    setAudienceField(field, value as any); // Use store action, 'as any' for simplicity until multi-selects are typed
   };
 
-  // Handler for radio group change
+  // Handler for radio group change - uses store action
   const handleSizeChange = (value: string) => {
-    handleChange('size', value as AudienceState['size']);
+    setAudienceField('size', value as AudienceState['size']); // Use store action
   };
+
+  // TODO: Implement handlers for multi-select components when they are added
+  // These handlers would call setAudienceField with the appropriate string array value.
 
   return (
     <div className="space-y-6 border border-neutral-light p-4 rounded-lg bg-white/30 shadow-sm">
@@ -63,40 +57,38 @@ const TargetAudienceForm: React.FC<TargetAudienceFormProps> = (props) => {
         Target Audience / Client
       </h3>
 
-      {/* Client/Audience Name */}
+      {/* Client/Audience Name - Uses store state */}
       <div>
         <label htmlFor="audienceName" className="settings-label">Client/Audience Name</label>
         <Input
           id="audienceName"
-          value={audience.name}
+          value={name} // Use store state
           onChange={(e) => handleChange('name', e.target.value)}
           placeholder="e.g., Acme Corp, Marketing Managers"
           className="settings-input"
         />
       </div>
 
-      {/* Org Type (Placeholder Select) */}
+      {/* Org Type (Placeholder Select) - Uses store state */}
       <div>
         <label htmlFor="orgType" className="settings-label">Organization Type</label>
-        {/* Replace with actual Select component */}
         <select
           id="orgType"
-          value={audience.orgType}
+          value={orgType} // Use store state
           onChange={(e) => handleChange('orgType', e.target.value)}
-          className="settings-input" // Reuse style
+          className="settings-input"
         >
           <option value="" disabled>Select type...</option>
           {orgTypes.map(type => <option key={type} value={type}>{type}</option>)}
         </select>
       </div>
 
-      {/* Industry (Placeholder Autocomplete) */}
+      {/* Industry (Placeholder Autocomplete) - Uses store state */}
       <div>
         <label htmlFor="industry" className="settings-label">Industry</label>
-        {/* Replace with actual Autocomplete component */}
         <Input
           id="industry"
-          value={audience.industry}
+          value={industry} // Use store state
           onChange={(e) => handleChange('industry', e.target.value)}
           placeholder="e.g., SaaS, E-commerce"
           className="settings-input"
@@ -104,15 +96,14 @@ const TargetAudienceForm: React.FC<TargetAudienceFormProps> = (props) => {
          <p className="text-xs text-neutral-medium mt-1">Start typing to see suggestions...</p>
       </div>
 
-      {/* Size/Scope */}
+      {/* Size/Scope - Uses store state */}
       <div>
         <label className="settings-label">Size/Scope</label>
         <RadioGroup
-          value={audience.size}
+          value={size} // Use store state
           onValueChange={handleSizeChange}
           className="flex flex-col sm:flex-row gap-4 mt-2"
         >
-          {/* Reusing styles from ProjectSetupForm */}
           <div className="flex items-center space-x-2 p-3 border rounded-md flex-1 cursor-pointer hover:border-[#ae5630] has-[:checked]:border-[#ae5630] has-[:checked]:ring-1 has-[:checked]:ring-[#ae5630]">
             <RadioGroupItem value="small" id="size-small" />
             <label htmlFor="size-small" className="cursor-pointer">Small</label>
@@ -128,35 +119,34 @@ const TargetAudienceForm: React.FC<TargetAudienceFormProps> = (props) => {
         </RadioGroup>
       </div>
 
-      {/* Decision-Maker Persona (Optional Accordion) */}
-      <Accordion type="single" collapsible className="w-full border border-neutral-light rounded-lg">
+      {/* Decision-Maker Persona (Optional Accordion) - Uses store state */}
+      <Accordion type="single" collapsible className="w-full border border-neutral-light rounded-lg" onValueChange={(value) => setIsPersonaExpanded(!!value)}>
         <AccordionItem value="item-1">
           <AccordionTrigger className="p-3 settings-label hover:no-underline hover:bg-neutral-light/30 rounded-t-lg">
              Decision-Maker Persona (Optional)
           </AccordionTrigger>
           <AccordionContent>
-            <div className="p-4 border-t border-neutral-light/40 space-y-4"> {/* Add border-t */}
+            <div className="p-4 border-t border-neutral-light/40 space-y-4">
               <div>
                 <label htmlFor="personaRole" className="settings-label text-xs">Role/Title</label>
-                <Input id="personaRole" value={audience.personaRole} onChange={(e) => handleChange('personaRole', e.target.value)} className="settings-input text-sm" />
+                <Input id="personaRole" value={personaRole} onChange={(e) => handleChange('personaRole', e.target.value)} className="settings-input text-sm" />
               </div>
               <div>
                 <label className="settings-label text-xs">Primary Concerns</label>
-                {/* Replace with MultiSelect */}
+                {/* TODO: Replace with actual MultiSelect component using store state 'personaConcerns' and 'setAudienceField' */}
                 <div className="p-2 border rounded-md bg-neutral-light/20 text-xs text-neutral-medium">Multi-select placeholder: {concerns.join(', ')}</div>
               </div>
               <div>
                 <label className="settings-label text-xs">Decision Criteria</label>
-                {/* Replace with MultiSelect */}
+                {/* TODO: Replace with actual MultiSelect component using store state 'personaCriteria' and 'setAudienceField' */}
                 <div className="p-2 border rounded-md bg-neutral-light/20 text-xs text-neutral-medium">Multi-select placeholder: {criteria.join(', ')}</div>
               </div>
               <div>
                 <label className="settings-label text-xs">Communication Preferences</label>
-                {/* Replace with MultiSelect */}
+                {/* TODO: Replace with actual MultiSelect component using store state 'personaCommPrefs' and 'setAudienceField' */}
                 <div className="p-2 border rounded-md bg-neutral-light/20 text-xs text-neutral-medium">Multi-select placeholder: {commPrefs.join(', ')}</div>
               </div>
              </div>
-            {/* Removed extra closing div */}
           </AccordionContent>
         </AccordionItem>
       </Accordion>
