@@ -114,17 +114,17 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({
               variant="ghost"
               size="sm"
               onClick={() => setViewMode('grid')}
-              className={`p-2 h-7 ${viewMode === 'grid' ? 'bg-primary text-primary' : 'text-neutral-medium'}`}
+              className={`p-2 h-7 ${viewMode === 'grid' ? 'bg-primary/70 text-white  hover:text-black' : 'text-neutral-medium hover:text-black'}`}
             >
-              <LayoutGrid size={14} className="px-2"/>
+              <LayoutGrid size={16} />
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setViewMode('list')}
-              className={`p-3 h-7 ${viewMode === 'list' ? 'bg-primary/10 text-primary' : 'text-neutral-medium'}`}
+              className={`p-2 mr-4 h-7 ${viewMode === 'list' ? 'bg-primary/70 text-primary  hover:text-black' : 'text-neutral-medium  hover:text-black'}`}
             >
-              <List size={14} />
+              <List size={16} />
           </Button>
         </div>
         
