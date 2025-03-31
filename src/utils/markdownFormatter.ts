@@ -16,6 +16,33 @@ interface BrandColors {
   title?: string;
 }
 
+/**
+ * Cleans up JSON code blocks from content
+ * @param content The content to clean
+ * @returns Content with JSON code blocks removed or converted to markdown
+ */
+export const cleanupJsonCodeBlocks = (content: string): string => {
+  // Remove or convert JSON code blocks to markdown
+  return content
+    // Remove JSON chart objects that are in the middle of content
+    .replace(/\{\s*"type"\s*:\s*"chart"[\s\S]*?\}\s*\n*/g,
+      '[Chart visualization removed for better formatting]\n\n')
+    
+    // Remove other JSON objects
+    .replace(/\{\s*"type"\s*:[\s\S]*?\}\s*\n*/g,
+      '[Visual element removed for better formatting]\n\n')
+    
+    // Clean up any remaining JSON-like structures
+    .replace(/\{\s*"[\w]+"[\s\S]*?\}\s*\n*/g,
+      '[Data structure removed for better formatting]\n\n')
+    
+    // Fix broken markdown tables
+    .replace(/\|\s*(\w+)\s*\|\s*(\w+)\s*\|/g, '| $1 | $2 |')
+    
+    // Ensure proper table formatting
+    .replace(/\|\s*---\s*\|\s*---\s*\|/g, '| --- | --- |');
+};
+
 export const formatToMarkdown = (
   htmlContent: string,
   brandColors?: BrandColors
@@ -29,6 +56,10 @@ export const formatToMarkdown = (
 
   // First, clean up any existing markdown or HTML formatting issues
   let cleanedContent = htmlContent
+    // Clean up JSON code blocks
+    .replace(/\{\s*"type"\s*:[\s\S]*?\}\s*\n*/g,
+      '[Visual element removed for better formatting]\n\n')
+    
     // Fix spacing issues
     .replace(/\s+/g, ' ')
     // Fix missing spaces after punctuation

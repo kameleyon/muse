@@ -24,6 +24,7 @@ import ExportConfiguration from './delivery/ExportConfiguration';
 import SharingPermissions from './delivery/SharingPermissions';
 import ArchivingAnalytics from './delivery/ArchivingAnalytics';
 import * as contentGenerationService from '@/services/contentGenerationService';
+import { generateFormattedPdf } from '@/services/exportService';
 // Import necessary prompt functions
 import { 
   createResearchPrompt,
@@ -47,6 +48,8 @@ import {
 } from '@/store/projectWorkflowStore';
 import { Slide } from '@/store/types'; // Import Slide type directly from types
 import { createProjectAPI } from '@/services/projectService'; // Import the API function
+import { addToast } from '@/store/slices/uiSlice'; // Import addToast action
+import { useDispatch } from 'react-redux'; // Import useDispatch hook
 import '@/styles/ProjectArea.css';
 import '@/styles/ProjectSetup.css';
 // Potentially add new CSS files for Steps 6 & 7 later if needed
@@ -57,6 +60,7 @@ interface ProjectAreaProps {
 
 const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const dispatch = useDispatch(); // Add dispatch hook
 
   // --- Zustand Store Integration ---
   const {
@@ -296,51 +300,48 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
 
   // --- Client-Side PDF Generation Handler ---
   const handleGenerateClientPdf = async () => {
-    if (!editorContent) { 
+    if (!editorContent) {
       console.error("No content available to generate PDF.");
-      setClientPdfStatus('error'); 
+      setClientPdfStatus('error');
       return;
     }
 
-    setIsGeneratingClientPdf(true); 
-    setClientPdfStatus('generating'); 
-    console.log("Generating PDF client-side...");
+    setIsGeneratingClientPdf(true);
+    setClientPdfStatus('generating');
+    console.log("Generating PDF using improved export service...");
 
     try {
-      const htmlString = ReactDOMServer.renderToString(
-        <html>
-          <head>
-            <style>{`
-              body { font-family: sans-serif; padding: 20px; }
-              h1, h2, h3 { margin-bottom: 0.5em; }
-              p { margin-bottom: 1em; line-height: 1.4; }
-              ul, ol { margin-left: 20px; margin-bottom: 1em; }
-            `}</style>
-          </head>
-          <body>
-            <MarkdownContent content={editorContent} />
-          </body>
-        </html>
+      // Use our improved PDF export service with Puppeteer
+      const result = await generateFormattedPdf(
+        projectId || `temp_${Date.now()}`,
+        editorContent,
+        {
+          primary: primaryColor || '#ae5630',
+          secondary: secondaryColor || '#232321',
+          accent: accentColor || '#9d4e2c',
+          title: projectName || 'MagicMuse Document'
+        }
       );
 
-      const pdfOptions = {
-        margin:       [1, 1, 1, 1], 
-        filename:     `${projectName || 'magicmuse-project'}.pdf`, 
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true }, 
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-
-      await html2pdf().set(pdfOptions).from(htmlString).save();
-
-      console.log("Client-side PDF generated successfully.");
-      setClientPdfStatus('success'); 
-
+      if (result.status === 'completed' && result.downloadUrl) {
+        // Create a temporary link and click it to download the PDF
+        const link = document.createElement('a');
+        link.href = result.downloadUrl;
+        link.download = `${projectName || 'magicmuse-project'}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        console.log("PDF generated successfully with Puppeteer.");
+        setClientPdfStatus('success');
+      } else {
+        throw new Error("PDF generation failed: No download URL returned");
+      }
     } catch (error) {
-      console.error("Client-side PDF generation failed:", error);
-      setClientPdfStatus('error'); 
+      console.error("PDF generation failed:", error);
+      setClientPdfStatus('error');
     } finally {
-      setIsGeneratingClientPdf(false); 
+      setIsGeneratingClientPdf(false);
     }
   };
   // --- End Client-Side PDF Generation Handler ---
@@ -1052,9 +1053,29 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
                  <Button variant="outline" onClick={() => setCurrentStep(6)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> 
                    Back to QA
                  </Button>
-                 <Button variant="primary" className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"> 
-                   Finish Project {/* Placeholder */}
-                </Button>
+                 <Button
+                   variant="primary"
+                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"
+                   onClick={() => {
+                     // Display success message using the dispatch from the component
+                     dispatch(addToast({
+                       type: 'success',
+                       message: "Project successfully finalized and archived!"
+                     }));
+                     
+                     // Reset to step 1 for a new project
+                     setTimeout(() => {
+                       setCurrentStep(1);
+                       // Reset project state
+                       setProjectName("");
+                       setDescription("");
+                       setSelectedPitchDeckTypeId(null);
+                       // Other resets as needed
+                     }, 1500);
+                   }}
+                 >
+                   Finish Project
+                 </Button>
                </div>
              </div>
            </>

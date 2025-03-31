@@ -6,7 +6,7 @@ import * as contentGenerationService from '@/services/contentGenerationService';
 import { useProjectWorkflowStore } from '@/store/projectWorkflowStore';
 import { useDispatch } from 'react-redux';
 import { addToast } from '@/store/slices/uiSlice';
-import { formatToMarkdown } from '@/utils/markdownFormatter';
+import { formatToMarkdown, cleanupJsonCodeBlocks } from '@/utils/markdownFormatter';
 
 interface EnhancementToolsProps {
   editorContent: string;
@@ -72,22 +72,25 @@ const EnhancementTools: React.FC<EnhancementToolsProps> = ({ editorContent, onCo
        );
        
        if (result.content && !result.content.startsWith('Error:')) {
+         // First, clean up any JSON code blocks in the result content
+         const cleanedResultContent = cleanupJsonCodeBlocks(result.content);
+         
          // If original content was markdown, ensure we preserve markdown formatting
          if (isMarkdown) {
            // Check if the result already contains markdown formatting
-           const resultHasMarkdown = isMarkdownContent(result.content);
+           const resultHasMarkdown = isMarkdownContent(cleanedResultContent);
            
            if (resultHasMarkdown) {
              // If the result already has markdown, use it directly
-             onContentChange(result.content);
+             onContentChange(cleanedResultContent);
            } else {
              // If the result lost markdown formatting, convert it back
-             const enhancedMarkdown = formatToMarkdown(result.content);
+             const enhancedMarkdown = formatToMarkdown(cleanedResultContent);
              onContentChange(enhancedMarkdown);
            }
          } else {
            // If not markdown, use the enhanced content as is
-           onContentChange(result.content);
+           onContentChange(cleanedResultContent);
          }
          
          dispatch(addToast({
@@ -242,21 +245,27 @@ const EnhancementTools: React.FC<EnhancementToolsProps> = ({ editorContent, onCo
              // Check if content is already in markdown format
              const isAlreadyMarkdown = isMarkdownContent(editorContent);
              
+             // First, clean up any JSON code blocks in the content
+             const contentWithoutJson = cleanupJsonCodeBlocks(editorContent);
+             
              if (isAlreadyMarkdown) {
                // If already markdown, just clean it up and ensure proper formatting
-               const cleanedMarkdown = editorContent
+               const cleanedMarkdown = contentWithoutJson
                  // Fix any broken markdown formatting
                  .replace(/\*\*\s+/g, '**') // Fix spaces after bold markers
                  .replace(/\s+\*\*/g, '**') // Fix spaces before bold markers
                  .replace(/\*\s+/g, '*') // Fix spaces after italic markers
                  .replace(/\s+\*/g, '*') // Fix spaces before italic markers
                  .replace(/\n{3,}/g, '\n\n') // Fix excessive line breaks
-                 .replace(/\n\s+\n/g, '\n\n'); // Fix lines with only whitespace
+                 .replace(/\n\s+\n/g, '\n\n') // Fix lines with only whitespace
+                 // Fix markdown tables
+                 .replace(/\|\s*(\w+)\s*\|\s*(\w+)\s*\|/g, '| $1 | $2 |')
+                 .replace(/\|\s*---\s*\|\s*---\s*\|/g, '| --- | --- |');
                
                onContentChange(cleanedMarkdown);
              } else {
                // Convert the current content to markdown format
-               const markdownContent = formatToMarkdown(editorContent);
+               const markdownContent = formatToMarkdown(contentWithoutJson);
                
                // Update the editor content with the markdown-formatted content
                onContentChange(markdownContent);

@@ -1,6 +1,8 @@
 // src/services/exportService.ts
-import { formatForPdfExport } from '@/utils/markdownFormatter';
+import { formatForPdfExport, cleanupJsonCodeBlocks } from '@/utils/markdownFormatter';
 import jsPDF from 'jspdf';
+import { marked } from 'marked';
+import 'jspdf-autotable'; // Import for better table support
 
 // Placeholder for API base URL
 const API_BASE_URL = '/api/export';
@@ -97,13 +99,23 @@ export const generateFormattedPdf = async (
   console.log('API CALL: generateFormattedPdf', projectId);
   
   try {
-    // First convert HTML content to properly formatted markdown
-    const markdownContent = formatForPdfExport(content, brandColors);
+    // First clean up any JSON code blocks in the content
+    const cleanedContent = cleanupJsonCodeBlocks(content);
     
-    // Use jsPDF to generate a PDF
-    const doc = new jsPDF();
+    // Then convert to markdown with proper formatting
+    const markdownContent = formatForPdfExport(cleanedContent, brandColors);
     
-    // Set up document properties
+    // Convert markdown to HTML for better parsing
+    const htmlContent = marked(markdownContent) as string;
+    
+    // Create a new PDF document
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+    
+    // Set document properties
     const title = brandColors?.title || `MagicMuse Document - ${projectId}`;
     doc.setProperties({
       title: title,
@@ -113,95 +125,227 @@ export const generateFormattedPdf = async (
       creator: 'MagicMuse PDF Generator'
     });
     
-    // Set up fonts and colors
-    doc.setFont('helvetica');
-    doc.setTextColor(0, 0, 0);
+    // Get colors from brandColors or use defaults
+    const primaryColor = brandColors?.primary || '#ae5630';
+    const secondaryColor = brandColors?.secondary || '#232321';
     
-    // Add title
+    // Convert hex colors to RGB for jsPDF
+    const hexToRgb = (hex: string) => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : { r: 0, g: 0, b: 0 };
+    };
+    
+    const primaryRgb = hexToRgb(primaryColor);
+    const secondaryRgb = hexToRgb(secondaryColor);
+    
+    // Add title page
     doc.setFontSize(24);
-    doc.text(title, 20, 20);
+    doc.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+    doc.text(title, 105, 30, { align: 'center', maxWidth: 170 });
     
-    // Add date
     doc.setFontSize(12);
-    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 30);
+    doc.setTextColor(secondaryRgb.r, secondaryRgb.g, secondaryRgb.b);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 45, { align: 'center' });
     
-    // Add content with proper markdown formatting
-    doc.setFontSize(12);
+    // Add a divider line
+    doc.setDrawColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+    doc.setLineWidth(0.5);
+    doc.line(20, 50, 190, 50);
     
-    // Process markdown content for better PDF rendering
-    const processedContent = markdownContent
-      // Remove any problematic code blocks that might be causing issues
-      .replace(/```([\s\S]*?)```/g, (match, codeContent) => {
-        if (codeContent.includes('"type":') || codeContent.includes('function')) {
-          return '[Code block removed for PDF export]';
-        }
-        return match;
-      });
+    // Parse the HTML content to extract sections
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
     
-    // Split content by headers to handle them specially
-    const contentSections = processedContent.split(/^(#+\s.*?)$/m);
+    // Start content on a new page
+    doc.addPage();
     
-    let yPosition = 40; // Starting y position
-    const pageWidth = doc.internal.pageSize.getWidth();
+    // Track current Y position
+    let yPos = 20;
     const margin = 20;
-    const textWidth = pageWidth - (margin * 2);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const contentWidth = pageWidth - (margin * 2);
     
-    // Process each section
-    for (let i = 0; i < contentSections.length; i++) {
-      const section = contentSections[i];
+    // Process each element
+    const elements = Array.from(tempDiv.children);
+    
+    for (const element of elements) {
+      // Check if we need a new page
+      if (yPos > 270) {
+        doc.addPage();
+        yPos = 20;
+      }
       
-      // Skip empty sections
-      if (!section.trim()) continue;
-      
-      // Check if this is a header
-      if (/^#+\s/.test(section)) {
-        // Determine header level
-        const headerLevel = (section.match(/^#+/) || [''])[0].length;
-        const headerText = section.replace(/^#+\s/, '');
+      // Process based on element type
+      if (element.tagName === 'H1') {
+        doc.setFontSize(20);
+        doc.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+        doc.text(element.textContent || '', margin, yPos);
+        yPos += 10;
         
-        // Set font size based on header level
-        if (headerLevel === 1) {
-          doc.setFontSize(20);
-          doc.setTextColor(0, 0, 0);
-        } else if (headerLevel === 2) {
-          doc.setFontSize(18);
-          doc.setTextColor(40, 40, 40);
-        } else {
-          doc.setFontSize(16);
-          doc.setTextColor(60, 60, 60);
-        }
-        
-        // Add header text
-        const headerLines = doc.splitTextToSize(headerText, textWidth);
-        doc.text(headerLines, margin, yPosition);
-        yPosition += (headerLines.length * (headerLevel === 1 ? 10 : 8)) + 5;
-        
-        // Reset font for normal text
+        // Add underline for h1
+        doc.setDrawColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+        doc.setLineWidth(0.5);
+        doc.line(margin, yPos, margin + contentWidth * 0.5, yPos);
+        yPos += 5;
+      } 
+      else if (element.tagName === 'H2') {
+        doc.setFontSize(18);
+        doc.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+        doc.text(element.textContent || '', margin, yPos);
+        yPos += 8;
+      } 
+      else if (element.tagName === 'H3') {
+        doc.setFontSize(16);
+        doc.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+        doc.text(element.textContent || '', margin, yPos);
+        yPos += 7;
+      } 
+      else if (element.tagName === 'P') {
         doc.setFontSize(12);
         doc.setTextColor(0, 0, 0);
-      } else {
-        // Process regular content
-        // Split the content into lines that fit the page width
-        const textLines = doc.splitTextToSize(section, textWidth);
+        const text = element.textContent || '';
+        const splitText = doc.splitTextToSize(text, contentWidth);
+        doc.text(splitText, margin, yPos);
+        yPos += (splitText.length * 7);
+      } 
+      else if (element.tagName === 'UL' || element.tagName === 'OL') {
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
         
-        // Check if we need a new page
-        if (yPosition + (textLines.length * 7) > doc.internal.pageSize.getHeight() - margin) {
-          doc.addPage();
-          yPosition = margin + 10;
+        const listItems = Array.from(element.querySelectorAll('li'));
+        for (let i = 0; i < listItems.length; i++) {
+          const item = listItems[i];
+          const prefix = element.tagName === 'OL' ? `${i + 1}. ` : '• ';
+          const text = item.textContent || '';
+          const splitText = doc.splitTextToSize(text, contentWidth - 10);
+          
+          // Check if we need a new page
+          if (yPos + (splitText.length * 7) > 270) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          doc.text(prefix, margin, yPos);
+          doc.text(splitText, margin + 7, yPos);
+          yPos += (splitText.length * 7);
         }
+      } 
+      else if (element.tagName === 'TABLE') {
+        // Use jspdf-autotable for better table rendering
+        try {
+          // Extract table data
+          const tableRows: string[][] = [];
+          const tableHeaders: string[] = [];
+          
+          // Get headers
+          const headerRow = element.querySelector('thead tr');
+          if (headerRow) {
+            const headers = Array.from(headerRow.querySelectorAll('th'));
+            headers.forEach(header => {
+              tableHeaders.push(header.textContent || '');
+            });
+          }
+          
+          // Get rows
+          const rows = Array.from(element.querySelectorAll('tbody tr'));
+          rows.forEach(row => {
+            const cells = Array.from(row.querySelectorAll('td'));
+            const rowData: string[] = [];
+            cells.forEach(cell => {
+              rowData.push(cell.textContent || '');
+            });
+            tableRows.push(rowData);
+          });
+          
+          // Check if we need a new page
+          if (yPos + (tableRows.length * 10) + 20 > 270) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          // @ts-ignore - jspdf-autotable extends jsPDF prototype
+          doc.autoTable({
+            head: tableHeaders.length > 0 ? [tableHeaders] : undefined,
+            body: tableRows,
+            startY: yPos,
+            theme: 'grid',
+            headStyles: {
+              fillColor: [primaryRgb.r, primaryRgb.g, primaryRgb.b],
+              textColor: [255, 255, 255],
+              fontStyle: 'bold'
+            },
+            alternateRowStyles: {
+              fillColor: [245, 245, 245]
+            },
+            margin: { left: margin, right: margin }
+          });
+          
+          // Update yPos after table
+          // @ts-ignore - jspdf-autotable extends jsPDF prototype
+          yPos = doc.lastAutoTable.finalY + 10;
+        } catch (tableError) {
+          console.error('Error rendering table:', tableError);
+          yPos += 10;
+        }
+      } 
+      else if (element.tagName === 'BLOCKQUOTE') {
+        doc.setFontSize(12);
+        doc.setTextColor(100, 100, 100);
+        // @ts-ignore - setFontStyle exists on jsPDF
+        doc.setFontStyle('italic');
         
-        // Add the text lines to the PDF
-        doc.text(textLines, margin, yPosition);
-        yPosition += (textLines.length * 7) + 10;
+        const text = element.textContent || '';
+        const splitText = doc.splitTextToSize(text, contentWidth - 10);
+        
+        // Draw quote line
+        doc.setDrawColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+        doc.setLineWidth(1);
+        doc.line(margin, yPos, margin, yPos + (splitText.length * 7));
+        
+        doc.text(splitText, margin + 5, yPos);
+        yPos += (splitText.length * 7) + 5;
+        
+        // @ts-ignore - setFontStyle exists on jsPDF
+        doc.setFontStyle('normal');
+      } 
+      else if (element.tagName === 'HR') {
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.5);
+        doc.line(margin, yPos, margin + contentWidth, yPos);
+        yPos += 5;
+      } 
+      else {
+        // Default handling for other elements
+        if (element.textContent && element.textContent.trim()) {
+          doc.setFontSize(12);
+          doc.setTextColor(0, 0, 0);
+          const text = element.textContent.trim();
+          const splitText = doc.splitTextToSize(text, contentWidth);
+          doc.text(splitText, margin, yPos);
+          yPos += (splitText.length * 7);
+        }
       }
+      
+      // Add some spacing between elements
+      yPos += 5;
+    }
+    
+    // Add footer to all pages
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(10);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Generated by MagicMuse | Page ${i} of ${pageCount}`, 105, 285, { align: 'center' });
     }
     
     // Generate a blob URL for the PDF
     const pdfBlob = doc.output('blob');
     const blobUrl = URL.createObjectURL(pdfBlob);
-    
-    // In a real implementation, we would save this to a server
-    // For now, we'll just return the blob URL
     
     return {
       status: 'completed',
