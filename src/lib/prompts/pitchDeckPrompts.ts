@@ -398,10 +398,22 @@ export const createVisualGenerationPrompt = (
 - Accent Color: ${projectInfo.design.accentColor}`;
   }
 
-  prompt += `\n\nOutput in JSON or CSV for easy rendering. 
-If chart, specify axis labels, legends, etc. 
-If table, define headers and rows. 
-If diagram or infographic, outline shapes/flow.`;
+  prompt += `\n\nYour job: Generate a visual specification for the *current pitch deck slide*. 
+**Important**:
+1. **Do not** mention the actual slide title or label. Just provide the chart, table, or diagram data.
+2. Return **only** the code block labeled \`visual-specification\`, nothing else. 
+
+Use this format exactly:
+\`\`\`visual-specification
+{
+  "type": "${determinedType}",
+  "title": "Short neutral label, e.g. 'Radar Chart'",
+  "data": {
+    // Provide the relevant data in JSON
+  },
+  "notes": "Any instructions for rendering."
+}
+\`\`\``;
 
   return prompt;
 };

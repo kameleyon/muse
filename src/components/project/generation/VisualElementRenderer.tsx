@@ -71,8 +71,76 @@ const VisualElementRenderer: React.FC<VisualElementRendererProps> = ({
       
       // Try to extract structured information
       // Check for different formats
-      // 1. Code block format with ```visual-specification
+      // 1. Code block format with ```visual-specification (JSON format)
       const codeBlockMatch = rawData.match(/```visual-specification([\s\S]*?)```/);
+      
+      // Try to parse JSON from the visual-specification block first
+      if (codeBlockMatch) {
+        try {
+          const jsonContent = codeBlockMatch[1].trim();
+          const jsonData = JSON.parse(jsonContent);
+          
+          // If we successfully parsed JSON, use it directly
+          if (jsonData) {
+            result.type = jsonData.type || type;
+            result.title = jsonData.title || title;
+            
+            // Handle data based on the type
+            if (jsonData.data) {
+              if (result.type === 'chart') {
+                // Process chart data
+                result.chartType = jsonData.type === 'radar' ? 'radar' :
+                                  jsonData.type === 'pie' ? 'pie' : 'line';
+                                  
+                // Extract data points from the JSON
+                if (Array.isArray(jsonData.data)) {
+                  result.dataPoints = jsonData.data.map((item: any) => ({
+                    label: item.label || '',
+                    value: parseFloat(item.value) || 0,
+                    category: item.category || '',
+                    color: item.color || ''
+                  }));
+                }
+                
+                // Set axis labels if provided
+                result.xAxisLabel = jsonData.xAxis || '';
+                result.yAxisLabel = jsonData.yAxis || '';
+              }
+              else if (result.type === 'table') {
+                // Process table data
+                if (jsonData.data.headers) {
+                  result.tableHeaders = jsonData.data.headers;
+                }
+                if (jsonData.data.rows) {
+                  result.tableRows = jsonData.data.rows;
+                }
+              }
+              else if (result.type === 'diagram') {
+                // Process diagram data
+                if (jsonData.data.nodes) {
+                  result.diagramNodes = jsonData.data.nodes;
+                }
+                if (jsonData.data.edges) {
+                  result.diagramEdges = jsonData.data.edges;
+                }
+              }
+            }
+            
+            // Add any notes
+            if (jsonData.notes) {
+              result.layout = jsonData.notes;
+            }
+            
+            // Successfully parsed JSON, return early
+            return result;
+          }
+        } catch (e) {
+          console.log('Failed to parse JSON from visual-specification block:', e);
+          // Continue with the existing parsing logic if JSON parsing fails
+        }
+      }
+      
+      // 1b. Code block format with ```visual-specification (non-JSON format)
       // 2. Square bracket visualization format [VISUALIZATION: description]
       const bracketMatch = rawData.match(/\[VISUALIZATION:?\s*([\s\S]*?)\]/i);
       // 3. Image alt text format with square brackets

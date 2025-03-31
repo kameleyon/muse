@@ -18,6 +18,7 @@ interface GenerationParams {
   depth?: 'brief' | 'standard' | 'detailed';
   tone?: string;
   styleConsistency?: boolean;
+  systemPrompt?: string;
   factCheckLevel?: 'basic' | 'standard' | 'thorough';
   useResearchModel?: boolean; 
   // temperature?: number; 
@@ -28,6 +29,13 @@ interface GeneratedContent {
   content: string; 
   modelUsed?: string;
   finishReason?: string;
+  blocks?: string[]; // Content blocks for streaming/typing effect
+}
+
+interface StreamingOptions {
+  onBlock?: (block: string) => void;
+  onComplete?: (content: string) => void;
+  onError?: (error: any) => void;
 }
 
 interface FactCheckResult {
@@ -68,7 +76,8 @@ export const generateContent = async (params: GenerationParams): Promise<Generat
         messages: [
           { 
             role: "system", 
-            content: "You are an expert assistant helping to create professional pitch decks. " +
+            content: params.systemPrompt || 
+                     "You are an expert assistant helping to create professional pitch decks. " +
                      "Always format your responses using Markdown with appropriate headings, " +
                      "bullet points, and formatting. Provide complete, comprehensive content based on the user's prompt." 
           }, 
@@ -100,132 +109,266 @@ export const generateContent = async (params: GenerationParams): Promise<Generat
       if (typeof choice.finish_reason === 'string') {
         finishReason = choice.finish_reason;
       }
-    } 
-    // Check for Anthropic format
-    else if (result.content && Array.isArray(result.content) && result.content.length > 0) {
-      const contentBlock = result.content[0];
-      if (contentBlock && contentBlock.type === 'text' && typeof contentBlock.text === 'string') {
-        generatedText = contentBlock.text.trim();
-      }
-      if (typeof result.stop_reason === 'string') {
-        finishReason = result.stop_reason;
-      }
-    }
-    // Check for Google Gemini format (might be nested differently)
-    else if (result.candidates && Array.isArray(result.candidates) && result.candidates.length > 0) {
-        const candidate = result.candidates[0];
-        if (candidate.content && candidate.content.parts && Array.isArray(candidate.content.parts) && candidate.content.parts.length > 0) {
-            generatedText = candidate.content.parts[0].text?.trim() || '';
-        }
-        if (typeof candidate.finishReason === 'string') {
-            finishReason = candidate.finishReason;
-        }
-    }
-    // Fallback for other potential direct text responses
-    else if (typeof result.text === 'string') {
-      generatedText = result.text.trim();
-      finishReason = 'direct_text';
-    } 
-    else if (typeof result.content === 'string') { // Less common, but possible
-      generatedText = result.content.trim();
-      finishReason = 'direct_content';
-    }
-
-    // Handle cases where parsing failed or content is empty
-    if (!generatedText) {
-      console.warn("Could not extract generated text from API response:", JSON.stringify(result, null, 2));
-      generatedText = `Error: Could not parse response from ${modelToUse}. See console for details.`;
-      finishReason = 'parsing_failed';
     }
     
-    console.log(`API Response from ${modelToUse}: Finish Reason - ${finishReason}`);
-    console.log("Generated Text Preview:", generatedText.substring(0, 200) + '...');
-
-    // Basic check to ensure some structure if the model failed to provide it
-    if (generatedText && !generatedText.startsWith('#') && !generatedText.startsWith('Error:') && finishReason !== 'parsing_failed') {
-      console.warn("Generated content lacks expected Markdown heading. Prepending a default title.");
-      generatedText = `# Generated Content\n\n${generatedText}`;
+    // If no content was found, try other formats or return an error
+    if (!generatedText) {
+      console.error("Unexpected API response format:", result);
+      return { 
+        content: "Error: Unable to parse API response. Check console for details.",
+        modelUsed: modelToUse,
+        finishReason: 'error'
+      };
     }
 
-    return { 
-      content: generatedText, 
-      modelUsed: modelToUse, 
-      finishReason: finishReason 
+    // Split content into blocks for streaming/typing effect
+    const blocks = generatedText.split(/\n\n+/).filter(block => block.trim().length > 0);
+    
+    return {
+      sectionId: params.sectionId,
+      content: generatedText,
+      modelUsed: modelToUse,
+      finishReason,
+      blocks
     };
-
   } catch (error) {
-    console.error("Error calling OpenRouter API:", error);
-    const errorMessage = `Error generating content: ${error instanceof Error ? error.message : String(error)}`;
-    console.log("Returning error content:", errorMessage);
-    return { content: errorMessage, finishReason: 'exception' };
+    console.error("Content generation error:", error);
+    return { 
+      content: `Error during content generation: ${error instanceof Error ? error.message : String(error)}`,
+      modelUsed: modelToUse,
+      finishReason: 'error'
+    };
   }
 };
 
 /**
- * Applies a template to the project structure (Placeholder - likely involves multiple generation calls).
+ * Generates content with streaming blocks for typing effect
+ * @param params - Generation parameters including the prompt
+ * @param options - Streaming options including callbacks
+ * @returns Promise resolving when generation is complete
+ */
+export const generateContentWithTypingEffect = async (
+  params: GenerationParams,
+  options: StreamingOptions
+): Promise<void> => {
+  try {
+    // Generate the full content first
+    const result = await generateContent(params);
+    
+    if (!result.blocks || result.blocks.length === 0) {
+      // If no blocks, create a single block from the content
+      const singleBlock = result.content;
+      
+      // Call the onBlock callback if provided
+      if (options.onBlock) {
+        options.onBlock(singleBlock);
+      }
+      
+      // Call the onComplete callback if provided
+      if (options.onComplete) {
+        options.onComplete(result.content);
+      }
+      
+      return;
+    }
+    
+    // Process each block with a delay to simulate typing
+    let fullContent = '';
+    
+    for (let i = 0; i < result.blocks.length; i++) {
+      const block = result.blocks[i];
+      
+      // Add the block to the full content
+      fullContent += (i > 0 ? '\n\n' : '') + block;
+      
+      // Call the onBlock callback if provided
+      if (options.onBlock) {
+        options.onBlock(block);
+      }
+      
+      // Add a delay between blocks (except for the last one)
+      if (i < result.blocks.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+    
+    // Call the onComplete callback if provided
+    if (options.onComplete) {
+      options.onComplete(fullContent);
+    }
+  } catch (error) {
+    console.error("Error in generateContentWithTypingEffect:", error);
+    
+    // Call the onError callback if provided
+    if (options.onError) {
+      options.onError(error);
+    }
+  }
+};
+
+/**
+ * Applies a template to generate content for multiple sections.
  * @param projectId - The ID of the project.
  * @param templateId - The ID of the template to apply.
- * @returns Promise resolving when complete.
+ * @returns Promise resolving to a success indicator.
  */
-export const applyTemplate = async (projectId: string, templateId: string): Promise<void> => {
+export const applyTemplate = async (projectId: string, templateId: string): Promise<boolean> => {
   console.log('API CALL: applyTemplate', projectId, templateId);
   // This would likely involve fetching template structure and then calling generateContent for each section
   await new Promise(resolve => setTimeout(resolve, 400));
+  return true;
 };
 
 /**
  * Enhances existing content using AI (Uses generateContent).
  * @param projectId - The ID of the project.
  * @param sectionId - The ID of the section to enhance.
- * @param content - The existing content.
- * @param enhancementType - e.g., 'clarity', 'persuasion', 'tone_adjust'
+ * @param content - The existing content to enhance.
+ * @param enhancementType - The type of enhancement to apply.
  * @returns Promise resolving to the enhanced content.
  */
-export const enhanceContent = async (projectId: string, sectionId: string, content: string, enhancementType: string): Promise<GeneratedContent> => {
-  console.log('API CALL: enhanceContent', projectId, sectionId, enhancementType);
-  const prompt = `Enhance the following content for ${enhancementType}:\n\n${content}`;
+export const enhanceContent = async (
+  projectId: string, 
+  sectionId: string, 
+  content: string, 
+  enhancementType: 'clarity' | 'conciseness' | 'persuasiveness' | 'persuasion' | 'tone' | 'flow' | 'transitions' | 'readability' | 'jargon' | 'regenerate'
+): Promise<GeneratedContent> => {
+  console.log('API CALL: enhanceContent', projectId, enhancementType);
+  
+  const prompt = `Enhance the following content for better ${enhancementType}. Maintain the same information and structure, but improve the ${enhancementType}:\n\n${content}`;
+  
   // Use the standard content model for enhancement
-  return generateContent({ projectId, sectionId, prompt, useResearchModel: false }); 
+  return generateContent({ projectId, sectionId, prompt, useResearchModel: false });
 };
 
 /**
- * Verifies facts within generated or provided content using the research model.
+ * Verifies facts in content using research model.
  * @param projectId - The ID of the project.
- * @param content - The content containing claims to verify.
+ * @param content - The content to verify.
  * @returns Promise resolving to an array of fact check results.
  */
 export const verifyFacts = async (projectId: string, content: string): Promise<FactCheckResult[]> => {
   console.log('API CALL: verifyFacts using research model', projectId);
-  const prompt = `Verify the factual claims in the following text. For each claim, state if it is verified, not verified, or uncertain. Provide a source or explanation where possible:\n\n${content}`;
+  const prompt = `Verify the factual claims in the following text. For each claim, provide a structured response in this exact format:
+
+Claim: [the claim being verified]
+Status: [Verified, Not Verified, or Uncertain]
+Source: [source information if available]
+Explanation: [brief explanation of verification]
+
+Please separate each claim with a blank line. Be objective and thorough in your verification:
+
+${content}`;
   
   try {
-    const result = await generateContent({ projectId, prompt, useResearchModel: true });
+    const result = await generateContent({ 
+      projectId, 
+      prompt, 
+      useResearchModel: true,
+      systemPrompt: "You are a fact-checking assistant with access to search capabilities. Your job is to verify factual claims in text. Always respond in a structured format with Claim, Status, Source, and Explanation fields. Be objective and thorough in your verification."
+    });
     console.log("Raw fact check response:", result.content);
     
-    // --- Robust Parsing for Fact Check Results ---
+    // Helper function to clean text of quotes and formatting issues
+    const cleanText = (text: string): string => {
+      return text
+        .replace(/^["']|["']$/g, '') // Remove quotes at start/end
+        .replace(/\\"/g, '"') // Replace escaped quotes
+        .replace(/^"(.*?)"$/, '$1') // Remove quotes around text
+        .replace(/^"(.*)"$/, '$1') // Remove quotes around text (greedy)
+        .replace(/["']+/g, '') // Remove any remaining quotes
+        .trim();
+    };
+    
+    // --- Improved Robust Parsing for Fact Check Results ---
     const results: FactCheckResult[] = [];
     const lines = result.content.split('\n');
     
+    // First try to parse structured format
+    let currentClaim: Partial<FactCheckResult> = {};
+    
     lines.forEach(line => {
-      const claimMatch = line.match(/Claim:\s*(.*)/i);
-      const statusMatch = line.match(/Status:\s*(Verified|Not Verified|Uncertain)/i);
-      const sourceMatch = line.match(/Source:\s*(.*)/i);
-      const explanationMatch = line.match(/Explanation:\s*(.*)/i);
-
-      if (claimMatch && statusMatch) {
-        results.push({
-          claim: claimMatch[1].trim(),
-          verified: statusMatch[1].toLowerCase() === 'verified',
-          source: sourceMatch ? sourceMatch[1].trim() : undefined,
-          explanation: explanationMatch ? explanationMatch[1].trim() : (statusMatch[1].toLowerCase() !== 'verified' ? 'No specific explanation provided.' : undefined)
-        });
-      } else if (line.includes("Verified") || line.includes("Not Verified") || line.includes("Uncertain")) {
-        // Attempt to capture less structured lines
-        const claim = line.split(/Verified|Not Verified|Uncertain/i)[0]?.trim() || 'Unknown Claim';
-        const verified = line.includes("Verified");
-        results.push({ claim, verified, explanation: line });
+      // Clean the line of any quotes or special characters
+      const cleanLine = line.trim().replace(/^["']|["']$/g, '').replace(/\\"/g, '"');
+      
+      if (cleanLine.length === 0) {
+        // Empty line might indicate end of a claim
+        if (currentClaim.claim) {
+          results.push({
+            claim: cleanText(currentClaim.claim),
+            verified: currentClaim.verified || false,
+            source: currentClaim.source ? cleanText(currentClaim.source) : undefined,
+            explanation: currentClaim.explanation ? cleanText(currentClaim.explanation) : undefined
+          });
+          currentClaim = {};
+        }
+        return;
+      }
+      
+      const claimMatch = cleanLine.match(/Claim:\s*(.*)/i);
+      const statusMatch = cleanLine.match(/Status:\s*(Verified|Not Verified|Uncertain)/i);
+      const sourceMatch = cleanLine.match(/Source:\s*(.*)/i);
+      const explanationMatch = cleanLine.match(/Explanation:\s*(.*)/i);
+      
+      if (claimMatch) {
+        // If we find a new claim and already have one in progress, save the previous one
+        if (currentClaim.claim) {
+          results.push({
+            claim: cleanText(currentClaim.claim),
+            verified: currentClaim.verified || false,
+            source: currentClaim.source ? cleanText(currentClaim.source) : undefined,
+            explanation: currentClaim.explanation ? cleanText(currentClaim.explanation) : undefined
+          });
+          currentClaim = {};
+        }
+        currentClaim.claim = cleanText(claimMatch[1]);
+      }
+      
+      if (statusMatch) {
+        currentClaim.verified = statusMatch[1].toLowerCase() === 'verified';
+      }
+      
+      if (sourceMatch) {
+        currentClaim.source = cleanText(sourceMatch[1]);
+      }
+      
+      if (explanationMatch) {
+        currentClaim.explanation = cleanText(explanationMatch[1]);
+      }
+      
+      // Also try to capture less structured lines
+      if (!claimMatch && !statusMatch && !sourceMatch && !explanationMatch) {
+        if (cleanLine.includes("Verified") || cleanLine.includes("Not Verified") || cleanLine.includes("Uncertain")) {
+          const parts = cleanLine.split(/Verified|Not Verified|Uncertain/i);
+          if (parts[0]?.trim()) {
+            // If we find a new claim and already have one in progress, save the previous one
+            if (currentClaim.claim) {
+              results.push({
+                claim: cleanText(currentClaim.claim),
+                verified: currentClaim.verified || false,
+                source: currentClaim.source ? cleanText(currentClaim.source) : undefined,
+                explanation: currentClaim.explanation ? cleanText(currentClaim.explanation) : undefined
+              });
+              currentClaim = {};
+            }
+            
+            currentClaim.claim = cleanText(parts[0]);
+            currentClaim.verified = cleanLine.includes("Verified");
+            currentClaim.explanation = parts[1] ? cleanText(parts[1]) : undefined;
+          }
+        }
       }
     });
+    
+    // Add the last claim if there is one
+    if (currentClaim.claim) {
+      results.push({
+        claim: cleanText(currentClaim.claim),
+        verified: currentClaim.verified || false,
+        source: currentClaim.source ? cleanText(currentClaim.source) : undefined,
+        explanation: currentClaim.explanation ? cleanText(currentClaim.explanation) : undefined
+      });
+    }
 
     // Handle cases where no structured results were found
     if (results.length === 0 && !result.content.startsWith('Error:')) {
