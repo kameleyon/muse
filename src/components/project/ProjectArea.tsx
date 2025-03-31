@@ -551,7 +551,10 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
         });
         
         const slidePrompt = createSlideContentPrompt(
-          slide, slideIndex, slidesToGenerate.length, projectInfo, researchResult.content, generatedSlides
+          slide,
+          projectInfo,
+          researchResult.content,
+          generatedSlides
         );
         
         const slideResult = await contentGenerationService.generateContent({

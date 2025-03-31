@@ -1,4 +1,12 @@
-// src/lib/prompts/pitchDeckPrompts.ts
+// src/lib/prompts/pitchDeckPrompts.tsx
+
+import * as React from 'react';
+import { useState, useEffect, useRef, ReactNode } from 'react';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title as ChartTitle, Tooltip, Legend } from 'chart.js';
+import { Bar as BarChart } from 'react-chartjs-2';
+
+// Register Chart.js components (this is required once in your app’s lifecycle)
+ChartJS.register(CategoryScale, LinearScale, BarElement, ChartTitle, Tooltip, Legend);
 
 /** 
  * SlideInfo interface (same as your original but we won't SHOW title in the prompt).
@@ -406,4 +414,160 @@ If diagram or infographic, outline shapes/flow.`;
   return prompt;
 };
 
-// Note: The React component implementation has been moved to pitchDeckPrompts.tsx
+//////////////////////////////////////////////////////////////////////////////////////
+// BELOW is an example of how you might implement a React component that uses       //
+// the prompts above, displays slides one-by-one, and uses Chart.js for any charts. //
+//////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * A small hook to provide a "typewriter" effect for text.
+ * You can adjust the typingSpeed or logic as desired.
+ */
+function useTypewriter(text: string, typingSpeed: number = 50) {
+  const [typedText, setTypedText] = useState('');
+  const indexRef = useRef(0);
+
+  useEffect(() => {
+    setTypedText(''); // reset each time text changes
+    indexRef.current = 0;
+  }, [text]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTypedText((prev) => {
+        if (indexRef.current < text.length) {
+          const nextChar = text.charAt(indexRef.current);
+          indexRef.current += 1;
+          return prev + nextChar;
+        } else {
+          clearInterval(timer);
+          return prev;
+        }
+      });
+    }, typingSpeed);
+
+    return () => clearInterval(timer);
+  }, [text, typingSpeed]);
+
+  return typedText;
+}
+
+/**
+ * Example React component to render "slides" with a typed effect.
+ * This is a simplistic demonstration:
+ *  - We assume we have pre-generated content for each slide
+ *  - We display each slide's text with a typewriter effect
+ *  - If the slide has chart data, we show a chart
+ */
+interface SlideContent {
+  id: string;
+  markdownText: string;
+  chartData?: any; // optional data structure for a chart
+}
+
+interface PitchDeckProps {
+  slides: SlideContent[];
+}
+
+/**
+ * `PitchDeck` component:
+ * - Renders each slide with typed text
+ * - Optionally shows a Bar chart if chartData is provided
+ * - Clicking a "Next Slide" button moves to the next
+ */
+export const PitchDeck: React.FC<PitchDeckProps> = ({ slides }): JSX.Element => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const currentSlide = slides[currentIndex];
+  const typedText = useTypewriter(currentSlide.markdownText, 30); // slower typing speed
+
+  const nextSlide = () => {
+    if (currentIndex < slides.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
+
+  // Example chart config (Bar chart)
+  // In a real scenario, you'd customize based on the "chartData" you have
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' as const },
+      title: { display: true, text: 'Example Chart' },
+    },
+  };
+
+  const dataForChart = {
+    labels: currentSlide?.chartData?.labels || ['A', 'B', 'C'],
+    datasets: [
+      {
+        label: 'Example',
+        data: currentSlide?.chartData?.values || [12, 19, 3],
+        backgroundColor: 'rgba(53,162,235,0.6)',
+      },
+    ],
+  };
+
+  return (
+    <div style={{ margin: '20px', maxWidth: '600px' }}>
+      <h2>Pitch Deck Slide {currentIndex + 1}</h2>
+
+      {/* The typed text area */}
+      <div style={{ whiteSpace: 'pre-wrap', marginBottom: '1em' }}>
+        {typedText}
+      </div>
+
+      {/* If there's chart data, display the chart */}
+      {currentSlide.chartData && (
+        <div style={{ marginTop: '20px' }}>
+          <BarChart options={chartOptions} data={dataForChart} />
+        </div>
+      )}
+
+      <button onClick={nextSlide} disabled={currentIndex >= slides.length - 1}>
+        Next Slide
+      </button>
+    </div>
+  );
+};
+
+/*
+USAGE EXAMPLE:
+
+const sampleSlides: SlideContent[] = [
+  {
+    id: '1',
+    markdownText: "## Introduction\n* **Welcome** to our pitch deck\n* We aim to solve a major problem...\n",
+    chartData: {
+      labels: ['2021', '2022', '2023'],
+      values: [10, 50, 75],
+    },
+  },
+  {
+    id: '2',
+    markdownText: "## Problem Statement\n* The market is fragmented...\n* **Key pain points**: cost, complexity.",
+  },
+  // ...
+];
+
+function App() {
+  return <PitchDeck slides={sampleSlides} />;
+}
+
+export default App;
+
+--------------------------------------------------------------------------------------
+NOTES:
+1. We've removed references to `slide.title` in the prompt strings themselves.
+2. The code above demonstrates how you'd incorporate:
+   - React
+   - Chart.js (via `react-chartjs-2`)
+   - A typed effect 
+   - Well-structured text output
+
+You can adapt these prompts to your own data flow (e.g., call an AI API, generate
+slide text, store the results, then pass them to <PitchDeck> for display). 
+3. If you need tables or infographics, just adapt the component to render them 
+   (or create separate components for those visuals) depending on the data. 
+4. The `PitchDeck` component is purely an **example** to show typed text and 
+   Chart.js usage in a React environment. Adjust as needed for production.
+*/ 
