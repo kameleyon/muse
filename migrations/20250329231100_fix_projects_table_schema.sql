@@ -10,7 +10,7 @@ BEGIN
         CREATE TABLE public.projects (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-            name TEXT NOT NULL,
+            project_name TEXT NOT NULL, -- Corrected column name
             description TEXT,
             privacy TEXT DEFAULT 'private' NOT NULL,
             tags TEXT[],
@@ -42,6 +42,20 @@ BEGIN
             FOR DELETE USING (auth.uid() = user_id);
     ELSE
         -- Add columns if they don't exist
+        -- Ensure the 'project_name' column exists
+        BEGIN
+            ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS project_name TEXT NOT NULL; -- Corrected column name
+        EXCEPTION WHEN OTHERS THEN
+             RAISE NOTICE 'Error adding project_name column: %', SQLERRM;
+        END;
+        
+        -- Ensure the 'privacy' column exists
+        BEGIN
+            ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS privacy TEXT DEFAULT 'private' NOT NULL;
+        EXCEPTION WHEN OTHERS THEN
+             RAISE NOTICE 'Error adding privacy column: %', SQLERRM;
+        END;
+
         BEGIN
             ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS description TEXT;
         EXCEPTION WHEN OTHERS THEN

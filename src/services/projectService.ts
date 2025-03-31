@@ -1,8 +1,9 @@
 import { addToast } from '@/store/slices/uiSlice'; // For showing notifications
 import { store } from '@/store/store'; // Corrected store import path
+import { supabase } from './supabase'; // Import the Supabase client instance
 
 interface ProjectData {
-  projectName: string;
+  projectName: string; // Reverted back to projectName
   description?: string;
   privacy?: 'private' | 'team' | 'public';
   tags?: string[];
@@ -37,18 +38,20 @@ interface UploadFileResponse {
 }
 
 
-// Helper to get the auth token from supabase
-const getAuthToken = (): string | null => {
+// Helper to get the auth token from the Supabase client
+const getAuthToken = async (): Promise<string | null> => {
   try {
-    // Get from localStorage where Supabase client stores the token
-    const supabaseData = localStorage.getItem('supabase.auth.token');
-    if (supabaseData) {
-      const parsed = JSON.parse(supabaseData);
-      return parsed.currentSession?.access_token || null;
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error) {
+      console.error("Error getting Supabase session:", error);
+      return null;
     }
-    return null;
+    if (session) {
+      return session.access_token;
+    }
+    return null; // No active session
   } catch (error) {
-    console.error("Error retrieving auth token:", error);
+    console.error("Unexpected error retrieving auth token:", error);
     return null;
   }
 };
@@ -63,7 +66,7 @@ export const createProjectAPI = async (projectData: ProjectData): Promise<Projec
   // Use relative API URL to work with any port the server is running on
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api'; // Use relative path for same-origin requests
   const url = `${apiBaseUrl}/projects`;
-  const token = getAuthToken(); // Get auth token if needed
+  const token = await getAuthToken(); // Get auth token asynchronously
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -78,9 +81,9 @@ export const createProjectAPI = async (projectData: ProjectData): Promise<Projec
     const response = await fetch(url, {
       method: 'POST',
       headers: headers,
-      body: JSON.stringify(projectData),
+      body: JSON.stringify(projectData), // Send original projectData (now with projectName)
     });
-    
+
     console.log(`Server response status: ${response.status}`);
     
     // First check if the response has content
@@ -146,7 +149,7 @@ export const createProjectAPI = async (projectData: ProjectData): Promise<Projec
 export const uploadProjectFile = async (projectId: string, file: File): Promise<UploadFileResponse | null> => {
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api'; // Use relative path for same-origin requests
     const url = `${apiBaseUrl}/projects/${projectId}/upload`; // Define upload endpoint
-    const token = getAuthToken();
+    const token = await getAuthToken(); // Get auth token asynchronously
 
     const formData = new FormData();
     formData.append('file', file); // 'file' should match the name expected by the backend middleware (e.g., multer)
@@ -196,7 +199,7 @@ export const uploadProjectFile = async (projectId: string, file: File): Promise<
 export const getProjectAPI = async (projectId: string): Promise<Project | null> => {
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api'; // Use relative path for same-origin requests
   const url = `${apiBaseUrl}/projects/${projectId}`;
-  const token = getAuthToken();
+  const token = await getAuthToken(); // Get auth token asynchronously
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -240,7 +243,7 @@ export const getProjectAPI = async (projectId: string): Promise<Project | null> 
 export const updateProjectAPI = async (projectId: string, projectData: Partial<ProjectData>): Promise<Project | null> => {
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api'; // Use relative path for same-origin requests
   const url = `${apiBaseUrl}/projects/${projectId}`;
-  const token = getAuthToken();
+  const token = await getAuthToken(); // Get auth token asynchronously
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -287,7 +290,7 @@ export const updateProjectAPI = async (projectId: string, projectData: Partial<P
 export const deleteProjectAPI = async (projectId: string): Promise<boolean> => {
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api'; // Use relative path for same-origin requests
   const url = `${apiBaseUrl}/projects/${projectId}`;
-  const token = getAuthToken();
+  const token = await getAuthToken(); // Get auth token asynchronously
 
   const headers: HeadersInit = {};
   if (token) {
@@ -345,7 +348,7 @@ export const getAllProjectsAPI = async (options: {
   if (options.pitchDeckTypeId) queryParams.append('pitchDeckTypeId', options.pitchDeckTypeId);
   
   const url = `${apiBaseUrl}/projects${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-  const token = getAuthToken();
+  const token = await getAuthToken(); // Get auth token asynchronously
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',

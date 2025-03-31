@@ -100,9 +100,7 @@
     @apply badge bg-primary/20 text-primary;
   }
 
-  .badge-secondary {
-    @apply badge bg-secondary/20 text-secondary;
-  }
+  /* Removed conflicting .badge-secondary rule */
 
   .animation-fade-in {
     @apply animate-fade-in;

@@ -17,23 +17,14 @@ const upload = multer({
 const router = express.Router();
 
 // --- Project Creation ---
-// POST /api/projects - temporarily disable authentication for testing
-router.post('/', (req, res, next) => {
-  // Set a mock user ID for testing
-  req.user = { id: 'test-user-id' };
-  next();
-}, createProject);
+// POST /api/projects - Requires authentication
+router.post('/', authenticate, createProject); // Re-enabled authenticate middleware
 
 // --- File Upload ---
 // POST /api/projects/:projectId/upload
 router.post(
   '/:projectId/upload',
-  // Temporarily disable authentication for testing
-  (req, res, next) => {
-    // Set a mock user ID for testing
-    req.user = { id: 'test-user-id' };
-    next();
-  },
+  authenticate, // Re-enabled authenticate middleware
   upload.single('file'), // Use multer middleware to handle single file upload named 'file'
   async (req: Request, res: Response, next: NextFunction) => { // Placeholder controller logic
     const projectId = req.params.projectId;

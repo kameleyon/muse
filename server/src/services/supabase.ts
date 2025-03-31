@@ -16,13 +16,19 @@ if (!config.supabase.serviceKey) {
 // Create an anonymous client (for auth operations)
 export const supabaseClient = createClient(
   config.supabase.url,
-  config.supabase.anonKey
+  config.supabase.anonKey,
+  {
+    db: { schema: 'public' }, // Explicitly set schema
+  }
 );
 
 // Create a service role client (for admin operations)
 export const supabaseAdmin = createClient(
   config.supabase.url,
-  config.supabase.serviceKey
+  config.supabase.serviceKey,
+  {
+    db: { schema: 'public' }, // Explicitly set schema
+  }
 );
 
 // Initialize database tables

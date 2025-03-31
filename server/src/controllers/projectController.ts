@@ -9,7 +9,7 @@ interface CreateProjectRequestBody {
   tags?: string[];
   teamMembers?: string[]; // Add teamMembers to interface
   pitchDeckTypeId?: string; // Add pitchDeckTypeId
-  // Add other fields like pitch_deck_type_id if needed
+  projectType: string; // Add projectType
 }
 
 export const createProject = async (req: Request, res: Response, next: NextFunction) => {
@@ -17,7 +17,7 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
     // Log the request body to diagnose what we're receiving
     logger.info(`Request body: ${JSON.stringify(req.body)}`);
     
-    const { projectName, description, privacy = 'private', tags = [], teamMembers = [], pitchDeckTypeId }: CreateProjectRequestBody = req.body;
+    const { projectName, projectType, description, privacy = 'private', tags = [], teamMembers = [], pitchDeckTypeId }: CreateProjectRequestBody = req.body;
     
     // @ts-ignore // Access user from the request object (added by auth middleware)
     const userId = req.user?.id;
@@ -32,8 +32,11 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
     if (!projectName) {
       return res.status(400).json({ message: 'Project name is required' });
     }
+    if (!projectType) {
+      return res.status(400).json({ message: 'Project type is required' });
+    }
 
-    logger.info(`Creating project "${projectName}" for user ${userId}`);
+    logger.info(`Creating project "${projectName}" (Type: ${projectType}) for user ${userId}`);
 
     // Convert values to appropriate types if needed
     const processedTags = Array.isArray(tags) ? tags : [];
@@ -42,7 +45,8 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
     // Log the data we're inserting
     logger.info(`Inserting data: ${JSON.stringify({
       user_id: userId,
-      name: projectName,
+      project_name: projectName, // Corrected column name
+      project_type: projectType, // Added project_type
       description,
       privacy,
       tags: processedTags,
@@ -56,7 +60,8 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
         .insert([
           {
             user_id: userId,
-            name: projectName,
+            project_name: projectName, // Corrected column name
+            project_type: projectType, // Added project_type
             description: description,
             privacy: privacy,
             tags: processedTags,
@@ -77,7 +82,7 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
         throw new Error('No data returned from database');
       }
 
-      logger.info(`Project created successfully with ID: ${data.id}`);
+      logger.info(`Project created successfully with ID: ${data.project_id}`); // Corrected to use project_id
       return res.status(201).json({ message: 'Project created successfully', project: data });
     } catch (dbError) {
       // Fallback: Create a mock project for testing/demo purposes
@@ -90,7 +95,8 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
       const mockProject = {
         id: mockId,
         user_id: userId,
-        name: projectName,
+        project_name: projectName, // Corrected column name
+        project_type: projectType, // Added project_type
         description: description || null,
         privacy: privacy,
         tags: processedTags,

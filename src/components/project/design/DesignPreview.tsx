@@ -14,11 +14,13 @@ interface DesignPreviewProps {
   headingFont: string;
   bodyFont: string;
   templateId: string | null;
+  projectName: string; // Add projectName prop
 }
 
 const DesignPreview: React.FC<DesignPreviewProps> = ({
   slides,
   logo,
+  projectName, // Destructure projectName
   primaryColor,
   secondaryColor,
   accentColor,
@@ -160,10 +162,10 @@ const DesignPreview: React.FC<DesignPreviewProps> = ({
               </div>
             )}
             <h1 className="text-2xl font-bold mb-2" style={{ color: primaryColor }}>
-              InstaSmart
+              {projectName || 'Project Title'} {/* Use projectName */}
             </h1>
             <p className="text-sm" style={{ color: secondaryColor }}>
-              Category: Proposal & Pitch Deck Generation
+              Category: Proposal & Pitch Deck Generation {/* Keep category for now */}
             </p>
           </div>
         );
@@ -403,22 +405,22 @@ const DesignPreview: React.FC<DesignPreviewProps> = ({
           </div>
 
           <Button
-            variant="ghost"
+            variant="outline" // Changed variant to outline
             size="sm"
             onClick={() => {
               const newValue = !isFullPreview;
               setIsFullPreview(newValue);
               console.log("Toggling full preview:", newValue);
             }}
-            className="p-1 h-8 hover:bg-primary/10"
+            className="px-2  h-8 hover:bg-primary/10 rounded-xl"
           >
             {isFullPreview ? (
               <>
-                <Minimize size={14} className="mr-1" /> Compact
+                <Minimize size={12} className="mr-1 text-primary" /> <span className="mr-1 text-primary text-sm">Compact</span>
               </>
             ) : (
               <>
-                <Maximize size={14} className="mr-1" /> Expand
+                <Maximize size={12} className="mr-1 text-primary" /> <span className="mr-1 text-primary text-sm">Expand</span>
               </>
             )}
           </Button>
@@ -426,7 +428,7 @@ const DesignPreview: React.FC<DesignPreviewProps> = ({
 
         {/* Preview Area */}
         <div 
-          className={`border rounded-md overflow-hidden relative ${
+          className={`border rounded-lg overflow-hidden relative ${
             isFullPreview ? 'h-[400px]' : 'h-[300px]'
           }`}
           style={{

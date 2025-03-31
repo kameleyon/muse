@@ -18,9 +18,13 @@ if (!config_1.default.supabase.serviceKey) {
     throw new Error('Missing required environment variable: SUPABASE_SERVICE_KEY');
 }
 // Create an anonymous client (for auth operations)
-exports.supabaseClient = (0, supabase_js_1.createClient)(config_1.default.supabase.url, config_1.default.supabase.anonKey);
+exports.supabaseClient = (0, supabase_js_1.createClient)(config_1.default.supabase.url, config_1.default.supabase.anonKey, {
+    db: { schema: 'public' }, // Explicitly set schema
+});
 // Create a service role client (for admin operations)
-exports.supabaseAdmin = (0, supabase_js_1.createClient)(config_1.default.supabase.url, config_1.default.supabase.serviceKey);
+exports.supabaseAdmin = (0, supabase_js_1.createClient)(config_1.default.supabase.url, config_1.default.supabase.serviceKey, {
+    db: { schema: 'public' }, // Explicitly set schema
+});
 // Initialize database tables
 const initializeDatabase = async () => {
     try {

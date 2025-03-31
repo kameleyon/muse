@@ -140,12 +140,13 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
     }
 
     const projectData = {
-      projectName,
+      projectName, // Reverted back to projectName
       description,
       privacy,
-      tags, 
-      teamMembers, 
-      pitchDeckTypeId: selectedPitchDeckTypeId, 
+      tags,
+      teamMembers,
+      pitchDeckTypeId: selectedPitchDeckTypeId,
+      projectType: selectedPitchDeckTypeId, // Add projectType using the selected ID
     };
 
     console.log('Attempting to create project with data:', projectData);
@@ -752,6 +753,7 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
                <div className="lg:col-span-5">
                   <div className="sticky top-[80px]">
                      <DesignPreview
+                        projectName={projectName} // Pass projectName
                         primaryColor={primaryColor}
                         secondaryColor={secondaryColor}
                         accentColor={accentColor}

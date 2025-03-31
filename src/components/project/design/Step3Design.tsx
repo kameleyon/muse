@@ -6,6 +6,7 @@ import BrandCustomization from './BrandCustomization';
 import StructurePlanning, { defaultPitchDeckStructure, numberToComplexityLevel } from './StructurePlanning';
 import { Slide, ComplexityLevel } from '@/store/types'; // Import Slide and ComplexityLevel from types
 import DesignPreview from './DesignPreview';
+import { useProjectWorkflowStore } from '@/store/projectWorkflowStore'; // Import Zustand store
 
 // Define Step3 Props
 interface Step3DesignProps {
@@ -21,6 +22,9 @@ const Step3Design: React.FC<Step3DesignProps> = ({
   isCompleted,
   onCompleteStep
 }) => {
+  // Get projectName from store
+  const projectName = useProjectWorkflowStore((state) => state.projectName);
+
   // State for template selection
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
     projectData?.design?.templateId || null
@@ -157,7 +161,8 @@ const Step3Design: React.FC<Step3DesignProps> = ({
           />
           
           {/* Live Preview */}
-          <DesignPreview 
+          <DesignPreview
+            projectName={projectName || ''} // Provide fallback for potentially null/undefined projectName
             slides={slides}
             logo={logo}
             primaryColor={primaryColor}

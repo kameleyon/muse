@@ -97,48 +97,46 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({
       {/* Header with title - now at the top as requested */}
       <h4 className="font-semibold text-neutral-dark text-lg mb-4">Select a Template</h4>
       
-      {/* Controls row with search, view toggle and filters */}
-      <div className="flex flex-wrap gap-2 items-center justify-between mb-4">
+      {/* Controls row: Search bar followed by icons */}
+      <div className="flex items-center gap-2 mb-4">
+        {/* Search Input */}
         <Input
           type="text"
           placeholder="Search templates..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-grow max-w-64 h-8 text-sm"
+          className="max-w-64 h-8 text-sm" // Removed flex-grow
         />
         
-        <div className="flex items-center gap-2">
-          {/* View Toggle */}
-          <div className="flex border rounded overflow-hidden">
-            <Button
+        {/* View Toggle */}
+        <div className="flex border rounded-md  overflow-hidden">
+          <Button
               variant="ghost"
               size="sm"
               onClick={() => setViewMode('grid')}
-              className={`p-1 h-7 ${viewMode === 'grid' ? 'bg-primary/10 text-primary' : 'text-neutral-medium'}`}
+              className={`p-2 h-7 ${viewMode === 'grid' ? 'bg-primary text-primary' : 'text-neutral-medium'}`}
             >
-              <LayoutGrid size={14} />
+              <LayoutGrid size={14} className="px-2"/>
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setViewMode('list')}
-              className={`p-1 h-7 ${viewMode === 'list' ? 'bg-primary/10 text-primary' : 'text-neutral-medium'}`}
+              className={`p-3 h-7 ${viewMode === 'list' ? 'bg-primary/10 text-primary' : 'text-neutral-medium'}`}
             >
               <List size={14} />
-            </Button>
-          </div>
-          
-          {/* Filter Button - more compact as requested */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFilters(!showFilters)}
-            className="h-7 px-2 flex items-center gap-1 whitespace-nowrap"
-          >
-            <span className="text-xs">Show Filters</span>
-            <Filter size={12} />
           </Button>
         </div>
+        
+        {/* Filter Button - Icon Only */}
+        <Button
+          variant="outline"
+          size="icon" // Use icon size
+          onClick={() => setShowFilters(!showFilters)}
+          className="h-7 w-7" // Adjust size if needed
+        >
+          <Filter size={14} /> {/* Adjusted icon size slightly */}
+        </Button>
       </div>
 
       {/* Simple template count */}

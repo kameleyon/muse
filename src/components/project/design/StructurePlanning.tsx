@@ -146,7 +146,7 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
     <Card className="p-4 border border-neutral-light bg-white/30 shadow-sm">
       <h4 className="font-semibold text-neutral-dark text-lg mb-4 border-b border-neutral-light/40 pb-2">Structure Planning</h4>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {/* Slide Structure List */}
         <div className="md:col-span-2">
           <div className="flex items-center mb-2">
@@ -156,7 +156,7 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
             </Tooltip>
           </div>
           
-          <ul className="border rounded-md p-2 bg-neutral-light/20 space-y-1 min-h-[800px]">
+          <ul className="border rounded-xl p-1 bg-neutral-light/20 space-y-1 min-h-[800px]">
             {slides.map((slide, index) => (
               <li 
                 key={slide.id} 
@@ -164,7 +164,7 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
                 onDragStart={(e) => handleDragStart(e, index)}
                 onDrop={(e) => handleDrop(e, index)}
                 onDragOver={handleDragOver}
-                className={`flex items-center justify-between p-2 border rounded cursor-move text-sm ${
+                className={`flex items-center justify-between p-1 border rounded-xl cursor-move text-sm ${
                   slide.isRequired ? 'bg-primary/5 border-primary/20' : 'bg-white border-neutral-light'
                 }`}
               >
@@ -178,7 +178,7 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
                         title={slide.isRequired ? "Required slides cannot be renamed" : "Double-click to edit title"}
                       >{`${index + 1}. ${slide.title}`}</span>
                       {slide.isRequired && (
-                        <span className="ml-1 px-0.5 py-0 bg-primary/10 text-primary text-[9px] rounded">Required</span>
+                        <span className="ml-1 px-1 py-0 bg-primary/1 font-semibold text-primary text-[9px] rounded-lg">Required</span>
                       )}
                     </div>
                     {slide.description && (
@@ -266,7 +266,7 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
             <div className="relative mb-2">
               <div className="relative">
                 {/* Custom styled range slider */}
-                <div className="w-full h-2 bg-neutral-200 rounded-lg relative">
+                <div className="w-full h-2 bg-neutral-200 rounded-xl relative">
                   <div
                     className="absolute h-2 left-0 top-0 rounded-lg"
                     style={{
@@ -324,20 +324,20 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
             </div>
             
             {/* Description based on string complexity level */}
-            <div className="text-xs text-neutral-dark mt-2 p-2 bg-primary/5 border border-primary/10 rounded">
+            <div className="text-xs text-neutral-dark mt-2 p-2 bg-primary/10 border border-primary/20 rounded-lg">
               {complexity === 'basic' && <p>Basic content with essential information only</p>}
               {complexity === 'intermediate' && <p>Balanced content with key details and supporting information</p>}
               {complexity === 'advanced' && <p>Comprehensive content with detailed explanations and analysis</p>}
             </div>
             
-            <p className="text-xs text-neutral-medium mt-2">
+            <p className="text-xs text-neutral-medium mt-2 px-2">
               Adjusts detail & depth of content per slide.
             </p>
           </div>
           
           {/* Duration Estimate */}
           <div>
-            <label className="settings-label mb-1">Duration Estimate</label>
+            <label className="mb-1 text-primary text-sm font-semibold">Duration Estimate</label>
             <p className="text-sm font-medium">
               ~ {Math.round(slides.length * (1 + (complexityValue / 100)))} minutes {/* Use numeric value */}
             </p>
@@ -347,7 +347,7 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
           </div>
           
           {/* Content Generation Impact */}
-          <div className="p-3 bg-primary/10 rounded-md border border-primary/20">
+          <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
             <h5 className="text-sm font-medium mb-2">Content Generation Impact</h5>
             <ul className="text-xs space-y-1">
               <li className="flex items-start"><span className="mr-1">•</span><span>The selected structure defines the slide content framework</span></li>

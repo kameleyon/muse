@@ -123,3 +123,17 @@
 2025-03-31 14:15:55 [error]: Supabase error creating project: Could not find the 'name' column of 'projects' in the schema cache
 2025-03-31 14:41:44 [error]: Supabase error creating project: Could not find the 'name' column of 'projects' in the schema cache
 2025-03-31 14:47:47 [error]: Supabase error creating project: Could not find the 'name' column of 'projects' in the schema cache
+2025-03-31 14:51:45 [error]: Supabase error creating project: Could not find the 'name' column of 'projects' in the schema cache
+2025-03-31 15:03:46 [error]: Supabase error creating project: Could not find the 'name' column of 'projects' in the schema cache
+2025-03-31 15:29:48 [error]: Supabase error creating project: Could not find the 'name' column of 'projects' in the schema cache
+2025-03-31 15:32:28 [error]: Supabase error creating project: Could not find the 'name' column of 'projects' in the schema cache
+2025-03-31 15:33:49 [error]: Supabase error creating project: Could not find the 'name' column of 'projects' in the schema cache
+2025-03-31 15:58:22 [error]: Supabase error creating project: Could not find the 'name' column of 'projects' in the schema cache
+2025-03-31 16:13:17 [error]: Supabase error creating project: Could not find the 'name' column of 'projects' in the schema cache
+2025-03-31 16:49:44 [error]: Supabase error creating project: Could not find the 'name' column of 'projects' in the schema cache
+2025-03-31 16:59:16 [error]: Supabase error creating project: Could not find the 'name' column of 'projects' in the schema cache
+2025-03-31 17:04:58 [error]: Supabase error creating project: Could not find the 'name' column of 'projects' in the schema cache
+2025-03-31 17:11:46 [error]: Supabase error creating project: Could not find the 'privacy' column of 'projects' in the schema cache
+2025-03-31 17:21:22 [error]: Supabase error creating project: invalid input syntax for type uuid: "test-user-id"
+2025-03-31 17:29:11 [error]: Supabase error creating project: null value in column "project_type" of relation "projects" violates not-null constraint
+2025-03-31 17:32:22 [error]: Supabase error creating project: null value in column "project_type" of relation "projects" violates not-null constraint

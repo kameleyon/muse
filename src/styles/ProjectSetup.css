@@ -56,3 +56,8 @@
 }
 
 /* Add more specific styles as the components evolve */
+
+/* Force darker text color for badges in MultiSelect */
+.multiselect-badge-text {
+  color: #23232170 !important; /* Use secondary color and !important */
+}

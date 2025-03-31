@@ -107,11 +107,11 @@ const MultiSelect: React.FC<MultiSelectProps> = ({ options, selectedValues, onCh
                   <Badge
                     key={value}
                     variant="secondary"
-                    className="mr-1 mb-1 flex items-center"
-                  >
-                    <span>{value}</span>
-                    <span
-                      className="ml-1 cursor-pointer rounded-full outline-none focus:ring-2"
+                     className="mr-1 mb-1 flex items-center"
+                   >
+                     <span className="multiselect-badge-text">{value}</span> {/* Added class */}
+                     <span
+                       className="ml-1 cursor-pointer rounded-full outline-none focus:ring-2"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
