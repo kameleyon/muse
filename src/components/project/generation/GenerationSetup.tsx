@@ -17,27 +17,34 @@ interface GenerationSetupProps {
     visualsEnabled: boolean;
     contentTone: ContentTone;
     slideStructure: SlideStructure;
-    typingSpeed: number;
+    typingSpeed: number; // This is the 0-4 scale
     includeAllSlides: boolean;
   }) => void;
   isGenerating: boolean;
   slideCount?: number;
+  projectId: string | null; // Prop is already added here, error was likely stale
 }
 
-const GenerationSetup: React.FC<GenerationSetupProps> = ({ 
+const GenerationSetup: React.FC<GenerationSetupProps> = ({
   onGenerate,
   isGenerating,
-  slideCount = 14
+  slideCount = 14,
+  projectId // Destructure projectId
 }) => {
   // State for all generation options
   const [factCheckLevel, setFactCheckLevel] = useState<FactCheckLevel>('standard');
   const [visualsEnabled, setVisualsEnabled] = useState<boolean>(true);
   const [contentTone, setContentTone] = useState<ContentTone>('formal');
   const [slideStructure, setSlideStructure] = useState<SlideStructure>('comprehensive');
-  const [typingSpeed, setTypingSpeed] = useState<number>(2); // 0-4 scale
+  const [typingSpeed, setTypingSpeed] = useState<number>(1); // Default to 1 (Very Fast)
   const [includeAllSlides, setIncludeAllSlides] = useState<boolean>(true);
 
   const handleGenerateClick = () => {
+    // Add a check here too, although button should be disabled
+    if (!projectId) {
+        alert("Project setup must be completed before generating content.");
+        return;
+    }
     onGenerate({
       factCheckLevel,
       visualsEnabled,
@@ -48,18 +55,14 @@ const GenerationSetup: React.FC<GenerationSetupProps> = ({
     });
   };
 
-  // Helper to convert typingSpeed (0-4 scale) to actual milliseconds (inverse relationship)
-  const getTypingSpeedInMs = () => {
-    // Map 0-4 to different speeds: 0=fastest, 4=slowest
-    const speedMap = [0, 2, 5, 10, 20];
-    return speedMap[typingSpeed];
-  };
-
   // Helper to display human-readable typing speed
   const getTypingSpeedLabel = () => {
     const labels = ["Instantaneous", "Very Fast", "Fast", "Medium", "Slow"];
     return labels[typingSpeed];
   };
+
+  // Determine if the generate button should be disabled
+  const isGenerateDisabled = isGenerating || !projectId;
 
   return (
     <Card className="p-4 border border-neutral-light bg-white/30 shadow-sm">
@@ -195,9 +198,10 @@ const GenerationSetup: React.FC<GenerationSetupProps> = ({
       <div className="flex justify-center mt-4">
         <Button
           onClick={handleGenerateClick}
-          disabled={isGenerating}
+          disabled={isGenerateDisabled} // Use the calculated disabled state
           size="sm"
-          className="text-white p-2 rounded-lg w-full" 
+          className={`text-white p-2 rounded-lg w-full ${isGenerateDisabled ? 'opacity-50 cursor-not-allowed' : ''}`} 
+          title={!projectId ? "Complete Project Setup (Step 1) first" : ""} // Add tooltip
         >
           <Wand2 size={18} className="text-xs pr-1" /> 
           {isGenerating ? 'Generating...' : 'Start Content Generation'}

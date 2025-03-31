@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { ChevronLeft, ChevronRight, Maximize, Minimize, Check } from 'lucide-react';
-import { Slide } from './StructurePlanning';
+import { Slide } from '@/store/types'; // Corrected import path
 
 // Define Props
 interface DesignPreviewProps {

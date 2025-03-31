@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import TemplateGallery from './TemplateGallery';
 import BrandCustomization from './BrandCustomization';
-import StructurePlanning, { Slide, defaultPitchDeckStructure } from './StructurePlanning';
+// Import default structure and conversion helper from StructurePlanning
+import StructurePlanning, { defaultPitchDeckStructure, numberToComplexityLevel } from './StructurePlanning';
+import { Slide, ComplexityLevel } from '@/store/types'; // Import Slide and ComplexityLevel from types
 import DesignPreview from './DesignPreview';
 
 // Define Step3 Props
@@ -52,8 +54,10 @@ const Step3Design: React.FC<Step3DesignProps> = ({
     // Ensure we always have all 14 slides
     setSlides(defaultPitchDeckStructure);
   }, []);
-  const [complexity, setComplexity] = useState<number>(
-    projectData?.design?.complexity || 50
+  // State for complexity level - Use ComplexityLevel type and convert initial value
+  const [complexity, setComplexity] = useState<ComplexityLevel>(
+    // Convert potential number from projectData or default 50 to ComplexityLevel string
+    numberToComplexityLevel(projectData?.design?.complexity || 50)
   );
   
   // State for save/autosave functionality

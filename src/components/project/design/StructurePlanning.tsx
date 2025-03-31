@@ -27,7 +27,7 @@ const complexityLevelToNumber = (level: ComplexityLevel): number => {
 };
 
 // Helper function to convert number (10-100) back to ComplexityLevel string
-const numberToComplexityLevel = (value: number): ComplexityLevel => {
+export const numberToComplexityLevel = (value: number): ComplexityLevel => {
   if (value <= 33) return 'basic';
   if (value <= 66) return 'intermediate';
   return 'advanced';
@@ -208,7 +208,7 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
               <Plus size={14} className="mr-1"/> Add Custom Slide (Disabled)
             </Button>
           </div>
-          <p className="text-xs text-neutral-medium mt-1">Standard pitch deck structure with 13 required slides + optional appendix.</p>
+          <p className="text-xs text-neutral-medium mt-1">Standard 14-slide pitch deck structure.</p>
           
           {/* Add Slide Modal (kept but functionally disabled) */}
           {showAddSlideModal && (

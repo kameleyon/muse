@@ -1,7 +1,8 @@
 // src/lib/prompts/pitchDeckPrompts.ts
 
 // Define the slide structure type separately for better type safety
-interface SlideInfo {
+// Export the interface
+export interface SlideInfo {
   id: string;
   title: string;
   type: string;
@@ -12,7 +13,8 @@ interface SlideInfo {
 }
 
 // Comprehensive ProjectInfo interface to structure all input data
-interface ProjectInfo {
+// Export the interface
+export interface ProjectInfo { // Already exported, error likely stale or due to caching
   // Step 1: Project Setup Data
   projectId: string;
   projectName: string;
@@ -65,63 +67,63 @@ export const createResearchPrompt = (info: ProjectInfo): string => {
   // Extract fact-check level for research depth
   const factCheckLevel = info.generationOptions?.factCheckLevel || 'standard';
   
-  // Basic project info prompt
-  let prompt = `Gather comprehensive background information for creating a ${info.pitchDeckType} pitch deck for a project named "${info.projectName}".`;
+  // Basic project info promptText
+  let promptText = `Gather comprehensive background information for creating a ${info.pitchDeckType} pitch deck for a project named "${info.projectName}".`;
   
   // Add project description
   if (info.description) {
-    prompt += ` The project is described as: ${info.description}.`;
+    promptText += ` The project is described as: ${info.description}.`;
   }
   
   // Add tags for context
   if (info.tags && info.tags.length > 0) {
-    prompt += ` Key themes/tags associated with the project are: ${info.tags.join(', ')}.`;
+    promptText += ` Key themes/tags associated with the project are: ${info.tags.join(', ')}.`;
   }
   
   // Add audience information from Step 2
   if (info.audience) {
-    prompt += `\n\nTarget Audience Information:`;
-    prompt += `\n- Organization: ${info.audience.name || 'Not specified'}`;
-    prompt += `\n- Organization Type: ${info.audience.orgType || 'Not specified'}`;
-    prompt += `\n- Industry: ${info.audience.industry || 'Not specified'}`;
-    prompt += `\n- Size: ${info.audience.size || 'Not specified'}`;
+    promptText += `\n\nTarget Audience Information:`;
+    promptText += `\n- Organization: ${info.audience.name || 'Not specified'}`;
+    promptText += `\n- Organization Type: ${info.audience.orgType || 'Not specified'}`;
+    promptText += `\n- Industry: ${info.audience.industry || 'Not specified'}`;
+    promptText += `\n- Size: ${info.audience.size || 'Not specified'}`;
     
     // Add decision-maker persona if available
     if (info.audience.personaRole) {
-      prompt += `\n\nDecision-Maker Persona:`;
-      prompt += `\n- Role/Title: ${info.audience.personaRole}`;
+      promptText += `\n\nDecision-Maker Persona:`;
+      promptText += `\n- Role/Title: ${info.audience.personaRole}`;
       
       if (info.audience.personaConcerns && info.audience.personaConcerns.length > 0) {
-        prompt += `\n- Primary Concerns: ${info.audience.personaConcerns.join(', ')}`;
+        promptText += `\n- Primary Concerns: ${info.audience.personaConcerns.join(', ')}`;
       }
       
       if (info.audience.personaCriteria && info.audience.personaCriteria.length > 0) {
-        prompt += `\n- Decision Criteria: ${info.audience.personaCriteria.join(', ')}`;
+        promptText += `\n- Decision Criteria: ${info.audience.personaCriteria.join(', ')}`;
       }
       
       if (info.audience.personaCommPrefs && info.audience.personaCommPrefs.length > 0) {
-        prompt += `\n- Communication Preferences: ${info.audience.personaCommPrefs.join(', ')}`;
+        promptText += `\n- Communication Preferences: ${info.audience.personaCommPrefs.join(', ')}`;
       }
     }
   }
   
   // Add specifics based on pitch deck type
   if (info.pitchDeckType === 'investment' || info.pitchDeckType === 'startup') {
-    prompt += `\n\nFocus on market size, growth trends, funding environments, key competitors, investment benchmarks, and target audience validation for this type of project/product.`;
-    prompt += `\nFor an investment pitch, especially look for statistics on similar companies' valuations, ROI figures, market adoption rates, and success stories.`;
+    promptText += `\n\nFocus on market size, growth trends, funding environments, key competitors, investment benchmarks, and target audience validation for this type of project/product.`;
+    promptText += `\nFor an investment pitch, especially look for statistics on similar companies' valuations, ROI figures, market adoption rates, and success stories.`;
   } else if (info.pitchDeckType === 'sales') {
-    prompt += `\n\nFocus on typical client pain points this product/service might solve, common objections, relevant industry case studies, competitor positioning, pricing models, and ROI metrics.`;
-    prompt += `\nFor a sales pitch, especially look for conversion metrics, implementation timelines, cost-benefit analyses, and testimonials from similar companies.`;
+    promptText += `\n\nFocus on typical client pain points this product/service might solve, common objections, relevant industry case studies, competitor positioning, pricing models, and ROI metrics.`;
+    promptText += `\nFor a sales pitch, especially look for conversion metrics, implementation timelines, cost-benefit analyses, and testimonials from similar companies.`;
   } else if (info.pitchDeckType === 'partnership') {
-    prompt += `\n\nFocus on synergy opportunities, mutual benefits, complementary strengths, case studies of successful partnerships in the industry, and strategic fit analyses.`;
-    prompt += `\nFor a partnership pitch, especially look for examples of successful collaborations, integration points, and shared value creation models.`;
+    promptText += `\n\nFocus on synergy opportunities, mutual benefits, complementary strengths, case studies of successful partnerships in the industry, and strategic fit analyses.`;
+    promptText += `\nFor a partnership pitch, especially look for examples of successful collaborations, integration points, and shared value creation models.`;
   } else {
-    prompt += `\n\nFocus on general industry context, potential stakeholders, relevant market data, and common success factors for projects of this nature.`;
+    promptText += `\n\nFocus on general industry context, potential stakeholders, relevant market data, and common success factors for projects of this nature.`;
   }
   
   // Adjust research depth based on fact-check level
   if (factCheckLevel === 'thorough') {
-    prompt += `\n\nConducting THOROUGH research is critical. Please:
+    promptText += `\n\nConducting THOROUGH research is critical. Please:
     - Search for multiple reliable and recent sources for each data point
     - Prioritize peer-reviewed studies, official statistics, and industry reports
     - Cross-reference data from multiple sources when possible
@@ -130,13 +132,13 @@ export const createResearchPrompt = (info: ProjectInfo): string => {
     - Analyze historical trends alongside current data
     - Provide confidence levels for projections and estimates (high/medium/low)`;
   } else if (factCheckLevel === 'basic') {
-    prompt += `\n\nConducting ESSENTIAL research is needed. Please:
+    promptText += `\n\nConducting ESSENTIAL research is needed. Please:
     - Find reliable sources for key data points
     - Focus on the most important market statistics and competitor information
     - Provide general sources for major claims
     - Prioritize speed while ensuring accuracy on critical facts`;
   } else { // standard
-    prompt += `\n\nConducting STANDARD research is required. Please:
+    promptText += `\n\nConducting STANDARD research is required. Please:
     - Use reliable sources for all significant data points
     - Include source citations for important claims and statistics
     - Balance depth with efficiency, focusing on most relevant information
@@ -145,7 +147,7 @@ export const createResearchPrompt = (info: ProjectInfo): string => {
   
   // Add visual data gathering instructions if visuals are enabled
   if (info.generationOptions?.visualsEnabled !== false) {
-    prompt += `\n\nPlease also gather data suitable for visual representations in the pitch deck:
+    promptText += `\n\nPlease also gather data suitable for visual representations in the pitch deck:
     - Key market statistics that could be presented in charts/graphs
     - Competitive landscape data that could be visualized in a 2x2 matrix or comparison table
     - Timeline information that could be represented in a roadmap
@@ -154,7 +156,7 @@ export const createResearchPrompt = (info: ProjectInfo): string => {
   }
   
   // Add detailed research structure request
-  prompt += `\n\nProvide structured information covering:
+  promptText += `\n\nProvide structured information covering:
 1. Market Overview: Size, growth rate, key trends, and future projections.
 2. Target Audience Insights: Demographics, needs, pain points, and buying behaviors.
 3. Competitive Landscape: Key players, their strengths/weaknesses, market share, and positioning strategy.
@@ -165,7 +167,7 @@ export const createResearchPrompt = (info: ProjectInfo): string => {
 
 Format the output clearly using Markdown with appropriate headings, bullet points, and emphasis for key data points.`;
 
-  return prompt;
+  return promptText;
 };
 
 /**
@@ -180,44 +182,47 @@ export const createSlideContentPrompt = (
   previousSlidesContent?: string[]
 ): string => {
   // Basic slide prompt with context
-  let prompt = `Generate content for slide ${slideIndex} of ${totalSlides} in a ${projectInfo.pitchDeckType} pitch deck for "${projectInfo.projectName}". `;
-  prompt += `This slide is the "${slideInfo.title}" slide (type: ${slideInfo.type}).`;
+  //let prompt = `Generate content for slide ${slideIndex} of ${totalSlides} in a ${projectInfo.pitchDeckType} pitch deck for "${projectInfo.projectName}". `;
+  //prompt += `This slide is the "${slideInfo.title}" slide (type: ${slideInfo.type}).`;
+
+  // Create a prompt that doesn't explicitly mention slide numbers or types
+  let promptText = `Generate concise and focused content for a ${projectInfo.pitchDeckType} pitch deck about "${projectInfo.projectName}". `;
   
   // Add slide description if available
   if (slideInfo.description) {
-    prompt += `\n\nSlide description: ${slideInfo.description}`;
+    promptText += `\n\nSlide description: ${slideInfo.description}`;
   }
   
   // Add custom prompt if provided
   if (slideInfo.customPrompt) {
-    prompt += `\n\nCustom instructions for this slide: ${slideInfo.customPrompt}`;
+    promptText += `\n\nCustom instructions for this slide: ${slideInfo.customPrompt}`;
   }
   
   // Add audience-specific context
   if (projectInfo.audience) {
-    prompt += `\n\nTarget audience: ${JSON.stringify(projectInfo.audience, null, 2)}`;
+    promptText += `\n\nTarget audience: ${JSON.stringify(projectInfo.audience, null, 2)}`;
     
     // Add audience-specific considerations for key slides
     if (['problem', 'solution', 'value_proposition', 'call_to_action'].includes(slideInfo.type)) {
-      prompt += `\n\nFor this "${slideInfo.type}" slide, address the specific concerns and criteria of the target audience.`;
+      promptText += `\n\nFor this "${slideInfo.type}" slide, address the specific concerns and criteria of the target audience.`;
       
       if (projectInfo.audience.personaConcerns && projectInfo.audience.personaConcerns.length > 0) {
-        prompt += ` Focus on their key concerns: ${projectInfo.audience.personaConcerns.join(', ')}.`;
+        promptText += ` Focus on their key concerns: ${projectInfo.audience.personaConcerns.join(', ')}.`;
       }
       
       if (projectInfo.audience.personaCriteria && projectInfo.audience.personaCriteria.length > 0) {
-        prompt += ` Address their decision criteria: ${projectInfo.audience.personaCriteria.join(', ')}.`;
+        promptText += ` Address their decision criteria: ${projectInfo.audience.personaCriteria.join(', ')}.`;
       }
     }
   }
   
   // Add complexity-based instructions
   if (projectInfo.design?.complexityLevel) {
-    prompt += `\n\nContent complexity level: ${projectInfo.design.complexityLevel.toUpperCase()}`;
+    promptText += `\n\nContent complexity level: ${projectInfo.design.complexityLevel.toUpperCase()}`;
     
     switch (projectInfo.design.complexityLevel) {
       case 'basic':
-        prompt += `\n- Keep content simple and accessible
+        promptText += `\n- Keep content simple and accessible
 - Focus on 1-3 key points only
 - Use straightforward language
 - Avoid jargon and technical terms
@@ -225,7 +230,7 @@ export const createSlideContentPrompt = (
 - Content should be scannable in under 10 seconds`;
         break;
       case 'intermediate':
-        prompt += `\n- Balance detail with accessibility
+        promptText += `\n- Balance detail with accessibility
 - Provide moderate supporting evidence
 - Include some industry-specific terminology with brief explanations
 - Use supporting statistics where relevant
@@ -233,7 +238,7 @@ export const createSlideContentPrompt = (
 - Content should be digestible in about 20 seconds`;
         break;
       case 'advanced':
-        prompt += `\n- Provide comprehensive details and nuance
+        promptText += `\n- Provide comprehensive details and nuance
 - Include substantial supporting evidence and data points
 - Use appropriate industry terminology
 - Explore deeper implications and connections
@@ -242,11 +247,10 @@ export const createSlideContentPrompt = (
         break;
     }
   }
-  
   // Add visual instructions if applicable
   if (slideInfo.includeVisual || slideInfo.visualType) {
-    prompt += `\n\nThis slide should include visual content of type: ${slideInfo.visualType || 'appropriate for the content'}.`;
-    prompt += `\nProvide specific data and descriptions that should be visualized, formatted as: 
+    promptText += `\n\nThis slide should include visual content of type: ${slideInfo.visualType || 'appropriate for the content'}.`;
+    promptText += `\nProvide specific data and descriptions that should be visualized, formatted as:
 \`\`\`visual-data
 [Detailed description of what should be visualized and how]
 [Include actual data points, labels, and relationships to be shown]
@@ -255,51 +259,51 @@ export const createSlideContentPrompt = (
   
   // Add content tone instructions based on generation options
   if (projectInfo.generationOptions?.contentTone) {
-    prompt += `\n\nContent tone should be: ${projectInfo.generationOptions.contentTone.toUpperCase()}`;
+    promptText += `\n\nContent tone should be: ${projectInfo.generationOptions.contentTone.toUpperCase()}`;
     switch (projectInfo.generationOptions.contentTone) {
       case 'formal':
-        prompt += ` - professional, precise, and authoritative language appropriate for executive-level audiences.`;
+        promptText += ` - professional, precise, and authoritative language appropriate for executive-level audiences.`;
         break;
       case 'conversational':
-        prompt += ` - friendly, relatable, and approachable while maintaining professionalism.`;
+        promptText += ` - friendly, relatable, and approachable while maintaining professionalism.`;
         break;
       case 'persuasive':
-        prompt += ` - compelling, action-oriented, and emotionally engaging to drive decision-making.`;
+        promptText += ` - compelling, action-oriented, and emotionally engaging to drive decision-making.`;
         break;
     }
   }
   
   // Add branding instructions
   if (projectInfo.design) {
-    prompt += `\n\nBranding guidelines:`;
-    prompt += `\n- Consistently refer to the project as "${projectInfo.projectName}"`;
-    prompt += `\n- ${projectInfo.design.primaryColor ? `Use primary brand color (${projectInfo.design.primaryColor}) for key elements` : ''}`;
-    prompt += `\n- ${projectInfo.design.secondaryColor ? `Use secondary brand color (${projectInfo.design.secondaryColor}) for supporting elements` : ''}`;
-    prompt += `\n- ${projectInfo.design.headingFont ? `Headings should appear in ${projectInfo.design.headingFont} font` : ''}`;
-    prompt += `\n- ${projectInfo.design.bodyFont ? `Body text should appear in ${projectInfo.design.bodyFont} font` : ''}`;
+    promptText += `\n\nBranding guidelines:`;
+    promptText += `\n- Consistently refer to the project as "${projectInfo.projectName}"`;
+    promptText += `\n- ${projectInfo.design.primaryColor ? `Use primary brand color (${projectInfo.design.primaryColor}) for key elements` : ''}`;
+    promptText += `\n- ${projectInfo.design.secondaryColor ? `Use secondary brand color (${projectInfo.design.secondaryColor}) for supporting elements` : ''}`;
+    promptText += `\n- ${projectInfo.design.headingFont ? `Headings should appear in ${projectInfo.design.headingFont} font` : ''}`;
+    promptText += `\n- ${projectInfo.design.bodyFont ? `Body text should appear in ${projectInfo.design.bodyFont} font` : ''}`;
   }
   
   // Add context from previous slides if available
   if (previousSlidesContent && previousSlidesContent.length > 0) {
-    prompt += `\n\nEnsure this slide builds cohesively on previous content. The most recent slide contained: "${previousSlidesContent[previousSlidesContent.length - 1].substring(0, 300)}..."`;
+    promptText += `\n\nEnsure this slide builds cohesively on previous content. The most recent slide contained: "${previousSlidesContent[previousSlidesContent.length - 1].substring(0, 300)}..."`;
   }
   
   // Add slide-specific instructions based on type
-  prompt += getSlideTypeSpecificInstructions(slideInfo.type);
+  promptText += getSlideTypeSpecificInstructions(slideInfo.type);
   
   // Add research data context
-  prompt += `\n\nUse the following research data to inform the content:\n${researchData}`;
-  
+  promptText += `\n\nUse the following research data to inform the content:\n${researchData}`;
   // Add output formatting instructions
-  prompt += `\n\nFormat the output as clean Markdown suited for a presentation slide. Include:
-- A clear slide title (use # for heading)
+  promptText += `\n\nFormat the output as clean Markdown suited for a presentation slide. Include:
 - Concise bullet points (use * for bullets)
 - Bold text for key points (use ** for bold)
+- If data visualization is needed, indicate clearly what should be visualized
 - If data visualization is needed, indicate clearly what should be visualized
 
 Keep text minimal and impactful - pitch decks should not be text-heavy. Focus on the 2-3 most important points for this slide type.`;
 
-  return prompt;
+  // Return the fully constructed slide content prompt
+  return promptText;
 };
 
 /**
@@ -308,134 +312,134 @@ Keep text minimal and impactful - pitch decks should not be text-heavy. Focus on
 function getSlideTypeSpecificInstructions(slideType: string): string {
   switch (slideType) {
     case 'title':
-    case 'cover':
-      return `\n\nFor a TITLE/COVER slide:
-- Create a compelling, concise title that captures the essence of the pitch
+    //case 'cover':
+      return `\n\nContent guidelines:
+- Create a compelling, concise headline that captures the essence of the pitch
 - Include a powerful subtitle or tagline (if appropriate)
-- Keep text minimal - this is a visual anchor for the presentation
-- May include presenter name, company, and date if relevant`;
+- Keep text minimal - this serves as a visual anchor
+- Consider including company name and date where relevant`;
       
     case 'problem':
     case 'pain_point':
-      return `\n\nFor a PROBLEM/PAIN POINT slide:
-- Clearly articulate the problem being solved
-- Use statistics or examples to demonstrate the problem's significance
-- Focus on the audience's perspective and how the problem affects them
-- Make the problem relatable and emotionally resonant
-- If applicable, highlight the cost of inaction or staying with status quo`;
+      return `\n\nContent guidelines:
+- Clearly articulate key challenges that need addressing
+- Use statistics or examples to demonstrate significance
+- Focus on the audience's perspective and how these issues affect them
+- Make content relatable and emotionally resonant
+- If applicable, highlight consequences of inaction`;
       
     case 'solution':
-      return `\n\nFor a SOLUTION slide:
-- Present your solution clearly and concisely
-- Focus on how it addresses the previously stated problem
-- Highlight 2-3 key benefits or features that directly solve the pain points
+      return `\n\nContent guidelines:
+- Present key concepts clearly and concisely
+- Focus on addressing previously stated challenges
+- Highlight 2-3 key benefits or features that directly address pain points
 - Avoid technical jargon unless absolutely necessary for the audience
-- Include a visual representation of the solution if possible`;
+- Consider including visual representations`;
       
     case 'value_proposition':
-      return `\n\nFor a VALUE PROPOSITION slide:
+      return `\n\nContent guidelines:
 - Articulate a clear, compelling statement of the unique value offered
-- Explain why this solution is different/better than alternatives
+- Explain what makes this approach different or better than alternatives
 - Quantify benefits when possible (e.g., saves 40% of time, increases ROI by 2x)
 - Focus on outcomes rather than features
-- Connect directly to audience pain points and decision criteria`;
+- Connect directly to audience needs and decision criteria`;
       
     case 'market':
     case 'market_analysis':
-      return `\n\nFor a MARKET ANALYSIS slide:
+      return `\n\nContent guidelines:
 - Include key market size figures (TAM, SAM, SOM if applicable)
-- Highlight market growth rate and trends
-- Identify key market segments and their characteristics
-- Include visual representation of market data (chart/graph)
-- Keep focus on the opportunity and why this market matters`;
+- Highlight market growth rate and key trends
+- Identify important market segments and their characteristics
+- Consider visual representations of market data
+- Emphasize the opportunity and its significance`;
       
     case 'competition':
     case 'competitive_landscape':
-      return `\n\nFor a COMPETITIVE LANDSCAPE slide:
-- Identify key competitors in the market
-- Highlight your differentiators and comparative advantages
-- Use a competitive matrix or positioning map if possible
-- Be honest but highlight your strengths against weaknesses of competitors
-- Avoid disparaging competitors - stay factual and professional`;
+      return `\n\nContent guidelines:
+- Identify key competitors and alternatives
+- Highlight important differentiators and comparative advantages
+- Consider using a comparison matrix or positioning map
+- Be factual about strengths compared to alternatives
+- Maintain professional tone when discussing competition`;
       
     case 'product':
     case 'product_details':
-      return `\n\nFor a PRODUCT/SERVICE DETAILS slide:
-- Focus on key features that solve the stated problem
+      return `\n\nContent guidelines:
+- Focus on key features that address core needs
 - Highlight unique aspects and competitive advantages
-- Use visual representation of the product/service if possible
+- Consider using visual representation when possible
 - Connect features to benefits and outcomes
 - Keep technical details appropriate to audience knowledge level`;
       
     case 'business_model':
-      return `\n\nFor a BUSINESS MODEL slide:
-- Clearly explain how the business makes money
-- Include pricing strategy if appropriate
+      return `\n\nContent guidelines:
+- Clearly explain how value is created and captured
+- Include pricing approach if appropriate
 - Highlight revenue streams and cost structure
 - Show path to profitability if applicable
-- Use visual representation of the business model if possible`;
+- Consider using diagrams to illustrate the model`;
       
     case 'traction':
     case 'validation':
-      return `\n\nFor a TRACTION/VALIDATION slide:
+      return `\n\nContent guidelines:
 - Highlight key metrics and milestones achieved
 - Include customer testimonials or case studies if available
-- Show growth trends using visual charts if possible
-- Focus on metrics that matter most to this audience type
-- Demonstrate market validation and proof of concept`;
+- Consider showing growth trends with visual charts
+- Focus on metrics that matter most to this audience
+- Demonstrate validation and proof of concept`;
       
     case 'team':
-      return `\n\nFor a TEAM slide:
-- Focus on key team members and their relevant experience
-- Highlight expertise directly related to solving the stated problem
+      return `\n\nContent guidelines:
+- Focus on key contributors and their relevant experience
+- Highlight expertise directly related to the core competencies needed
 - Include accomplishments that build credibility
-- Keep bios very brief - focus on why this team can execute
-- Include advisors or board members if relevant to establishing credibility`;
+- Keep biographical information brief and focused on execution capability
+- Consider mentioning advisors if relevant to establishing credibility`;
       
     case 'financials':
     case 'financial_projections':
-      return `\n\nFor a FINANCIALS slide:
-- Include key financial projections (revenue, expenses, profitability)
-- Show growth trajectory and key financial milestones
+      return `\n\nContent guidelines:
+- Include key projections (revenue, expenses, profitability)
+- Show growth trajectory and important financial milestones
 - Include clear timeline for projections
-- Highlight key assumptions underlying projections
-- Use visual charts to represent financial data
-- Keep details appropriate to audience (more for investors, less for partners)`;
+- Highlight key assumptions underlying the model
+- Consider visual representation of financial data
+- Adjust detail level appropriate to audience needs`;
       
     case 'roadmap':
     case 'timeline':
-      return `\n\nFor a ROADMAP/TIMELINE slide:
-- Show clear timeline with key milestones
+      return `\n\nContent guidelines:
+- Present a clear progression with key milestones
 - Include past achievements and future goals
 - Focus on strategic priorities rather than feature lists
-- Use visual timeline representation
-- Demonstrate thoughtful planning and realistic execution timeline`;
+- Consider visual timeline representation
+- Demonstrate thoughtful planning and realistic execution`;
       
     case 'investment':
     case 'ask':
-      return `\n\nFor an INVESTMENT/ASK slide:
-- Clearly state what you're asking for (funding amount, partnership terms, etc.)
-- Explain how the resources will be used
+      return `\n\nContent guidelines:
+- Clearly articulate what you're requesting (funding, partnership terms, etc.)
+- Explain how resources will be utilized
 - Show potential returns or benefits to the audience
-- Include timeline for use of resources
-- Be specific and confident in your ask`;
+- Include timeline for resource utilization
+- Be specific and confident in your request`;
       
     case 'call_to_action':
     case 'closing':
-      return `\n\nFor a CALL TO ACTION/CLOSING slide:
+      return `\n\nContent guidelines:
 - Include a clear, compelling next step for the audience
-- Restate the core value proposition
+- Reinforce the core value proposition
 - Create a sense of urgency or opportunity
 - Include contact information or specific action instructions
-- End with a memorable statement or reinforcement of key message`;
+- End with a memorable statement or key message reinforcement`;
       
     default:
-      return `\n\nFor this ${slideType.toUpperCase()} slide:
-- Include relevant, concise content appropriate for this slide type
+      return `\n\nContent guidelines:
+- Include relevant, concise information appropriate for this content
 - Focus on 2-3 key points maximum
-- Use visual elements if appropriate
-- Ensure the content connects to the overall pitch narrative
-- Tailor information to the needs and interests of the target audience`;
+- Consider using visual elements where appropriate
+- Ensure the content connects to the overall narrative
+- Tailor information to the audience's needs and interests`;
   }
 }
 
@@ -500,7 +504,7 @@ ${researchData}
   if (info.slideStructure && info.slideStructure.length > 0) {
     prompt += `\n\nGenerate content for the following ${info.slideStructure.length} slides based on the provided structure:`;
     info.slideStructure.forEach((slide, index) => {
-      prompt += `\n${index + 1}. ${slide.title} (${slide.type})${slide.description ? `: ${slide.description}` : ''}`;
+      prompt += `\n${index + 1}. ${slide.description ? `: ${slide.description}` : ''}`;
     });
   } else {
     // Default slide structure if none provided
@@ -607,14 +611,12 @@ For each visual element, provide data in this format:
   // Formatting instructions
   prompt += `\n\nOutput Format Instructions:
 - Structure the output clearly using Markdown
-- Use headings for slide titles (e.g., '## Problem/Opportunity')
 - Use bullet points for key points
 - Bold important text or statistics
 - For each slide, include:
-  1. A clear slide title/heading
-  2. Concise content appropriate for the slide type
-  3. Visual data suggestions in the format specified above (if applicable)
-  4. Notes on any special formatting or emphasis needed
+  1. Concise content appropriate for the slide type
+  2. Visual data suggestions in the format specified above (if applicable)
+  3. Notes on any special formatting or emphasis needed
 
 Ensure the content is cohesive across all slides, with a clear narrative flow from the problem through to the call to action.`;
 
@@ -634,7 +636,7 @@ export const createVisualGenerationPrompt = (
   const determinedVisualType = visualType || slideInfo.visualType || determineAppropriateVisualType(slideInfo.type);
   
   // Basic prompt
-  let prompt = `Generate a ${determinedVisualType} for the "${slideInfo.title}" slide (type: ${slideInfo.type}) in a ${projectInfo.pitchDeckType} pitch deck.`;
+  let prompt = `Generate a ${determinedVisualType} for a ${slideInfo.type} slide in a ${projectInfo.pitchDeckType} pitch deck.`;
   
   // Add content context
   prompt += `\n\nThe slide content is:\n${slideContent}`;
@@ -697,8 +699,14 @@ export const createVisualGenerationPrompt = (
   prompt += `\n\nProvide the output in the following format:
 \`\`\`visual-specification
 Type: ${determinedVisualType}
-Title: [Clear title for the visual]
-Data: [Structured data points and relationships]
+Title: [Clear title for the visual]`;
+  // Request specific data format for charts and tables
+  if (determinedVisualType === 'chart' || determinedVisualType === 'table') {
+    prompt += `\nData: [Provide data here in simple CSV format, e.g., "Category,Value\\nApples,10\\nOranges,15"]`;
+  } else {
+    prompt += `\nData: [Structured data points and relationships]`;
+  }
+  prompt += `
 Elements: [Key elements to include]
 Layout: [Description of layout and organization]
 Color Usage: [How to apply the brand colors]

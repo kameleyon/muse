@@ -26,8 +26,8 @@ const ToolbarButton: React.FC<{
     disabled={disabled}
     title={title}
     className={`
-      p-1 w-8 h-8  // Override padding and size for tighter toolbar look
-      ${isActive ? 'bg-neutral-light text-primary' : 'text-neutral-dark hover:text-primary'} {/* Changed inactive text color */}
+      p-1.5 w-9 h-9  // Increased size for better visibility
+      ${isActive ? 'bg-primary/20 text-primary font-bold' : 'text-neutral-dark hover:bg-neutral-light hover:text-primary'} {/* Improved contrast */}
     `}
     // Pass children directly to Button component
   >

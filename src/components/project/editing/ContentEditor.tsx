@@ -14,9 +14,23 @@ import * as contentGenerationService from '@/services/contentGenerationService';
 interface ContentEditorProps {
   content: string; // Content from parent state (Should be HTML or Tiptap JSON now)
   onChange: (newContent: string) => void; // Re-add onChange handler prop
+  brandColors?: {
+    primary: string;
+    secondary: string;
+    accent: string;
+  };
+  brandFonts?: {
+    headingFont: string;
+    bodyFont: string;
+  };
 }
 
-const ContentEditor: React.FC<ContentEditorProps> = ({ content, onChange }) => { // Re-add onChange
+const ContentEditor: React.FC<ContentEditorProps> = ({
+  content,
+  onChange,
+  brandColors = { primary: '#ae5630', secondary: '#232321', accent: '#9d4e2c' },
+  brandFonts = { headingFont: 'Comfortaa, sans-serif', bodyFont: 'Questrial, sans-serif' }
+}) => {
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [isVersionsModalOpen, setIsVersionsModalOpen] = useState(false); // State for Versions modal
 
@@ -89,13 +103,11 @@ const ContentEditor: React.FC<ContentEditorProps> = ({ content, onChange }) => {
     <Card className="p-0 border border-neutral-light bg-white/30 shadow-sm flex flex-col h-full min-h-[500px]"> 
       <h4 className="font-semibold text-neutral-dark text-lg p-4 border-b border-neutral-light/40 flex-shrink-0">Content Editor</h4>
       
-      {/* Placeholder Toolbar for other features */}
-      {/* Placeholder Toolbar for other features */}
-      <div className="p-0 border-b border-neutral-light/40 flex flex-wrap gap-2 items-center text-xs text-neutral-medium flex-shrink-0">
-         <Button variant="outline" size="sm" className="text-xs border-0" onClick={openMediaModal}><ImageIcon size={14} className="mr-1"/> Media</Button>
-         <Button variant="outline" size="sm" className="text-xs border-0" onClick={openVersionsModal}><GitCompare size={14} className="mr-1"/> Versions</Button>
-         <Button variant="outline" size="sm" className="text-xs border-0" onClick={fetchAndOpenAISuggestions}><Bot size={14} className="mr-1"/> AI Suggestions</Button>
-         <Button variant="outline" size="sm" className="text-xs border-0" onClick={openCommentsSidebar}><MessageSquare size={14} className="mr-1"/> Comments</Button>
+      {/* Streamlined toolbar with only useful features */}
+      <div className="p-2 border-b border-neutral-light/40 flex flex-wrap gap-2 items-center text-xs text-neutral-medium flex-shrink-0">
+         <Button variant="outline" size="sm" className="text-xs py-1.5 px-2.5 shadow-sm hover:bg-neutral-light/20" onClick={fetchAndOpenAISuggestions}>
+           <Bot size={14} className="mr-1.5"/> AI Enhance
+         </Button>
       </div>
 
       {/* Render the RichTextEditor */}
@@ -103,6 +115,8 @@ const ContentEditor: React.FC<ContentEditorProps> = ({ content, onChange }) => {
          <RichTextEditor
             initialContent={content} // Pass content (expecting HTML or Tiptap JSON)
             onChange={onChange} // Pass handler to update ProjectArea state
+            brandColors={brandColors} // Pass brand colors from props
+            brandFonts={brandFonts} // Pass brand fonts from props
          />
       </div>
        

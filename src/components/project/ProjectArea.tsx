@@ -26,22 +26,26 @@ import ArchivingAnalytics from './delivery/ArchivingAnalytics';
 import * as contentGenerationService from '@/services/contentGenerationService';
 // Import necessary prompt functions
 import { 
-  createResearchPrompt, 
-  createSlideContentPrompt, 
-  createVisualGenerationPrompt 
-} from '@/lib/prompts/pitchDeckPrompts'; 
+  createResearchPrompt,
+  createSlideContentPrompt,
+  createVisualGenerationPrompt,
+  type ProjectInfo, // Explicitly import type
+  type SlideInfo // Explicitly import type
+} from '@/lib/prompts/pitchDeckPrompts';
 import ReactDOMServer from 'react-dom/server';
 import html2pdf from 'html2pdf.js';
-import { marked } from 'marked'; // Import marked
+import { marked } from 'marked'; // Ensure marked is imported
 import { MarkdownContent } from '@/lib/markdown';
+// Slide type is imported later, removing duplicate here
 // Import Zustand store AND types, including the new phaseData
-import { 
-  useProjectWorkflowStore, 
-  initializeWorkflowState, 
-  QualityMetrics, 
-  FactCheckResult, 
-  Suggestion 
-} from '@/store/projectWorkflowStore'; 
+import {
+  useProjectWorkflowStore,
+  initializeWorkflowState,
+  QualityMetrics,
+  FactCheckResult,
+  Suggestion
+} from '@/store/projectWorkflowStore';
+import { Slide } from '@/store/types'; // Import Slide type directly from types
 import { createProjectAPI } from '@/services/projectService'; // Import the API function
 import '@/styles/ProjectArea.css';
 import '@/styles/ProjectSetup.css';
@@ -341,6 +345,7 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
   };
   // --- End Client-Side PDF Generation Handler ---
 
+
   // --- START: Integrated Generation Logic ---
   
   // Helper function to get default slide structure based on the selected option
@@ -365,44 +370,31 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
       { id: 'slide-14', title: 'Investment/Ask', type: 'investment', includeVisual: false }
     ];
     
-    if (structureOption === 'comprehensive') {
-      return [...defaultSlides, ...additionalSlides];
-    }
+    // Always return the full 14 slides by default now
+    return [...defaultSlides, ...additionalSlides];
     
-    return defaultSlides;
+    // --- Previous logic based on structureOption (kept for reference if needed later) ---
+    // if (structureOption === 'comprehensive') {
+    //   return [...defaultSlides, ...additionalSlides];
+    // }
+    // return defaultSlides;
   };
 
-  // Helper for typing effect with configurable speed
-  const simulateTyping = (text: string, setText: (text: string) => void, speed = 5) => {
-    let i = 0;
-    let currentText = '';
-    setText('');
-    
-    const intervalId = setInterval(() => {
-      if (i < text.length) {
-        currentText += text.charAt(i);
-        setText(currentText);
-        i++;
-      } else {
-        clearInterval(intervalId);
-        // Convert final Markdown to HTML before setting editor state
-        const htmlContent = marked(text) as string;
-        console.log("Generated HTML for Editor:", htmlContent);
-        setEditorContent(htmlContent); // Use store action
-        setIsGenerating(false); // Ensure generation stops (using store action)
-      }
-    }, speed); // Speed in milliseconds - lower is faster
+  // REMOVED simulateTyping function
+  // REMOVED getTypingSpeedFromOption function
+
+  // Separate function to finalize content after generation
+  const finalizeGeneratedContent = (content: string) => {
+    // Convert final Markdown to HTML before setting editor state
+    const htmlContent = marked(content) as string;
+    console.log("Generated HTML for Editor:", htmlContent);
+    setEditorContent(htmlContent); // Use store action
+    setIsGenerating(false); // Ensure generation stops
   };
 
-  // Helper to convert typingSpeed option to actual milliseconds
-  const getTypingSpeedFromOption = (speedOption: number) => {
-    // Map speedOption (0-4) to actual ms values (0=fastest, 4=slowest)
-    const speedMap = [0, 2, 5, 10, 20];
-    return speedMap[speedOption] || 5; // Default to 5ms if invalid option
-  };
 
   // Main Generation Handler
-  const handleGenerateContent = async (options: { 
+  const handleGenerateContent = async (options: {
     factCheckLevel: 'basic' | 'standard' | 'thorough',
     visualsEnabled: boolean,
     contentTone: 'formal' | 'conversational' | 'persuasive',
@@ -410,6 +402,7 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
     typingSpeed: number,
     includeAllSlides: boolean
   }) => {
+    // REMOVED typingSpeedInMs calculation
     resetGenerationState(); // Reset store state first
     setIsGenerating(true); // Use store action
     setGenerationStatusText('Initiating generation...'); // Use store action
@@ -417,11 +410,19 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
     // Get latest state from store for the prompt
     const currentStoreState = useProjectWorkflowStore.getState();
     
+    // Ensure projectId is a string before creating projectInfo
+    if (!currentStoreState.projectId) {
+      console.error("Project ID is null, cannot create projectInfo for prompts.");
+      setIsGenerating(false); // Stop generation
+      setGenerationStatusText('Error: Project ID missing.');
+      return; // Exit the function
+    }
+
     // Prepare comprehensive project info object for prompts
-    const projectInfo = {
-      projectId: currentStoreState.projectId || 'temp-id', // Use projectId from store
+    const projectInfo: ProjectInfo = { // Add type annotation for safety
+      projectId: currentStoreState.projectId, // Now guaranteed to be a string
       projectName: currentStoreState.projectName,
-      pitchDeckType: currentStoreState.selectedPitchDeckTypeId || 'generic',
+      pitchDeckType: currentStoreState.selectedPitchDeckTypeId || 'generic', // Add fallback
       description: currentStoreState.description,
       tags: currentStoreState.tags,
       teamMembers: currentStoreState.teamMembers,
@@ -469,29 +470,39 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
       // Calculate dynamic steps based on selected options
       const researchSteps = 1;
       // Use the actual slide structure length for calculation
-      const actualSlideStructure = projectInfo.slideStructure; 
-      const slideCount = options.includeAllSlides ? 
-        actualSlideStructure.length : 
+      const actualSlideStructure = projectInfo.slideStructure || [];
+      const slideCount = options.includeAllSlides ?
+        (actualSlideStructure.length || 0) :
         (options.slideStructure === 'comprehensive' ? 14 : 10);
-      const visualSteps = options.visualsEnabled ? Math.ceil(slideCount * 0.4) : 0; 
+      const visualSteps = options.visualsEnabled ? Math.ceil(slideCount * 0.4) : 0;
       const finalizationSteps = 1;
       const totalSteps = researchSteps + slideCount + visualSteps + finalizationSteps;
       const progressIncrement = totalSteps > 0 ? 100 / totalSteps : 0; // Avoid division by zero
       let currentProgress = 0;
       
+      // Start with a clean slate for content generation
+      // Create a custom description based on the project info
+      const projectDescription = `${projectInfo.projectName} is an innovative AI-powered platform designed to revolutionize ${projectInfo.audience?.industry || 'the industry'} with cutting-edge technology and personalized experiences.`;
+      
+      // Begin with a clean slate for the content - with typing effect
+      const initialContent = `# ${projectInfo.projectName}\n\n${projectDescription}\n\n`;
+      
+      
+      // Set initial content directly
+      setGeneratedContentPreview(initialContent);
+      
       // --- PHASE 1: Research ---
-      setGenerationStatusText('Researching information...');
-      setPhaseData({ currentPhase: 'researching', phaseProgress: 0 }); // Corrected phase name
+      setPhaseData({ currentPhase: 'researching', phaseProgress: 0 });
       
       // Use projectId from store state
-      if (!projectId) { 
+      if (!projectId) {
         throw new Error("Project ID is missing. Cannot generate content.");
       }
       
       const researchPrompt = createResearchPrompt(projectInfo);
       
       const researchResult = await contentGenerationService.generateContent({
-        projectId: projectId, // Use projectId from store state
+        projectId: projectId,
         prompt: researchPrompt,
         useResearchModel: true,
         factCheckLevel: options.factCheckLevel
@@ -504,10 +515,7 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
       // --- Update after Research ---
       currentProgress += progressIncrement * researchSteps;
       setGenerationProgress(Math.round(currentProgress));
-      setPhaseData({ currentPhase: 'researching', phaseProgress: 100 }); // Corrected phase name
-      
-      const researchPreview = `# Research Results\n\n${researchResult.content.substring(0, 300)}...\n\n---\n\n`;
-      setGeneratedContentPreview(researchPreview);
+      setPhaseData({ currentPhase: 'researching', phaseProgress: 100 });
       
       // --- PHASE 2: Content Generation (SLIDE BY SLIDE) ---
       setGenerationStatusText(`Generating content for ${slideCount} slides...`);
@@ -519,8 +527,8 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
       });
       
       // Determine the actual slides to generate
-      const slidesToGenerate = options.includeAllSlides ? 
-        actualSlideStructure : 
+      const slidesToGenerate = options.includeAllSlides ?
+        actualSlideStructure :
         actualSlideStructure?.slice(0, options.slideStructure === 'comprehensive' ? 14 : 10);
       
       if (!slidesToGenerate || slidesToGenerate.length === 0) {
@@ -547,7 +555,7 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
         );
         
         const slideResult = await contentGenerationService.generateContent({
-          projectId: projectId, // Use projectId from store state
+          projectId: projectId,
           prompt: slidePrompt,
           useResearchModel: false,
         });
@@ -556,16 +564,24 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
           throw new Error(`Failed to generate content for slide ${slideIndex}. Details: ${slideResult?.content}`);
         }
         
-        let formattedSlideContent = `## ${slideIndex}. ${slide.title}\n${slideResult.content}\n\n`;
+        // Format slide content with slide title as heading
+        let formattedSlideContent = `## ${slide.title}\n\n${slideResult.content}\n\n`;
         generatedSlides.push(formattedSlideContent);
         
-        allGeneratedContent = `# ${projectInfo.projectName}\n${projectInfo.description ? `\n${projectInfo.description}\n` : ''}\n\n${generatedSlides.join('\n---\n\n')}`;
+        // Build the updated content incrementally
+        // Start with the project header and description
+        const currentContent = `# ${projectInfo.projectName}\n\n${projectDescription}\n\n${generatedSlides.join('')}`;
         
-        // Update preview incrementally
-        setGeneratedContentPreview(allGeneratedContent); 
+        // Update preview with the content generated so far
+        const updatedPreviewContent = `# ${projectInfo.projectName}\n\n${projectDescription}\n\n${generatedSlides.join('')}`;
+        setGeneratedContentPreview(updatedPreviewContent);
         
+        // Update progress
         currentProgress = Math.round((researchSteps + (i + 1)) / totalSteps * 100);
-        setGenerationProgress(Math.min(currentProgress, 85)); 
+        setGenerationProgress(Math.min(currentProgress, 85));
+        
+        // Small delay to let the user see the progress
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
       
       // --- PHASE 3: Visual Generation (if enabled) ---
@@ -573,10 +589,11 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
         setGenerationStatusText('Creating visual elements...');
         setPhaseData({ currentPhase: 'visuals', phaseProgress: 0 });
         
-        const visualSlides = slidesToGenerate.filter(slide => 
-          slide.includeVisual || 
-          ['market_analysis', 'competition', 'financials', 'roadmap', 'product'].some(type => 
-            slide.type.includes(type)
+        // Add explicit type for 'slide' parameter
+        const visualSlides = slidesToGenerate.filter((slide: Slide) =>
+          slide.includeVisual ||
+          ['market_analysis', 'competition', 'financials', 'roadmap', 'product'].some(type =>
+            slide.type?.includes(type) // Add optional chaining for safety
           )
         );
         
@@ -584,7 +601,7 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
         
         for (let i = 0; i < slidesForVisuals.length; i++) {
           const slide = slidesForVisuals[i];
-          const slideIndex = slidesToGenerate.findIndex(s => s.id === slide.id) + 1;
+          const slideIndex = slidesToGenerate.findIndex((s: Slide) => s.id === slide.id) + 1;
           
           setGenerationStatusText(`Creating visuals for slide ${slideIndex}: ${slide.title}...`);
           setPhaseData({
@@ -594,21 +611,41 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
             totalSlides: slidesToGenerate.length
           });
           
-          // In a real implementation, call a visual generation service
+          // Call the generation service for the visual specification
           const visualPrompt = createVisualGenerationPrompt(
             slide, generatedSlides[slideIndex - 1], projectInfo
           );
-          // Simulate visual generation call
-          await new Promise(resolve => setTimeout(resolve, 300)); 
-          
-          // Append visual placeholder/spec to the slide content in the preview
-          const visualSpecPlaceholder = `\n\n\`\`\`visual-specification\n${visualPrompt.split('```visual-specification')[1]?.split('```')[0]?.trim()}\n\`\`\`\n`;
-          generatedSlides[slideIndex - 1] += visualSpecPlaceholder;
-          allGeneratedContent = `# ${projectInfo.projectName}\n${projectInfo.description ? `\n${projectInfo.description}\n` : ''}\n\n${generatedSlides.join('\n---\n\n')}`;
-          setGeneratedContentPreview(allGeneratedContent); // Update preview with visual spec
+          const visualResult = await contentGenerationService.generateContent({
+            projectId: projectId,
+            prompt: visualPrompt,
+            useResearchModel: false, // Use standard model for visuals/specs
+          });
+
+          if (!visualResult || visualResult.content.startsWith('Error:')) {
+             console.warn(`Failed to generate visual spec for slide ${slideIndex}: ${visualResult?.content}`);
+             // Optionally add a simple placeholder note even on failure
+             // generatedSlides[slideIndex - 1] += `\n\n[Visual generation failed for ${slide.title}]\n\n`;
+          } else {
+             // Extract the full visual-specification block from the result
+             const specMatch = visualResult.content.match(/```visual-specification([\s\S]*?)```/);
+             const fullSpecBlock = specMatch ? specMatch[0] : `\n\n[Could not extract visual spec for ${slide.title}]\n\n`; // Fallback
+
+             // Find the index of this slide in the generatedSlides array
+             const slideContentIndex = slideIndex - 1;
+             if (slideContentIndex >= 0 && slideContentIndex < generatedSlides.length) {
+               // Append the full extracted spec block
+               generatedSlides[slideContentIndex] += `\n\n${fullSpecBlock}\n\n`;
+
+               // Update preview with the added visual placeholder
+               const updatedContentWithVisual = `# ${projectInfo.projectName}\n\n${projectDescription}\n\n${generatedSlides.join('')}`;
+               setGeneratedContentPreview(updatedContentWithVisual); // Update directly
+             }
+          }
 
           currentProgress = Math.round((researchSteps + slidesToGenerate.length + (i + 1)) / totalSteps * 100);
-          setGenerationProgress(Math.min(currentProgress, 95)); 
+          
+          // Small delay to let the user see the progress
+          await new Promise(resolve => setTimeout(resolve, 100));
         }
       }
       
@@ -616,30 +653,34 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
       setGenerationStatusText('Finalizing presentation...');
       setPhaseData({ currentPhase: 'finalizing', phaseProgress: 0 });
       
+      // Small pause
       await new Promise(resolve => setTimeout(resolve, 300));
       
       setGenerationProgress(100);
       setPhaseData({ currentPhase: 'finalizing', phaseProgress: 100 });
       setGenerationStatusText('Generation complete!');
       
-      const finalContent = allGeneratedContent;
+      // Get the final content with all slides and visual elements
+      const finalContent = `# ${projectInfo.projectName}\n\n${projectDescription}\n\n${generatedSlides.join('')}`;
       
-      const typingSpeedInMs = getTypingSpeedFromOption(options.typingSpeed);
-      // Call simulateTyping AFTER setting final status, but pass the final content
-      simulateTyping(finalContent, setGeneratedContentPreview, typingSpeedInMs); 
-      // Note: simulateTyping now handles setIsGenerating(false) and setEditorContent
+      // Only convert to HTML and update editor content once we're fully done
+      finalizeGeneratedContent(finalContent);
       
     } catch (error) {
       console.error("Generation failed:", error);
       const errorMessage = `Error during generation: ${error instanceof Error ? error.message : String(error)}`;
-      setGeneratedContentPreview(errorMessage);
+      // Handle error gracefully - update preview directly
+      setGeneratedContentPreview(errorMessage); // Already updated, no simulateTyping needed
+
       setGenerationStatusText('Generation Failed!');
       setGenerationProgress(0);
       setIsGenerating(false); // Ensure generation stops on error
+      
+      // Still convert the error message to HTML for the editor
+      finalizeGeneratedContent(errorMessage);
     }
   };
   // --- END: Integrated Generation Logic ---
-
 
   return (
     // Use Card component for consistent container styling
@@ -813,8 +854,9 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
               <div className="lg:col-span-4 space-y-6">
                  <GenerationSetup
                     onGenerate={handleGenerateContent} // Use the integrated handler
-                    isGenerating={isGenerating} 
+                    isGenerating={isGenerating}
                     slideCount={slideStructure?.length || 14} // Pass slide count
+                    projectId={projectId} // Pass projectId
                  />
                  {/* Conditionally render progress */}
                  {isGenerating && (
@@ -879,8 +921,17 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
                {/* Main Editor Area */}
                <div className="lg:col-span-8 space-y-6">
                   <ContentEditor
-                     content={editorContent} 
-                     onChange={setEditorContent} 
+                     content={editorContent}
+                     onChange={setEditorContent}
+                     brandColors={{
+                       primary: primaryColor || '#ae5630',
+                       secondary: secondaryColor || '#232321',
+                       accent: accentColor || '#9d4e2c'
+                     }}
+                     brandFonts={{
+                       headingFont: headingFont || 'Comfortaa, sans-serif',
+                       bodyFont: bodyFont || 'Questrial, sans-serif'
+                     }}
                   />
                </div>
                {/* Right Sidebar: Tools & Collaboration */}
@@ -890,7 +941,13 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
                         editorContent={editorContent} 
                         onContentChange={setEditorContent} 
                      />
-                     <VisualElementStudio />
+                     <VisualElementStudio
+                       brandColors={{
+                         primary: primaryColor || '#ae5630',
+                         secondary: secondaryColor || '#232321',
+                         accent: accentColor || '#9d4e2c'
+                       }}
+                     />
                      <CollaborationTools />
                   </div>
                </div>
