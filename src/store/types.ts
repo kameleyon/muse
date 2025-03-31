@@ -5,7 +5,7 @@ export type PrivacyLevel = 'private' | 'team' | 'public';
 export type AudienceSize = 'Small' | 'Medium' | 'Enterprise' | '';
 export type ComplexityLevel = 'basic' | 'intermediate' | 'advanced';
 export type FactCheckLevel = 'basic' | 'standard' | 'thorough';
-export type GenerationPhase = 'idle' | 'preparing' | 'researching' | 'content' | 'visuals' | 'finalizing' | 'complete';
+export type GenerationPhase = 'idle' | 'preparing' | 'researching' | 'content' | 'finalizing' | 'complete'; // Removed 'visuals'
 export type ValidationStatus = 'Not Run' | 'Running' | 'Passed' | 'Issues Found';
 export type ClientPdfStatus = 'idle' | 'generating' | 'success' | 'error';
 // Removed 'image' to align with SlideInfo in pitchDeckPrompts.ts

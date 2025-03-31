@@ -139,36 +139,10 @@ const GenerationSetup: React.FC<GenerationSetupProps> = ({
       <div className="mb-4 space-y-3 p-3 bg-gray-50 rounded-md">
         <h5 className="text-sm font-medium text-neutral-dark">Advanced Options</h5>
         
-        {/* Visual Elements Toggle */}
-        <div className="flex items-center space-x-2 p-2 border rounded-md">
-          <input
-            type="checkbox"
-            id="visuals-enabled"
-            checked={visualsEnabled}
-            onChange={(e) => setVisualsEnabled(e.target.checked)}
-            className="cursor-pointer"
-          />
-          <Label htmlFor="visuals-enabled" className="text-sm cursor-pointer flex items-center">
-            <LineChart size={16} className="mr-1" /> Include visual elements (charts, tables, diagrams)
-          </Label>
-        </div>
-
-        {/* Include All Slides Toggle */}
-        <div className="flex items-center space-x-2 p-2 border rounded-md">
-          <input
-            type="checkbox"
-            id="all-slides"
-            checked={includeAllSlides}
-            onChange={(e) => setIncludeAllSlides(e.target.checked)}
-            className="cursor-pointer"
-          />
-          <Label htmlFor="all-slides" className="text-sm cursor-pointer flex items-center">
-            <Layout size={16} className="mr-1" /> Generate content for all required slides
-          </Label>
-        </div>
+        {/* Checkboxes removed as requested */}
 
         {/* Typing Speed Radio Buttons */}
-        <div className="space-y-2">
+        <div className="space-y-2 pt-2"> {/* Added padding-top for spacing */}
           <div className="flex justify-between items-center">
             <Label className="text-sm flex items-center">
               <Clock size={16} className="mr-1" /> Preview Animation Speed

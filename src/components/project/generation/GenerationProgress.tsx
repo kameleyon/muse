@@ -36,8 +36,7 @@ const GenerationProgress: React.FC<GenerationProgressProps> = ({
         return <Search size={16} className="text-blue-500" />;
       case 'content':
         return <FileText size={16} className="text-green-500" />;
-      case 'visuals':
-        return <BarChart size={16} className="text-purple-500" />;
+      // 'visuals' case removed
       case 'finalizing':
         return <CheckCircle size={16} className="text-amber-500" />;
       case 'complete':
@@ -52,7 +51,7 @@ const GenerationProgress: React.FC<GenerationProgressProps> = ({
       case 'preparing': return 'bg-neutral-400';
       case 'researching': return 'bg-blue-500'; // Corrected phase name
       case 'content': return 'bg-green-500';
-      case 'visuals': return 'bg-purple-500';
+      // 'visuals' case removed
       case 'finalizing': return 'bg-amber-500';
       case 'complete': return 'bg-primary';
     }
@@ -65,7 +64,7 @@ const GenerationProgress: React.FC<GenerationProgressProps> = ({
       case 'preparing': return 'Preparing...';
       case 'researching': return 'Researching'; // Corrected phase name
       case 'content': return 'Generating Content';
-      case 'visuals': return 'Creating Visuals';
+      // 'visuals' case removed
       case 'finalizing': return 'Finalizing';
       case 'complete': return 'Complete';
     }
@@ -82,8 +81,8 @@ const GenerationProgress: React.FC<GenerationProgressProps> = ({
             <span>{getPhaseName(phaseData.currentPhase)}</span>
           </div>
           
-          {/* Show slide progress if in content or visuals phase */}
-          {(phaseData.currentPhase === 'content' || phaseData.currentPhase === 'visuals') && 
+          {/* Show slide progress if in content phase */}
+          {(phaseData.currentPhase === 'content') && // Removed check for 'visuals'
             phaseData.currentSlide && phaseData.totalSlides && (
             <div className="bg-neutral-100 px-2 py-1 rounded text-xs font-medium">
               Slide {phaseData.currentSlide} of {phaseData.totalSlides}
@@ -120,11 +119,8 @@ const GenerationProgress: React.FC<GenerationProgressProps> = ({
             <FileText size={14} />
             <span className="text-xs mt-1">Content</span>
           </div>
-          <div className={`flex flex-col items-center ${phaseData.currentPhase === 'visuals' || progress >= 75 ? 'progress-step-icon-active' : 'progress-step-icon-inactive'}`}>
-            <BarChart size={14} />
-            <span className="text-xs mt-1">Visuals</span>
-          </div>
-          <div className={`flex flex-col items-center ${phaseData.currentPhase === 'finalizing' || progress >= 100 ? 'progress-step-icon-active' : 'progress-step-icon-inactive'}`}>
+          {/* Visuals step removed */}
+          <div className={`flex flex-col items-center ${phaseData.currentPhase === 'finalizing' || progress >= 75 ? 'progress-step-icon-active' : 'progress-step-icon-inactive'}`}> {/* Adjusted progress threshold */}
             <CheckCircle size={14} />
             <span className="text-xs mt-1">Finalize</span>
           </div>

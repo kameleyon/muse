@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react'; // Import useRef
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import html2canvas from 'html2canvas'; // Import html2canvas
 import { BarChart3, Table, Image as ImageIcon, Share2, Database, Palette, XCircle, Plus, Clock, TrendingUp, Loader } from 'lucide-react';
 import TimelineDiagram from './visualizations/TimelineDiagram';
 import StackedAreaChart from './visualizations/StackedAreaChart';
@@ -8,6 +9,7 @@ import { useProjectWorkflowStore } from '@/store/projectWorkflowStore';
 import { useDispatch } from 'react-redux';
 import { addToast } from '@/store/slices/uiSlice';
 
+// Interfaces remain for potential future use with real data
 interface ChartData {
   type: string;
   title: string;
@@ -39,17 +41,24 @@ const VisualElementStudio: React.FC<{
   brandColors = { primary: '#ae5630', secondary: '#232321', accent: '#9d4e2c' }
 }) => {
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
-  const [chartPreview, setChartPreview] = useState<ChartData | null>(null);
-  const [tablePreview, setTablePreview] = useState<TableData | null>(null);
-  const [diagramPreview, setDiagramPreview] = useState<DiagramData | null>(null);
-  const [showTimeline, setShowTimeline] = useState<boolean>(false);
-  const [showMarketGrowth, setShowMarketGrowth] = useState<boolean>(false);
+  // Remove state for mock previews
+  // const [chartPreview, setChartPreview] = useState<ChartData | null>(null);
+  // const [tablePreview, setTablePreview] = useState<TableData | null>(null);
+  // const [diagramPreview, setDiagramPreview] = useState<DiagramData | null>(null);
+  const [showTimeline, setShowTimeline] = useState<boolean>(false); // Keep for showing component structure
+  const [showMarketGrowth, setShowMarketGrowth] = useState<boolean>(false); // Keep for showing component structure
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  
+
+  // Refs might be used later for capturing dynamically generated previews
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const marketGrowthRef = useRef<HTMLDivElement>(null);
+  const diagramPreviewRef = useRef<HTMLDivElement>(null);
+  const chartPreviewRef = useRef<HTMLDivElement>(null);
+
   // Get project ID and editor content from store at component level
   const { projectId, editorContent, setEditorContent } = useProjectWorkflowStore();
   const dispatch = useDispatch();
-  
+
   const handleAddElement = async (type: string) => {
     if (!projectId) {
       dispatch(addToast({
@@ -58,221 +67,133 @@ const VisualElementStudio: React.FC<{
       }));
       return;
     }
-    
+
     setIsLoading(true);
     setSelectedTool(type);
-    setChartPreview(null);
-    setTablePreview(null);
-    setDiagramPreview(null);
+    // Clear any previous component structure visibility states
     setShowTimeline(false);
     setShowMarketGrowth(false);
-    
+
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 600));
-      
+      // Simulate API call delay or initial setup time
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Simply set the selected tool type. Do not generate mock preview data here.
+      // The UI will show the appropriate interface based on the selectedTool state.
+      // Specific components like TimelineDiagram or StackedAreaChart might still render
+      // if their corresponding state (e.g., showTimeline) is set, but without mock data injection here.
+
+      // Example: If specific components need to be shown immediately upon tool selection
       if (type === 'timeline') {
-        setShowTimeline(true);
+         setShowTimeline(true); // Show the timeline component structure
+      } else if (type === 'marketgrowth') {
+         setShowMarketGrowth(true); // Show the market growth component structure
       }
-      else if (type === 'marketgrowth') {
-        setShowMarketGrowth(true);
-      }
-      else if (type === 'chart') {
-        // Create a sample chart preview for AI in Education Market Growth
-        setChartPreview({
-          type: 'chart',
-          title: 'AI in Education Market Growth Trajectory (2024-2033)',
-          data: [
-            'Year,Market Size',
-            '2024,12.0',
-            '2025,17.3',
-            '2026,24.3',
-            '2027,31.4',
-            '2028,40.4',
-            '2029,51.7',
-            '2030,61.8',
-            '2031,67.1',
-            '2032,70.2',
-            '2033,73.3'
-          ],
-          elements: [
-            'Stacked area chart showing growth of overall market and personalized learning segment',
-            'Y-axis showing market size in billions of dollars',
-            'X-axis showing years (2024-2033)',
-            'Clear annotation of the 35.18% CAGR',
-            'Highlight of the $73.3B projection for 2033'
-          ],
-          layout: 'Clean, professional design with minimal grid lines',
-          colorUsage: brandColors
-        });
-      }
-      else if (type === 'table') {
-        setTablePreview({
-          type: 'table',
-          title: 'Competitive Analysis Matrix',
-          headers: ['Feature', 'Our Solution', 'Competitor A', 'Competitor B', 'Competitor C'],
-          rows: [
-            ['AI Integration', 'Advanced', 'Basic', 'Intermediate', 'None'],
-            ['User Experience', 'Excellent', 'Good', 'Fair', 'Good'],
-            ['Pricing', '$49/mo', '$79/mo', '$39/mo', '$99/mo'],
-            ['Market Share', '15%', '35%', '10%', '25%'],
-            ['Customer Support', '24/7', 'Business hours', 'Email only', '24/7']
-          ],
-          notes: 'Based on market research conducted in Q1 2025'
-        });
-      }
-      else if (type === 'diagram') {
-        setDiagramPreview({
-          type: 'diagram',
-          title: 'System Architecture',
-          elements: [
-            'User Interface',
-            'API Gateway',
-            'Authentication Service',
-            'Core Processing Engine',
-            'Database',
-            'Analytics Engine'
-          ],
-          connections: [
-            { from: 'User Interface', to: 'API Gateway' },
-            { from: 'API Gateway', to: 'Authentication Service' },
-            { from: 'API Gateway', to: 'Core Processing Engine' },
-            { from: 'Core Processing Engine', to: 'Database' },
-            { from: 'Core Processing Engine', to: 'Analytics Engine' }
-          ],
-          style: 'Modern, clean with directional arrows'
-        });
-      }
+      // No explicit setting of chartPreview, tablePreview, or diagramPreview with mock data.
+
     } catch (error) {
-      console.error(`Error generating ${type}:`, error);
+      console.error(`Error selecting tool ${type}:`, error);
       dispatch(addToast({
         type: 'error',
-        message: `Failed to generate ${type} visualization.`
+        message: `Failed to load tool for ${type}.`
       }));
     } finally {
       setIsLoading(false);
     }
   };
-  
-  const handleInsertElement = (type: string) => {
-    // Generate chart/visual element HTML or markdown
-    let visualElementCode = '';
-    
-    if (type === 'Market Chart') {
-      // Generate markdown for the market growth chart instead of HTML
-      visualElementCode = `
-### AI in Education Market Growth Trajectory (2024-2033)
 
-![Market Growth Chart](chart-placeholder.png)
+  const handleInsertElement = async (type: string) => {
+    let visualElementHtml = ''; // Use HTML for insertion
+    setIsLoading(true); // Show loading indicator
 
-**CAGR: 35.18% through 2033**
-
-*Total Market | AI-Powered Learning Solutions*
-`;
-    } else if (type === 'Timeline') {
-      // Generate timeline in markdown format
-      visualElementCode = `
-### Project Timeline
-
-- **2022 Q1**: Initial R&D phase completed
-- **2022 Q3**: Secured $3.2M funding
-- **2023 Q1**: Beta platform launch
-- **2023 Q3**: Analytics dashboard release
-- **2024 Q1**: Commercial launch (Current Phase)
-- **2024 Q3**: Implementation of NLP capabilities
-- **2025 Q1**: Enterprise solution launch
-- **2025 Q3**: International expansion
-- **2026 Q1**: Integration of generative AI/LLM technologies
-`;
-    } else if (type === 'Table') {
-      // Generate table in markdown format
-      if (tablePreview) {
-        visualElementCode = `
-### ${tablePreview.title}
-
-| ${tablePreview.headers.join(' | ')} |
-| ${tablePreview.headers.map(() => '---').join(' | ')} |
-${tablePreview.rows.map(row => `| ${row.join(' | ')} |`).join('\n')}
-
-${tablePreview.notes ? `*Note: ${tablePreview.notes}*` : ''}
-`;
+    try {
+      // Generate generic placeholder HTML based on type
+      if (type === 'Market Chart') {
+        visualElementHtml = `<p style="text-align: center; border: 1px dashed #ccc; padding: 1rem; margin: 1rem 0;">[Placeholder: Market Growth Chart]</p>`;
+      } else if (type === 'Chart') {
+        visualElementHtml = `<p style="text-align: center; border: 1px dashed #ccc; padding: 1rem; margin: 1rem 0;">[Placeholder: Chart]</p>`;
+      } else if (type === 'Timeline') {
+        visualElementHtml = `<p style="text-align: center; border: 1px dashed #ccc; padding: 1rem; margin: 1rem 0;">[Placeholder: Timeline Diagram]</p>`;
+      } else if (type === 'Table') {
+        // Generate generic HTML table structure
+        visualElementHtml = `
+          <h3 style="text-align: center; margin-bottom: 0.5rem;">[Placeholder Table Title]</h3>
+          <table border="1" style="border-collapse: collapse; width: 90%; margin: 1rem auto; font-size: 0.9em;">
+            <thead style="background-color: #eee;">
+              <tr>
+                <th style="border: 1px solid #ccc; padding: 6px 10px; text-align: left;">Header 1</th>
+                <th style="border: 1px solid #ccc; padding: 6px 10px; text-align: left;">Header 2</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="border: 1px solid #ccc; padding: 6px 10px;">Row 1, Cell 1</td>
+                <td style="border: 1px solid #ccc; padding: 6px 10px;">Row 1, Cell 2</td>
+              </tr>
+              <tr>
+                <td style="border: 1px solid #ccc; padding: 6px 10px;">Row 2, Cell 1</td>
+                <td style="border: 1px solid #ccc; padding: 6px 10px;">Row 2, Cell 2</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="text-align: center; font-size: 0.8em; margin-top: 0.5rem;"><em>[Placeholder Table Note]</em></p>
+        `;
+      } else if (type === 'Diagram') {
+          visualElementHtml = `<p style="text-align: center; border: 1px dashed #ccc; padding: 1rem; margin: 1rem 0;">[Placeholder: Diagram]</p>`;
       } else {
-        visualElementCode = `
-### Competitive Analysis Matrix
-
-| Feature | Our Solution | Competitor A | Competitor B | Competitor C |
-| --- | --- | --- | --- | --- |
-| AI Integration | Advanced | Basic | Intermediate | None |
-| User Experience | Excellent | Good | Fair | Good |
-| Pricing | $49/mo | $79/mo | $39/mo | $99/mo |
-| Market Share | 15% | 35% | 10% | 25% |
-| Customer Support | 24/7 | Business hours | Email only | 24/7 |
-
-*Based on market research conducted in Q1 2025*
-`;
+        // Handle unimplemented or error cases
+        visualElementHtml = `<p style="text-align: center; color: #888; margin: 1rem 0;">[Visual Element: ${type} - Not implemented]</p>`;
+        console.warn(`Insertion for type "${type}" is not implemented.`);
       }
-    } else if (type === 'Diagram') {
-      // Generate diagram in markdown format
-      visualElementCode = `
-### ${diagramPreview?.title || 'System Architecture'}
 
-*Diagram showing the following components:*
-${diagramPreview?.elements.map(element => `- ${element}`).join('\n') || `
-- User Interface
-- API Gateway
-- Authentication Service
-- Core Processing Engine
-- Database
-- Analytics Engine`}
+      // Append the visual element HTML to the existing content
+      if (visualElementHtml && setEditorContent) {
+        // Append with a newline for separation
+        setEditorContent(editorContent + '\n' + visualElementHtml);
 
-*With connections between components*
-`;
+        dispatch(addToast({
+          type: 'success',
+          message: `${type} placeholder inserted successfully.`
+        }));
+      } else {
+        throw new Error(`Failed to generate placeholder HTML for ${type}`);
+      }
+    } catch (error) {
+        console.error(`Error inserting ${type}:`, error);
+        dispatch(addToast({
+          type: 'error',
+          message: `Failed to insert ${type} element. Please try again.`
+        }));
+    } finally {
+        setIsLoading(false);
+        closePreview(); // Close the preview/tool selection pane
     }
-    
-    // Insert the visual element code into the editor content
-    if (visualElementCode && setEditorContent) {
-      // Insert at cursor position or append to the end
-      // Append the visual element to the existing content
-      setEditorContent(editorContent + visualElementCode);
-      
-      dispatch(addToast({
-        type: 'success',
-        message: `${type} element inserted successfully.`
-      }));
-    } else {
-      dispatch(addToast({
-        type: 'error',
-        message: `Failed to insert ${type} element. Please try again.`
-      }));
-    }
-    
-    closePreview();
   };
-  
+
+
   const closePreview = () => {
     setSelectedTool(null);
-    setChartPreview(null);
-    setTablePreview(null);
-    setDiagramPreview(null);
+    // No preview states to clear anymore
     setShowTimeline(false);
     setShowMarketGrowth(false);
   };
-  
+
   // Render chart preview or tool buttons based on state
   return (
     <Card className="p-3 border border-neutral-light bg-white/30 shadow-sm relative">
       <h4 className="font-semibold text-neutral-dark text-lg mb-3 border-b border-neutral-light/40 pb-2">Visual Element Studio</h4>
-      
+
       {isLoading && (
         <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-10 rounded-md">
           <div className="flex flex-col items-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-2"></div>
-            <p className="text-sm text-neutral-dark">Generating {selectedTool}...</p>
+            <p className="text-sm text-neutral-dark">Processing...</p> {/* Generic loading */}
           </div>
         </div>
       )}
-      
+
       {!selectedTool ? (
+        // Tool Selection View
         <>
           <p className="text-xs text-neutral-medium mb-3">
             Create charts, tables, diagrams, or manage images.
@@ -353,335 +274,155 @@ ${diagramPreview?.elements.map(element => `- ${element}`).join('\n') || `
           </div>
         </>
       ) : (
+        // Tool Interface/Preview View (Now without mock data)
         <>
-          {/* Chart Preview */}
-          {chartPreview && (
-            <div className="mb-2">
-              <div className="flex justify-between items-center mb-2">
-                <h5 className="font-medium text-sm">{chartPreview.title}</h5>
-                <Button variant="ghost" size="sm" onClick={closePreview} className="h-6 w-6 p-0">
-                  <XCircle size={16} />
-                </Button>
-              </div>
-              
-              <div className="chart-preview border border-neutral-light rounded-md p-3 mb-3 bg-white">
-                <div className="w-full h-40 bg-gray-50 flex items-center justify-center border border-dashed border-gray-300 rounded"
-                    style={{ borderColor: `${brandColors.primary}40` }}>
-                  <div className="text-center p-4">
-                    <BarChart3
-                      className="mx-auto mb-2"
-                      size={32}
-                      style={{ color: brandColors.primary }}
-                    />
-                    <p className="text-xs font-medium" style={{ color: brandColors.secondary }}>
-                      AI in Education Market Growth Trajectory
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">2024-2033</p>
-                    <p className="text-xs font-medium mt-2" style={{ color: brandColors.primary }}>
-                      $73.3B by 2033 (35.18% CAGR)
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="specs text-xs mt-4">
-                <div className="mb-2">
-                  <p className="font-medium text-gray-700">Data Points:</p>
-                  <div className="bg-gray-50 p-2 rounded max-h-20 overflow-y-auto">
-                    <code className="text-xs whitespace-pre-wrap">
-                      {chartPreview.data.slice(0, 3).join('\n')}
-                      {chartPreview.data.length > 3 && '...'}
-                    </code>
-                  </div>
-                </div>
-                
-                <div className="mt-2">
-                  <p className="font-medium text-gray-700">Elements:</p>
-                  <ul className="list-disc list-inside text-gray-600 text-xs ml-1">
-                    {chartPreview.elements.slice(0, 2).map((element, i) => (
-                      <li key={i} className="truncate">{element}</li>
-                    ))}
-                    {chartPreview.elements.length > 2 && <li className="text-gray-500">...and more</li>}
-                  </ul>
-                </div>
-              </div>
-              
-              <div className="flex justify-end mt-4 gap-2">
-                <Button variant="outline" size="sm" onClick={closePreview} className="text-xs">Cancel</Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  className="text-xs text-white"
-                  style={{ backgroundColor: brandColors.primary }}
-                  onClick={() => handleInsertElement('Chart')}
-                >
-                  <Plus size={14} className="mr-1" /> Insert Chart
-                </Button>
-              </div>
-            </div>
-          )}
-          
-          {/* Timeline Diagram */}
+          {/* Timeline Diagram Structure */}
           {showTimeline && (
             <div className="mb-2">
               <div className="flex justify-between items-center mb-2">
-                <h5 className="font-medium text-sm">InstaSmart Strategic Evolution Roadmap</h5>
+                <h5 className="font-medium text-sm">Timeline Diagram</h5>
                 <Button variant="ghost" size="sm" onClick={closePreview} className="h-6 w-6 p-0">
                   <XCircle size={16} />
                 </Button>
               </div>
-              
-              {/* Actual Timeline Diagram */}
-              <TimelineDiagram
-                title="InstaSmart Strategic Evolution Roadmap"
-                startYear="2022"
-                endYear="2026"
-                brandColors={brandColors}
-                events={[
-                  { year: "2022", quarter: "1", title: "Initial R&D phase completed", isCurrentPhase: false },
-                  { year: "2022", quarter: "3", title: "Secured $3.2M funding", isCurrentPhase: false },
-                  { year: "2023", quarter: "1", title: "Beta platform launch", isCurrentPhase: false },
-                  { year: "2023", quarter: "3", title: "Analytics dashboard release", isCurrentPhase: false },
-                  { year: "2024", quarter: "1", title: "Commercial launch", isCurrentPhase: true },
-                  { year: "2024", quarter: "3", title: "Implementation of NLP capabilities", isCurrentPhase: false },
-                  { year: "2025", quarter: "1", title: "Enterprise solution launch", isCurrentPhase: false },
-                  { year: "2025", quarter: "3", title: "International expansion", isCurrentPhase: false },
-                  { year: "2026", quarter: "1", title: "Integration of generative AI/LLM technologies", isCurrentPhase: false }
-                ]}
-              />
-              
+              {/* Render the component structure, but it won't have data unless passed */}
+              <div ref={timelineRef}>
+                <TimelineDiagram
+                  title="[Timeline Title]"
+                  startYear="YYYY"
+                  endYear="YYYY"
+                  brandColors={brandColors}
+                  events={[]} // Pass empty array or fetch real data
+                />
+              </div>
               <div className="flex justify-end mt-4 gap-2">
                 <Button variant="outline" size="sm" onClick={closePreview} className="text-xs">Cancel</Button>
                 <Button
-                  variant="primary"
-                  size="sm"
-                  className="text-xs text-white"
+                  variant="primary" size="sm" className="text-xs text-white"
                   style={{ backgroundColor: brandColors.primary }}
                   onClick={() => handleInsertElement('Timeline')}
                 >
-                  <Plus size={14} className="mr-1" /> Insert Timeline
+                  <Plus size={14} className="mr-1" /> Insert Timeline Placeholder
                 </Button>
               </div>
             </div>
           )}
-          
-          {/* Market Growth Chart */}
+
+          {/* Market Growth Chart Structure */}
           {showMarketGrowth && (
             <div className="mb-2">
               <div className="flex justify-between items-center mb-2">
-                <h5 className="font-medium text-sm">AI in Education Market Growth Trajectory (2024-2033)</h5>
-                <Button variant="ghost" size="sm" onClick={closePreview} className="h-6 w-6 p-0">
+                <h5 className="font-medium text-sm">Market Growth Chart</h5>
+                 <Button variant="ghost" size="sm" onClick={closePreview} className="h-6 w-6 p-0">
                   <XCircle size={16} />
                 </Button>
               </div>
-              
-              {/* Actual Market Growth Chart */}
-              <StackedAreaChart
-                title="AI in Education Market Growth"
-                xAxisLabel="Year"
-                yAxisLabel="Market Size ($ Billions)"
-                cagr="35.18%"
-                brandColors={brandColors}
-                data={[
-                  { year: "2024", total: 12.0, segment1: 5.4 },
-                  { year: "2025", total: 17.3, segment1: 7.7 },
-                  { year: "2026", total: 24.3, segment1: 12.1 },
-                  { year: "2027", total: 31.4, segment1: 15.5 },
-                  { year: "2028", total: 40.4, segment1: 21.2 },
-                  { year: "2029", total: 51.7, segment1: 28.0 },
-                  { year: "2030", total: 61.8, segment1: 34.9 },
-                  { year: "2031", total: 67.1, segment1: 41.0 },
-                  { year: "2032", total: 70.2, segment1: 45.6 },
-                  { year: "2033", total: 73.3, segment1: 47.8 }
-                ]}
-              />
-              
+               {/* Render the component structure, but it won't have data unless passed */}
+              <div ref={marketGrowthRef}>
+                <StackedAreaChart
+                  title="[Chart Title]"
+                  xAxisLabel="X-Axis"
+                  yAxisLabel="Y-Axis"
+                  cagr="N/A"
+                  brandColors={brandColors}
+                  data={[]} // Pass empty array or fetch real data
+                />
+              </div>
               <div className="flex justify-end mt-4 gap-2">
                 <Button variant="outline" size="sm" onClick={closePreview} className="text-xs">Cancel</Button>
                 <Button
-                  variant="primary"
-                  size="sm"
-                  className="text-xs text-white"
+                  variant="primary" size="sm" className="text-xs text-white"
                   style={{ backgroundColor: brandColors.primary }}
                   onClick={() => handleInsertElement('Market Chart')}
                 >
-                  <Plus size={14} className="mr-1" /> Insert Market Chart
+                  <Plus size={14} className="mr-1" /> Insert Market Chart Placeholder
                 </Button>
               </div>
             </div>
           )}
-          
-          {/* Table Preview */}
-          {tablePreview && (
+
+          {/* Generic Chart Wizard Interface (Example) */}
+          {selectedTool === 'chart' && !showMarketGrowth && ( // Ensure it doesn't overlap
+             <div className="mb-2">
+               <div className="flex justify-between items-center mb-2">
+                 <h5 className="font-medium text-sm">Chart Wizard</h5>
+                 <Button variant="ghost" size="sm" onClick={closePreview} className="h-6 w-6 p-0">
+                   <XCircle size={16} />
+                 </Button>
+               </div>
+               {/* Placeholder for Chart Wizard UI elements */}
+               <div ref={chartPreviewRef} className="chart-preview border border-neutral-light rounded-md p-3 mb-3 bg-white min-h-[150px] flex items-center justify-center text-neutral-medium italic">
+                 Chart configuration options would go here...
+               </div>
+               <div className="flex justify-end mt-4 gap-2">
+                 <Button variant="outline" size="sm" onClick={closePreview} className="text-xs">Cancel</Button>
+                 <Button
+                   variant="primary" size="sm" className="text-xs text-white"
+                   style={{ backgroundColor: brandColors.primary }}
+                   onClick={() => handleInsertElement('Chart')}
+                 >
+                   <Plus size={14} className="mr-1" /> Insert Chart Placeholder
+                 </Button>
+               </div>
+             </div>
+           )}
+
+          {/* Table Generator Interface (Example) */}
+          {selectedTool === 'table' && (
             <div className="mb-2">
               <div className="flex justify-between items-center mb-2">
-                <h5 className="font-medium text-sm">{tablePreview.title}</h5>
+                <h5 className="font-medium text-sm">Table Generator</h5>
                 <Button variant="ghost" size="sm" onClick={closePreview} className="h-6 w-6 p-0">
                   <XCircle size={16} />
                 </Button>
               </div>
-              
-              <div className="table-preview border border-neutral-light rounded-md p-3 mb-3 bg-white overflow-x-auto">
-                <table className="w-full text-xs border-collapse">
-                  <thead>
-                    <tr style={{ backgroundColor: `${brandColors.primary}15` }}>
-                      {tablePreview.headers.map((header, i) => (
-                        <th
-                          key={i}
-                          className="border border-neutral-light p-2 font-medium text-left"
-                          style={{ color: brandColors.secondary }}
-                        >
-                          {header}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tablePreview.rows.map((row, i) => (
-                      <tr key={i} className={i % 2 === 0 ? 'bg-white' : `bg-neutral-light/10`}>
-                        {row.map((cell, j) => (
-                          <td
-                            key={j}
-                            className="border border-neutral-light p-2"
-                            style={{
-                              fontWeight: j === 0 ? 500 : 400,
-                              color: j === 0 ? brandColors.primary : 'inherit'
-                            }}
-                          >
-                            {cell}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {tablePreview.notes && (
-                  <div className="text-xs text-neutral-medium mt-2 italic">
-                    Note: {tablePreview.notes}
-                  </div>
-                )}
+              {/* Placeholder for Table Generator UI elements */}
+              <div className="table-preview border border-neutral-light rounded-md p-3 mb-3 bg-white min-h-[150px] flex items-center justify-center text-neutral-medium italic">
+                Table configuration options would go here...
               </div>
-              
               <div className="flex justify-end mt-4 gap-2">
                 <Button variant="outline" size="sm" onClick={closePreview} className="text-xs">Cancel</Button>
                 <Button
-                  variant="primary"
-                  size="sm"
-                  className="text-xs text-white"
+                  variant="primary" size="sm" className="text-xs text-white"
                   style={{ backgroundColor: brandColors.primary }}
                   onClick={() => handleInsertElement('Table')}
                 >
-                  <Plus size={14} className="mr-1" /> Insert Table
+                  <Plus size={14} className="mr-1" /> Insert Table Placeholder
                 </Button>
               </div>
             </div>
           )}
-          
-          {/* Diagram Preview */}
-          {diagramPreview && (
-            <div className="mb-2">
-              <div className="flex justify-between items-center mb-2">
-                <h5 className="font-medium text-sm">{diagramPreview.title}</h5>
-                <Button variant="ghost" size="sm" onClick={closePreview} className="h-6 w-6 p-0">
-                  <XCircle size={16} />
-                </Button>
-              </div>
-              
-              <div className="diagram-preview border border-neutral-light rounded-md p-3 mb-3 bg-white">
-                <div className="w-full h-60 bg-gray-50 flex items-center justify-center border border-dashed border-gray-300 rounded p-4"
-                    style={{ borderColor: `${brandColors.primary}40` }}>
-                  <div className="w-full h-full relative">
-                    {/* Simple diagram visualization */}
-                    {diagramPreview.elements.map((element, i) => {
-                      const x = 50 + (i % 3) * 120;
-                      const y = 30 + Math.floor(i / 3) * 80;
-                      return (
-                        <div
-                          key={i}
-                          className="absolute px-3 py-2 rounded-md text-xs font-medium text-center"
-                          style={{
-                            left: `${x}px`,
-                            top: `${y}px`,
-                            backgroundColor: `${brandColors.primary}20`,
-                            borderColor: brandColors.primary,
-                            color: brandColors.secondary,
-                            border: `1px solid ${brandColors.primary}40`,
-                            minWidth: '100px',
-                            transform: 'translate(-50%, -50%)'
-                          }}
-                        >
-                          {element}
-                        </div>
-                      );
-                    })}
-                    {/* Simple connection lines */}
-                    <svg className="absolute inset-0 w-full h-full" style={{ zIndex: -1 }}>
-                      {diagramPreview.connections.map((conn, i) => {
-                        const fromIndex = diagramPreview.elements.indexOf(conn.from);
-                        const toIndex = diagramPreview.elements.indexOf(conn.to);
-                        if (fromIndex === -1 || toIndex === -1) return null;
-                        
-                        const fromX = 50 + (fromIndex % 3) * 120;
-                        const fromY = 30 + Math.floor(fromIndex / 3) * 80;
-                        const toX = 50 + (toIndex % 3) * 120;
-                        const toY = 30 + Math.floor(toIndex / 3) * 80;
-                        
-                        return (
-                          <g key={i}>
-                            <line
-                              x1={fromX}
-                              y1={fromY}
-                              x2={toX}
-                              y2={toY}
-                              stroke={brandColors.secondary}
-                              strokeWidth="1"
-                              strokeDasharray="4,2"
-                            />
-                            {/* Arrow head */}
-                            <circle cx={toX} cy={toY} r="3" fill={brandColors.secondary} />
-                          </g>
-                        );
-                      })}
-                    </svg>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="specs text-xs mt-4">
-                <div className="mt-2">
-                  <p className="font-medium text-gray-700">Elements:</p>
-                  <ul className="list-disc list-inside text-gray-600 text-xs ml-1">
-                    {diagramPreview.elements.slice(0, 3).map((element, i) => (
-                      <li key={i} className="truncate">{element}</li>
-                    ))}
-                    {diagramPreview.elements.length > 3 && <li className="text-gray-500">...and more</li>}
-                  </ul>
-                </div>
-                <div className="mt-2">
-                  <p className="font-medium text-gray-700">Style:</p>
-                  <p className="text-gray-600 text-xs ml-1">{diagramPreview.style}</p>
-                </div>
-              </div>
-              
-              <div className="flex justify-end mt-4 gap-2">
-                <Button variant="outline" size="sm" onClick={closePreview} className="text-xs">Cancel</Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  className="text-xs text-white"
-                  style={{ backgroundColor: brandColors.primary }}
-                  onClick={() => handleInsertElement('Diagram')}
-                >
-                  <Plus size={14} className="mr-1" /> Insert Diagram
-                </Button>
-              </div>
-            </div>
-          )}
-          
-          {/* Other tool interfaces */}
-          {selectedTool && !chartPreview && !tablePreview && !diagramPreview && !showTimeline && !showMarketGrowth && (
+
+          {/* Diagram Builder Interface (Example) */}
+          {selectedTool === 'diagram' && (
+             <div className="mb-2">
+               <div className="flex justify-between items-center mb-2">
+                 <h5 className="font-medium text-sm">Diagram Builder</h5>
+                 <Button variant="ghost" size="sm" onClick={closePreview} className="h-6 w-6 p-0">
+                   <XCircle size={16} />
+                 </Button>
+               </div>
+               {/* Placeholder for Diagram Builder UI elements */}
+               <div ref={diagramPreviewRef} className="diagram-preview border border-neutral-light rounded-md p-3 mb-3 bg-white min-h-[150px] flex items-center justify-center text-neutral-medium italic">
+                 Diagram configuration options would go here...
+               </div>
+               <div className="flex justify-end mt-4 gap-2">
+                 <Button variant="outline" size="sm" onClick={closePreview} className="text-xs">Cancel</Button>
+                 <Button
+                   variant="primary" size="sm" className="text-xs text-white"
+                   style={{ backgroundColor: brandColors.primary }}
+                   onClick={() => handleInsertElement('Diagram')}
+                 >
+                   <Plus size={14} className="mr-1" /> Insert Diagram Placeholder
+                 </Button>
+               </div>
+             </div>
+           )}
+
+          {/* Other tool interfaces (Unimplemented) */}
+          {selectedTool && !['chart', 'table', 'diagram', 'timeline', 'marketgrowth'].includes(selectedTool) && (
             <div className="text-center py-8">
-              <p className="text-gray-400 mb-4">This feature is not implemented in the current version.</p>
+              <p className="text-gray-400 mb-4">This feature ({selectedTool}) is not implemented in the current version.</p>
               <Button variant="outline" size="sm" onClick={closePreview}>Back to Tools</Button>
             </div>
           )}

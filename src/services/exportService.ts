@@ -1,8 +1,8 @@
 // src/services/exportService.ts
-import { formatForPdfExport, cleanupJsonCodeBlocks } from '@/utils/markdownFormatter';
+import { cleanupJsonCodeBlocks } from '@/utils/markdownFormatter'; // Keep cleanup for potential direct content use elsewhere
 import jsPDF from 'jspdf';
-import { marked } from 'marked';
-import 'jspdf-autotable'; // Import for better table support
+import html2canvas from 'html2canvas';
+import 'jspdf-autotable'; // Keep for potential future table handling if needed directly
 
 // Placeholder for API base URL
 const API_BASE_URL = '/api/export';
@@ -28,6 +28,14 @@ export interface ExportResult { // Export interface
   jobId?: string; // ID to track async export jobs
 }
 
+// Define the brand colors interface (might be used for title/footer)
+interface BrandColors {
+  primary?: string;
+  secondary?: string;
+  accent?: string;
+  title?: string;
+}
+
 // --- API Functions ---
 
 /**
@@ -41,12 +49,14 @@ export const exportProject = async (projectId: string, options: ExportOptions): 
   // Replace with actual fetch/axios call
   // This might be an async job, returning a jobId initially
   await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate job start delay
-  
+
   // Simulate immediate completion for simple formats, or pending for complex ones
   if (options.format === 'pdf' || options.format === 'pptx') {
-    return { 
-      status: 'completed', 
-      downloadUrl: `/exports/${projectId}_${options.format}_${Date.now()}.${options.format === 'pdf' ? 'pdf' : 'pptx'}` 
+    // Note: PDF generation is now handled client-side by generateFormattedPdf
+    // This simulation might need adjustment depending on how PDF export is triggered
+    return {
+      status: 'completed',
+      downloadUrl: `/exports/${projectId}_${options.format}_${Date.now()}.${options.format === 'pdf' ? 'pdf' : 'pptx'}` // Placeholder URL
     };
   } else {
      return { status: 'pending', jobId: `export_${Date.now()}` };
@@ -61,60 +71,87 @@ export const exportProject = async (projectId: string, options: ExportOptions): 
 export const getExportStatus = async (jobId: string): Promise<ExportResult> => {
   console.log('API CALL: getExportStatus', jobId);
    // Replace with actual fetch/axios call
-  await new Promise(resolve => setTimeout(resolve, 500)); 
+  await new Promise(resolve => setTimeout(resolve, 500));
   // Simulate progress -> completion
   if (Math.random() > 0.3) { // Simulate still processing
      return { status: 'processing', jobId };
   } else {
      // Simulate completion (determine format based on jobId or another way)
      const format = 'google_slides'; // Example
-     return { 
-       status: 'completed', 
-       shareUrl: `https://docs.google.com/presentation/d/example_${jobId}`, 
-       jobId 
+     return {
+       status: 'completed',
+       shareUrl: `https://docs.google.com/presentation/d/example_${jobId}`,
+       jobId
      };
   }
 };
 
 /**
- * Generates a PDF with proper markdown formatting and color application
- * @param projectId - The ID of the project.
- * @param content - The content to format and export as PDF.
- * @param brandColors - Optional brand colors to apply to the PDF.
- * @returns Promise resolving to the export result.
+ * Generates a PDF from an HTML content string using html2canvas and jsPDF.
+ * Preserves styling and layout by rendering the HTML temporarily.
+ * @param projectId - The ID of the project (used for filename/title).
+ * @param htmlContent - The HTML content string to export.
+ * @param brandColors - Optional brand colors (currently used for title/footer).
+ * @returns Promise resolving to the export result with a blob URL.
  */
-// Define the brand colors interface
-interface BrandColors {
-  primary?: string;
-  secondary?: string;
-  accent?: string;
-  title?: string;
-}
-
 export const generateFormattedPdf = async (
   projectId: string,
-  content: string,
+  htmlContent: string, // Accept HTML string
   brandColors?: BrandColors
 ): Promise<ExportResult> => {
-  console.log('API CALL: generateFormattedPdf', projectId);
-  
+  console.log('API CALL: generateFormattedPdf using html2canvas from string', projectId);
+
+  if (!htmlContent) {
+    console.error('PDF generation failed: HTML content string not provided.');
+    return { status: 'failed' };
+  }
+
+  // --- 1. Create a temporary element to render HTML ---
+  const tempContainer = document.createElement('div');
+  // Apply styles to make it render off-screen but with a defined width
+  // Use a fixed width similar to the editor's expected rendering width for consistency
+  tempContainer.style.position = 'absolute';
+  tempContainer.style.left = '-9999px'; // Move off-screen
+  tempContainer.style.top = '0';
+  tempContainer.style.width = '800px'; // Adjust width as needed, e.g., based on editor width
+  tempContainer.style.padding = '15px'; // Simulate some padding
+  tempContainer.style.backgroundColor = 'white'; // Ensure a background
+  tempContainer.innerHTML = htmlContent; // Set the content
+
+  // Append to body to allow rendering
+  document.body.appendChild(tempContainer);
+
+  let pdfBlobUrl: string | null = null;
+  let exportStatus: 'completed' | 'failed' = 'failed'; // Default to failed
+
   try {
-    // First clean up any JSON code blocks in the content
-    const cleanedContent = cleanupJsonCodeBlocks(content);
-    
-    // Then convert to markdown with proper formatting
-    const markdownContent = formatForPdfExport(cleanedContent, brandColors);
-    
-    // Convert markdown to HTML for better parsing
-    const htmlContent = marked(markdownContent) as string;
-    
-    // Create a new PDF document
+    // --- 2. Capture the temporary element using html2canvas ---
+    const canvas = await html2canvas(tempContainer, {
+      scale: 2, // Increase scale for better resolution
+      useCORS: true,
+      logging: false,
+      // Ensure background is captured if needed
+      backgroundColor: '#ffffff',
+    });
+
+    // --- 3. Prepare jsPDF Document ---
     const doc = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
       format: 'a4'
     });
-    
+
+    const pdfWidth = doc.internal.pageSize.getWidth();
+    const pdfHeight = doc.internal.pageSize.getHeight();
+    const margin = 15; // Page margin
+    const contentWidth = pdfWidth - (margin * 2);
+    const contentHeight = pdfHeight - (margin * 2);
+
+    const imgWidth = canvas.width;
+    const imgHeight = canvas.height;
+    const aspectRatio = imgHeight / imgWidth;
+    const scaledImgHeight = contentWidth * aspectRatio;
+
     // Set document properties
     const title = brandColors?.title || `MagicMuse Document - ${projectId}`;
     doc.setProperties({
@@ -122,14 +159,12 @@ export const generateFormattedPdf = async (
       subject: 'Generated by MagicMuse',
       author: 'MagicMuse',
       keywords: 'MagicMuse, PDF, Document',
-      creator: 'MagicMuse PDF Generator'
+      creator: 'MagicMuse PDF Generator (html2canvas)'
     });
-    
-    // Get colors from brandColors or use defaults
+
+    // --- 4. Add Title Page (Optional) ---
     const primaryColor = brandColors?.primary || '#ae5630';
     const secondaryColor = brandColors?.secondary || '#232321';
-    
-    // Convert hex colors to RGB for jsPDF
     const hexToRgb = (hex: string) => {
       const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
       return result ? {
@@ -138,223 +173,87 @@ export const generateFormattedPdf = async (
         b: parseInt(result[3], 16)
       } : { r: 0, g: 0, b: 0 };
     };
-    
     const primaryRgb = hexToRgb(primaryColor);
     const secondaryRgb = hexToRgb(secondaryColor);
-    
-    // Add title page
-    doc.setFontSize(24);
+
+    doc.setFontSize(22);
     doc.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
-    doc.text(title, 105, 30, { align: 'center', maxWidth: 170 });
-    
+    doc.text(title, pdfWidth / 2, 40, { align: 'center', maxWidth: contentWidth });
+
     doc.setFontSize(12);
     doc.setTextColor(secondaryRgb.r, secondaryRgb.g, secondaryRgb.b);
-    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 45, { align: 'center' });
-    
-    // Add a divider line
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, pdfWidth / 2, 55, { align: 'center' });
+
     doc.setDrawColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
     doc.setLineWidth(0.5);
-    doc.line(20, 50, 190, 50);
-    
-    // Parse the HTML content to extract sections
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlContent;
-    
-    // Start content on a new page
-    doc.addPage();
-    
-    // Track current Y position
-    let yPos = 20;
-    const margin = 20;
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const contentWidth = pageWidth - (margin * 2);
-    
-    // Process each element
-    const elements = Array.from(tempDiv.children);
-    
-    for (const element of elements) {
-      // Check if we need a new page
-      if (yPos > 270) {
-        doc.addPage();
-        yPos = 20;
-      }
-      
-      // Process based on element type
-      if (element.tagName === 'H1') {
-        doc.setFontSize(20);
-        doc.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
-        doc.text(element.textContent || '', margin, yPos);
-        yPos += 10;
-        
-        // Add underline for h1
-        doc.setDrawColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
-        doc.setLineWidth(0.5);
-        doc.line(margin, yPos, margin + contentWidth * 0.5, yPos);
-        yPos += 5;
-      } 
-      else if (element.tagName === 'H2') {
-        doc.setFontSize(18);
-        doc.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
-        doc.text(element.textContent || '', margin, yPos);
-        yPos += 8;
-      } 
-      else if (element.tagName === 'H3') {
-        doc.setFontSize(16);
-        doc.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
-        doc.text(element.textContent || '', margin, yPos);
-        yPos += 7;
-      } 
-      else if (element.tagName === 'P') {
-        doc.setFontSize(12);
-        doc.setTextColor(0, 0, 0);
-        const text = element.textContent || '';
-        const splitText = doc.splitTextToSize(text, contentWidth);
-        doc.text(splitText, margin, yPos);
-        yPos += (splitText.length * 7);
-      } 
-      else if (element.tagName === 'UL' || element.tagName === 'OL') {
-        doc.setFontSize(12);
-        doc.setTextColor(0, 0, 0);
-        
-        const listItems = Array.from(element.querySelectorAll('li'));
-        for (let i = 0; i < listItems.length; i++) {
-          const item = listItems[i];
-          const prefix = element.tagName === 'OL' ? `${i + 1}. ` : '• ';
-          const text = item.textContent || '';
-          const splitText = doc.splitTextToSize(text, contentWidth - 10);
-          
-          // Check if we need a new page
-          if (yPos + (splitText.length * 7) > 270) {
-            doc.addPage();
-            yPos = 20;
-          }
-          
-          doc.text(prefix, margin, yPos);
-          doc.text(splitText, margin + 7, yPos);
-          yPos += (splitText.length * 7);
-        }
-      } 
-      else if (element.tagName === 'TABLE') {
-        // Use jspdf-autotable for better table rendering
-        try {
-          // Extract table data
-          const tableRows: string[][] = [];
-          const tableHeaders: string[] = [];
-          
-          // Get headers
-          const headerRow = element.querySelector('thead tr');
-          if (headerRow) {
-            const headers = Array.from(headerRow.querySelectorAll('th'));
-            headers.forEach(header => {
-              tableHeaders.push(header.textContent || '');
-            });
-          }
-          
-          // Get rows
-          const rows = Array.from(element.querySelectorAll('tbody tr'));
-          rows.forEach(row => {
-            const cells = Array.from(row.querySelectorAll('td'));
-            const rowData: string[] = [];
-            cells.forEach(cell => {
-              rowData.push(cell.textContent || '');
-            });
-            tableRows.push(rowData);
-          });
-          
-          // Check if we need a new page
-          if (yPos + (tableRows.length * 10) + 20 > 270) {
-            doc.addPage();
-            yPos = 20;
-          }
-          
-          // @ts-ignore - jspdf-autotable extends jsPDF prototype
-          doc.autoTable({
-            head: tableHeaders.length > 0 ? [tableHeaders] : undefined,
-            body: tableRows,
-            startY: yPos,
-            theme: 'grid',
-            headStyles: {
-              fillColor: [primaryRgb.r, primaryRgb.g, primaryRgb.b],
-              textColor: [255, 255, 255],
-              fontStyle: 'bold'
-            },
-            alternateRowStyles: {
-              fillColor: [245, 245, 245]
-            },
-            margin: { left: margin, right: margin }
-          });
-          
-          // Update yPos after table
-          // @ts-ignore - jspdf-autotable extends jsPDF prototype
-          yPos = doc.lastAutoTable.finalY + 10;
-        } catch (tableError) {
-          console.error('Error rendering table:', tableError);
-          yPos += 10;
-        }
-      } 
-      else if (element.tagName === 'BLOCKQUOTE') {
-        doc.setFontSize(12);
-        doc.setTextColor(100, 100, 100);
-        // @ts-ignore - setFontStyle exists on jsPDF
-        doc.setFontStyle('italic');
-        
-        const text = element.textContent || '';
-        const splitText = doc.splitTextToSize(text, contentWidth - 10);
-        
-        // Draw quote line
-        doc.setDrawColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
-        doc.setLineWidth(1);
-        doc.line(margin, yPos, margin, yPos + (splitText.length * 7));
-        
-        doc.text(splitText, margin + 5, yPos);
-        yPos += (splitText.length * 7) + 5;
-        
-        // @ts-ignore - setFontStyle exists on jsPDF
-        doc.setFontStyle('normal');
-      } 
-      else if (element.tagName === 'HR') {
-        doc.setDrawColor(200, 200, 200);
-        doc.setLineWidth(0.5);
-        doc.line(margin, yPos, margin + contentWidth, yPos);
-        yPos += 5;
-      } 
-      else {
-        // Default handling for other elements
-        if (element.textContent && element.textContent.trim()) {
-          doc.setFontSize(12);
-          doc.setTextColor(0, 0, 0);
-          const text = element.textContent.trim();
-          const splitText = doc.splitTextToSize(text, contentWidth);
-          doc.text(splitText, margin, yPos);
-          yPos += (splitText.length * 7);
-        }
-      }
-      
-      // Add some spacing between elements
-      yPos += 5;
+    doc.line(margin, 65, pdfWidth - margin, 65);
+
+    // --- 5. Add Captured Content with Paging ---
+    let position = 0;
+    const totalPages = Math.ceil(scaledImgHeight / contentHeight);
+
+    if (totalPages > 0) {
+      doc.addPage();
+      const pdfImageY = margin - position;
+      doc.addImage(
+        canvas.toDataURL('image/png'),
+        'PNG',
+        margin,
+        pdfImageY,
+        contentWidth,
+        scaledImgHeight,
+        undefined,
+        'FAST'
+      );
+      position += contentHeight;
     }
-    
-    // Add footer to all pages
-    const pageCount = doc.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
+
+    for (let i = 2; i <= totalPages; i++) {
+      doc.addPage();
+      const pdfImageY = margin - position;
+      doc.addImage(
+        canvas.toDataURL('image/png'),
+        'PNG',
+        margin,
+        pdfImageY,
+        contentWidth,
+        scaledImgHeight,
+        undefined,
+        'FAST'
+      );
+      position += contentHeight;
+    }
+
+    // --- 6. Add Footer to All Content Pages ---
+    const finalPageCount = doc.getNumberOfPages();
+    for (let i = 2; i <= finalPageCount; i++) {
       doc.setPage(i);
       doc.setFontSize(10);
       doc.setTextColor(150, 150, 150);
-      doc.text(`Generated by MagicMuse | Page ${i} of ${pageCount}`, 105, 285, { align: 'center' });
+      doc.text(`Page ${i - 1} of ${finalPageCount - 1}`, pdfWidth / 2, pdfHeight - 10, { align: 'center' });
+      doc.text(`Generated by MagicMuse`, margin, pdfHeight - 10);
     }
-    
-    // Generate a blob URL for the PDF
+
+    // --- 7. Generate Blob URL ---
     const pdfBlob = doc.output('blob');
-    const blobUrl = URL.createObjectURL(pdfBlob);
-    
-    return {
-      status: 'completed',
-      downloadUrl: blobUrl
-    };
+    pdfBlobUrl = URL.createObjectURL(pdfBlob);
+    exportStatus = 'completed';
+
   } catch (error) {
-    console.error('PDF generation failed:', error);
-    return { status: 'failed' };
+    console.error('PDF generation using html2canvas failed:', error);
+    exportStatus = 'failed';
+  } finally {
+    // --- 8. Clean up: Remove the temporary element ---
+    if (tempContainer.parentNode) {
+      tempContainer.parentNode.removeChild(tempContainer);
+    }
   }
+
+  // --- 9. Return Result ---
+  return {
+    status: exportStatus,
+    downloadUrl: pdfBlobUrl ?? undefined // Return blob URL if successful
+  };
 };
 
 // Add more functions as needed (batchExport, getExportHistory, etc.)

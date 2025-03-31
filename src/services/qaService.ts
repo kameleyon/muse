@@ -453,30 +453,17 @@ export const getImprovementSuggestions = async (projectId: string, content: stri
     // Simulate parsing the response
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    // Generate simulated suggestions
-    return [
-      {
-        id: `sug-${Date.now()}-1`,
-        text: 'Refine value proposition for clarity.',
-        impact: 'High',
-        effort: 'Medium',
-        type: 'content'
-      },
-      {
-        id: `sug-${Date.now()}-2`,
-        text: 'Add competitor comparison chart.',
-        impact: 'Medium',
-        effort: 'High',
-        type: 'data'
-      },
-      {
-        id: `sug-${Date.now()}-3`,
-        text: 'Strengthen the call to action in the conclusion.',
-        impact: 'High',
-        effort: 'Low',
-        type: 'content'
-      }
-    ];
+    // TODO: Implement parsing of the actual AI response (result.content)
+    // to extract suggestions, impact, effort, and type.
+    // For now, return an empty array to avoid showing mock data.
+    const parsedSuggestions: Suggestion[] = [];
+    
+    // Example of how parsing might look (pseudo-code):
+    // const lines = result.content.split('\n');
+    // lines.forEach(line => { /* ... parsing logic ... */ });
+    
+    return parsedSuggestions;
+    
   } catch (error) {
     console.error('Improvement suggestions generation failed:', error);
     return [
@@ -510,7 +497,7 @@ export const applyFinalPolish = async (projectId: string, content: string): Prom
     4. Repetitive language
     5. Unclear statements
     
-    Return the polished content.
+    Return the entire polished content, ensuring all original markdown formatting (headings, lists, bold, italics, links, etc.) is preserved.
     
     Content to polish:
     ${content}`;
@@ -588,7 +575,7 @@ export const implementSuggestion = async (projectId: string, suggestionId: strin
     
     Suggestion: ${suggestionText}
     
-    Return the entire content with the improvement implemented.
+    Return the entire content with the improvement implemented, ensuring all original markdown formatting (headings, lists, bold, italics, links, etc.) is preserved.
     
     Current content:
     ${content}`;

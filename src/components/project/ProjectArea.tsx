@@ -475,12 +475,12 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
       const slideCount = options.includeAllSlides ?
         (actualSlideStructure.length || 0) :
         (options.slideStructure === 'comprehensive' ? 14 : 10);
-      const visualSteps = options.visualsEnabled ? Math.ceil(slideCount * 0.4) : 0;
+      // const visualSteps = options.visualsEnabled ? Math.ceil(slideCount * 0.4) : 0; // Visual steps removed
       const finalizationSteps = 1;
-      const totalSteps = researchSteps + slideCount + visualSteps + finalizationSteps;
+      const totalSteps = researchSteps + slideCount + finalizationSteps; // Removed visualSteps from total
       const progressIncrement = totalSteps > 0 ? 100 / totalSteps : 0; // Avoid division by zero
       let currentProgress = 0;
-      
+
       // Start with a clean slate for content generation
       // Create a custom description based on the project info
       const projectDescription = `${projectInfo.projectName} is an innovative AI-powered platform designed to revolutionize ${projectInfo.audience?.industry || 'the industry'} with cutting-edge technology and personalized experiences.`;
@@ -588,72 +588,9 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
       
-      // --- PHASE 3: Visual Generation (if enabled) ---
-      if (options.visualsEnabled && visualSteps > 0) {
-        setGenerationStatusText('Creating visual elements...');
-        setPhaseData({ currentPhase: 'visuals', phaseProgress: 0 });
-        
-        // Add explicit type for 'slide' parameter
-        const visualSlides = slidesToGenerate.filter((slide: Slide) =>
-          slide.includeVisual ||
-          ['market_analysis', 'competition', 'financials', 'roadmap', 'product'].some(type =>
-            slide.type?.includes(type) // Add optional chaining for safety
-          )
-        );
-        
-        const slidesForVisuals = visualSlides.slice(0, visualSteps);
-        
-        for (let i = 0; i < slidesForVisuals.length; i++) {
-          const slide = slidesForVisuals[i];
-          const slideIndex = slidesToGenerate.findIndex((s: Slide) => s.id === slide.id) + 1;
-          
-          setGenerationStatusText(`Creating visuals for slide ${slideIndex}: ${slide.title}...`);
-          setPhaseData({
-            currentPhase: 'visuals',
-            phaseProgress: Math.round(((i + 1) / slidesForVisuals.length) * 100),
-            currentSlide: slideIndex,
-            totalSlides: slidesToGenerate.length
-          });
-          
-          // Call the generation service for the visual specification
-          const visualPrompt = createVisualGenerationPrompt(
-            slide, generatedSlides[slideIndex - 1], projectInfo
-          );
-          const visualResult = await contentGenerationService.generateContent({
-            projectId: projectId,
-            prompt: visualPrompt,
-            useResearchModel: false, // Use standard model for visuals/specs
-          });
-
-          if (!visualResult || visualResult.content.startsWith('Error:')) {
-             console.warn(`Failed to generate visual spec for slide ${slideIndex}: ${visualResult?.content}`);
-             // Optionally add a simple placeholder note even on failure
-             // generatedSlides[slideIndex - 1] += `\n\n[Visual generation failed for ${slide.title}]\n\n`;
-          } else {
-             // Extract the full visual-specification block from the result
-             const specMatch = visualResult.content.match(/```visual-specification([\s\S]*?)```/);
-             const fullSpecBlock = specMatch ? specMatch[0] : `\n\n[Could not extract visual spec for ${slide.title}]\n\n`; // Fallback
-
-             // Find the index of this slide in the generatedSlides array
-             const slideContentIndex = slideIndex - 1;
-             if (slideContentIndex >= 0 && slideContentIndex < generatedSlides.length) {
-               // Append the full extracted spec block
-               generatedSlides[slideContentIndex] += `\n\n${fullSpecBlock}\n\n`;
-
-               // Update preview with the added visual placeholder
-               const updatedContentWithVisual = `# ${projectInfo.projectName}\n\n${projectDescription}\n\n${generatedSlides.join('')}`;
-               setGeneratedContentPreview(updatedContentWithVisual); // Update directly
-             }
-          }
-
-          currentProgress = Math.round((researchSteps + slidesToGenerate.length + (i + 1)) / totalSteps * 100);
-          
-          // Small delay to let the user see the progress
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
-      }
+      // --- PHASE 3: Visual Generation REMOVED ---
       
-      // --- PHASE 4: Finalization ---
+      // --- PHASE 4 becomes PHASE 3: Finalization ---
       setGenerationStatusText('Finalizing presentation...');
       setPhaseData({ currentPhase: 'finalizing', phaseProgress: 0 });
       
@@ -943,16 +880,10 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
                   <div className="sticky top-[80px] space-y-6"> 
                      <EnhancementTools
                         editorContent={editorContent} 
-                        onContentChange={setEditorContent} 
+                        onContentChange={setEditorContent}
                      />
-                     <VisualElementStudio
-                       brandColors={{
-                         primary: primaryColor || '#ae5630',
-                         secondary: secondaryColor || '#232321',
-                         accent: accentColor || '#9d4e2c'
-                       }}
-                     />
-                     <CollaborationTools />
+                     {/* VisualElementStudio removed */}
+                     {/* CollaborationTools removed */}
                   </div>
                </div>
               <div className="lg:col-span-12 flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">

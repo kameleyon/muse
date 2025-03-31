@@ -315,12 +315,17 @@ function getSlideTypeSpecificInstructions(slideType: string): string {
 - Clearly state the unique value 
 - Emphasize how it differs from existing options 
 - Quantify benefits if possible (ROI, time saved, etc.).`;
+    case 'market_opportunity':
+      return `\n\n(Market Opportunity)
+- Clearly state the market opportunity based on the market research 
+- Support statement in a clear concise chart bars. 
+- Explain the chart in a comprehensive yet data oriented section`;
     // ... other cases as needed ...
     default:
       return `\n\n(Generic Slide)
 - Provide relevant, concise info 
 - Focus on 2-3 key points 
-- Use visuals where appropriate.`;
+- Use visuals where appropriate. DO NOT WRITE THE NAME/TITLE/LABEL OF THE SLIDE`;
   }
 }
 

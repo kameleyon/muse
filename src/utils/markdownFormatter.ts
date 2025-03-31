@@ -19,24 +19,19 @@ interface BrandColors {
 /**
  * Cleans up JSON code blocks from content
  * @param content The content to clean
- * @returns Content with JSON code blocks removed or converted to markdown
+ * @returns Content with JSON code blocks removed
  */
 export const cleanupJsonCodeBlocks = (content: string): string => {
-  // Remove or convert JSON code blocks to markdown
-  return content
-    // Remove JSON chart objects that are in the middle of content
-    .replace(/\{\s*"type"\s*:\s*"chart"[\s\S]*?\}\s*\n*/g,
-      '[Chart visualization removed for better formatting]\n\n')
-    
-    // Remove other JSON objects
-    .replace(/\{\s*"type"\s*:[\s\S]*?\}\s*\n*/g,
-      '[Visual element removed for better formatting]\n\n')
-    
-    // Clean up any remaining JSON-like structures
-    .replace(/\{\s*"[\w]+"[\s\S]*?\}\s*\n*/g,
-      '[Data structure removed for better formatting]\n\n')
-    
-    // Fix broken markdown tables
+  // More robustly remove JSON objects/arrays that might appear inline.
+  // This targets structures starting with { or [ and containing key-value pairs or quoted strings,
+  // attempting to match balanced braces/brackets. It's not a perfect JSON parser but should catch common cases.
+  let cleaned = content.replace(/\{\s*"[^"]+"\s*:\s*[\s\S]*?\}\s*\n*/g, '[Data structure removed]\n\n');
+  cleaned = cleaned.replace(/\[\s*\{[\s\S]*?\}\s*\]\s*\n*/g, '[Data array removed]\n\n');
+  // Catch simpler JSON-like blocks that might be missed
+  cleaned = cleaned.replace(/\{\s*(".*?"\s*:\s*".*?"\s*,?\s*)+\s*\}\s*\n*/g, '[Simple data removed]\n\n');
+
+  // Fix broken markdown tables (keep this part)
+  return cleaned
     .replace(/\|\s*(\w+)\s*\|\s*(\w+)\s*\|/g, '| $1 | $2 |')
     
     // Ensure proper table formatting
@@ -55,11 +50,8 @@ export const formatToMarkdown = (
   };
 
   // First, clean up any existing markdown or HTML formatting issues
+  // JSON cleanup is now handled separately by cleanupJsonCodeBlocks
   let cleanedContent = htmlContent
-    // Clean up JSON code blocks
-    .replace(/\{\s*"type"\s*:[\s\S]*?\}\s*\n*/g,
-      '[Visual element removed for better formatting]\n\n')
-    
     // Fix spacing issues
     .replace(/\s+/g, ' ')
     // Fix missing spaces after punctuation
@@ -187,10 +179,7 @@ export const formatForPdfExport = (
   // Preserve markdown formatting for PDF rendering
   const processedMarkdown = markdown
     // Keep color markers for PDF styling
-    // Replace with actual PDF-compatible styling if needed
-    .replace(/\[color:primary\](.*?)\[\/color\]/g, `$1`)
-    .replace(/\[color:secondary\](.*?)\[\/color\]/g, `$1`)
-    .replace(/\[color:accent\](.*?)\[\/color\]/g, `$1`)
+    // These will be parsed by the PDF generator
     
     // Preserve markdown headings with proper formatting
     .replace(/^# (.*?)$/gm, `# $1\n`)

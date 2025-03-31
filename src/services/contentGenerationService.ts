@@ -2,7 +2,7 @@
 
 // Read environment variables (Vite specific)
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const CONTENT_MODEL = import.meta.env.VITE_DEFAULT_CONTENT_MODEL || 'google/gemini-2.5-pro-exp-03-25:free';
+const CONTENT_MODEL = import.meta.env.VITE_DEFAULT_CONTENT_MODEL || 'qwen/qwen-plus';
 const RESEARCH_MODEL = import.meta.env.VITE_DEFAULT_RESEARCH_MODEL || 'openai/gpt-4o-search-preview';
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'http://localhost:5173';
 const APP_NAME = import.meta.env.VITE_APP_NAME || 'MagicMuse';
@@ -111,14 +111,25 @@ export const generateContent = async (params: GenerationParams): Promise<Generat
       }
     }
     
-    // If no content was found, try other formats or return an error
+    // If no content was found, check if it's an error response
     if (!generatedText) {
-      console.error("Unexpected API response format:", result);
-      return { 
-        content: "Error: Unable to parse API response. Check console for details.",
-        modelUsed: modelToUse,
-        finishReason: 'error'
-      };
+      if (result.error && typeof result.error.message === 'string') {
+        // Handle specific error format from OpenRouter/API
+        console.error("API returned an error:", result.error);
+        return {
+          content: `Error: API Error - ${result.error.message}`,
+          modelUsed: modelToUse,
+          finishReason: 'error'
+        };
+      } else {
+        // Handle other unexpected formats
+        console.error("Unexpected API response format:", result);
+        return {
+          content: "Error: Unable to parse API response. Check console for details.",
+          modelUsed: modelToUse,
+          finishReason: 'error'
+        };
+      }
     }
 
     // Split content into blocks for streaming/typing effect
@@ -228,17 +239,53 @@ export const applyTemplate = async (projectId: string, templateId: string): Prom
  * @returns Promise resolving to the enhanced content.
  */
 export const enhanceContent = async (
-  projectId: string, 
-  sectionId: string, 
-  content: string, 
+  projectId: string,
+  sectionId: string,
+  content: string,
   enhancementType: 'clarity' | 'conciseness' | 'persuasiveness' | 'persuasion' | 'tone' | 'flow' | 'transitions' | 'readability' | 'jargon' | 'regenerate'
 ): Promise<GeneratedContent> => {
   console.log('API CALL: enhanceContent', projectId, enhancementType);
+
+  let specificPrompt = '';
+  switch (enhancementType) {
+    case 'clarity':
+      specificPrompt = `Rewrite the following content to improve its clarity and ease of understanding. Ensure the core meaning is preserved but expressed more directly:\n\n${content}`;
+      break;
+    case 'conciseness':
+      specificPrompt = `Rewrite the following content to make it more concise. Remove redundant words and phrases, and shorten sentences where possible without losing essential information:\n\n${content}`;
+      break;
+    case 'persuasion': // Alias for persuasiveness
+    case 'persuasiveness':
+      specificPrompt = `Enhance the following content to be more persuasive. Strengthen the arguments, use more compelling language, and focus on benefits or impact:\n\n${content}`;
+      break;
+    case 'tone':
+      // Note: Ideally, the target tone would be passed as a parameter. Using a generic improvement for now.
+      specificPrompt = `Analyze the tone of the following content and adjust it to be more professional and engaging, suitable for a pitch deck:\n\n${content}`;
+      break;
+    case 'flow':
+      specificPrompt = `Analyze the flow and structure of the following content. Suggest improvements or rewrite sections to ensure a logical and smooth progression of ideas:\n\n${content}`;
+      break;
+    case 'transitions':
+      specificPrompt = `Analyze the transitions between paragraphs and ideas in the following content. Add or improve transition words and phrases to create a smoother flow:\n\n${content}`;
+      break;
+    case 'readability':
+      specificPrompt = `Improve the readability of the following content. Simplify complex sentences, replace jargon with clearer terms (unless essential), and ensure consistent formatting:\n\n${content}`;
+      break;
+    case 'jargon':
+      specificPrompt = `Identify and replace or explain any potentially confusing jargon or technical terms in the following content to make it accessible to a wider audience:\n\n${content}`;
+      break;
+    case 'regenerate':
+       specificPrompt = `Regenerate the following content, aiming for a fresh perspective while keeping the core topic the same:\n\n${content}`;
+       break;
+    default:
+      specificPrompt = `Enhance the following content for better ${enhancementType}:\n\n${content}`;
+  }
   
-  const prompt = `Enhance the following content for better ${enhancementType}. Maintain the same information and structure, but improve the ${enhancementType}:\n\n${content}`;
-  
+  // Add instruction to preserve markdown
+  specificPrompt += "\n\nReturn the entire enhanced content, ensuring all original markdown formatting (headings, lists, bold, italics, links, etc.) is preserved.";
+
   // Use the standard content model for enhancement
-  return generateContent({ projectId, sectionId, prompt, useResearchModel: false });
+  return generateContent({ projectId, sectionId, prompt: specificPrompt, useResearchModel: false }); // Use specificPrompt here
 };
 
 /**
