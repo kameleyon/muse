@@ -125,14 +125,76 @@ export const generateFormattedPdf = async (
     doc.setFontSize(12);
     doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 30);
     
-    // Add content
+    // Add content with proper markdown formatting
     doc.setFontSize(12);
     
-    // Split the content into lines that fit the page width
-    const textLines = doc.splitTextToSize(markdownContent, 170);
+    // Process markdown content for better PDF rendering
+    const processedContent = markdownContent
+      // Remove any problematic code blocks that might be causing issues
+      .replace(/```([\s\S]*?)```/g, (match, codeContent) => {
+        if (codeContent.includes('"type":') || codeContent.includes('function')) {
+          return '[Code block removed for PDF export]';
+        }
+        return match;
+      });
     
-    // Add the text lines to the PDF, starting at y-position 40
-    doc.text(textLines, 20, 40);
+    // Split content by headers to handle them specially
+    const contentSections = processedContent.split(/^(#+\s.*?)$/m);
+    
+    let yPosition = 40; // Starting y position
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    const textWidth = pageWidth - (margin * 2);
+    
+    // Process each section
+    for (let i = 0; i < contentSections.length; i++) {
+      const section = contentSections[i];
+      
+      // Skip empty sections
+      if (!section.trim()) continue;
+      
+      // Check if this is a header
+      if (/^#+\s/.test(section)) {
+        // Determine header level
+        const headerLevel = (section.match(/^#+/) || [''])[0].length;
+        const headerText = section.replace(/^#+\s/, '');
+        
+        // Set font size based on header level
+        if (headerLevel === 1) {
+          doc.setFontSize(20);
+          doc.setTextColor(0, 0, 0);
+        } else if (headerLevel === 2) {
+          doc.setFontSize(18);
+          doc.setTextColor(40, 40, 40);
+        } else {
+          doc.setFontSize(16);
+          doc.setTextColor(60, 60, 60);
+        }
+        
+        // Add header text
+        const headerLines = doc.splitTextToSize(headerText, textWidth);
+        doc.text(headerLines, margin, yPosition);
+        yPosition += (headerLines.length * (headerLevel === 1 ? 10 : 8)) + 5;
+        
+        // Reset font for normal text
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+      } else {
+        // Process regular content
+        // Split the content into lines that fit the page width
+        const textLines = doc.splitTextToSize(section, textWidth);
+        
+        // Check if we need a new page
+        if (yPosition + (textLines.length * 7) > doc.internal.pageSize.getHeight() - margin) {
+          doc.addPage();
+          yPosition = margin + 10;
+        }
+        
+        // Add the text lines to the PDF
+        doc.text(textLines, margin, yPosition);
+        yPosition += (textLines.length * 7) + 10;
+      }
+    }
     
     // Generate a blob URL for the PDF
     const pdfBlob = doc.output('blob');

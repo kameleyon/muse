@@ -153,34 +153,41 @@ export const formatForPdfExport = (
   const markdown = formatToMarkdown(content, brandColors);
   
   // Process the markdown for PDF generation with jsPDF
-  // Clean up the markdown for better rendering in jsPDF
+  // Preserve markdown formatting for PDF rendering
   const processedMarkdown = markdown
-    // Remove color markers
+    // Keep color markers for PDF styling
+    // Replace with actual PDF-compatible styling if needed
     .replace(/\[color:primary\](.*?)\[\/color\]/g, `$1`)
     .replace(/\[color:secondary\](.*?)\[\/color\]/g, `$1`)
     .replace(/\[color:accent\](.*?)\[\/color\]/g, `$1`)
     
-    // Convert markdown headings to plain text with line breaks
-    .replace(/^# (.*?)$/gm, `\n\n$1\n`)
-    .replace(/^## (.*?)$/gm, `\n$1\n`)
-    .replace(/^### (.*?)$/gm, `$1\n`)
+    // Preserve markdown headings with proper formatting
+    .replace(/^# (.*?)$/gm, `# $1\n`)
+    .replace(/^## (.*?)$/gm, `## $1\n`)
+    .replace(/^### (.*?)$/gm, `### $1\n`)
     
-    // Convert markdown lists to plain text with proper spacing
-    .replace(/^- (.*?)$/gm, `• $1\n`)
-    .replace(/^\d+\. (.*?)$/gm, `• $1\n`)
+    // Preserve markdown lists
+    .replace(/^- (.*?)$/gm, `- $1\n`)
+    .replace(/^\d+\. (.*?)$/gm, `$1. $1\n`)
     
-    // Convert markdown bold/italic to plain text
-    .replace(/\*\*(.*?)\*\*/g, `$1`)
-    .replace(/\*(.*?)\*/g, `$1`)
+    // Preserve markdown bold/italic
+    // These will be handled by the PDF renderer
     
-    // Convert markdown links to plain text
-    .replace(/\[(.*?)\]\((.*?)\)/g, `$1 ($2)`)
+    // Preserve markdown links with proper formatting
+    .replace(/\[(.*?)\]\((.*?)\)/g, `[$1]($2)`)
+    
+    // Clean up any code blocks that might be causing issues
+    .replace(/```([\s\S]*?)```/g, (match, codeContent) => {
+      // Remove any JSON or code that might be causing rendering issues
+      if (codeContent.includes('"type":') || codeContent.includes('function')) {
+        return `[Code block removed for PDF export]`;
+      }
+      return match;
+    })
     
     // Add extra line breaks for better readability
     .replace(/\n\n/g, `\n\n`);
   
   // Return the processed content
-  return processedMarkdown;
-  
   return processedMarkdown;
 };

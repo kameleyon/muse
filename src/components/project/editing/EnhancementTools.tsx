@@ -6,6 +6,7 @@ import * as contentGenerationService from '@/services/contentGenerationService';
 import { useProjectWorkflowStore } from '@/store/projectWorkflowStore';
 import { useDispatch } from 'react-redux';
 import { addToast } from '@/store/slices/uiSlice';
+import { formatToMarkdown } from '@/utils/markdownFormatter';
 
 interface EnhancementToolsProps {
   editorContent: string;
@@ -19,6 +20,24 @@ const EnhancementTools: React.FC<EnhancementToolsProps> = ({ editorContent, onCo
   // Get project ID from store
   const { projectId } = useProjectWorkflowStore();
   const dispatch = useDispatch();
+
+  // Helper function to detect if content is markdown
+  const isMarkdownContent = (content: string): boolean => {
+    // Check for common markdown patterns
+    const markdownPatterns = [
+      /^#+ /m,                  // Headers
+      /\*\*(.*?)\*\*/,          // Bold
+      /\*(.*?)\*/,              // Italic
+      /\[(.*?)\]\((.*?)\)/,     // Links
+      /^- /m,                   // Unordered lists
+      /^[0-9]+\. /m,            // Ordered lists
+      /^>/m,                    // Blockquotes
+      /`(.*?)`/,                // Inline code
+      /^```[\s\S]*?```$/m       // Code blocks
+    ];
+    
+    return markdownPatterns.some(pattern => pattern.test(content));
+  };
 
   const handleEnhance = async (type: 'clarity' | 'conciseness' | 'persuasiveness' | 'persuasion' | 'tone' | 'flow' | 'transitions' | 'readability' | 'jargon' | 'regenerate') => {
      if (!editorContent) {
@@ -40,7 +59,11 @@ const EnhancementTools: React.FC<EnhancementToolsProps> = ({ editorContent, onCo
      setEnhancementType(type);
      setIsLoading(true);
      
+     // Determine if content is markdown
+     const isMarkdown = isMarkdownContent(editorContent);
+     
      try {
+       // Send content to AI for enhancement
        const result = await contentGenerationService.enhanceContent(
          projectId,
          'current-section', // Using a default section ID
@@ -49,7 +72,24 @@ const EnhancementTools: React.FC<EnhancementToolsProps> = ({ editorContent, onCo
        );
        
        if (result.content && !result.content.startsWith('Error:')) {
-         onContentChange(result.content);
+         // If original content was markdown, ensure we preserve markdown formatting
+         if (isMarkdown) {
+           // Check if the result already contains markdown formatting
+           const resultHasMarkdown = isMarkdownContent(result.content);
+           
+           if (resultHasMarkdown) {
+             // If the result already has markdown, use it directly
+             onContentChange(result.content);
+           } else {
+             // If the result lost markdown formatting, convert it back
+             const enhancedMarkdown = formatToMarkdown(result.content);
+             onContentChange(enhancedMarkdown);
+           }
+         } else {
+           // If not markdown, use the enhanced content as is
+           onContentChange(result.content);
+         }
+         
          dispatch(addToast({
            type: 'success',
            message: `Successfully enhanced content for ${type}.`
@@ -185,15 +225,51 @@ const EnhancementTools: React.FC<EnhancementToolsProps> = ({ editorContent, onCo
               </Button>
            </div>
         </div>
-         {/* Section Regeneration */}
+         {/* Apply Markdown Button */}
          <Button
            variant="secondary"
            size="sm"
            className="w-full mt-8"
-           onClick={() => handleEnhance('regenerate')}
+           onClick={() => {
+             if (!editorContent) {
+               dispatch(addToast({
+                 type: 'warning',
+                 message: "Please add some content before applying markdown formatting."
+               }));
+               return;
+             }
+             
+             // Check if content is already in markdown format
+             const isAlreadyMarkdown = isMarkdownContent(editorContent);
+             
+             if (isAlreadyMarkdown) {
+               // If already markdown, just clean it up and ensure proper formatting
+               const cleanedMarkdown = editorContent
+                 // Fix any broken markdown formatting
+                 .replace(/\*\*\s+/g, '**') // Fix spaces after bold markers
+                 .replace(/\s+\*\*/g, '**') // Fix spaces before bold markers
+                 .replace(/\*\s+/g, '*') // Fix spaces after italic markers
+                 .replace(/\s+\*/g, '*') // Fix spaces before italic markers
+                 .replace(/\n{3,}/g, '\n\n') // Fix excessive line breaks
+                 .replace(/\n\s+\n/g, '\n\n'); // Fix lines with only whitespace
+               
+               onContentChange(cleanedMarkdown);
+             } else {
+               // Convert the current content to markdown format
+               const markdownContent = formatToMarkdown(editorContent);
+               
+               // Update the editor content with the markdown-formatted content
+               onContentChange(markdownContent);
+             }
+             
+             dispatch(addToast({
+               type: 'success',
+               message: "Markdown formatting applied successfully."
+             }));
+           }}
            disabled={isLoading}
          >
-            Regenerate Section
+            Apply Markdown Formatting
          </Button>
       </div>
     </Card>

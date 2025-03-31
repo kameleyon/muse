@@ -46,8 +46,8 @@ const VisualElementStudio: React.FC<{
   const [showMarketGrowth, setShowMarketGrowth] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   
-  // Get project ID from store
-  const { projectId, editorContent } = useProjectWorkflowStore();
+  // Get project ID and editor content from store at component level
+  const { projectId, editorContent, setEditorContent } = useProjectWorkflowStore();
   const dispatch = useDispatch();
   
   const handleAddElement = async (type: string) => {
@@ -155,11 +155,97 @@ const VisualElementStudio: React.FC<{
   };
   
   const handleInsertElement = (type: string) => {
-    // In a real implementation, this would insert the element into the editor
-    dispatch(addToast({
-      type: 'success',
-      message: `${type} element inserted successfully.`
-    }));
+    // Generate chart/visual element HTML or markdown
+    let visualElementCode = '';
+    
+    if (type === 'Market Chart') {
+      // Generate markdown for the market growth chart instead of HTML
+      visualElementCode = `
+### AI in Education Market Growth Trajectory (2024-2033)
+
+![Market Growth Chart](chart-placeholder.png)
+
+**CAGR: 35.18% through 2033**
+
+*Total Market | AI-Powered Learning Solutions*
+`;
+    } else if (type === 'Timeline') {
+      // Generate timeline in markdown format
+      visualElementCode = `
+### Project Timeline
+
+- **2022 Q1**: Initial R&D phase completed
+- **2022 Q3**: Secured $3.2M funding
+- **2023 Q1**: Beta platform launch
+- **2023 Q3**: Analytics dashboard release
+- **2024 Q1**: Commercial launch (Current Phase)
+- **2024 Q3**: Implementation of NLP capabilities
+- **2025 Q1**: Enterprise solution launch
+- **2025 Q3**: International expansion
+- **2026 Q1**: Integration of generative AI/LLM technologies
+`;
+    } else if (type === 'Table') {
+      // Generate table in markdown format
+      if (tablePreview) {
+        visualElementCode = `
+### ${tablePreview.title}
+
+| ${tablePreview.headers.join(' | ')} |
+| ${tablePreview.headers.map(() => '---').join(' | ')} |
+${tablePreview.rows.map(row => `| ${row.join(' | ')} |`).join('\n')}
+
+${tablePreview.notes ? `*Note: ${tablePreview.notes}*` : ''}
+`;
+      } else {
+        visualElementCode = `
+### Competitive Analysis Matrix
+
+| Feature | Our Solution | Competitor A | Competitor B | Competitor C |
+| --- | --- | --- | --- | --- |
+| AI Integration | Advanced | Basic | Intermediate | None |
+| User Experience | Excellent | Good | Fair | Good |
+| Pricing | $49/mo | $79/mo | $39/mo | $99/mo |
+| Market Share | 15% | 35% | 10% | 25% |
+| Customer Support | 24/7 | Business hours | Email only | 24/7 |
+
+*Based on market research conducted in Q1 2025*
+`;
+      }
+    } else if (type === 'Diagram') {
+      // Generate diagram in markdown format
+      visualElementCode = `
+### ${diagramPreview?.title || 'System Architecture'}
+
+*Diagram showing the following components:*
+${diagramPreview?.elements.map(element => `- ${element}`).join('\n') || `
+- User Interface
+- API Gateway
+- Authentication Service
+- Core Processing Engine
+- Database
+- Analytics Engine`}
+
+*With connections between components*
+`;
+    }
+    
+    // Insert the visual element code into the editor content
+    if (visualElementCode && setEditorContent) {
+      // Insert at cursor position or append to the end
+      // Append the visual element to the existing content
+      setEditorContent(editorContent + visualElementCode);
+      
+      dispatch(addToast({
+        type: 'success',
+        message: `${type} element inserted successfully.`
+      }));
+    } else {
+      dispatch(addToast({
+        type: 'error',
+        message: `Failed to insert ${type} element. Please try again.`
+      }));
+    }
+    
     closePreview();
   };
   
