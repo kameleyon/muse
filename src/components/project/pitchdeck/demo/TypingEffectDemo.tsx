@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Play, Pause, RotateCcw, Download, Loader } from 'lucide-react';
-import ContentGenerationPreview from '@/components/project/editing/ContentGenerationPreview';
+import ContentGenerationPreview from '@/components/project/pitchdeck/editing/ContentGenerationPreview';
 import * as contentGenerationService from '@/services/contentGenerationService';
 import { useProjectWorkflowStore } from '@/store/projectWorkflowStore';
 import { useDispatch } from 'react-redux';

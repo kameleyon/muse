@@ -86,8 +86,33 @@ const NewProjectModal: React.FC<NewProjectModalProps> = ({
 
         if (newProjectId) {
           onClose(); // Close the modal first
-          // Pass project name in navigation state
-          navigate(`/project/${newProjectId}/setup`, { state: { projectName: name } });
+          // Map subcategory ID to a valid project type recognized by ProjectArea component
+          let projectType = "pitchdeck"; // Default fallback
+          
+          // Map subcategory IDs to valid project types
+          if (selectedSubcategory) {
+            const subcategoryId = selectedSubcategory.id;
+            
+            // Map blog-related subcategories to 'blog' type
+            if (subcategoryId === 'blog_content_marketing') {
+              projectType = 'blog';
+            }
+            // Add more mappings as needed for other subcategories
+            else if (subcategoryId.includes('pitch') || subcategoryId.includes('proposal')) {
+              projectType = 'pitchdeck';
+            }
+            // Add additional mappings for other subcategory types
+            
+            console.log(`Mapped subcategory ID "${subcategoryId}" to project type "${projectType}"`);
+          }
+          
+          // Pass project name and mapped project type in navigation state
+          navigate(`/project/${newProjectId}/setup`, { 
+            state: { 
+              projectName: name,
+              projectType: projectType 
+            } 
+          });
         } else {
           // Handle case where creation succeeded but no ID was returned (shouldn't happen ideally)
           console.error("Project created but no ID returned.");

@@ -1,3 +1,4 @@
+//src/pages/ProjectSetup.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom'; // Import useLocation
 import SidebarProject from '@/components/project/SidebarProject';
@@ -8,14 +9,16 @@ import Loading from '@/components/common/Loading'; // Assuming Loading component
 interface ProjectData {
   id: string;
   name: string;
-  // Add other relevant fields if needed later
+  projectType: string; // Add projectType field
 }
 
 const ProjectSetup: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const location = useLocation(); // Get location object
-  // Safely access projectName from state, provide default if state is null/undefined
-  const initialProjectNameFromState = (location.state as { projectName?: string })?.projectName;
+  // Safely access state, provide defaults if state is null/undefined
+  const locationState = location.state as { projectName?: string; projectType?: string } | null;
+  const initialProjectNameFromState = locationState?.projectName;
+  const initialProjectTypeFromState = locationState?.projectType; // Get projectType from state
 
   const [projectData, setProjectData] = useState<ProjectData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -38,8 +41,23 @@ const ProjectSetup: React.FC = () => {
         
         // Use the name from navigation state if available, otherwise generate placeholder
         const fetchedName = initialProjectNameFromState || `Project ${projectId.substring(0, 5)}...`;
-        const fetchedData: ProjectData = { id: projectId, name: fetchedName }; 
         
+        // IMPORTANT: Get the project type from state or try to determine from URL/query params
+        // This is critical for loading the correct layout
+        let fetchedType = initialProjectTypeFromState;
+        
+        // If no type in state, check if we can determine it from other sources
+        // For example, you might extract it from URL path segments or query parameters
+        if (!fetchedType) {
+          // Instead of defaulting to a specific type, set an error
+          setError("Project type is missing. Cannot set up project correctly.");
+          setIsLoading(false);
+          return; // Exit early from useEffect
+        }
+        
+        console.log(`ProjectSetup: Using projectType: ${fetchedType} (from state: ${initialProjectTypeFromState})`);
+        const fetchedData: ProjectData = { id: projectId, name: fetchedName, projectType: fetchedType };
+
         setProjectData(fetchedData);
       } catch (err) {
         console.error("Failed to fetch project data:", err);
@@ -50,8 +68,8 @@ const ProjectSetup: React.FC = () => {
     };
 
     fetchProjectData();
-  // Add initialProjectNameFromState to dependency array if you want fetch to re-run if state changes (might not be necessary here)
-  }, [projectId, initialProjectNameFromState]); 
+  // Add dependencies from state if fetch should re-run when they change
+  }, [projectId, initialProjectNameFromState, initialProjectTypeFromState]);
 
   if (isLoading) {
     return <Loading />;
@@ -75,9 +93,9 @@ const ProjectSetup: React.FC = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-grow w-full md-w-3/4"> {/* Ensure flex-grow works correctly */}
-        {/* Pass initialName from fetched data (which now uses navigation state if available) */}
-        <ProjectArea initialName={projectData.name} /> 
+      <div className="flex-grow w-full md:w-3/4"> {/* Ensure flex-grow works correctly */}
+        {/* Pass projectType from fetched data */}
+        <ProjectArea projectType={projectData.projectType} />
       </div>
     </div>
   );

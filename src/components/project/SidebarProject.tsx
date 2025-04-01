@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/Card'; // Assuming Card component is reusable
-import { projectMenuItems, ProjectMenuItem, ProjectSubItem } from './data/projectMenuItems'; // Import from .tsx
+import { projectMenuItems, ProjectMenuItem, ProjectSubItem } from './pitchdeck/data/projectMenuItems'; // Import from .tsx
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import '@/styles/SidebarProject.css'; // Keep existing CSS import
 

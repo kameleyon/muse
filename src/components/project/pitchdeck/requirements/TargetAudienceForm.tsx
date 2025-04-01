@@ -1,14 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Input } from '../../ui/Input';
-import { RadioGroup } from '../../ui/RadioGroup';
-import { RadioGroupItem } from '../../ui/RadioGroupItem';
-import { Label } from '../../ui/Label';
-import { Button } from '../../ui/Button';
+import { Input } from '../../../ui/Input';
+import { RadioGroup } from '../../../ui/RadioGroup';
+import { RadioGroupItem } from '../../../ui/RadioGroupItem';
+import { Label } from '../../../ui/Label';
+import { Button } from '../../../ui/Button';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '../../ui/Command';
-import { Popover, PopoverContent, PopoverTrigger } from '../../ui/Popover';
-import { cn } from '../../../lib/utils';
-import { Badge } from '../../ui/Badge';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '../../../ui/Command';
+import { Popover, PopoverContent, PopoverTrigger } from '../../../ui/Popover';
+import { cn } from '../../../../lib/utils';
+import { Badge } from '../../../ui/Badge';
 
 // Data for organization types
 const organizationTypes = [

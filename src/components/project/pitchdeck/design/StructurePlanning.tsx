@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input'; 
 import { Button } from '@/components/ui/Button';
 import { GripVertical, Plus, Trash2, Info } from 'lucide-react';
-import { Tooltip } from '../../ui/Tooltip';
+import { Tooltip } from '../../../ui/Tooltip';
 // Explicitly import the centralized Slide type again
 import { Slide, ComplexityLevel } from '@/store/types';
 
