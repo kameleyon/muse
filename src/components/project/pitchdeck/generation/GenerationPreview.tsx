@@ -83,13 +83,11 @@ const GenerationPreview: React.FC<GenerationPreviewProps> = ({
 This is a preview of your generated content. Click "Start Content Generation" to begin, or explore the visualization capabilities below.
 
 ## Sample Chart
-
 \`\`\`chart
 ${JSON.stringify(chartData, null, 2)}
 \`\`\`
 
 ## Features
-
 - **Rich Charts**: Line, bar, pie, area, radar, and more
 - **Beautiful Tables**: Automatically styled to match your brand
 - **Smart Diagrams**: Visualize processes and relationships
@@ -124,20 +122,11 @@ Click "Start Content Generation" to create your own content with these visualiza
         Real-Time Preview
       </h4>
       <div
-        className={`flex-grow overflow-y-auto text-sm text-neutral-dark bg-white/50 p-4 rounded custom-scrollbar template-${templateId} whitespace-pre-wrap`}
+        className={`flex-grow overflow-y-auto text-sm text-neutral-dark bg-white/50 p-6 rounded custom-scrollbar template-${templateId} whitespace-pre-wrap`}
         style={{ overflowWrap: 'break-word', ...getTemplateStyles() }}
       >
         {displayContent ? (
           <>
-            {/* Add debug info for chart content */}
-            {displayContent.includes('```chart') && (
-              <div className="bg-blue-50 p-2 mb-4 text-xs border border-blue-200 rounded">
-                <div className="font-semibold text-blue-700">Chart Content Detected</div>
-                <div className="text-blue-600">
-                  The preview contains chart code blocks that should be rendered as visualizations.
-                </div>
-              </div>
-            )}
             <MarkdownVisualizer 
               content={displayContent}
               enhanceVisuals={options.enhanceVisuals}

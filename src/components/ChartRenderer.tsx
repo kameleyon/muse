@@ -287,9 +287,9 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
     // Render the appropriate chart based on the type
     let chartComponent = null;
     
-    // Set width and height for all charts
-    const chartWidth = 600;
-    const chartHeight = options?.aspectRatio ? 300 * options.aspectRatio : 300;
+    // Set width and height for all charts - reduced to avoid horizontal scrolling
+    const chartWidth = 450; // Reduced from 600
+    const chartHeight = options?.aspectRatio ? 250 * options.aspectRatio : 250; // Reduced from 300
     
     switch (chartType) {
       case 'bar':
