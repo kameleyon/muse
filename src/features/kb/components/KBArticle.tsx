@@ -1,6 +1,6 @@
 // src/features/kb/components/KBArticle.tsx
 import React from 'react';
-import { MarkdownContent } from '../../../lib/markdown'; // Adjust path if needed
+import MarkdownContent from '../../../lib/markdown'; // Adjust path if needed
 
 interface KBArticleProps {
   content: string; // Markdown content

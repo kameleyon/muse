@@ -1,37 +1,45 @@
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { Components } from 'react-markdown';
+import ChartRenderer from '../components/ChartRenderer';
 
-interface MarkdownContentProps {
+interface MarkdownRendererProps {
   content: string;
-  className?: string;
 }
 
-/**
- * Component for rendering markdown content with custom styling
- */
-export const MarkdownContent: React.FC<MarkdownContentProps> = ({ content, className = '' }) => {
+interface CodeBlockProps {
+  node?: any;
+  inline?: boolean;
+  className?: string;
+  children: React.ReactNode;
+  [key: string]: any;
+}
+
+const CodeBlock: React.FC<CodeBlockProps> = ({ node, inline, className, children, ...props }) => {
+  const match = /language-(\w+)/.exec(className || '');
+  if (!inline && match && match[1] === 'chart') {
+    const childArray = React.Children.toArray(children);
+    // Filter out only text nodes (strings or numbers) and convert them to strings.
+    const textNodes = childArray.filter(
+      (child): child is React.ReactText =>
+        typeof child === 'string' || typeof child === 'number'
+    );
+    const data = textNodes.map(child => String(child)).join('');
+    return <ChartRenderer data={data} />;
+  }
   return (
-    <div className={`prose prose-sm max-w-none prose-headings:font-semibold prose-p:mb-2 prose-ul:list-disc prose-ol:list-decimal ${className}`}>
-      <ReactMarkdown>{content}</ReactMarkdown>
-    </div>
+    <pre className={className} {...props}>
+      <code>{children}</code>
+    </pre>
   );
 };
 
-/**
- * Utility function to check if content contains markdown
- */
-export const containsMarkdown = (content: string): boolean => {
-  // Check for common markdown patterns
-  const markdownPatterns = [
-    /[*_]{1,2}[^*_]+[*_]{1,2}/, // Bold or italic
-    /^#+\s+/, // Headers
-    /^(-|\*|\+|\d+\.)\s+/, // Lists
-    /!\[.*\]\(.*\)/, // Images
-    /\[.*\]\(.*\)/, // Links
-    /`[^`]+`/, // Inline code
-    /```[\s\S]*?```/, // Code blocks
-    /^\s*>.*$/ // Blockquotes
-  ];
-
-  return markdownPatterns.some(pattern => pattern.test(content));
+// Cast CodeBlock to any to satisfy the expected type from ReactMarkdown.
+const components: Components = {
+  code: CodeBlock as unknown as React.ComponentType<any>
 };
+
+const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
+  return <ReactMarkdown components={components}>{content}</ReactMarkdown>;
+};
+
+export default MarkdownRenderer;

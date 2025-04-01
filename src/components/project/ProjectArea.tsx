@@ -36,7 +36,7 @@ import {
 import ReactDOMServer from 'react-dom/server';
 import html2pdf from 'html2pdf.js';
 import { marked } from 'marked'; // Ensure marked is imported
-import { MarkdownContent } from '@/lib/markdown';
+import MarkdownContent from '@/lib/markdown';
 // Slide type is imported later, removing duplicate here
 // Import Zustand store AND types, including the new phaseData
 import {

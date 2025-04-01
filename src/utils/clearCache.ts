@@ -65,7 +65,7 @@ export const clearAllLocalStorage = () => {
 /**
  * Clear all browser storage (localStorage, sessionStorage, cookies)
  */
-export const nuclearReset = () => {
+export const nuclearReset = async () => {
   console.log('Performing nuclear reset of all browser storage');
   
   try {
@@ -81,6 +81,20 @@ export const nuclearReset = () => {
         .replace(/^ +/, "")
         .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
     });
+
+    // Unregister service workers if available
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map(registration => registration.unregister()));
+      console.log('Service workers unregistered');
+    }
+
+    // Clear Cache API if available
+    if ('caches' in window) {
+      const cacheKeys = await caches.keys();
+      await Promise.all(cacheKeys.map(key => caches.delete(key)));
+      console.log('Cache storage cleared');
+    }
     
     console.log('Nuclear reset completed');
     return true;
@@ -108,6 +122,8 @@ export const completeLogout = async (dispatch: any) => {
       dispatch(logout());
     }
     
+    await nuclearReset();
+    window.location.href = window.location.origin;
     console.log('Complete logout successful');
     return true;
   } catch (error) {

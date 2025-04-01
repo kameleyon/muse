@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { IoSend, IoClose, IoSearch, IoChatbubble } from 'react-icons/io5';
 import { useLocation } from 'react-router-dom';
 import qwenService from '../../services/ai/qwen';
-import { containsMarkdown, MarkdownContent } from '../../lib/markdown';
+import MarkdownContent from '../../lib/markdown';
+import { containsMarkdown } from '../../lib/utils'; // Corrected import path
 import './ChatPanel.css';
 
 interface Message {
