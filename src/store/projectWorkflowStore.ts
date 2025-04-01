@@ -1,4 +1,5 @@
 import { create, StateCreator } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 // Import slice creators and their state/action types
 import { createSetupSlice, ProjectSetupState, ProjectSetupActions } from './slices/setupSlice';
@@ -68,20 +69,50 @@ export type ProjectWorkflowActions =
 
 // --- Store Implementation using Slice Pattern ---
 // Define the type for the combined store creator function
-type StoreCreator = StateCreator<ProjectWorkflowState & ProjectWorkflowActions>;
+type StoreCreator = StateCreator<ProjectWorkflowState & ProjectWorkflowActions, [], [["zustand/persist", unknown]]>;
 
-export const useProjectWorkflowStore = create<ProjectWorkflowState & ProjectWorkflowActions>(
-  (...args) => ({
-    // Combine slices by calling their creator functions
-    ...createSetupSlice(...args),
+export const useProjectWorkflowStore = create<ProjectWorkflowState & ProjectWorkflowActions>()(
+  persist(
+    (...args) => ({
+      // Combine slices by calling their creator functions
+      ...createSetupSlice(...args),
     ...createRequirementsSlice(...args),
     ...createDesignSlice(...args),
     ...createGenerationSlice(...args),
     ...createEditingSlice(...args),
     ...createQASlice(...args),
-    ...createDeliverySlice(...args),
-  })
+      ...createDeliverySlice(...args),
+    }),
+    {
+      name: 'project-workflow-storage', // Unique name for localStorage key
+      storage: createJSONStorage(() => localStorage), // Use localStorage
+      partialize: (state) => ({
+        // Selectively persist only necessary state
+        projectId: state.projectId,
+        projectName: state.projectName,
+        selectedPitchDeckTypeId: state.selectedPitchDeckTypeId,
+        description: state.description,
+        privacy: state.privacy,
+        tags: state.tags,
+        teamMembers: state.teamMembers,
+        // Persist other relevant setup/requirements/design state as needed
+        // Example:
+        audienceName: state.audienceName,
+        industry: state.industry,
+        selectedTemplateId: state.selectedTemplateId,
+        primaryColor: state.primaryColor,
+        secondaryColor: state.secondaryColor,
+        accentColor: state.accentColor,
+        headingFont: state.headingFont,
+        bodyFont: state.bodyFont,
+        slideStructure: state.slideStructure,
+        // DO NOT persist temporary/transient state like:
+        // isGenerating, generationProgress, generatedContentPreview, editorContent, etc.
+      }),
+    }
+  )
 );
+
 
 // --- Utility function to initialize store with initial props ---
 // This remains the same

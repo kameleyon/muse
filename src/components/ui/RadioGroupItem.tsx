@@ -33,10 +33,10 @@ const RadioGroupItem = React.forwardRef<HTMLInputElement, RadioGroupItemProps>(
            className={cn(
              "h-4 w-4 rounded-full border border-primary flex items-center justify-center transition-colors",
              isChecked ? "bg-primary text-primary-foreground" : "bg-transparent",
-             className // Allow overriding styles
+            className // Allow overriding styles
            )}
          >
-           {isChecked && <Check className="h-3 w-3" />}
+           {isChecked && <Check className="h-3 w-3 text-white" />} {/* Added text-white */}
          </span>
          {/* Render children (often the Label) next to the indicator */}
          {children}

@@ -1,4 +1,6 @@
 // src/services/contentGenerationService.ts
+import { collectProjectData, generateResearchPrompt, generateFullContentPrompt } from '@/lib/pitchPrompt';
+import { useProjectWorkflowStore } from '@/store/projectWorkflowStore';
 
 // Read environment variables (Vite specific)
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
@@ -430,6 +432,59 @@ ${content}`;
      console.error("Error during fact verification:", error);
      return [{ claim: 'Verification Process', verified: false, explanation: `Error during verification: ${error instanceof Error ? error.message : String(error)}` }];
   }
+};
+
+/**
+ * Generates comprehensive research for a project using a research-optimized model
+ * @param projectId - The ID of the project
+ * @returns Promise resolving to the research data
+ */
+export const generateResearch = async (projectId: string): Promise<GeneratedContent> => {
+  console.log('API CALL: generateResearch', projectId);
+  
+  // Get project data from store
+  const store = useProjectWorkflowStore;
+  const projectData = collectProjectData(projectId, store);
+  
+  // Generate research prompt using the template
+  const researchPrompt = generateResearchPrompt(projectData);
+  
+  // Call the AI with the research prompt using the research model
+  return generateContent({
+    projectId,
+    prompt: researchPrompt,
+    useResearchModel: true, // Use research-optimized model
+    systemPrompt: "You are a professional market research and business analysis assistant. Provide detailed, factual, and data-driven research results formatted for easy visualization. Include specific numbers, facts, and statistics whenever possible.",
+    factCheckLevel: 'thorough'
+  });
+};
+
+/**
+ * Generates complete pitch deck content based on research and project data
+ * @param projectId - The ID of the project
+ * @param researchData - The research data generated previously
+ * @returns Promise resolving to the full content
+ */
+export const generateFullContent = async (
+  projectId: string,
+  researchData: string
+): Promise<GeneratedContent> => {
+  console.log('API CALL: generateFullContent', projectId);
+  
+  // Get project data from store
+  const store = useProjectWorkflowStore;
+  const projectData = collectProjectData(projectId, store);
+  
+  // Generate content prompt using the template
+  const contentPrompt = generateFullContentPrompt(projectData, researchData);
+  
+  // Call the AI with the content prompt using the content model
+  return generateContent({
+    projectId,
+    prompt: contentPrompt,
+    useResearchModel: false, // Use content-optimized model
+    systemPrompt: "You are a professional pitch deck writer with expertise in creating compelling business presentations. Format content in Markdown and include data-driven visualizations with proper syntax for tables, charts, and diagrams."
+  });
 };
 
 // Add more functions as needed (getGenerationStatus, adjustParameters, etc.)

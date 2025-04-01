@@ -64,6 +64,9 @@ const GenerationSetup: React.FC<GenerationSetupProps> = ({
   // Determine if the generate button should be disabled
   const isGenerateDisabled = isGenerating || !projectId;
 
+  // Add console log here to check the values
+  console.log(`GenerationSetup Render: isGenerating=${isGenerating}, projectId=${projectId}, isGenerateDisabled=${isGenerateDisabled}`);
+
   return (
     <Card className="p-4 border border-neutral-light bg-white/30 shadow-sm">
       <h4 className="font-semibold text-neutral-dark text-lg mb-4 border-b border-neutral-light/40 pb-2">Generation Setup</h4>

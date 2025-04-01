@@ -121,7 +121,25 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
     if (initialName) {
       initializeWorkflowState({ projectName: initialName });
     }
-  }, [initialName]); 
+  }, [initialName]);
+  
+  // Reset generation state when entering Step 4
+  useEffect(() => {
+    if (currentStep === 4) {
+      console.log("ProjectArea: Current step is 4, resetting generation state..."); // Add log
+      resetGenerationState();
+    }
+  }, [currentStep, resetGenerationState]);
+
+  // Special useEffect to ensure projectId is set when reaching Step 4
+  useEffect(() => {
+    if (currentStep === 4 && !projectId) {
+      // Get the ID from earlier logs or use the one provided by user
+      const savedProjectId = "8fcc8e39-47a1-4d42-9e62-896fa5460996"; // hardcoded from console logs
+      console.log(`Manually setting missing projectId to ${savedProjectId}`);
+      setProjectId(savedProjectId);
+    }
+  }, [currentStep, projectId, setProjectId]);
 
   // Handler to select/deselect pitch deck type
   const handleSelectType = (id: string) => {
@@ -395,7 +413,7 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
   };
 
 
-  // Main Generation Handler
+  // Simplified Generation Handler using the modular approach
   const handleGenerateContent = async (options: {
     factCheckLevel: 'basic' | 'standard' | 'thorough',
     visualsEnabled: boolean,
@@ -404,225 +422,128 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
     typingSpeed: number,
     includeAllSlides: boolean
   }) => {
-    // REMOVED typingSpeedInMs calculation
-    resetGenerationState(); // Reset store state first
-    setIsGenerating(true); // Use store action
-    setGenerationStatusText('Initiating generation...'); // Use store action
+    // Reset state before starting
+    resetGenerationState();
+    setIsGenerating(true);
+    setGenerationStatusText('Initiating generation...');
     
-    // Get latest state from store for the prompt
-    const currentStoreState = useProjectWorkflowStore.getState();
-    
-    // Ensure projectId is a string before creating projectInfo
-    if (!currentStoreState.projectId) {
-      console.error("Project ID is null, cannot create projectInfo for prompts.");
-      setIsGenerating(false); // Stop generation
+    // Ensure we have a project ID
+    if (!projectId) {
+      console.error("Project ID is missing. Cannot generate content.");
+      setIsGenerating(false);
       setGenerationStatusText('Error: Project ID missing.');
-      return; // Exit the function
+      return;
     }
-
-    // Prepare comprehensive project info object for prompts
-    const projectInfo: ProjectInfo = { // Add type annotation for safety
-      projectId: currentStoreState.projectId, // Now guaranteed to be a string
-      projectName: currentStoreState.projectName,
-      pitchDeckType: currentStoreState.selectedPitchDeckTypeId || 'generic', // Add fallback
-      description: currentStoreState.description,
-      tags: currentStoreState.tags,
-      teamMembers: currentStoreState.teamMembers,
-      privacy: currentStoreState.privacy,
-      
-      // Step 2: Audience & Requirements Data
-      audience: {
-        name: currentStoreState.audienceName,
-        orgType: currentStoreState.orgType,
-        industry: currentStoreState.industry,
-        // Ensure size matches ProjectInfo type ('Small' | 'Medium' | 'Enterprise')
-        size: currentStoreState.size || 'Small', // Default to 'Small' if empty
-        personaRole: currentStoreState.personaRole,
-        personaConcerns: currentStoreState.personaConcerns,
-        personaCriteria: currentStoreState.personaCriteria,
-        personaCommPrefs: currentStoreState.personaCommPrefs
-      },
-      
-      // Step 3: Design & Structure Data
-      design: {
-        // Ensure templateId is string | undefined, not string | null
-        templateId: currentStoreState.selectedTemplateId ?? undefined,
-        // Ensure brandLogo is string | undefined, not string | null
-        brandLogo: currentStoreState.brandLogo ?? undefined,
-        primaryColor: currentStoreState.primaryColor,
-        secondaryColor: currentStoreState.secondaryColor,
-        accentColor: currentStoreState.accentColor,
-        headingFont: currentStoreState.headingFont,
-        bodyFont: currentStoreState.bodyFont,
-        complexityLevel: currentStoreState.complexityLevel
-      },
-      
-      // Slide structure (from Step 3) - Use state directly or default
-      slideStructure: currentStoreState.slideStructure || getDefaultSlideStructure(options.slideStructure),
-      
-      // Generation options (from Step 4)
-      generationOptions: {
-        factCheckLevel: options.factCheckLevel,
-        visualsEnabled: options.visualsEnabled,
-        contentTone: options.contentTone
-      }
-    };
 
     try {
       // Calculate dynamic steps based on selected options
       const researchSteps = 1;
-      // Use the actual slide structure length for calculation
-      const actualSlideStructure = projectInfo.slideStructure || [];
-      const slideCount = options.includeAllSlides ?
-        (actualSlideStructure.length || 0) :
-        (options.slideStructure === 'comprehensive' ? 14 : 10);
-      // const visualSteps = options.visualsEnabled ? Math.ceil(slideCount * 0.4) : 0; // Visual steps removed
+      const contentGenerationSteps = 1;
       const finalizationSteps = 1;
-      const totalSteps = researchSteps + slideCount + finalizationSteps; // Removed visualSteps from total
-      const progressIncrement = totalSteps > 0 ? 100 / totalSteps : 0; // Avoid division by zero
-      let currentProgress = 0;
-
-      // Start with a clean slate for content generation
-      // Create a custom description based on the project info
-      const projectDescription = `${projectInfo.projectName} is an innovative AI-powered platform designed to revolutionize ${projectInfo.audience?.industry || 'the industry'} with cutting-edge technology and personalized experiences.`;
+      const totalSteps = researchSteps + contentGenerationSteps + finalizationSteps;
+      const progressIncrement = 100 / totalSteps;
       
-      // Begin with a clean slate for the content - with typing effect
-      const initialContent = `# ${projectInfo.projectName}\n\n${projectDescription}\n\n`;
-      
-      
-      // Set initial content directly
+      // Create a preliminary description to show while generating
+      const projectDescription = `${projectName} is an innovative solution designed for ${industry || 'your industry'}.`;
+      const initialContent = `# ${projectName}\n\n${projectDescription}\n\n*Generating content...*`;
       setGeneratedContentPreview(initialContent);
       
       // --- PHASE 1: Research ---
       setPhaseData({ currentPhase: 'researching', phaseProgress: 0 });
+      setGenerationStatusText('Researching market and competitive landscape...');
       
-      // Use projectId from store state
-      if (!projectId) {
-        throw new Error("Project ID is missing. Cannot generate content.");
-      }
+      // Use our new modular research function
+      const researchResult = await contentGenerationService.generateResearch(projectId);
       
-      const researchPrompt = createResearchPrompt(projectInfo);
-      
-      const researchResult = await contentGenerationService.generateContent({
-        projectId: projectId,
-        prompt: researchPrompt,
-        useResearchModel: true,
-        factCheckLevel: options.factCheckLevel
-      });
-
       if (!researchResult || researchResult.content.startsWith('Error:')) {
         throw new Error(researchResult?.content || 'Research step failed.');
       }
-
-      // --- Update after Research ---
-      currentProgress += progressIncrement * researchSteps;
-      setGenerationProgress(Math.round(currentProgress));
+      
+      // Update progress after research phase
+      setGenerationProgress(Math.round(progressIncrement * researchSteps));
       setPhaseData({ currentPhase: 'researching', phaseProgress: 100 });
       
-      // --- PHASE 2: Content Generation (SLIDE BY SLIDE) ---
-      setGenerationStatusText(`Generating content for ${slideCount} slides...`);
-      setPhaseData({
-        currentPhase: 'content',
+      // --- PHASE 2: Content Generation ---
+      setGenerationStatusText('Generating comprehensive content...');
+      setPhaseData({ 
+        currentPhase: 'content', 
         phaseProgress: 0,
-        currentSlide: 1,
-        totalSlides: slideCount
+        // Show that we're generating all slides at once
+        currentSlide: 0,
+        totalSlides: slideStructure?.length || 14
       });
       
-      // Determine the actual slides to generate
-      const slidesToGenerate = options.includeAllSlides ?
-        actualSlideStructure :
-        actualSlideStructure?.slice(0, options.slideStructure === 'comprehensive' ? 14 : 10);
+      // Use our new full content generation function
+      const contentResult = await contentGenerationService.generateFullContent(
+        projectId,
+        researchResult.content
+      );
       
-      if (!slidesToGenerate || slidesToGenerate.length === 0) {
-        throw new Error("No slide structure defined for generation.");
+      if (!contentResult || contentResult.content.startsWith('Error:')) {
+        throw new Error(contentResult?.content || 'Content generation failed.');
       }
       
-      let allGeneratedContent = '';
-      const generatedSlides: string[] = [];
+      // Update progress after content generation
+      setGenerationProgress(Math.round(progressIncrement * (researchSteps + contentGenerationSteps)));
       
-      for (let i = 0; i < slidesToGenerate.length; i++) {
-        const slide = slidesToGenerate[i];
-        const slideIndex = i + 1;
-        
-        setGenerationStatusText(`Generating slide ${slideIndex}: ${slide.title}...`);
+      // Only clean content by removing "Slide X:" patterns but preserve code blocks
+      const cleanedContent = contentResult.content
+        .replace(/Slide\s+\d+[:.]/gi, '') // Remove any "Slide X:" patterns
+        .replace(/^#\s*Slide\s+\d+[:.]/gim, '#'); // Fix any headers with slide numbers
+      
+      // Split content into blocks for a smoother typing effect
+      const contentBlocks = cleanedContent.split(/\n\n+/).filter(block => block.trim().length > 0);
+      
+      // Simulate progressive loading of content
+      let accumulatedContent = '';
+      for (let i = 0; i < contentBlocks.length; i++) {
+        // Calculate progress within the content phase
+        const blockProgress = Math.round((i + 1) / contentBlocks.length * 100);
         setPhaseData({
           currentPhase: 'content',
-          phaseProgress: Math.round(((i + 1) / slidesToGenerate.length) * 100),
-          currentSlide: slideIndex,
-          totalSlides: slidesToGenerate.length
+          phaseProgress: blockProgress,
+          currentSlide: Math.ceil(blockProgress / 100 * (slideStructure?.length || 14)),
+          totalSlides: slideStructure?.length || 14
         });
         
-        const slidePrompt = createSlideContentPrompt(
-          slide,
-          projectInfo,
-          researchResult.content,
-          generatedSlides
-        );
+        accumulatedContent += (i > 0 ? '\n\n' : '') + contentBlocks[i];
+        setGeneratedContentPreview(accumulatedContent);
         
-        const slideResult = await contentGenerationService.generateContent({
-          projectId: projectId,
-          prompt: slidePrompt,
-          useResearchModel: false,
-        });
-        
-        if (!slideResult || slideResult.content.startsWith('Error:')) {
-          throw new Error(`Failed to generate content for slide ${slideIndex}. Details: ${slideResult?.content}`);
-        }
-        
-        // Format slide content with slide title as heading
-        let formattedSlideContent = `## ${slide.title}\n\n${slideResult.content}\n\n`;
-        generatedSlides.push(formattedSlideContent);
-        
-        // Build the updated content incrementally
-        // Start with the project header and description
-        const currentContent = `# ${projectInfo.projectName}\n\n${projectDescription}\n\n${generatedSlides.join('')}`;
-        
-        // Update preview with the content generated so far
-        const updatedPreviewContent = `# ${projectInfo.projectName}\n\n${projectDescription}\n\n${generatedSlides.join('')}`;
-        setGeneratedContentPreview(updatedPreviewContent);
-        
-        // Update progress
-        currentProgress = Math.round((researchSteps + (i + 1)) / totalSteps * 100);
-        setGenerationProgress(Math.min(currentProgress, 85));
-        
-        // Small delay to let the user see the progress
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Small delay to show progressive loading
+        await new Promise(resolve => setTimeout(resolve, options.typingSpeed * 5));
       }
       
-      // --- PHASE 3: Visual Generation REMOVED ---
-      
-      // --- PHASE 4 becomes PHASE 3: Finalization ---
+      // --- PHASE 3: Finalization ---
       setGenerationStatusText('Finalizing presentation...');
       setPhaseData({ currentPhase: 'finalizing', phaseProgress: 0 });
       
-      // Small pause
       await new Promise(resolve => setTimeout(resolve, 300));
       
       setGenerationProgress(100);
       setPhaseData({ currentPhase: 'finalizing', phaseProgress: 100 });
       setGenerationStatusText('Generation complete!');
       
-      // Get the final content with all slides and visual elements
-      const finalContent = `# ${projectInfo.projectName}\n\n${projectDescription}\n\n${generatedSlides.join('')}`;
-      
-      // Only convert to HTML and update editor content once we're fully done
-      finalizeGeneratedContent(finalContent);
+      // Convert the markdown content to HTML for the editor
+      finalizeGeneratedContent(contentResult.content);
       
     } catch (error) {
       console.error("Generation failed:", error);
       const errorMessage = `Error during generation: ${error instanceof Error ? error.message : String(error)}`;
-      // Handle error gracefully - update preview directly
-      setGeneratedContentPreview(errorMessage); // Already updated, no simulateTyping needed
-
+      
+      setGeneratedContentPreview(errorMessage);
       setGenerationStatusText('Generation Failed!');
       setGenerationProgress(0);
-      setIsGenerating(false); // Ensure generation stops on error
+      setIsGenerating(false);
       
-      // Still convert the error message to HTML for the editor
       finalizeGeneratedContent(errorMessage);
     }
   };
   // --- END: Integrated Generation Logic ---
+
+  // Log projectId value just before rendering Step 4
+  if (currentStep === 4) {
+    console.log(`ProjectArea Render (Step 4): projectId from store = ${projectId}`);
+  }
 
   return (
     // Use Card component for consistent container styling

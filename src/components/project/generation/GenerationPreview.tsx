@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react'; // Removed useState, useEffect
+import React, { useMemo, useState, useEffect } from 'react';
+import { useTypewriterEffect } from '@/lib/pitchPrompt'; // Import the typewriter effect
 import { Card } from '@/components/ui/Card';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -160,8 +161,11 @@ const GenerationPreview: React.FC<GenerationPreviewProps> = ({
     }
   }), [brandColors, fonts]);
 
+  // Apply the typewriter effect
+  const displayContent = useTypewriterEffect(content, 3); // Speed set to 3ms for a faster typing effect
+  
   return (
-    <Card className="p-4 border border-neutral-light bg-white shadow-md h-[700px] flex flex-col">
+    <Card className="p-4 border border-neutral-light bg-white shadow-md h-[850px] flex flex-col"> {/* Increased height */}
       <h4 className="font-semibold text-neutral-dark mb-4 text-center text-sm flex-shrink-0">
         Real-Time Preview
       </h4>
@@ -170,12 +174,12 @@ const GenerationPreview: React.FC<GenerationPreviewProps> = ({
         style={{ overflowWrap: 'break-word', ...getTemplateStyles() }}
       >
         {content ? (
-          // Render content directly using ReactMarkdown
+          // Use the typewriter effect in the ReactMarkdown
           <ReactMarkdown
              remarkPlugins={[remarkGfm]}
              components={markdownComponents} // Use our custom renderers
            >
-             {content}
+             {displayContent}
            </ReactMarkdown>
         ) : (
           <p className="text-neutral-medium italic text-center mt-10">

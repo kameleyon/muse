@@ -122,7 +122,7 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({
               variant="ghost"
               size="sm"
               onClick={() => setViewMode('list')}
-              className={`p-2 mr-4 h-7 ${viewMode === 'list' ? 'bg-primary/70 text-primary  hover:text-black' : 'text-neutral-medium  hover:text-black'}`}
+              className={`p-2 mr-4 h-7 ${viewMode === 'list' ? 'bg-primary/70 text-white  hover:text-black' : 'text-neutral-medium  hover:text-black'}`}
             >
               <List size={16} />
           </Button>
