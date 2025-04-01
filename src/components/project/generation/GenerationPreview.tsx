@@ -1,171 +1,246 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useTypewriterEffect } from '@/lib/pitchPrompt'; // Import the typewriter effect
 import { Card } from '@/components/ui/Card';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { Components } from 'react-markdown'; // Import Components type
 import remarkGfm from 'remark-gfm';
-import VisualElementRenderer from './VisualElementRenderer'; // Direct import
+import {
+  LineChart,
+  BarChart,
+  PieChart,
+  AreaChart,
+  Area,
+  Bar,
+  Line,
+  Pie,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
 
+/**
+ * Chart component that renders chart data from code blocks
+ * This directly renders the chart instead of showing the JSON
+ */
+interface ChartComponentProps {
+  data: string | any[];
+  brandColors?: {
+    primary?: string;
+    secondary?: string;
+    accent?: string;
+  };
+}
+const ChartComponent: React.FC<ChartComponentProps> = ({ data, brandColors }) => {
+  const primaryColor = brandColors?.primary || '#ae5630';
+  const secondaryColor = brandColors?.secondary || '#232321';
+  const accentColor = brandColors?.accent || '#9d4e2c';
+  
+  try {
+    // Clean and parse the data
+    const cleanData = typeof data === 'string' 
+      ? data.replace(/```chart\s+|```/g, '').trim()
+      : JSON.stringify(data);
+      
+    let chartData = JSON.parse(cleanData);
+    
+    if (!Array.isArray(chartData)) {
+      throw new Error("Chart data must be an array");
+    }
+    
+    // Get all the keys except 'name' to determine data series
+    const keys = Object.keys(chartData[0] || {}).filter(k => k !== 'name');
+    
+    // Determine the chart type based on the data structure
+    let chartType = 'bar'; // Default
+    
+    // If there's only one data key and it has 'value' in the name, use pie chart
+    if (keys.length === 1 && keys[0] === 'value') {
+      chartType = 'pie';
+    }
+    // If there are multiple data series, use a line chart 
+    else if (keys.length > 1) {
+      chartType = 'line';
+    }
+    
+    // Render the appropriate chart based on the detected type
+    switch (chartType) {
+      case 'pie':
+        return (
+          <div className="chart-container my-4">
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  fill={primaryColor}
+                  label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                />
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        );
+        
+      case 'line':
+        return (
+          <div className="chart-container my-4">
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                {keys.map((key, i) => (
+                  <Line
+                    key={key}
+                    type="monotone"
+                    dataKey={key}
+                    stroke={[primaryColor, secondaryColor, accentColor][i % 3]}
+                    activeDot={{ r: 6 }}
+                  />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        );
+        
+      case 'bar':
+      default:
+        return (
+          <div className="chart-container my-4">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                {keys.map((key, i) => (
+                  <Bar
+                    key={key}
+                    dataKey={key}
+                    fill={[primaryColor, secondaryColor, accentColor][i % 3]}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        );
+    }
+  } catch (error: unknown) { // Type error as unknown
+    const errorMessage = error instanceof Error ? error.message : String(error); // Check type
+    console.error("Error rendering chart:", errorMessage, "Data:", data);
+    return (
+      <div className="chart-error p-3 my-4 border border-red-300 rounded bg-red-50">
+        <p className="font-medium text-red-700">Chart rendering error</p>
+        <p className="text-sm text-red-600">{errorMessage}</p> {/* Use checked message */}
+      </div>
+    );
+  }
+};
+
+// Define Props for GenerationPreview
 interface GenerationPreviewProps {
   content?: string;
   templateId?: string;
   brandColors?: {
-    primary: string;
-    secondary: string;
-    accent: string;
+    primary?: string;
+    secondary?: string;
+    accent?: string;
   };
   fonts?: {
-    headingFont: string;
-    bodyFont: string;
+    headingFont?: string;
+    bodyFont?: string;
   };
 }
 
 const GenerationPreview: React.FC<GenerationPreviewProps> = ({
-  content = '', // Default to empty string
+  content = '',
   templateId = 'default',
   brandColors = {
-    primary: '#ae5630', // Use theme default
-    secondary: '#232321', // Use theme default
-    accent: '#9d4e2c' // Use theme default
+    primary: '#ae5630',
+    secondary: '#232321',
+    accent: '#9d4e2c'
   },
   fonts = {
-    headingFont: 'Comfortaa, sans-serif', // Use theme default
-    bodyFont: 'Questrial, sans-serif' // Use theme default
+    headingFont: 'Comfortaa, sans-serif',
+    bodyFont: 'Questrial, sans-serif'
   }
 }) => {
-
   // Apply template-specific styling
   const getTemplateStyles = () => {
-    const baseStyles = {
+    return {
       '--primary-color': brandColors.primary,
       '--secondary-color': brandColors.secondary,
       '--accent-color': brandColors.accent,
       '--heading-font': fonts.headingFont,
       '--body-font': fonts.bodyFont,
     } as React.CSSProperties;
-    return baseStyles;
   };
 
   // Custom components for markdown rendering with template styles
-  const markdownComponents = useMemo(() => ({
-    h1: ({ node, ...props }: any) => <h1 style={{ fontFamily: fonts.headingFont, color: brandColors.primary, fontSize: '1.8rem', paddingBottom: '0.5rem', marginTop: '2rem', marginBottom: '1.5rem' }} {...props} />,
-    h2: ({ node, ...props }: any) => <h2 style={{ fontFamily: fonts.headingFont, color: brandColors.secondary, fontSize: '1.5rem', marginTop: '2.5rem', marginBottom: '1.5rem' }} {...props} />,
-    h3: ({ node, ...props }: any) => <h3 style={{ fontFamily: fonts.headingFont, color: brandColors.secondary, fontSize: '1.25rem', marginTop: '1.25rem', marginBottom: '0.5rem' }} {...props} />,
-    p: ({ node, ...props }: any) => <p style={{ fontFamily: fonts.bodyFont, marginBottom: '0.75rem', lineHeight: '1.6', fontSize: '0.95rem' }} {...props} />,
-    ul: ({ node, ...props }: any) => <ul style={{ paddingLeft: '1.5rem', marginBottom: '1rem' }} {...props} />,
-    li: ({ node, ...props }: any) => <li style={{ fontFamily: fonts.bodyFont, marginBottom: '0.25rem', fontSize: '0.95rem' }} {...props} />,
-    a: ({ node, ...props }: any) => <a style={{ color: brandColors.accent, textDecoration: 'none' }} {...props} />,
-    blockquote: ({ node, ...props }: any) => <blockquote style={{ borderLeft: `3px solid ${brandColors.accent}`, paddingLeft: '1rem', fontStyle: 'italic', color: brandColors.secondary, margin: '1rem 0' }} {...props} />,
-    pre: ({ node, ...props }: any) => <pre style={{ backgroundColor: '#f7f7f7', padding: '1rem', borderRadius: '4px', overflow: 'auto', fontSize: '0.85rem', fontFamily: 'monospace', marginBottom: '1rem' }} {...props} />,
+  // Use imported Components type
+  const markdownComponents: Components = useMemo(() => ({
+    // Ensure 'node' is optional in all overrides
+    h1: ({ node, ...props }: { node?: any; [key: string]: any }) => <h1 style={{ fontFamily: fonts.headingFont, color: brandColors.primary, fontSize: '1.8rem', paddingBottom: '0.5rem', marginTop: '2rem', marginBottom: '1.5rem' }} {...props} />,
+    h2: ({ node, ...props }: { node?: any; [key: string]: any }) => <h2 style={{ fontFamily: fonts.headingFont, color: brandColors.secondary, fontSize: '1.5rem', marginTop: '2.5rem', marginBottom: '1.5rem' }} {...props} />,
+    h3: ({ node, ...props }: { node?: any; [key: string]: any }) => <h3 style={{ fontFamily: fonts.headingFont, color: brandColors.secondary, fontSize: '1.25rem', marginTop: '1.25rem', marginBottom: '0.5rem' }} {...props} />,
+    p: ({ node, ...props }: { node?: any; [key: string]: any }) => <p style={{ fontFamily: fonts.bodyFont, marginBottom: '0.75rem', lineHeight: '1.6', fontSize: '0.95rem' }} {...props} />,
+    ul: ({ node, ...props }: { node?: any; [key: string]: any }) => <ul style={{ paddingLeft: '1.5rem', marginBottom: '1rem' }} {...props} />,
+    li: ({ node, ...props }: { node?: any; [key: string]: any }) => <li style={{ fontFamily: fonts.bodyFont, marginBottom: '0.25rem', fontSize: '0.95rem' }} {...props} />,
+    // Make node optional in 'a' tag override as well
+    a: ({ node, ...props }: { node?: any } & React.ComponentPropsWithoutRef<'a'>) => <a style={{ color: brandColors.accent, textDecoration: 'none' }} {...props} />,
 
-    // Visual Element Handling (code blocks)
-    code: ({ node, className, children, ...props }: any) => {
-      if (className === 'language-visual-specification') {
-        try {
-          const specText = String(children);
-          // Determine type (default to chart)
-          let type: 'chart' | 'table' | 'diagram' | 'infographic' = 'chart';
-          if (specText.toLowerCase().includes('table')) type = 'table';
-          else if (specText.toLowerCase().includes('diagram')) type = 'diagram';
-          else if (specText.toLowerCase().includes('infographic')) type = 'infographic';
+    // Enhanced code block handling with chart rendering
+    code: ({ node, className, children, ...props }: { node?: any; className?: string; children?: React.ReactNode; [key: string]: any }) => {
+      const match = /language-(\w+)/.exec(className || '');
+      const codeContent = String(children).replace(/\n$/, '');
 
-          // Extract title
-          const titleMatch = specText.match(/Title:\s*([\s\S]*?)(?=\nData:|\nElements:|\nLayout:|\nColor Usage:|\n\`\`\`)/);
-          const title = titleMatch ? titleMatch[1].trim() : 'Visual Element';
-
-          // Extract the raw description/data part
-          const dataMatch = specText.match(/Data:\s*([\s\S]*?)(?=\nElements:|\nLayout:|\nColor Usage:|\n\`\`\`)/);
-          const rawDataContent = dataMatch ? dataMatch[1].trim() : specText; // Fallback to full spec if Data: not found
-
-          return (
-            <VisualElementRenderer
-              specData={{ type, title, rawData: rawDataContent }} // Pass extracted description/data
-              brandColors={brandColors}
-            />
-          );
-        } catch (e) {
-          console.error("Error parsing visual specification:", e);
-          return (
-            <div className="visual-element-placeholder p-3 my-4 rounded border text-sm italic text-neutral-medium" style={{ borderColor: `${brandColors.primary}30`, background: `${brandColors.primary}05`}}>
-              [Visual Element Error: Could not parse specification]
-            </div>
-          );
-        }
+      // If it's a chart code block, render the chart
+      if (match && match[1] === 'chart') {
+        // Pass optional props safely
+        return <ChartComponent data={codeContent} brandColors={brandColors ?? {}} />;
       }
-      // Render normal code blocks
+
+      // For other code blocks, render normally
       return <code className={className} {...props}>{children}</code>;
     },
 
-    // Visual Element Handling (img placeholders) & Fix via.placeholder.com errors
-    img: ({ node, src, alt, ...props }: any) => {
-       // If it's a placeholder pattern (no src, specific alt text)
-       if (!src && alt && (alt.startsWith('Visualization:') || alt.startsWith('Visual:') || alt?.includes('Logo') || alt?.includes('Company Logo') || alt?.includes('Chart') || alt?.includes('Graph'))) {
-         try {
-           // Special case for the company logo
-           if (alt.includes('Company Logo') && alt.includes('brain') && alt.includes('circuit')) {
-             return (
-               <div className="flex justify-center my-4">
-                 <div className="px-4 py-3 rounded font-bold text-white text-xl flex items-center" style={{backgroundColor: '#6c2323'}}>
-                   <svg viewBox="0 0 50 50" width="30" height="30" className="mr-2">
-                     <path d="M25,10 C15,10 10,20 10,25 C10,35 20,40 25,40 C30,40 40,35 40,25 C40,15 35,10 25,10 Z" fill="none" stroke="white" strokeWidth="2" />
-                     <path d="M20,20 L30,30 M30,20 L20,30 M25,15 L25,35" stroke="white" strokeWidth="1" />
-                   </svg>
-                   InstaSmart
-                 </div>
-               </div>
-             );
-           }
+    // Handle pre blocks
+    pre: ({ node, children, ...props }: { node?: any; children?: React.ReactNode; [key: string]: any }) => {
+      // Check if the child is a chart code element
+      const isChartBlock = React.Children.toArray(children).some((child: React.ReactNode) => {
+        if (React.isValidElement(child)) {
+          const className = child.props.className || '';
+          return className.includes('language-chart');
+        }
+        return false;
+      });
 
-           let type: 'chart' | 'table' | 'diagram' | 'infographic' = 'chart';
-           if (alt.toLowerCase().includes('table')) type = 'table';
-           else if (alt.toLowerCase().includes('diagram') || alt.toLowerCase().includes('split-screen')) type = 'diagram';
-           else if (alt.toLowerCase().includes('infographic')) type = 'infographic';
+      // If this is a chart block, don't render the pre wrapper
+      if (isChartBlock) {
+        return <>{children}</>;
+      }
 
-           const title = alt.split(':').length > 1 ? alt.split(':')[1].trim() : alt;
-
-           // Pass the alt text itself as the rawData description
-           return (
-             <VisualElementRenderer
-               specData={{ type, title, rawData: alt }}
-               brandColors={{ primary: '#6c2323', secondary: '#167683', accent: brandColors.accent }}
-             />
-           );
-         } catch (e) {
-           console.error("Error rendering visual element from img placeholder:", e);
-           return (
-             <div className="visual-element-placeholder p-3 my-4 rounded border text-sm italic text-neutral-medium" style={{ borderColor: '#6c232330', background: '#6c232305'}}>
-               [Visual Element: {alt}]
-             </div>
-           );
-         }
-       }
-       // Explicitly ignore via.placeholder.com URLs
-       if (src && src.includes('via.placeholder.com')) {
-            console.warn(`Ignoring placeholder image URL: ${src}`);
-            return null; // Don't render these images
-       }
-       // Render other valid images
-       if (src) {
-            return <img src={src} alt={alt} style={{ maxWidth: '100%', height: 'auto', borderRadius: '4px', margin: '1rem 0' }} {...props} />;
-       }
-       // Render valid images (removed duplicate code)
-       if (src) {
-           // Ignore placeholder.com URLs
-           if (src.includes('via.placeholder.com')) {
-               console.warn(`Ignoring placeholder image URL: ${src}`);
-               return null; // Don't render these images
-           }
-           return <img src={src} alt={alt} style={{ maxWidth: '100%', height: 'auto', borderRadius: '4px', margin: '1rem 0' }} {...props} />;
-       }
-       // Return null if no src and not a recognized placeholder pattern
-       return null;
+      // Otherwise render normally
+      return <pre style={{ backgroundColor: '#f7f7f7', padding: '1rem', borderRadius: '4px', overflow: 'auto', fontSize: '0.85rem', fontFamily: 'monospace', marginBottom: '1rem' }} {...props}>{children}</pre>;
     }
+
   }), [brandColors, fonts]);
 
-  // Apply the typewriter effect
-  const displayContent = useTypewriterEffect(content, 3); // Speed set to 3ms for a faster typing effect
+  // Apply the typewriter effect with a faster speed for demos
+  const displayContent = useTypewriterEffect(content, 3);
   
   return (
-    <Card className="p-4 border border-neutral-light bg-white shadow-md h-[850px] flex flex-col"> {/* Increased height */}
+    <Card className="p-4 border border-neutral-light bg-white shadow-md h-[850px] flex flex-col">
       <h4 className="font-semibold text-neutral-dark mb-4 text-center text-sm flex-shrink-0">
         Real-Time Preview
       </h4>
@@ -174,10 +249,9 @@ const GenerationPreview: React.FC<GenerationPreviewProps> = ({
         style={{ overflowWrap: 'break-word', ...getTemplateStyles() }}
       >
         {content ? (
-          // Use the typewriter effect in the ReactMarkdown
           <ReactMarkdown
              remarkPlugins={[remarkGfm]}
-             components={markdownComponents} // Use our custom renderers
+             components={markdownComponents}
            >
              {displayContent}
            </ReactMarkdown>
