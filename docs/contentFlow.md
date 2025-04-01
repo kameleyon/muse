@@ -4,40 +4,7 @@
 
 This document provides a detailed technical specification for implementing the Proposal & Pitch Deck Generation feature within the MagicMuse professional writing platform. The implementation follows a structured 7-step workflow with integrated version control, quality assessment, and collaboration features.
 
-## Sidebar Navigation Structure
 
-The sidebar menu should include the following hierarchy:
-
-```
-MAIN NAVIGATION
-├── Dashboard
-├── Projects
-│   └── Recent Projects
-├── Content Creation
-│   ├── Professional Writing
-│   │   ├── Business Documents
-│   │   │   ├── Proposal & Pitch Deck
-│   │   │   ├── Executive Summary
-│   │   │   ├── Report Writing
-│   │   │   ├── Company Policy & SOP
-│   │   │   └── Meeting Agenda & Minutes
-│   │   ├── Marketing Content
-│   │   └── Digital & Social Media
-│   ├── Creative Writing
-│   ├── Academic & Educational
-│   └── Technical & Specialized
-├── Templates
-│   ├── My Templates
-│   └── Public Templates
-├── Resources
-│   ├── AI Assistant
-│   ├── Knowledge Base
-│   └── Tutorials
-├── Analytics
-└── Settings
-```
-
-Additionally, when working on a specific project, a secondary context-aware sidebar should appear:
 
 ```
 PROJECT NAVIGATION

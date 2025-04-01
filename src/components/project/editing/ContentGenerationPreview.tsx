@@ -9,15 +9,53 @@ interface ContentGenerationPreviewProps {
   content: string;
   onExport?: () => void;
   className?: string;
+  brandColors?: {
+    primary?: string;
+    secondary?: string;
+    accent?: string;
+    highlight?: string;
+    background?: string;
+  };
+  fonts?: {
+    headingFont?: string;
+    bodyFont?: string;
+  };
+  visualOptions?: {
+    enhanceVisuals?: boolean;
+    showCharts?: boolean;
+    showTables?: boolean;
+    showDiagrams?: boolean;
+    chartHeight?: number;
+    animateCharts?: boolean;
+  };
 }
 
 /**
- * A component that displays content generation with a typing effect
+ * An enhanced component that displays content generation with a typing effect and visualization capabilities
  */
 const ContentGenerationPreview: React.FC<ContentGenerationPreviewProps> = ({
   content,
   onExport,
-  className = ''
+  className = '',
+  brandColors = {
+    primary: '#ae5630',
+    secondary: '#232321',
+    accent: '#9d4e2c',
+    highlight: '#ff7300',
+    background: '#ffffff'
+  },
+  fonts = {
+    headingFont: 'Comfortaa, sans-serif',
+    bodyFont: 'Questrial, sans-serif'
+  },
+  visualOptions = {
+    enhanceVisuals: true,
+    showCharts: true,
+    showTables: true,
+    showDiagrams: true,
+    chartHeight: 250,
+    animateCharts: true
+  }
 }) => {
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -60,6 +98,12 @@ const ContentGenerationPreview: React.FC<ContentGenerationPreviewProps> = ({
     setTypingSpeed(newSpeed);
   };
 
+  // Toggle visual enhancements
+  const [visualEnhancements, setVisualEnhancements] = useState(visualOptions.enhanceVisuals);
+  const toggleVisualEnhancements = () => {
+    setVisualEnhancements(!visualEnhancements);
+  };
+
   return (
     <Card className={`p-4 ${className}`}>
       <div className="flex justify-between items-center mb-4">
@@ -95,19 +139,35 @@ const ContentGenerationPreview: React.FC<ContentGenerationPreviewProps> = ({
         </div>
       </div>
 
-      <div className="mb-4">
-        <label htmlFor="typingSpeed" className="block text-sm mb-1">
-          Typing Speed: {typingSpeed}ms
-        </label>
-        <input
-          id="typingSpeed"
-          type="range"
-          min="10"
-          max="100"
-          value={typingSpeed}
-          onChange={handleSpeedChange}
-          className="w-full"
-        />
+      <div className="flex justify-between items-center mb-4">
+        <div className="w-1/2 mr-2">
+          <label htmlFor="typingSpeed" className="block text-sm mb-1">
+            Typing Speed: {typingSpeed}ms
+          </label>
+          <input
+            id="typingSpeed"
+            type="range"
+            min="10"
+            max="100"
+            value={typingSpeed}
+            onChange={handleSpeedChange}
+            className="w-full"
+          />
+        </div>
+        <div className="w-1/2 ml-2">
+          <label className="flex items-center text-sm mb-1">
+            <input
+              type="checkbox"
+              checked={visualEnhancements}
+              onChange={toggleVisualEnhancements}
+              className="mr-2"
+            />
+            Enhanced Visualizations
+          </label>
+          <div className="text-xs text-gray-500">
+            {visualEnhancements ? "Rich charts, tables and diagrams" : "Simple text mode"}
+          </div>
+        </div>
       </div>
 
       <div className="bg-white p-4 rounded-md border min-h-[300px] max-h-[500px] overflow-y-auto">
@@ -117,6 +177,16 @@ const ContentGenerationPreview: React.FC<ContentGenerationPreviewProps> = ({
             typingSpeed={typingSpeed}
             delayBetweenBlocks={500}
             onComplete={handleTypingComplete}
+            brandColors={brandColors}
+            fonts={fonts}
+            options={{
+              enhanceVisuals: visualEnhancements,
+              showCharts: visualOptions.showCharts,
+              showTables: visualOptions.showTables,
+              showDiagrams: visualOptions.showDiagrams,
+              chartHeight: visualOptions.chartHeight,
+              animateCharts: visualOptions.animateCharts
+            }}
           />
         ) : (
           <div className="text-gray-400 italic">No content to display</div>

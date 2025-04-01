@@ -18,7 +18,8 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { ChartRenderer } from '../components/ChartRenderer'; // Import the shared component
-
+import { MarkdownVisualizer } from '../components/content/visualization/MarkdownVisualizer';
+import { enhanceMarkdownWithCharts, extractChartData } from '../utils/chartUtils';
 
 /* MODULE 1: Data Collection */
 export const collectProjectData = (projectId: string, store: any) => {
@@ -42,7 +43,9 @@ export const collectProjectData = (projectId: string, store: any) => {
       colors: {
         primary: state.primaryColor,
         secondary: state.secondaryColor,
-        accent: state.accentColor
+        accent: state.accentColor,
+        highlight: state.highlightColor || '#ff7300',
+        background: state.backgroundColor || '#ffffff'
       },
       fonts: {
         heading: state.headingFont,
@@ -77,6 +80,7 @@ export const generateResearchPrompt = (projectData: any) => {
     - Use standard Markdown table syntax directly for tables.
     - Include numerical data for charts as JSON arrays within code blocks labeled "chart". Example: \`\`\`chart [{"name": "Category A", "value": 30}, ...] \`\`\`
     - Use standard Markdown lists or paragraphs for relationship data or process flows.
+    - For advanced charts, include type and options like: \`\`\`chart {"data": [...], "type": "bar", "options": {"showValues": true}} \`\`\`
 
     Structure your response with clear sections and data summaries. Ensure data formats are precise for rendering.
   `;
@@ -111,62 +115,68 @@ export const useTypewriterEffect = (finalText: string, speed: number = 10) => {
 // It's separate from the main one in src/lib/markdown.tsx.
 export const MarkdownRenderer: React.FC<{
   content: string;
-  brandColors: { primary?: string; secondary?: string; accent?: string; }; // Added secondary/accent for ChartRenderer
-  components?: Components;
-}> = ({ content, brandColors, components = {} }) => {
-  const primaryColor = brandColors?.primary || '#000000';
-  const headingFont = 'var(--heading-font)';
-
-  // Define custom renderers
-  const customRenderers: Components = {
-    h1: ({ node, ...props }) => (
-      <h1 style={{ color: primaryColor, fontFamily: headingFont }} {...props} />
-    ),
-    h2: ({ node, ...props }) => (
-      <h2 style={{ color: primaryColor, fontFamily: headingFont }} {...props} />
-    ),
-    h3: ({ node, ...props }) => (
-      <h3 style={{ color: primaryColor, fontFamily: headingFont }} {...props} />
-    ),
-    // Re-added custom 'code' handler ONLY for 'chart' language blocks
-    code({ node, inline, className, children, ...props }: { node?: any; inline?: boolean; className?: string; children?: React.ReactNode }) {
-      const match = /language-(\w+)/.exec(className || '');
-      const codeContent = String(children).replace(/\n$/, '');
-
-      // Check if it's a block code element with the language 'chart'
-      if (!inline && match && match[1] === 'chart') {
-        // Render using the imported ChartRenderer, passing necessary props
-        return <ChartRenderer data={codeContent} colors={brandColors || {}} />;
-      }
-
-      // For all other code blocks or inline code, render normally
-      return <code className={className} {...props}>{children}</code>;
-    },
-    ...components // Include any other components passed in
+  brandColors: { 
+    primary?: string; 
+    secondary?: string; 
+    accent?: string;
+    highlight?: string;
+    background?: string;
   };
-
-  // Use remarkGfm for GitHub Flavored Markdown support (tables, etc.)
+  fonts?: {
+    headingFont?: string;
+    bodyFont?: string;
+  };
+  options?: {
+    enhanceVisuals?: boolean;
+    showCharts?: boolean;
+    showTables?: boolean;
+    showDiagrams?: boolean;
+    chartHeight?: number;
+    animateCharts?: boolean;
+  };
+  components?: Components;
+}> = ({ 
+  content, 
+  brandColors, 
+  fonts = {
+    headingFont: 'var(--heading-font)',
+    bodyFont: 'var(--body-font)',
+  }, 
+  options = {
+    enhanceVisuals: true,
+    showCharts: true,
+    showTables: true,
+    showDiagrams: true,
+    chartHeight: 300,
+    animateCharts: true
+  },
+  components = {} 
+}) => {
+  // Use the enhanced MarkdownVisualizer component for rendering
   return (
-    <ReactMarkdown remarkPlugins={[remarkGfm]} components={customRenderers}>
-      {content}
-    </ReactMarkdown>
+    <MarkdownVisualizer 
+      content={content}
+      enhanceVisuals={options.enhanceVisuals}
+      brandColors={brandColors}
+      fonts={fonts}
+      options={{
+        showCharts: options.showCharts,
+        showTables: options.showTables,
+        showDiagrams: options.showDiagrams,
+        chartHeight: options.chartHeight,
+        animateCharts: options.animateCharts
+      }}
+    />
   );
 };
 
 /* MODULE 5: Visual Content Generator */
-// Updated to only extract chart data, as tables/diagrams are now standard Markdown.
+// Updated to leverage the new chartUtils functions
 export const extractVisualContent = (researchText: string) => {
-  // Note: This function still looks for ```chart blocks based on the prompt instructions.
-  const chartRegex = /```chart\s+([\s\S]*?)```/g;
-  const charts = [...researchText.matchAll(chartRegex)].map(match => match[1]);
-
-  // Removed extraction logic for tables and diagrams
-  return { charts };
+  return extractChartData(researchText);
 };
 
 /* MODULE 6: Content Generation Prompt */
-// Removed redundant DataTable component. Standard Markdown tables are now handled by default.
-// Removed duplicate ChartRenderer definition from here.
 export const generateFullContentPrompt = (projectData: any, researchData: string) => {
   const projectName = projectData?.projectInfo?.name || 'the project';
   const audienceConcerns = projectData?.audience?.concerns?.join(', ') || 'key audience concerns';
@@ -196,22 +206,46 @@ export const generateFullContentPrompt = (projectData: any, researchData: string
     3. DO NOT include literal slide numbers or prefixes.
     4. Integrate visualizations seamlessly within the content:
        - Tables: Use standard Markdown table syntax directly.
-       - Charts: Use JSON format within code blocks labeled "chart". Example: \`\`\`chart [{"name": "Example", "value": 0}] \`\`\`
+       - Charts: Use JSON format within code blocks labeled "chart". Example:
+         \`\`\`chart 
+         {"data": [{"name": "Example", "value": 0}], "type": "bar", "options": {"showValues": true}} 
+         \`\`\`
+       - You can also use simpler chart format: \`\`\`chart [{"name": "Example", "value": 0}] \`\`\`
        - Diagrams: Use standard Markdown lists or paragraphs for descriptions.
     5. Maintain a professional tone consistent with the "${templateId}" style.
     6. Address the audience's key concerns: ${audienceConcerns}.
     7. Ensure the generated content is compelling, concise, and directly uses the research findings.
+    8. Include at least 3 different types of charts (bar, line, pie, radar, etc.) to illustrate key data points.
 
     Create the full pitch deck content below based on these instructions.
   `;
 };
 
 /* Usage Component */
-// Note: This component uses the MarkdownRenderer defined *above* in this file.
+// Updated to use the enhanced options for the MarkdownRenderer
 export const ContentGenerator: React.FC<{ projectId: string }> = ({ projectId }) => {
   const [generatedContent, setGeneratedContent] = React.useState('');
-  // Ensure brandColors passed here includes secondary/accent if needed by ChartRenderer
-  const brandColors = { primary: '#4A90E2', secondary: '#50E3C2', accent: '#F5A623' };
+  const brandColors = { 
+    primary: '#4A90E2', 
+    secondary: '#50E3C2', 
+    accent: '#F5A623',
+    highlight: '#FF7300',
+    background: '#FFFFFF'
+  };
+  
+  const fonts = {
+    headingFont: 'Comfortaa, sans-serif',
+    bodyFont: 'Questrial, sans-serif'
+  };
+  
+  const options = {
+    enhanceVisuals: true,
+    showCharts: true,
+    showTables: true,
+    showDiagrams: true,
+    chartHeight: 300,
+    animateCharts: true
+  };
 
   React.useEffect(() => {
     // Implement your real-time content generation logic here.
@@ -221,7 +255,12 @@ export const ContentGenerator: React.FC<{ projectId: string }> = ({ projectId })
   return (
     <div className="content-generator p-4">
       <h3 className="text-xl font-bold mb-4">Pitch Deck Preview</h3>
-      <MarkdownRenderer content={generatedContent} brandColors={brandColors} />
+      <MarkdownRenderer 
+        content={generatedContent} 
+        brandColors={brandColors} 
+        fonts={fonts}
+        options={options}
+      />
     </div>
   );
 };

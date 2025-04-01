@@ -1,12 +1,12 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { useTypewriterEffect } from '@/lib/pitchPrompt'; // Import the typewriter effect
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
+import { useTypewriterEffect } from '@/lib/pitchPrompt';
 import { MarkdownVisualizer } from '@/components/content/visualization/MarkdownVisualizer';
 import { generateExampleChartData, recommendChartType } from '@/utils/chartUtils';
 
-// Define Props for GenerationPreview
-interface GenerationPreviewProps {
+interface GeneratePreviewProps {
   content?: string;
+  previewSpeed?: number;
   templateId?: string;
   brandColors?: {
     primary?: string;
@@ -19,10 +19,10 @@ interface GenerationPreviewProps {
     headingFont?: string;
     bodyFont?: string;
   };
-  previewSpeed?: number;
   options?: {
     enhanceVisuals?: boolean;
-    showCharts?: boolean; 
+    showTypewriterEffect?: boolean;
+    showCharts?: boolean;
     showTables?: boolean;
     showDiagrams?: boolean;
     chartHeight?: number;
@@ -30,23 +30,28 @@ interface GenerationPreviewProps {
   };
 }
 
-const GenerationPreview: React.FC<GenerationPreviewProps> = ({
+/**
+ * Enhanced GeneratePreview component with advanced visualization capabilities
+ * Provides real-time preview of content with visual elements like charts and diagrams
+ */
+const GeneratePreview: React.FC<GeneratePreviewProps> = ({
   content = '',
+  previewSpeed = 5,
   templateId = 'default',
   brandColors = {
     primary: '#ae5630',
     secondary: '#232321',
     accent: '#9d4e2c',
-    highlight: '#ff7300',
+    highlight: '#e67e22',
     background: '#ffffff'
   },
   fonts = {
     headingFont: 'Comfortaa, sans-serif',
     bodyFont: 'Questrial, sans-serif'
   },
-  previewSpeed = 3,
   options = {
     enhanceVisuals: true,
+    showTypewriterEffect: true,
     showCharts: true,
     showTables: true,
     showDiagrams: true,
@@ -54,23 +59,15 @@ const GenerationPreview: React.FC<GenerationPreviewProps> = ({
     animateCharts: true
   }
 }) => {
+  // Apply typewriter effect if requested
+  const displayedContent = options.showTypewriterEffect 
+    ? useTypewriterEffect(content, previewSpeed) 
+    : content;
+
   // Generate placeholder content when empty
   const [placeholderContent, setPlaceholderContent] = useState<string>('');
 
-  // Apply template-specific styling
-  const getTemplateStyles = () => {
-    return {
-      '--primary-color': brandColors.primary,
-      '--secondary-color': brandColors.secondary,
-      '--accent-color': brandColors.accent,
-      '--highlight-color': brandColors.highlight,
-      '--background-color': brandColors.background,
-      '--heading-font': fonts.headingFont,
-      '--body-font': fonts.bodyFont,
-    } as React.CSSProperties;
-  };
-
-  // Generate example content with chart when no content is provided
+  // Generate placeholder content with chart example when no content is provided
   useEffect(() => {
     if (!content) {
       // Generate example chart data
@@ -101,9 +98,22 @@ Click "Start Content Generation" to create your own content with these visualiza
     }
   }, [content]);
 
-  // Apply the typewriter effect with the specified speed
-  const displayContent = useTypewriterEffect(content || placeholderContent, previewSpeed);
-  
+  // Determine the content to display
+  const contentToDisplay = content ? displayedContent : placeholderContent;
+
+  // CSS styles specific to the template
+  const getTemplateStyles = () => {
+    return {
+      '--primary-color': brandColors.primary,
+      '--secondary-color': brandColors.secondary,
+      '--accent-color': brandColors.accent,
+      '--highlight-color': brandColors.highlight,
+      '--background-color': brandColors.background,
+      '--heading-font': fonts.headingFont,
+      '--body-font': fonts.bodyFont,
+    } as React.CSSProperties;
+  };
+
   return (
     <Card className="p-4 border border-neutral-light bg-white shadow-md h-[850px] flex flex-col">
       <h4 className="font-semibold text-neutral-dark mb-4 text-center text-sm flex-shrink-0">
@@ -113,28 +123,22 @@ Click "Start Content Generation" to create your own content with these visualiza
         className={`flex-grow overflow-y-auto text-sm text-neutral-dark bg-white/50 p-4 rounded custom-scrollbar template-${templateId} whitespace-pre-wrap`}
         style={{ overflowWrap: 'break-word', ...getTemplateStyles() }}
       >
-        {displayContent ? (
-          <MarkdownVisualizer 
-            content={displayContent}
-            enhanceVisuals={options.enhanceVisuals}
-            brandColors={brandColors}
-            fonts={fonts}
-            options={{
-              showCharts: options.showCharts,
-              showTables: options.showTables,
-              showDiagrams: options.showDiagrams,
-              chartHeight: options.chartHeight,
-              animateCharts: options.animateCharts
-            }}
-          />
-        ) : (
-          <p className="text-neutral-medium italic text-center mt-10">
-            Click "Start Content Generation" to begin...
-          </p>
-        )}
+        <MarkdownVisualizer 
+          content={contentToDisplay}
+          enhanceVisuals={options.enhanceVisuals}
+          brandColors={brandColors}
+          fonts={fonts}
+          options={{
+            showCharts: options.showCharts,
+            showTables: options.showTables,
+            showDiagrams: options.showDiagrams,
+            chartHeight: options.chartHeight,
+            animateCharts: options.animateCharts
+          }}
+        />
       </div>
     </Card>
   );
 };
 
-export default GenerationPreview;
+export default GeneratePreview;
