@@ -251,9 +251,11 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
       
       // Special handling for chart code blocks
       if (match && match[1] === 'chart' && options.showCharts) {
+        console.log("MarkdownVisualizer: Processing chart code block:", codeContent);
         try {
           // First, try to parse using our enhanced JSON utilities
           const chartData = convertToChartData(codeContent);
+          console.log("MarkdownVisualizer: Chart data after conversion:", chartData);
           
           // Ensure we have valid data
           if (!chartData || chartData.length === 0) {
@@ -262,6 +264,7 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
           
           // Validate and fix the chart data structure
           let safeData = validateChartData(chartData);
+          console.log("MarkdownVisualizer: Safe chart data after validation:", safeData);
           
           // Determine if this is already in the enhanced format with type and options
           let chartType;

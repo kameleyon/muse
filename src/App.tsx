@@ -22,6 +22,7 @@ const Profile = lazy(() => import(/* webpackChunkName: "profile" */ './pages/Pro
 const Settings = lazy(() => import(/* webpackChunkName: "settings" */ './pages/Settings'));
 // Removed NewProject import
 const ProjectSetup = lazy(() => import(/* webpackChunkName: "project-setup" */ './pages/ProjectSetup')); // Added ProjectSetup page
+const ChartTest = lazy(() => import(/* webpackChunkName: "chart-test" */ './pages/ChartTest')); // Added ChartTest page
 const NotFound = lazy(() => import(/* webpackChunkName: "not-found" */ './pages/NotFound'));
 
 function App() {
@@ -151,6 +152,16 @@ function App() {
                       <ProjectSetup />
                     </MainLayout>
                   </ProtectedRoute>
+                </Suspense>
+              }
+            />
+            
+            {/* Chart Test Route - for development/testing */}
+            <Route
+              path="/chart-test"
+              element={
+                <Suspense fallback={<Loading />}>
+                  <ChartTest />
                 </Suspense>
               }
             />

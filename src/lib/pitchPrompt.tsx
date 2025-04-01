@@ -95,6 +95,19 @@ export const useTypewriterEffect = (finalText: string, speed: number = 10) => {
       setDisplayText('');
       return;
     }
+
+    // Check if the text contains chart code blocks
+    const hasChartBlocks = finalText.includes('```chart');
+    
+    if (hasChartBlocks) {
+      // If there are chart blocks, render the entire text immediately
+      // to ensure charts are properly rendered
+      console.log("Chart blocks detected, rendering entire text immediately");
+      setDisplayText(finalText);
+      return;
+    }
+    
+    // Otherwise, use the typewriter effect
     let currentIndex = 0;
     const intervalId = setInterval(() => {
       if (currentIndex <= finalText.length) {

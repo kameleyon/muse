@@ -287,12 +287,18 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
     // Render the appropriate chart based on the type
     let chartComponent = null;
     
+    // Set width and height for all charts
+    const chartWidth = 600;
+    const chartHeight = options?.aspectRatio ? 300 * options.aspectRatio : 300;
+    
     switch (chartType) {
       case 'bar':
         chartComponent = (
           <>
             {ChartTitle}
             <BarChart 
+              width={chartWidth}
+              height={chartHeight}
               data={chartData} 
               layout={layout}
               margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
@@ -323,7 +329,12 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
         chartComponent = (
           <>
             {ChartTitle}
-            <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <LineChart 
+              width={chartWidth}
+              height={chartHeight}
+              data={chartData} 
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
               {showGrid && <CartesianGrid strokeDasharray="3 3" />}
               <XAxis dataKey="name" />
               <YAxis />
@@ -351,7 +362,12 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
         chartComponent = (
           <>
             {ChartTitle}
-            <AreaChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <AreaChart 
+              width={chartWidth}
+              height={chartHeight}
+              data={chartData} 
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
               {showGrid && <CartesianGrid strokeDasharray="3 3" />}
               <XAxis dataKey="name" />
               <YAxis />
@@ -381,7 +397,10 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
         chartComponent = (
           <>
             {ChartTitle}
-            <PieChart>
+            <PieChart
+              width={chartWidth}
+              height={chartHeight}
+            >
               <Tooltip />
               {showLegend && <Legend />}
               <Pie
@@ -411,7 +430,11 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
         chartComponent = (
           <>
             {ChartTitle}
-            <ScatterChart margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <ScatterChart 
+              width={chartWidth}
+              height={chartHeight}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
               {showGrid && <CartesianGrid strokeDasharray="3 3" />}
               <XAxis dataKey="x" type="number" name="x" />
               <YAxis dataKey="y" type="number" name="y" />
@@ -439,7 +462,14 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
         chartComponent = (
           <>
             {ChartTitle}
-            <RadarChart cx="50%" cy="50%" outerRadius={100} data={chartData}>
+            <RadarChart 
+              width={chartWidth}
+              height={chartHeight}
+              cx="50%" 
+              cy="50%" 
+              outerRadius={100} 
+              data={chartData}
+            >
               <PolarGrid />
               <PolarAngleAxis dataKey="name" />
               <PolarRadiusAxis angle={30} domain={[0, 'auto']} />
@@ -465,6 +495,8 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
           <>
             {ChartTitle}
             <RadialBarChart 
+              width={chartWidth}
+              height={chartHeight}
               cx="50%" 
               cy="50%" 
               innerRadius={20} 
@@ -495,7 +527,12 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
         chartComponent = (
           <>
             {ChartTitle}
-            <ComposedChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <ComposedChart 
+              width={chartWidth}
+              height={chartHeight}
+              data={chartData} 
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
               {showGrid && <CartesianGrid strokeDasharray="3 3" />}
               <XAxis dataKey="name" />
               <YAxis />
@@ -567,6 +604,8 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
           <>
             {ChartTitle}
             <Treemap
+              width={chartWidth}
+              height={chartHeight}
               data={chartData}
               dataKey="value"
               aspectRatio={4/3}
@@ -589,7 +628,12 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
         chartComponent = (
           <>
             {ChartTitle}
-            <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <BarChart 
+              width={chartWidth}
+              height={chartHeight}
+              data={chartData} 
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
               {showGrid && <CartesianGrid strokeDasharray="3 3" />}
               <XAxis dataKey="name" />
               <YAxis />
@@ -612,11 +656,21 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
         );
     }
 
+    // Add debug information to help diagnose rendering issues
+    console.log("Rendering chart with data:", chartData);
+    console.log("Chart type:", chartType);
+    console.log("Chart keys:", dataKeys);
+    
     return (
       <div className="chart-container my-4">
-        <ResponsiveContainer width="100%" height={chartHeight}>
+        <div className="chart-debug-info text-xs text-gray-500 mb-2">
+          Chart Type: {chartType}, Data Points: {chartData.length}, Keys: {dataKeys.join(', ')}
+        </div>
+        {/* Add a fixed height to the container to ensure the chart renders */}
+        <div style={{ width: '100%', height: `${chartHeight}px`, position: 'relative' }}>
+          {/* Render the chart directly without ResponsiveContainer */}
           {chartComponent}
-        </ResponsiveContainer>
+        </div>
       </div>
     );
   } catch (error: unknown) { // Type error as unknown

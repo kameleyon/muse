@@ -104,6 +104,20 @@ Click "Start Content Generation" to create your own content with these visualiza
   // Apply the typewriter effect with the specified speed
   const displayContent = useTypewriterEffect(content || placeholderContent, previewSpeed);
   
+  // Add debugging for chart content
+  React.useEffect(() => {
+    if (displayContent && displayContent.includes('```chart')) {
+      console.log("GenerationPreview: Chart content detected in displayContent");
+      const chartBlocks = displayContent.match(/```chart[\s\S]*?```/g);
+      if (chartBlocks) {
+        console.log(`GenerationPreview: Found ${chartBlocks.length} chart blocks`);
+        chartBlocks.forEach((block, index) => {
+          console.log(`GenerationPreview: Chart block ${index + 1}:`, block);
+        });
+      }
+    }
+  }, [displayContent]);
+  
   return (
     <Card className="p-4 border border-neutral-light bg-white shadow-md h-[850px] flex flex-col">
       <h4 className="font-semibold text-neutral-dark mb-4 text-center text-sm flex-shrink-0">
@@ -114,19 +128,30 @@ Click "Start Content Generation" to create your own content with these visualiza
         style={{ overflowWrap: 'break-word', ...getTemplateStyles() }}
       >
         {displayContent ? (
-          <MarkdownVisualizer 
-            content={displayContent}
-            enhanceVisuals={options.enhanceVisuals}
-            brandColors={brandColors}
-            fonts={fonts}
-            options={{
-              showCharts: options.showCharts,
-              showTables: options.showTables,
-              showDiagrams: options.showDiagrams,
-              chartHeight: options.chartHeight,
-              animateCharts: options.animateCharts
-            }}
-          />
+          <>
+            {/* Add debug info for chart content */}
+            {displayContent.includes('```chart') && (
+              <div className="bg-blue-50 p-2 mb-4 text-xs border border-blue-200 rounded">
+                <div className="font-semibold text-blue-700">Chart Content Detected</div>
+                <div className="text-blue-600">
+                  The preview contains chart code blocks that should be rendered as visualizations.
+                </div>
+              </div>
+            )}
+            <MarkdownVisualizer 
+              content={displayContent}
+              enhanceVisuals={options.enhanceVisuals}
+              brandColors={brandColors}
+              fonts={fonts}
+              options={{
+                showCharts: options.showCharts,
+                showTables: options.showTables,
+                showDiagrams: options.showDiagrams,
+                chartHeight: options.chartHeight,
+                animateCharts: options.animateCharts
+              }}
+            />
+          </>
         ) : (
           <p className="text-neutral-medium italic text-center mt-10">
             Click "Start Content Generation" to begin...
