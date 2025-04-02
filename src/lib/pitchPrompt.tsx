@@ -309,18 +309,11 @@ export const generateFullContentPrompt = (projectData: any, researchData: string
          ]
          \`\`\`
          
-         Example for pie chart:
-         \`\`\`chart 
-         [
-           {"name": "Market Share", "value": 40},
-           {"name": "Competitors", "value": 35},
-           {"name": "New Entrants", "value": 25}
-         ]
-         \`\`\`
+      
        
        - Diagrams: Use standard Markdown lists or paragraphs for descriptions.
        - Do not write Line 1, Line 2, Line 3, but right the specific label Name
-       - If you have more that 7 data/values - DO NOT USE PIE CHART -- Use scattered or line charts
+       - DO NOT USE PIE CHART -- Use scattered or line charts instead
     6. Maintain a professional tone consistent with the "${templateId}" style.
     7. Address the audience's key concerns: ${audienceConcerns}.
     8. Ensure the generated content is compelling, concise, and directly uses the research findings.

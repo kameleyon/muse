@@ -79,12 +79,6 @@ const GeneratePreview: React.FC<GeneratePreviewProps> = ({
 
 This is a preview of your generated content. Click "Start Content Generation" to begin, or explore the visualization capabilities below.
 
-## Sample Chart
-
-\`\`\`chart
-${JSON.stringify(chartData, null, 2)}
-\`\`\`
-
 ## Features
 
 - **Rich Charts**: Line, bar, pie, area, radar, and more

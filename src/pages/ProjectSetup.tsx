@@ -94,8 +94,8 @@ const ProjectSetup: React.FC = () => {
 
       {/* Main Content Area */}
       <div className="flex-grow w-full md:w-3/4"> {/* Ensure flex-grow works correctly */}
-        {/* Pass projectType from fetched data */}
-        <ProjectArea projectType={projectData.projectType} />
+        {/* Pass projectType AND initialName from fetched data */}
+        <ProjectArea projectType={projectData.projectType} initialName={projectData.name} />
       </div>
     </div>
   );

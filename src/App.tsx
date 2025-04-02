@@ -1,5 +1,6 @@
 import { useEffect, lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { setNavigate } from './utils/navigation';
 import { AnimatePresence } from 'framer-motion';
 import Loading from './components/common/Loading';
 import { AuthModalProvider } from './context/AuthModalContext';
@@ -22,10 +23,18 @@ const Profile = lazy(() => import(/* webpackChunkName: "profile" */ './pages/Pro
 const Settings = lazy(() => import(/* webpackChunkName: "settings" */ './pages/Settings'));
 // Removed NewProject import
 const ProjectSetup = lazy(() => import(/* webpackChunkName: "project-setup" */ './pages/ProjectSetup')); // Added ProjectSetup page
+const PdfExport = lazy(() => import(/* webpackChunkName: "pdf-export" */ './pages/PdfExport')); // Added PdfExport page
+const PdfExportTest = lazy(() => import(/* webpackChunkName: "pdf-export-test" */ './pages/PdfExportTest')); // Added PdfExportTest page
 const ChartTest = lazy(() => import(/* webpackChunkName: "chart-test" */ './pages/ChartTest')); // Added ChartTest page
 const NotFound = lazy(() => import(/* webpackChunkName: "not-found" */ './pages/NotFound'));
 
 function App() {
+  // Initialize navigation utility
+  const navigate = useNavigate();
+  useEffect(() => {
+    setNavigate(navigate);
+  }, [navigate]);
+  
   // Set favicon
   useEffect(() => {
     const favicon = document.querySelector("link[rel='icon']");
@@ -152,6 +161,24 @@ function App() {
                       <ProjectSetup />
                     </MainLayout>
                   </ProtectedRoute>
+                </Suspense>
+              }
+            />
+            
+            {/* PDF Export Routes */}
+            <Route
+              path="/pdf-export"
+              element={
+                <Suspense fallback={<Loading />}>
+                  <PdfExport />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/pdf-export-test"
+              element={
+                <Suspense fallback={<Loading />}>
+                  <PdfExportTest />
                 </Suspense>
               }
             />

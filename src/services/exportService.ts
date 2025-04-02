@@ -3,6 +3,7 @@ import { cleanupJsonCodeBlocks } from '@/utils/markdownFormatter'; // Keep clean
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'jspdf-autotable'; // Keep for potential future table handling if needed directly
+import { navigate } from '@/utils/navigation';
 
 // Placeholder for API base URL
 const API_BASE_URL = '/api/export';
@@ -87,63 +88,98 @@ export const getExportStatus = async (jobId: string): Promise<ExportResult> => {
 };
 
 /**
- * Generates a PDF from an HTML content string using html2canvas and jsPDF.
- * Preserves styling and layout by rendering the HTML temporarily.
+ * Generates a PDF from HTML content using the dedicated PdfExport page.
+ * This approach provides better styling and layout control.
  * @param projectId - The ID of the project (used for filename/title).
  * @param htmlContent - The HTML content string to export.
- * @param brandColors - Optional brand colors (currently used for title/footer).
- * @returns Promise resolving to the export result with a blob URL.
+ * @param options - Optional settings for the PDF export.
+ * @returns Promise resolving to the export result.
  */
 export const generateFormattedPdf = async (
   projectId: string,
-  htmlContent: string, // Accept HTML string
+  htmlContent: string,
+  options?: {
+    title?: string;
+    fileName?: string;
+    brandColors?: BrandColors;
+  }
+): Promise<ExportResult> => {
+  console.log('Navigating to PDF export page for project:', projectId);
+  
+  if (!htmlContent) {
+    console.error('PDF generation failed: HTML content string not provided.');
+    return { status: 'failed' };
+  }
+  
+  // Navigate to the PDF export page with content and options
+  navigate('/pdf-export', {
+    state: {
+      content: htmlContent,
+      title: options?.title || 'Markdown Export',
+      fileName: options?.fileName || `document-${projectId}`,
+      brandColors: options?.brandColors
+    }
+  });
+  
+  // Since we're navigating away, return a pending status
+  return {
+    status: 'pending',
+    jobId: `pdf_export_${Date.now()}`
+  };
+};
+
+/**
+ * Legacy PDF generation function using html2canvas and jsPDF directly.
+ * Kept for reference and fallback purposes.
+ * @deprecated Use generateFormattedPdf instead which uses the dedicated PdfExport page.
+ */
+export const generatePdfLegacy = async (
+  projectId: string,
+  htmlContent: string,
   brandColors?: BrandColors
 ): Promise<ExportResult> => {
-  console.log('API CALL: generateFormattedPdf using html2canvas from string', projectId);
+  console.log('LEGACY: generatePdfLegacy using html2canvas from string', projectId);
 
   if (!htmlContent) {
     console.error('PDF generation failed: HTML content string not provided.');
     return { status: 'failed' };
   }
 
-  // --- 1. Create a temporary element to render HTML ---
+  // Create a temporary element to render HTML
   const tempContainer = document.createElement('div');
-  // Apply styles to make it render off-screen but with a defined width
-  // Use a fixed width similar to the editor's expected rendering width for consistency
   tempContainer.style.position = 'absolute';
-  tempContainer.style.left = '-9999px'; // Move off-screen
+  tempContainer.style.left = '-9999px';
   tempContainer.style.top = '0';
-  tempContainer.style.width = '800px'; // Adjust width as needed, e.g., based on editor width
-  tempContainer.style.padding = '15px'; // Simulate some padding
-  tempContainer.style.backgroundColor = 'white'; // Ensure a background
-  tempContainer.innerHTML = htmlContent; // Set the content
+  tempContainer.style.width = '800px';
+  tempContainer.style.padding = '15px';
+  tempContainer.style.backgroundColor = 'white';
+  tempContainer.innerHTML = htmlContent;
 
-  // Append to body to allow rendering
   document.body.appendChild(tempContainer);
 
   let pdfBlobUrl: string | null = null;
-  let exportStatus: 'completed' | 'failed' = 'failed'; // Default to failed
+  let exportStatus: 'completed' | 'failed' = 'failed';
 
   try {
-    // --- 2. Capture the temporary element using html2canvas ---
+    // Capture the temporary element
     const canvas = await html2canvas(tempContainer, {
-      scale: 2, // Increase scale for better resolution
+      scale: 2,
       useCORS: true,
       logging: false,
-      // Ensure background is captured if needed
       backgroundColor: '#ffffff',
     });
 
-    // --- 3. Prepare jsPDF Document ---
+    // Create PDF document
     const doc = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
       format: 'a4'
     });
 
+    // Set up dimensions
     const pdfWidth = doc.internal.pageSize.getWidth();
     const pdfHeight = doc.internal.pageSize.getHeight();
-    const margin = 15; // Page margin
+    const margin = 15;
     const contentWidth = pdfWidth - (margin * 2);
     const contentHeight = pdfHeight - (margin * 2);
 
@@ -162,7 +198,7 @@ export const generateFormattedPdf = async (
       creator: 'MagicMuse PDF Generator (html2canvas)'
     });
 
-    // --- 4. Add Title Page (Optional) ---
+    // Add title page
     const primaryColor = brandColors?.primary || '#ae5630';
     const secondaryColor = brandColors?.secondary || '#232321';
     const hexToRgb = (hex: string) => {
@@ -188,7 +224,7 @@ export const generateFormattedPdf = async (
     doc.setLineWidth(0.5);
     doc.line(margin, 65, pdfWidth - margin, 65);
 
-    // --- 5. Add Captured Content with Paging ---
+    // Add content pages
     let position = 0;
     const totalPages = Math.ceil(scaledImgHeight / contentHeight);
 
@@ -224,7 +260,7 @@ export const generateFormattedPdf = async (
       position += contentHeight;
     }
 
-    // --- 6. Add Footer to All Content Pages ---
+    // Add footers
     const finalPageCount = doc.getNumberOfPages();
     for (let i = 2; i <= finalPageCount; i++) {
       doc.setPage(i);
@@ -234,7 +270,7 @@ export const generateFormattedPdf = async (
       doc.text(`Generated by MagicMuse`, margin, pdfHeight - 10);
     }
 
-    // --- 7. Generate Blob URL ---
+    // Generate blob URL
     const pdfBlob = doc.output('blob');
     pdfBlobUrl = URL.createObjectURL(pdfBlob);
     exportStatus = 'completed';
@@ -243,16 +279,14 @@ export const generateFormattedPdf = async (
     console.error('PDF generation using html2canvas failed:', error);
     exportStatus = 'failed';
   } finally {
-    // --- 8. Clean up: Remove the temporary element ---
     if (tempContainer.parentNode) {
       tempContainer.parentNode.removeChild(tempContainer);
     }
   }
 
-  // --- 9. Return Result ---
   return {
     status: exportStatus,
-    downloadUrl: pdfBlobUrl ?? undefined // Return blob URL if successful
+    downloadUrl: pdfBlobUrl ?? undefined
   };
 };
 

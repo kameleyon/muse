@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Download, Settings, Loader2, RefreshCw, Check, AlertTriangle } from 'lucide-react';
+import { Download, Settings, Loader2, RefreshCw, Check, AlertTriangle, X } from 'lucide-react';
 import { useProjectWorkflowStore } from '@/store/projectWorkflowStore';
 import { useDispatch } from 'react-redux';
 import { addToast } from '@/store/slices/uiSlice';
 import * as exportService from '@/services/exportService';
+import PdfExporter from '@/components/export/PdfExporter';
 
 // Define types matching service
 type ExportFormat = 'pptx' | 'pdf' | 'google_slides' | 'html5' | 'video' | 'mobile' | 'print';
@@ -25,6 +26,8 @@ const ExportConfiguration: React.FC<ExportConfigurationProps> = ({
   const [isExporting, setIsExporting] = useState(false);
   const [exportResult, setExportResult] = useState<exportService.ExportResult | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
+  const [pdfExportUrl, setPdfExportUrl] = useState<string | null>(null);
   const [exportOptions, setExportOptions] = useState({
     password: false,
     tracking: false,
@@ -62,10 +65,14 @@ const ExportConfiguration: React.FC<ExportConfigurationProps> = ({
           projectId, 
           editorContent,
           {
-            primary: '#ae5630',
-            secondary: '#232321',
-            accent: '#4a90e2',
-            title: `${projectId} - Markdown Export`
+            title: `${projectId} - Markdown Export`,
+            fileName: `${projectId}_export`,
+            brandColors: {
+              primary: '#ae5630',
+              secondary: '#232321',
+              accent: '#4a90e2',
+              title: `${projectId} - Markdown Export`
+            }
           }
         );
         
@@ -187,9 +194,31 @@ const ExportConfiguration: React.FC<ExportConfigurationProps> = ({
   // Determine overall loading state
   const isLoading = isExporting || isGeneratingClientPdf;
   
+  // Handle PDF export completion
+  const handlePdfExportComplete = (url: string) => {
+    setPdfExportUrl(url);
+    setIsExporting(false);
+    dispatch(addToast({
+      type: 'success',
+      message: 'PDF generated successfully'
+    }));
+  };
+  
+  // Handle PDF export error
+  const handlePdfExportError = (error: Error) => {
+    console.error('PDF export error:', error);
+    setIsExporting(false);
+    dispatch(addToast({
+      type: 'error',
+      message: 'PDF generation failed'
+    }));
+  };
+
   // Determine status message and style
   const getStatusInfo = () => {
-    if (selectedFormat === 'pdf' && onGenerateClientPdf) {
+    if (showPdfPreview) {
+      return { message: '', className: '' };
+    } else if (selectedFormat === 'pdf' && onGenerateClientPdf) {
       // Client-side PDF status
       switch (clientPdfStatus) {
         case 'generating':
@@ -241,6 +270,20 @@ const ExportConfiguration: React.FC<ExportConfigurationProps> = ({
   
   const statusInfo = getStatusInfo();
 
+  // Generate PDF directly in the component
+  const handleGeneratePdf = () => {
+    if (!editorContent) {
+      dispatch(addToast({
+        type: 'error',
+        message: 'No content available for export'
+      }));
+      return;
+    }
+    
+    setIsExporting(true);
+    setShowPdfPreview(true);
+  };
+
   return (
     <Card className="p-4 border border-neutral-light bg-white/30 shadow-sm relative">
       <h4 className="font-semibold text-neutral-dark text-lg mb-3 border-b border-neutral-light/40 pb-2">Export Configuration</h4>
@@ -267,13 +310,13 @@ const ExportConfiguration: React.FC<ExportConfigurationProps> = ({
             onChange={(e) => setSelectedFormat(e.target.value as ExportFormat)}
             disabled={isLoading}
           >
-            <option value="pdf">PDF (Markdown Formatted)</option>
-            <option value="pptx">PowerPoint (PPTX)</option>
-            <option value="google_slides">Google Slides</option>
-            <option value="html5">HTML5 Interactive</option>
-            <option value="video">Video Presentation</option>
-            <option value="mobile">Mobile-Optimized</option>
-            <option value="print">Print-Ready</option>
+          <option value="pdf">PDF (Markdown Formatted)</option>
+          <option value="pptx" disabled>PowerPoint (PPTX) - Coming Soon</option>
+          <option value="google_slides" disabled>Google Slides - Coming Soon</option>
+          <option value="html5" disabled>HTML5 Interactive - Coming Soon</option>
+          <option value="video" disabled>Video Presentation - Coming Soon</option>
+          <option value="mobile" disabled>Mobile-Optimized - Coming Soon</option>
+          <option value="print" disabled>Print-Ready - Coming Soon</option>
           </select>
           <Button 
             variant="link" 
@@ -290,7 +333,7 @@ const ExportConfiguration: React.FC<ExportConfigurationProps> = ({
         <Button 
           size="lg" 
           className="w-full md:w-auto text-white" 
-          onClick={handleExport} 
+          onClick={selectedFormat === 'pdf' ? handleGeneratePdf : handleExport} 
           disabled={isLoading || !projectId || !editorContent}
         >
           {isLoading ? <Loader2 size={18} className="animate-spin mr-2"/> : <Download size={18} className="mr-2"/>}
@@ -298,7 +341,7 @@ const ExportConfiguration: React.FC<ExportConfigurationProps> = ({
         </Button>
       </div>
 
-      {/* Advanced Options (Collapsible) */}
+      {/* Advanced Options (Collapsible) - Commented out as requested
       {showAdvanced && (
         <div className="mt-4 pt-4 border-t border-neutral-light/40 space-y-2">
           <h5 className="text-sm font-medium text-neutral-dark flex items-center gap-1">
@@ -360,9 +403,36 @@ const ExportConfiguration: React.FC<ExportConfigurationProps> = ({
           </div>
         </div>
       )}
+      */}
 
+      {/* PDF Preview */}
+      {showPdfPreview && (
+        <div className="mt-4 border rounded-md overflow-hidden">
+          <div className="bg-neutral-100 p-3 flex justify-between items-center border-b">
+            <h5 className="font-medium text-neutral-dark">PDF Preview</h5>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setShowPdfPreview(false)}
+              className="h-8 w-8 p-0 rounded-full"
+            >
+              <X size={16} />
+            </Button>
+          </div>
+          <div className="p-0">
+            <PdfExporter
+              content={editorContent || ''}
+              title={`${projectId || 'Document'} - Markdown Export`}
+              fileName={`${projectId || 'document'}_export`}
+              onExportComplete={handlePdfExportComplete}
+              onExportError={handlePdfExportError}
+            />
+          </div>
+        </div>
+      )}
+      
       {/* Export Result Display */}
-      {(statusInfo.message) && (
+      {(!showPdfPreview && statusInfo.message) && (
         <div className={`mt-3 text-xs p-2 rounded border ${statusInfo.className}`}>
           <div className="flex items-start gap-2">
             {clientPdfStatus === 'success' || exportResult?.status === 'completed' ? (
@@ -377,14 +447,23 @@ const ExportConfiguration: React.FC<ExportConfigurationProps> = ({
               <p>{statusInfo.message}</p>
               
               {exportResult?.downloadUrl && (
-                <a 
-                  href={exportResult.downloadUrl} 
-                  target="_blank" 
-                  rel="noreferrer" 
-                  className="underline mt-1 inline-block"
-                >
-                  Download File
-                </a>
+                <div className="flex gap-2 mt-2">
+                  <a 
+                    href={exportResult.downloadUrl} 
+                    download={`${projectId}_export.${selectedFormat}`}
+                    className="underline inline-block"
+                  >
+                    Download File
+                  </a>
+                  <a 
+                    href={exportResult.downloadUrl} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className="underline inline-block"
+                  >
+                    Open in New Tab
+                  </a>
+                </div>
               )}
               
               {exportResult?.shareUrl && (

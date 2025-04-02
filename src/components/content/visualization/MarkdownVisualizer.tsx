@@ -341,8 +341,8 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
             showValues: true,
             showGrid: true,
             showLegend: true,
-            width: 450,
-            height: 250
+            width: 600,
+            height: 350
           };
           
           // Check if this is the enhanced format with configuration
@@ -354,24 +354,46 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
             chartStacked = chartData[0].stacked;
             chartOptions = { ...chartOptions, ...(chartData[0].options || {}) };
           } else {
-            // Auto-detect chart type based on data structure
-            const keys = Object.keys(safeData[0]).filter(k => k !== 'name' && k !== 'color');
+          // Auto-detect chart type based on data structure
+          const keys = Object.keys(safeData[0]).filter(k => k !== 'name' && k !== 'color');
+          
+          // Check if data looks like time series
+          const isTimeSeries = typeof safeData[0].name === 'string' && 
+            /^\d{4}-\d{2}-\d{2}|^\d{2}\/\d{2}\/\d{4}|^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/.test(safeData[0].name);
+          
+          // Check if data has year property (common in market data)
+          const hasYearProperty = typeof safeData[0].year === 'string' || typeof safeData[0].year === 'number';
+          
+          // Never use pie charts as requested
+          if (keys.includes('x') && keys.includes('y')) {
+            chartType = 'scatter';
+          } else if (isTimeSeries || hasYearProperty || keys.length > 2) {
+            chartType = 'line';
+          } else if (keys.length >= 4 && safeData.length <= 8) {
+            chartType = 'radar';
+          } else {
+            // Default to bar chart instead of pie
+            chartType = 'bar';
+          }
+          
+          // For market data with year property, ensure proper formatting
+          if (hasYearProperty && chartType === 'line') {
+            // Ensure data is sorted by year
+            safeData.sort((a, b) => {
+              const yearA = typeof a.year === 'string' ? parseInt(a.year) : a.year;
+              const yearB = typeof b.year === 'string' ? parseInt(b.year) : b.year;
+              return yearA - yearB;
+            });
             
-            if (keys.length === 1 && keys[0] === 'value') {
-              chartType = 'pie';
-            } else if (keys.includes('x') && keys.includes('y')) {
-              chartType = 'scatter';
-            } else if (
-              (typeof safeData[0].name === 'string' && 
-              /^\d{4}-\d{2}-\d{2}|^\d{2}\/\d{2}\/\d{4}|^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/.test(safeData[0].name)) ||
-              keys.length > 2
-            ) {
-              chartType = 'line';
-            } else if (keys.length >= 4 && safeData.length <= 8) {
-              chartType = 'radar';
-            } else {
-              chartType = 'bar';
-            }
+            // Set chart options for better display
+            chartOptions = {
+              ...chartOptions,
+              showGrid: true,
+              showValues: true,
+              showLegend: true,
+              aspectRatio: 1.5
+            };
+          }
           }
           
           return (
