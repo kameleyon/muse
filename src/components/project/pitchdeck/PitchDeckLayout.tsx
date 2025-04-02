@@ -75,14 +75,16 @@ const PitchDeckLayout: React.FC<PitchDeckLayoutProps> = ({ initialName }) => {
     isGeneratingClientPdf, setIsGeneratingClientPdf, clientPdfStatus, setClientPdfStatus,
   } = useProjectWorkflowStore();
 
-  // Initialize store - This might need adjustment. If ProjectArea handles initial setup,
-  // this layout might just consume the existing store state.
-  // Let's comment it out for now, assuming the store is initialized elsewhere (e.g., ProjectSetup page).
-  // useEffect(() => {
-  //   if (initialName) { // initialName is no longer a prop here
-  //     initializeWorkflowState({ projectName: initialName });
-  //   }
-  // }, [initialName]);
+  // Initialize store with project name if provided
+  useEffect(() => {
+    if (initialName && initialName.trim() !== '') {
+      console.log(`PitchDeckLayout: Initializing with project name: ${initialName}`);
+      setProjectName(initialName);
+    } else if (!projectName || projectName === "Untitled Project") {
+      // Don't set a default name - let the user enter their own
+      console.log(`PitchDeckLayout: No project name provided, waiting for user input`);
+    }
+  }, [initialName, projectName, setProjectName]);
 
   // Reset generation state when entering Step 4
   useEffect(() => {
@@ -376,7 +378,7 @@ const PitchDeckLayout: React.FC<PitchDeckLayoutProps> = ({ initialName }) => {
        {/* Project Title Header - This might also move upstream depending on design */}
        <div className="p-4 border-b border-neutral-light/40 bg-gradient-to-r from-neutral-light/10 to-transparent">
          <h1 className="text-2xl font-bold font-heading text-secondary truncate">
-           {projectName || "Untitled Project"}
+           {projectName && projectName.trim() !== "" ? projectName : "Untitled Project"}
          </h1>
          <p className="text-sm text-neutral-dark font-medium">
            Category: Proposal & Pitch Deck Generation
