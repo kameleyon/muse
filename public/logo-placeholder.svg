@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="100" viewBox="0 0 200 100">
+  <rect width="200" height="100" fill="#f0f0f0" />
+  <circle cx="70" cy="50" r="25" fill="#ae5630" />
+  <rect x="110" y="25" width="50" height="50" fill="#232321" />
+  <text x="100" y="90" font-family="Arial" font-size="12" text-anchor="middle" fill="#666">Logo</text>
+  <rect width="200" height="100" fill="none" stroke="#ccc" stroke-width="2" />
+</svg>

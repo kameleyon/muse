@@ -1,11 +1,13 @@
 // src/features/editor/EditorToolbar.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { Editor } from '@tiptap/react';
 import { Button } from '@/components/ui/Button'; // Import the Button component
 import {
   FaBold, FaItalic, FaStrikethrough, FaHeading,
-  FaListUl, FaListOl, FaQuoteLeft, FaCode, FaUndo, FaRedo
+  FaListUl, FaListOl, FaQuoteLeft, FaCode, FaUndo, FaRedo,
+  FaChartBar, FaChartPie, FaChartLine, FaImage
 } from 'react-icons/fa';
+import ImageModal from './ImageModal';
 
 interface EditorToolbarProps {
   editor: Editor | null;
@@ -35,11 +37,50 @@ const ToolbarButton: React.FC<{
   </Button>
 );
 
-
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
+  const [isChartModalOpen, setIsChartModalOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedChartType, setSelectedChartType] = useState<string>('bar');
+
   if (!editor) {
     return null;
   }
+
+  const insertChart = (chartType: string) => {
+    // Sample chart data based on chart type
+    let sampleData;
+    
+    switch (chartType) {
+      case 'pie':
+        sampleData = JSON.stringify([
+          { name: "Category A", value: 30 },
+          { name: "Category B", value: 45 },
+          { name: "Category C", value: 25 }
+        ]);
+        break;
+      case 'line':
+        sampleData = JSON.stringify([
+          { name: "Jan", value: 100 },
+          { name: "Feb", value: 150 },
+          { name: "Mar", value: 120 },
+          { name: "Apr", value: 200 },
+          { name: "May", value: 180 }
+        ]);
+        break;
+      case 'bar':
+      default:
+        sampleData = JSON.stringify([
+          { name: "Product A", value: 400 },
+          { name: "Product B", value: 300 },
+          { name: "Product C", value: 200 },
+          { name: "Product D", value: 278 },
+          { name: "Product E", value: 189 }
+        ]);
+    }
+
+    // Insert the chart with the sample data
+    editor.chain().focus().insertChart(sampleData, chartType).run();
+  };
 
   return (
     <div className="editor-toolbar flex flex-wrap gap-1 border border-b-0 border-neutral-light rounded-t-md p-2 bg-neutral-white"> {/* Removed bottom border */}
@@ -107,7 +148,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
       >
         <FaQuoteLeft />
       </ToolbarButton>
-       <ToolbarButton
+      <ToolbarButton
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
         disabled={!editor.can().chain().focus().toggleCodeBlock().run()}
         isActive={editor.isActive('codeBlock')}
@@ -115,6 +156,37 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
       >
         <FaCode />
       </ToolbarButton>
+      
+      {/* Chart buttons */}
+      <div className="border-l border-neutral-light mx-1"></div>
+      <ToolbarButton
+        onClick={() => insertChart('bar')}
+        title="Insert Bar Chart"
+      >
+        <FaChartBar />
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={() => insertChart('pie')}
+        title="Insert Pie Chart"
+      >
+        <FaChartPie />
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={() => insertChart('line')}
+        title="Insert Line Chart"
+      >
+        <FaChartLine />
+      </ToolbarButton>
+      
+      <div className="border-l border-neutral-light mx-1"></div>
+      <ToolbarButton
+        onClick={() => setIsImageModalOpen(true)}
+        title="Insert Image"
+      >
+        <FaImage />
+      </ToolbarButton>
+      
+      <div className="border-l border-neutral-light mx-1"></div>
       <ToolbarButton
         onClick={() => editor.chain().focus().undo().run()}
         disabled={!editor.can().chain().focus().undo().run()}
@@ -129,7 +201,13 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
       >
         <FaRedo />
       </ToolbarButton>
-      {/* Add more buttons as needed */}
+      
+      {/* Image Modal */}
+      <ImageModal 
+        isOpen={isImageModalOpen} 
+        onClose={() => setIsImageModalOpen(false)} 
+        editor={editor} 
+      />
     </div>
   );
 };

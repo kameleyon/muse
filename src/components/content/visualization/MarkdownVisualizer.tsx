@@ -55,7 +55,43 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
   }
 }) => {
   // Process and enhance the markdown content if requested
-  const processedContent = enhanceVisuals ? enhanceMarkdownWithCharts(content) : content;
+  let processedContent = content;
+  
+  // First, try to detect and wrap any standalone JSON blocks in the content
+  if (enhanceVisuals) {
+    // Look for JSON-like patterns that aren't already in code blocks
+    processedContent = processedContent.replace(/(\[{.*?}\])/gs, (match) => {
+      // Skip if it's already inside a code block
+      if (match.includes('```') || match.startsWith('`') || match.endsWith('`')) {
+        return match;
+      }
+      
+      // Check if it looks like chart data
+      if (match.includes('"name"') && match.includes('"value"')) {
+        return '```chart\n' + match + '\n```';
+      }
+      
+      return match;
+    });
+    
+    // Also look for JSON objects with a data property
+    processedContent = processedContent.replace(/({.*?"data":\s*\[.*?\].*?})/gs, (match) => {
+      // Skip if it's already inside a code block
+      if (match.includes('```') || match.startsWith('`') || match.endsWith('`')) {
+        return match;
+      }
+      
+      // Check if it looks like chart data
+      if (match.includes('"data"') && (match.includes('"name"') || match.includes('"type"'))) {
+        return '```chart\n' + match + '\n```';
+      }
+      
+      return match;
+    });
+    
+    // Process the content with the chart enhancer
+    processedContent = enhanceMarkdownWithCharts(processedContent);
+  }
   
   // CSS Custom Properties for styling
   const cssVars = {
@@ -250,7 +286,10 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
       const codeContent = String(children).replace(/\n$/, '');
       
       // Special handling for chart code blocks
-      if (match && match[1] === 'chart' && options.showCharts) {
+      if ((match && match[1] === 'chart' && options.showCharts) || 
+          (match && match[1] === 'json' && options.showCharts) ||
+          (!match && codeContent.includes('"name"') && codeContent.includes('"value"') && options.showCharts) ||
+          (!match && codeContent.includes('[{') && codeContent.includes('}]') && options.showCharts)) {
         console.log("MarkdownVisualizer: Processing chart code block:", codeContent);
         try {
           // First, try to parse using our enhanced JSON utilities
@@ -262,9 +301,35 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
             throw new Error("Could not generate valid chart data");
           }
           
-          // Validate and fix the chart data structure
+          // Check for generic "Line 1", "Line 2" labels and replace them
           let safeData = validateChartData(chartData);
-          console.log("MarkdownVisualizer: Safe chart data after validation:", safeData);
+          
+          // Fix generic labels if present
+          const hasGenericLabels = safeData.some(item => 
+            item && typeof item === 'object' && 
+            Object.keys(item).some(key => /^Line \d+$/.test(key))
+          );
+          
+          if (hasGenericLabels) {
+            console.log("MarkdownVisualizer: Fixing generic Line labels in chart data");
+            safeData = safeData.map(item => {
+              if (item && typeof item === 'object') {
+                const newItem: Record<string, any> = { ...item };
+                Object.entries(item).forEach(([key, value]) => {
+                  if (/^Line \d+$/.test(key)) {
+                    // Replace with more descriptive name based on position
+                    const seriesNumber = key.replace('Line ', '');
+                    delete newItem[key];
+                    newItem[`Data Series ${seriesNumber}`] = value;
+                  }
+                });
+                return newItem;
+              }
+              return item;
+            });
+          }
+          
+          console.log("MarkdownVisualizer: Safe chart data after validation and label fixing:", safeData);
           
           // Determine if this is already in the enhanced format with type and options
           let chartType;
@@ -275,7 +340,9 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
             aspectRatio: options.chartHeight ? options.chartHeight / 300 : 1,
             showValues: true,
             showGrid: true,
-            showLegend: true
+            showLegend: true,
+            width: 450,
+            height: 250
           };
           
           // Check if this is the enhanced format with configuration

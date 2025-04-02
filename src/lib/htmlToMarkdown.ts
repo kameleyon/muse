@@ -33,9 +33,13 @@ export function htmlToMarkdown(html: string): string {
   // Replace links
   markdown = markdown.replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '[$2]($1)');
   
-  // Replace images
+  // Replace images - handle more image tag variations
   markdown = markdown.replace(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*>/gi, '![$2]($1)');
   markdown = markdown.replace(/<img[^>]*src="([^"]*)"[^>]*>/gi, '![]($1)');
+  markdown = markdown.replace(/<img[^>]*src='([^']*)'[^>]*alt='([^']*)'[^>]*>/gi, '![$2]($1)');
+  markdown = markdown.replace(/<img[^>]*src='([^']*)'[^>]*>/gi, '![]($1)');
+  markdown = markdown.replace(/<img[^>]*alt="([^"]*)"[^>]*src="([^"]*)"[^>]*>/gi, '![$1]($2)');
+  markdown = markdown.replace(/<img[^>]*alt='([^']*)'[^>]*src='([^']*)'[^>]*>/gi, '![$1]($2)');
   
   // Replace unordered lists
   markdown = markdown.replace(/<ul[^>]*>(.*?)<\/ul>/gis, (match, content) => {
@@ -44,10 +48,10 @@ export function htmlToMarkdown(html: string): string {
   });
   
   // Replace ordered lists
-  markdown = markdown.replace(/<ol[^>]*>(.*?)<\/ol>/gis, (match, content) => {
+  markdown = markdown.replace(/<ol[^>]*>(.*?)<\/ol>/gis, (match: string, content: string) => {
     let index = 1;
-    const listItems = content.replace(/<li[^>]*>(.*?)<\/li>/gi, () => {
-      return `${index++}. $1\n`;
+    const listItems = content.replace(/<li[^>]*>(.*?)<\/li>/gi, (liMatch: string, liContent: string) => {
+      return `${index++}. ${liContent}\n`;
     });
     return listItems + '\n';
   });
@@ -55,8 +59,49 @@ export function htmlToMarkdown(html: string): string {
   // Replace blockquotes
   markdown = markdown.replace(/<blockquote[^>]*>(.*?)<\/blockquote>/gis, '> $1\n\n');
   
-  // Replace code blocks
-  markdown = markdown.replace(/<pre[^>]*><code[^>]*>(.*?)<\/code><\/pre>/gis, '```\n$1\n```\n\n');
+  // Handle tables
+  markdown = markdown.replace(/<table[^>]*>([\s\S]*?)<\/table>/gi, (match, tableContent) => {
+    // Extract table rows
+    const rows = tableContent.match(/<tr[^>]*>([\s\S]*?)<\/tr>/gi);
+    if (!rows) return match;
+    
+    let markdownTable = '';
+    let isFirstRow = true;
+    
+    rows.forEach((row: string) => {
+      // Extract cells from the row
+      const cells = row.match(/<t[hd][^>]*>([\s\S]*?)<\/t[hd]>/gi);
+      if (!cells) return;
+      
+      const markdownRow = cells.map((cell: string) => {
+        // Extract cell content
+        const content = cell.replace(/<t[hd][^>]*>([\s\S]*?)<\/t[hd]>/i, '$1').trim();
+        return content || ' ';
+      }).join(' | ');
+      
+      markdownTable += '| ' + markdownRow + ' |\n';
+      
+      // Add header separator after first row
+      if (isFirstRow) {
+        markdownTable += '| ' + cells.map(() => '---').join(' | ') + ' |\n';
+        isFirstRow = false;
+      }
+    });
+    
+    return markdownTable + '\n';
+  });
+  
+  // Special handling for chart code blocks
+  markdown = markdown.replace(/<pre[^>]*><code[^>]*class="language-chart"[^>]*>([\s\S]*?)<\/code><\/pre>/gis, (match, chartData) => {
+    // Preserve chart data exactly as is
+    return '```chart\n' + chartData.trim() + '\n```\n\n';
+  });
+  
+  // Replace code blocks with language classes
+  markdown = markdown.replace(/<pre[^>]*><code[^>]*class="language-([^"]+)"[^>]*>([\s\S]*?)<\/code><\/pre>/gis, '```$1\n$2\n```\n\n');
+  
+  // Replace regular code blocks without language classes
+  markdown = markdown.replace(/<pre[^>]*><code[^>]*>([\s\S]*?)<\/code><\/pre>/gis, '```\n$1\n```\n\n');
   
   // Replace inline code
   markdown = markdown.replace(/<code[^>]*>(.*?)<\/code>/gi, '`$1`');

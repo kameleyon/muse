@@ -3,6 +3,8 @@ import React, { useEffect } from 'react'; // Import useEffect
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { EditorToolbar } from './EditorToolbar'; // Import the toolbar
+import Chart from './extensions/ChartExtension'; // Import the Chart extension
+import Image from './extensions/ImageExtension'; // Import the Image extension
 
 interface RichTextEditorProps {
   initialContent?: string;
@@ -34,7 +36,17 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         // Configure StarterKit extensions if needed
         // e.g., heading: { levels: [1, 2, 3] }
       }),
-      // Add more extensions here (e.g., Placeholder, Link, Image)
+      Chart.configure({
+        HTMLAttributes: {
+          class: 'chart-extension',
+        },
+      }),
+      Image.configure({
+        HTMLAttributes: {
+          class: 'image-extension',
+        },
+      }),
+      // Add more extensions here (e.g., Placeholder, Link)
     ],
     content: initialContent,
     editable: editable,

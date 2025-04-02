@@ -22,8 +22,32 @@ import { MarkdownVisualizer } from '../components/content/visualization/Markdown
 import { enhanceMarkdownWithCharts, extractChartData } from '../utils/chartUtils';
 
 /* MODULE 1: Data Collection */
+// Define the full 14-slide default structure (fallback if not in state)
+const defaultSlideStructure = [
+  { id: 'slide-1', title: 'Cover Slide', type: 'cover', description: 'Company Logo, Project Name, Tagline or Short Mission Statement', isRequired: true },
+  { id: 'slide-2', title: 'Problem', type: 'problem', description: 'Define the problem your product/service aims to solve', isRequired: true },
+  { id: 'slide-3', title: 'Solution', type: 'solution', description: 'Explain how your product/service solves the problem', isRequired: true },
+  { id: 'slide-4', title: 'How It Works', type: 'how_it_works', description: 'Explain the mechanics of your solution', isRequired: true },
+  { id: 'slide-5', title: 'Core Features', type: 'features', description: 'Highlight the main features and benefits', isRequired: true },
+  { id: 'slide-6', title: 'Market Opportunity', type: 'market_analysis', description: 'Market size, trends, and growth potential', isRequired: true },
+  { id: 'slide-7', title: 'Business Model', type: 'business_model', description: 'Revenue streams and monetization strategy', isRequired: true },
+  { id: 'slide-8', title: 'Competitive Advantage', type: 'competition', description: 'What sets you apart from competitors', isRequired: true },
+  { id: 'slide-9', title: 'Go-to-Market Strategy', type: 'go_to_market', description: 'Plan for acquiring customers and scaling', isRequired: true },
+  { id: 'slide-10', title: 'Financial Projections', type: 'financials', description: 'Key financial metrics and forecasts', isRequired: true },
+  { id: 'slide-11', title: 'Team & Expertise', type: 'team', description: 'Key team members and their qualifications', isRequired: true },
+  { id: 'slide-12', title: 'Roadmap & Milestones', type: 'roadmap', description: 'Timeline of key achievements and future goals', isRequired: true },
+  { id: 'slide-13', title: 'Call to Action', type: 'call_to_action', description: 'Specific ask and next steps', isRequired: true },
+  { id: 'slide-14', title: 'Appendix', type: 'appendix', description: 'Additional supporting information (optional)', isRequired: false }
+];
+
 export const collectProjectData = (projectId: string, store: any) => {
   const state = store.getState();
+  
+  // Use the slide structure from state, or fall back to the default if not available
+  const slideStructure = state.slideStructure && state.slideStructure.length > 0 
+    ? state.slideStructure 
+    : defaultSlideStructure;
+    
   return {
     projectInfo: {
       id: projectId,
@@ -40,6 +64,7 @@ export const collectProjectData = (projectId: string, store: any) => {
     },
     design: {
       templateId: state.selectedTemplateId,
+      brandLogo: state.brandLogo || null, // Include brand logo if available
       colors: {
         primary: state.primaryColor,
         secondary: state.secondaryColor,
@@ -50,9 +75,11 @@ export const collectProjectData = (projectId: string, store: any) => {
       fonts: {
         heading: state.headingFont,
         body: state.bodyFont
-      }
+      },
+      complexity: state.complexityLevel // Include complexity level
     },
-    structure: state.slideStructure
+    structure: slideStructure,
+    slideCount: slideStructure.length // Include the slide count explicitly
   };
 };
 
@@ -62,11 +89,25 @@ export const generateResearchPrompt = (projectData: any) => {
   const industry = projectData?.audience?.industry || 'relevant industry';
   const audienceName = projectData?.audience?.name || 'target audience';
   const audienceSize = projectData?.audience?.size || 'unknown size';
+  const complexityLevel = projectData?.design?.complexity || 'intermediate';
+  
+  // Determine research detail level based on complexity
+  let researchDepth = '';
+  if (complexityLevel === 'basic') {
+    researchDepth = 'Provide essential research with key facts and figures. Focus on the most important data points and keep analysis concise.';
+  } else if (complexityLevel === 'intermediate') {
+    researchDepth = 'Provide balanced research with relevant data and moderate analysis. Include supporting information while maintaining clarity.';
+  } else if (complexityLevel === 'advanced') {
+    researchDepth = 'Provide comprehensive research with detailed data, in-depth analysis, and nuanced insights. Include multiple data points and thorough explanations.';
+  }
 
   return `
     I need comprehensive research for a pitch deck on "${projectName}".
     Industry: ${industry}
     Target audience: ${audienceName}, size: ${audienceSize}
+    
+    RESEARCH COMPLEXITY: ${complexityLevel.toUpperCase()}
+    ${researchDepth}
 
     Please provide detailed information on:
     1. Market size and growth projections (with specific numbers)
@@ -83,6 +124,8 @@ export const generateResearchPrompt = (projectData: any) => {
     - For advanced charts, include type and options like: \`\`\`chart {"data": [...], "type": "bar", "options": {"showValues": true}} \`\`\`
 
     Structure your response with clear sections and data summaries. Ensure data formats are precise for rendering.
+    
+    Important: Do not use any emojis in your response.
   `;
 };
 
@@ -194,6 +237,18 @@ export const generateFullContentPrompt = (projectData: any, researchData: string
   const projectName = projectData?.projectInfo?.name || 'the project';
   const audienceConcerns = projectData?.audience?.concerns?.join(', ') || 'key audience concerns';
   const templateId = projectData?.design?.templateId || 'default';
+  const complexityLevel = projectData?.design?.complexity || 'intermediate';
+  const slideCount = projectData?.slideCount || 14;
+  
+  // Determine content detail level based on complexity
+  let detailLevel = '';
+  if (complexityLevel === 'basic') {
+    detailLevel = 'Create concise, straightforward content with essential information only. Keep explanations brief and focus on the most important points.';
+  } else if (complexityLevel === 'intermediate') {
+    detailLevel = 'Balance detail and brevity. Include supporting information and explanations while maintaining clarity and focus.';
+  } else if (complexityLevel === 'advanced') {
+    detailLevel = 'Create comprehensive, detailed content with in-depth analysis, supporting data, and thorough explanations. Include nuanced insights and address potential questions or objections.';
+  }
 
   return `
     Generate a complete, polished pitch deck for "${projectName}" with the following specs:
@@ -213,22 +268,62 @@ export const generateFullContentPrompt = (projectData: any, researchData: string
     RESEARCH FINDINGS (Use this data to populate the deck content):
     ${researchData}
 
+    CONTENT COMPLEXITY: ${complexityLevel.toUpperCase()}
+    ${detailLevel}
+
     Guidelines:
     1. Format your response entirely in Markdown.
-    2. Structure the content logically according to the provided slide structure. Use Markdown headers (##) for slide titles/sections.
-    3. DO NOT include literal slide numbers or prefixes.
-    4. Integrate visualizations seamlessly within the content:
-       - Tables: Use standard Markdown table syntax directly.
-       - Charts: Use JSON format within code blocks labeled "chart". Example:
+    2. CRITICAL: You MUST create content for EXACTLY ${slideCount} slides as defined in the SLIDE STRUCTURE above. The standard structure has 14 slides, but the user may have modified this. Do not add or remove slides from what is provided.
+    3. Structure the content logically according to the provided slide structure. Use Markdown headers (##) for slide titles/sections.
+    4. For the Cover Slide, include a placeholder for the company logo by adding an empty line with just: ![Logo](/logo-placeholder.svg)
+       DO NOT use [CompanyLogo] or any other text that would appear in the rendered output.
+    5. DO NOT include literal slide numbers or prefixes or name like cover, problem - say it differently
+    6. Integrate visualizations seamlessly within the content:
+       - Tables: Use standard Markdown table syntax directly. Make sure tables have clear headers and are properly formatted.
+         Example:
+         | Category | Value | Percentage |
+         |----------|-------|------------|
+         | Product A| 1200  | 40%        |
+         | Product B| 900   | 30%        |
+         | Product C| 600   | 20%        |
+         | Product D| 300   | 10%        |
+       
+       - Charts: Use JSON format within code blocks labeled "chart". Use descriptive names instead of generic "Line 1", "Line 2", etc.
+         Example for line chart (preferred):
          \`\`\`chart 
-         {"data": [{"name": "Example", "value": 0}], "type": "bar", "options": {"showValues": true}} 
+         [
+           {"name": "2021", "revenue": 1200, "expenses": 800, "profit": 400},
+           {"name": "2022", "revenue": 1500, "expenses": 900, "profit": 600},
+           {"name": "2023", "revenue": 1800, "expenses": 1000, "profit": 800},
+           {"name": "2024", "revenue": 2100, "expenses": 1100, "profit": 1000},
+           {"name": "2025", "revenue": 2400, "expenses": 1200, "profit": 1200}
+         ]
          \`\`\`
-       - You can also use simpler chart format: \`\`\`chart [{"name": "Example", "value": 0}] \`\`\`
+         
+         Example for bar chart:
+         \`\`\`chart 
+         [
+           {"name": "Product A", "sales": 1200, "returns": 50},
+           {"name": "Product B", "sales": 900, "returns": 30},
+           {"name": "Product C", "sales": 600, "returns": 20}
+         ]
+         \`\`\`
+         
+         Example for pie chart:
+         \`\`\`chart 
+         [
+           {"name": "Market Share", "value": 40},
+           {"name": "Competitors", "value": 35},
+           {"name": "New Entrants", "value": 25}
+         ]
+         \`\`\`
+       
        - Diagrams: Use standard Markdown lists or paragraphs for descriptions.
-    5. Maintain a professional tone consistent with the "${templateId}" style.
-    6. Address the audience's key concerns: ${audienceConcerns}.
-    7. Ensure the generated content is compelling, concise, and directly uses the research findings.
-    8. Include at least 3 different types of charts (bar, line, pie, radar, etc.) to illustrate key data points.
+    6. Maintain a professional tone consistent with the "${templateId}" style.
+    7. Address the audience's key concerns: ${audienceConcerns}.
+    8. Ensure the generated content is compelling, concise, and directly uses the research findings.
+    9. Include at least 3 different types of charts (bar, line, pie, radar, etc.) to illustrate key data points.
+    10. Do not use any emojis in your response.
 
     Create the full pitch deck content below based on these instructions.
   `;

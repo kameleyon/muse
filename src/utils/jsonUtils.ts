@@ -442,11 +442,90 @@ export const convertToChartData = (input: string): any[] | null => {
   
   // Try direct JSON parse first
   try {
-    const directParse = JSON.parse(processedInput);
+    // Handle commas in numeric values (e.g., 1,107.1)
+    let commaFixedInput = processedInput.replace(/"value"\s*:\s*(\d{1,3}(?:,\d{3})+(?:\.\d+)?)/g, (match, value) => {
+      return match.replace(value, value.replace(/,/g, ''));
+    });
+    
+    // Handle commas in all numeric values
+    commaFixedInput = commaFixedInput.replace(/"[^"]+"\s*:\s*(\d{1,3}(?:,\d{3})+(?:\.\d+)?)/g, (match, value) => {
+      return match.replace(value, value.replace(/,/g, ''));
+    });
+    
+    // Fix common issues with chart data
+    commaFixedInput = commaFixedInput
+      .replace(/\bNaN\b/g, 'null')  // Replace NaN with null
+      .replace(/\bundefined\b/g, 'null')  // Replace undefined with null
+      .replace(/\bInfinity\b/g, 'null')  // Replace Infinity with null
+      .replace(/'/g, '"')  // Replace single quotes with double quotes
+      .replace(/(\w+)(?=\s*:)/g, '"$1"')  // Add quotes to property names
+      .replace(/,\s*([}\]])/g, '$1');  // Remove trailing commas
+    
+    // Try to parse the JSON
+    const directParse = JSON.parse(commaFixedInput);
     console.log("Direct JSON parse succeeded for chart data");
-    return Array.isArray(directParse) ? directParse : [directParse];
+    
+    // If it's an object with a data property, use that
+    if (directParse && typeof directParse === 'object' && !Array.isArray(directParse) && directParse.data) {
+      return Array.isArray(directParse.data) ? directParse.data : [directParse.data];
+    }
+    
+    // Ensure we have an array of objects with name/value pairs
+    if (Array.isArray(directParse)) {
+      // Check if we have generic "Line 1", "Line 2" labels and replace them
+      const hasGenericLabels = directParse.some(item => 
+        item && typeof item === 'object' && 
+        Object.keys(item).some(key => /^Line \d+$/.test(key))
+      );
+      
+      if (hasGenericLabels) {
+        // Replace generic labels with more descriptive ones
+        return directParse.map(item => {
+          if (item && typeof item === 'object') {
+            const newItem: Record<string, any> = {};
+            Object.entries(item).forEach(([key, value]) => {
+              if (/^Line \d+$/.test(key)) {
+                // Replace with more descriptive name based on position
+                newItem[`Data Series ${key.replace('Line ', '')}`] = value;
+              } else {
+                newItem[key] = value;
+              }
+            });
+            return newItem;
+          }
+          return item;
+        });
+      }
+      
+      return directParse;
+    }
+    
+    return [directParse];
   } catch (directError: any) {
     console.log("Direct JSON parse failed for chart data:", directError.message);
+    
+    // Try to fix common JSON formatting issues in code blocks
+    let fixedInput = processedInput
+      .replace(/^\s*\[\s*$/m, '[') // Fix opening bracket on its own line
+      .replace(/^\s*\]\s*$/m, ']') // Fix closing bracket on its own line
+      .replace(/^\s*\{\s*$/m, '{') // Fix opening brace on its own line
+      .replace(/^\s*\}\s*$/m, '}') // Fix closing brace on its own line
+      .replace(/^\s*\{\s*"name":/gm, '{"name":') // Fix object start with name property
+      .replace(/,\s*$/gm, ',') // Fix trailing commas at end of lines
+      .replace(/,(\s*[\]}])/g, '$1'); // Remove trailing commas before closing brackets
+      
+    // Handle commas in numeric values (e.g., 1,107.1)
+    fixedInput = fixedInput.replace(/"value"\s*:\s*(\d{1,3}(?:,\d{3})+(?:\.\d+)?)/g, (match, value) => {
+      return match.replace(value, value.replace(/,/g, ''));
+    });
+      
+    try {
+      const fixedParse = JSON.parse(fixedInput);
+      console.log("Fixed JSON parse succeeded for chart data");
+      return Array.isArray(fixedParse) ? fixedParse : [fixedParse];
+    } catch (fixedError) {
+      console.log("Fixed JSON parse failed for chart data:", fixedError);
+    }
     
     // Try with basic repairs
     try {

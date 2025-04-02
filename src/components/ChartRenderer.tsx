@@ -240,19 +240,27 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
     const dataKeys = Object.keys(chartData[0]).filter(k => k !== 'name' && k !== 'color');
     
     // Auto-detect chart type if not explicitly provided
-    let chartType = type || 'bar'; // Default to bar chart
+    let chartType = type || 'line'; // Default to line chart
     
     // Auto chart type detection logic
     if (!type) {
-      // Use pie chart if there's just a 'value' property
-      if (dataKeys.length === 1 && dataKeys[0] === 'value') {
+      // Don't use pie chart if there are more than 7 data points
+      const tooManyPointsForPie = chartData.length > 7;
+      
+      // Use pie chart if there's just a 'value' property and not too many data points
+      if (dataKeys.length === 1 && dataKeys[0] === 'value' && !tooManyPointsForPie) {
         chartType = 'pie';
+      }
+      // Use horizontal bar chart for categorical data with many data points
+      else if (dataKeys.length === 1 && dataKeys[0] === 'value' && tooManyPointsForPie) {
+        chartType = 'bar';
+        layout = 'vertical'; // Use horizontal bars for better readability with many categories
       }
       // Use line chart for time series data (if name has date-like format) or multiple data series
       else if (
         (typeof chartData[0].name === 'string' && 
-         /^\d{4}-\d{2}-\d{2}|^\d{2}\/\d{2}\/\d{4}|^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/.test(chartData[0].name)) ||
-        dataKeys.length > 2
+         /^\d{4}-\d{2}-\d{2}|^\d{2}\/\d{2}\/\d{4}|^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)|^\d{4}$/.test(chartData[0].name)) ||
+        dataKeys.length > 1
       ) {
         chartType = 'line';
       }
@@ -732,21 +740,28 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
         );
     }
 
-    // Add debug information to help diagnose rendering issues
+    // Log debug information to console only (not visible in UI)
     console.log("Rendering chart with data:", chartData);
     console.log("Chart type:", chartType);
     console.log("Chart keys:", dataKeys);
     
+    // Add a visualization caption if provided in the chart data
+    const visualizationCaption = chartData[0]?.visualization || '';
+    
     return (
       <div className="chart-container my-4">
-        <div className="chart-debug-info text-xs text-gray-500 mb-2">
-          Chart Type: {chartType}, Data Points: {chartData.length}, Keys: {dataKeys.join(', ')}
-        </div>
         {/* Add a fixed height to the container to ensure the chart renders */}
         <div style={{ width: '100%', height: `${chartHeight}px`, position: 'relative' }}>
           {/* Render the chart directly without ResponsiveContainer */}
           {chartComponent}
         </div>
+        
+        {/* Only show visualization caption if it exists */}
+        {visualizationCaption && (
+          <div className="visualization-caption text-sm text-center text-gray-600 mt-2 italic">
+            {visualizationCaption}
+          </div>
+        )}
       </div>
     );
   } catch (error: unknown) { // Type error as unknown
