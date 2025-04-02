@@ -314,6 +314,7 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
               layout={chartLayout}
               stacked={chartStacked}
               colors={brandColors}
+              fonts={fonts}
               options={chartOptions}
             />
           );

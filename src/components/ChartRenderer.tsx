@@ -47,6 +47,10 @@ interface ChartRendererProps {
     gradientEnd?: string;
     background?: string;
   };
+  fonts?: {
+    headingFont?: string;
+    bodyFont?: string;
+  };
   options?: {
     animation?: boolean;
     aspectRatio?: number;
@@ -80,6 +84,10 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
   layout = 'horizontal', 
   stacked = false, 
   colors = {}, 
+  fonts = {
+    bodyFont: 'inherit',
+    headingFont: 'inherit'
+  },
   options = {} 
 }) => {
   // Set default colors using optional chaining and defaults
@@ -402,24 +410,92 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
               height={chartHeight}
             >
               <Tooltip />
-              {showLegend && <Legend />}
+              {/* Position the legend on the right side with smaller font */}
+              {showLegend && (
+                <Legend 
+                  layout="vertical" 
+                  verticalAlign="middle" 
+                  align="right"
+                  wrapperStyle={{ 
+                    fontSize: '0.75rem', 
+                    fontFamily: fonts.bodyFont || 'inherit',
+                    lineHeight: '1.2em'
+                  }}
+                  formatter={(value, entry: any) => {
+                    // Use any type for entry to avoid TypeScript errors
+                    const percent = entry.payload?.payload?.percent || 0;
+                    return `${value} (${(percent * 100).toFixed(0)}%)`;
+                  }}
+                />
+              )}
               <Pie
                 data={chartData}
-                dataKey={dataKeys[0]}
+                dataKey={dataKeys[0] || 'value'} // Ensure we have a valid dataKey
                 nameKey="name"
-                cx="50%"
+                cx="40%"  // Shifted left to make room for legend
                 cy="50%"
-                outerRadius={100}
+                outerRadius={90}  // Slightly smaller to fit better
                 fill={primaryColor}
-                labelLine={showValues}
-                label={showValues ? ({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)` : false}
+                labelLine={false}  // No label lines on the chart itself
+                label={false}      // No labels on the chart itself
+                // Add percent value to each data point for the legend
+                isAnimationActive={options?.animation !== false}
               >
-                {chartData.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={entry.color || colorPalette[index % colorPalette.length]} 
-                  />
-                ))}
+                {chartData.map((entry, index) => {
+                  // Handle different data formats for pie charts
+                  let value = 0;
+                  let name = '';
+                  
+                  if (typeof entry === 'object' && entry !== null) {
+                    // Standard format with name and value
+                    if ('name' in entry && dataKeys.length > 0) {
+                      name = entry.name || `Item ${index + 1}`;
+                      value = entry[dataKeys[0]] || entry.value || 0;
+                    }
+                    // Format with category and value
+                    else if ('category' in entry && ('value' in entry)) {
+                      name = entry.category || `Item ${index + 1}`;
+                      value = entry.value || 0;
+                    }
+                    // Format with phase and value
+                    else if ('phase' in entry && ('value' in entry)) {
+                      name = entry.phase || `Item ${index + 1}`;
+                      value = entry.value || 0;
+                    }
+                    // Fallback
+                    else {
+                      name = `Item ${index + 1}`;
+                      value = 1;
+                    }
+                  }
+                  
+                  // Calculate percent for each slice
+                  const total = chartData.reduce((sum, item) => {
+                    if (typeof item === 'object' && item !== null) {
+                      if (dataKeys.length > 0 && dataKeys[0] in item) {
+                        return sum + (item[dataKeys[0]] || 0);
+                      } else if ('value' in item) {
+                        return sum + (item.value || 0);
+                      }
+                    }
+                    return sum + 0;
+                  }, 0);
+                  
+                  const percent = total > 0 ? value / total : 0;
+                  
+                  // Add percent and name to the entry for use in the legend
+                  entry.percent = percent;
+                  if (!entry.name && name) {
+                    entry.name = name;
+                  }
+                  
+                  return (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={entry.color || colorPalette[index % colorPalette.length]} 
+                    />
+                  );
+                })}
               </Pie>
             </PieChart>
           </>
