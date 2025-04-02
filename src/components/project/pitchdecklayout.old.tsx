@@ -335,10 +335,14 @@ const ProjectArea: React.FC<ProjectAreaProps> = ({ initialName }) => {
         projectId || `temp_${Date.now()}`,
         editorContent,
         {
-          primary: primaryColor || '#ae5630',
-          secondary: secondaryColor || '#232321',
-          accent: accentColor || '#9d4e2c',
-          title: projectName || 'MagicMuse Document'
+          title: projectName || 'MagicMuse Document',
+          fileName: `${projectName || 'magicmuse-project'}.pdf`,
+          brandColors: {
+            primary: primaryColor || '#ae5630',
+            secondary: secondaryColor || '#232321',
+            accent: accentColor || '#9d4e2c',
+            title: projectName || 'MagicMuse Document' // Keep title here for consistency if needed by type
+          }
         }
       );
 
