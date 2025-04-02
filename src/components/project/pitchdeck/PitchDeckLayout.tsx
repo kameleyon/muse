@@ -600,13 +600,53 @@ const PitchDeckLayout: React.FC<PitchDeckLayoutProps> = ({ initialName }) => {
                      }}
                   />
                </div>
-               {/* Right Sidebar: Tools & Collaboration */}
+               {/* Right Sidebar: Quality Dashboard */}
                <div className="lg:col-span-4 space-y-6">
                   <div className="sticky top-[80px] space-y-6">
+                     {/* Enhancement tools commented out
                      <EnhancementTools
                         editorContent={editorContent}
                         onContentChange={setEditorContent}
                      />
+                     */}
+                     {/*<Card className="p-4 border border-neutral-light bg-white/30 shadow-sm relative">
+                        <h4 className="font-semibold text-neutral-dark text-lg mb-3 border-b border-neutral-light/40 pb-2">Quality Dashboard</h4>
+                        <div className="space-y-4">
+                           <div>
+                              <span className="text-sm font-medium text-neutral-dark">Refinement Recommendations</span>
+                              <p className="text-xs text-neutral-medium mt-1">AI-powered suggestions to improve your content.</p>
+                           </div>
+                           <div>
+                              <span className="text-sm font-medium text-neutral-dark">Content Validation</span>
+                              <p className="text-xs text-neutral-medium mt-1">Verify facts and ensure quality standards.</p>
+                           </div>
+                        </div>
+                     </Card>*/}
+                     <QualityDashboard
+                        metrics={qualityMetrics}
+                        isLoading={isLoadingQA}
+                     />
+                     <div className=" space-y-6">
+                     <RefinementPanel
+                      suggestions={refinementSuggestions}
+                      onImplement={handleImplementSuggestion}
+                      onCompare={handleCompareSuggestion}
+                      onPolish={handleRunFinalPolish}
+                      isLoading={isLoadingQA}
+                   />
+                   <ValidationInterface
+                      onVerifyFacts={handleRunFactCheck}
+                      onCheckCompliance={handleRunComplianceCheck}
+                      onValidateFinancials={handleRunFinancialValidation}
+                      onCheckLanguage={handleRunLanguageCheck}
+                      factCheckResults={factCheckResults}
+                      complianceStatus={complianceStatus}
+                      financialValidationStatus={financialValidationStatus}
+                      languageCheckStatus={languageCheckStatus}
+                      isLoading={isLoadingQA}
+                   />
+                   
+                </div>
                      {/* VisualElementStudio removed */}
                      {/* CollaborationTools removed */}
                   </div>
@@ -615,13 +655,20 @@ const PitchDeckLayout: React.FC<PitchDeckLayoutProps> = ({ initialName }) => {
                 <Button variant="outline" onClick={() => setCurrentStep(4)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto">
                   Back to Generation
                 </Button>
-                <Button
+                {/*<Button
                   variant="primary"
                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"
                   onClick={handleContinueFromStep5}
                 >
                   Continue to QA & Refinement
-                 </Button>
+                 </Button>*/}
+                 <Button
+                   variant="primary"
+                   className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"
+                   onClick={handleContinueFromStep6}
+                 >
+                   Continue to Finalization
+                  </Button>
                </div>
              </div>
            </>

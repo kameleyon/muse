@@ -226,9 +226,11 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
         */}
       </div>
       
-      {/* Toolbar - only visible in edit mode */}
-      {isEditMode && (
-        <div className="p-2 border-b border-neutral-light/40 flex flex-wrap gap-2 items-center text-xs text-neutral-medium flex-shrink-0">
+      {/* Toolbar - Quality Dashboard */}
+      <div className="p-2 border-b border-neutral-light/40 flex flex-wrap gap-2 items-center text-xs text-neutral-medium flex-shrink-0">
+        <div className="font-semibold text-neutral-dark">Quality Dashboard</div>
+        <div className="ml-auto flex items-center gap-2">
+          {/* Enhancement tools commented out
           <Button 
             variant="outline" 
             size="sm" 
@@ -237,8 +239,13 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
           >
             <Bot size={14} className="mr-1.5"/> AI Enhance
           </Button>
+          */}
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-neutral-dark">Refinement Recommendations</span>
+            <span className="text-xs text-neutral-medium">Content Validation</span>
+          </div>
         </div>
-      )}
+      </div>
 
       {/* Content area - conditionally render editor or visualizer */}
       <div className="flex-grow p-2 overflow-hidden">

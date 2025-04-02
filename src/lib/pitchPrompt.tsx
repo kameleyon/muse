@@ -319,11 +319,14 @@ export const generateFullContentPrompt = (projectData: any, researchData: string
          \`\`\`
        
        - Diagrams: Use standard Markdown lists or paragraphs for descriptions.
+       - Do not write Line 1, Line 2, Line 3, but right the specific label Name
+       - If you have more that 7 data/values - DO NOT USE PIE CHART -- Use scattered or line charts
     6. Maintain a professional tone consistent with the "${templateId}" style.
     7. Address the audience's key concerns: ${audienceConcerns}.
     8. Ensure the generated content is compelling, concise, and directly uses the research findings.
     9. Include at least 3 different types of charts (bar, line, pie, radar, etc.) to illustrate key data points.
     10. Do not use any emojis in your response.
+    11. Place the logo in the logo placeholder.
 
     Create the full pitch deck content below based on these instructions.
   `;

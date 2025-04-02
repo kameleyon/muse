@@ -123,7 +123,7 @@ export const completeLogout = async (dispatch: any) => {
     }
     
     await nuclearReset();
-    window.location.href = window.location.origin;
+    // Removed redirection to allow the calling component to handle navigation
     console.log('Complete logout successful');
     return true;
   } catch (error) {
