@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import { useDispatch } from 'react-redux';
 import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select'; // Assuming Select component exists
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { setContentFilters } from '@/store/slices/contentSlice'; // Import Redux action
 
@@ -60,15 +66,14 @@ const ContentLibraryToolbar: React.FC<ContentLibraryToolbarProps> = ({
   };
 
   // Update Redux store immediately when type filter changes
-  const handleTypeFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const newType = e.target.value;
-      setTypeFilter(newType);
-      dispatch(
-          setContentFilters({
-              type: newType || null,
-              search: searchInput, // Keep current search term
-          })
-      );
+  const handleTypeFilterChange = (newType: string) => {
+    setTypeFilter(newType);
+    dispatch(
+      setContentFilters({
+        type: newType || null,
+        search: searchInput, // Keep current search term
+      })
+    );
   };
 
   // TODO: Implement date filter logic similarly if needed
@@ -89,19 +94,32 @@ const ContentLibraryToolbar: React.FC<ContentLibraryToolbarProps> = ({
         />
       </div>
       <div className="w-full md:w-48">
-        {/* Assuming Select component takes options, value, onChange */}
-        <Select
-          options={contentTypeFilters}
-          value={typeFilter}
-          onChange={handleTypeFilterChange}
-        />
+        <Select value={typeFilter} onValueChange={handleTypeFilterChange}>
+          <SelectTrigger>
+            <SelectValue placeholder="Filter by type..." />
+          </SelectTrigger>
+          <SelectContent>
+            {contentTypeFilters.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="w-full md:w-48">
-        <Select
-          options={dateFilters}
-          value={dateFilter}
-          onChange={(e) => setDateFilter(e.target.value)} // Only update local state for now
-        />
+        <Select value={dateFilter} onValueChange={(value: string) => setDateFilter(value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Filter by date..." />
+          </SelectTrigger>
+          <SelectContent>
+            {dateFilters.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div>
         <Button onClick={applyFilters}>Apply Filters</Button> {/* Keep apply button for explicit search/date filter application */}

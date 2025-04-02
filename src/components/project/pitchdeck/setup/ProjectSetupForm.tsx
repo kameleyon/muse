@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react'; // Import useState and useEffect
-import { Input } from '@/components/ui/Input';
-import { RadioGroup } from '@/components/ui/RadioGroup';
-import { RadioGroupItem } from '@/components/ui/RadioGroupItem';
+import { Input, RadioGroup, RadioGroupItem } from '@/components/ui';
 import { Lock, Users, Globe } from 'lucide-react';
 
 interface ProjectSetupFormProps {

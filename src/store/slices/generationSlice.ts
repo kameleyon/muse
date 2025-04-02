@@ -14,8 +14,10 @@ export interface GenerationState {
     generationStatusText: string;
     generatedContentPreview: string; // Live preview content
     phaseData: {
-      currentPhase: GenerationPhase;
+      currentPhase: 'researching' | 'content' | 'finalizing';
       phaseProgress: number; // Progress within the current phase (0-100)
+      currentSection?: number;
+      totalSections?: number;
       currentSlide?: number;
       totalSlides?: number;
     };
@@ -40,7 +42,7 @@ export interface GenerationActions {
 
 // Define initial state for generation phase data
 export const initialPhaseData: GenerationState['phaseData'] = {
-  currentPhase: 'idle',
+  currentPhase: 'researching',
   phaseProgress: 0,
 };
 

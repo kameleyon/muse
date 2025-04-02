@@ -5,6 +5,7 @@ import { ProjectWorkflowState, ProjectWorkflowActions } from '../projectWorkflow
 // Interface for Step 1: Project Setup State
 export interface ProjectSetupState {
   selectedPitchDeckTypeId: string | null;
+  selectedBlogTypeId: string | null;
   projectId: string | null; 
   projectName: string;
   description: string;
@@ -16,6 +17,7 @@ export interface ProjectSetupState {
 // Interface for Step 1 Actions
 export interface ProjectSetupActions {
   setSelectedPitchDeckTypeId: (id: string | null) => void;
+  setSelectedBlogTypeId: (id: string | null) => void;
   setProjectName: (name: string) => void;
   setDescription: (desc: string) => void;
   setPrivacy: (privacy: 'private' | 'team' | 'public') => void;
@@ -29,6 +31,7 @@ export interface ProjectSetupActions {
 // Define the initial state for this slice
 export const initialSetupState: ProjectSetupState = {
   selectedPitchDeckTypeId: null,
+  selectedBlogTypeId: null,
   projectId: null, 
   projectName: '',
   description: '',
@@ -48,6 +51,7 @@ export const createSetupSlice: StateCreator<
 
   // Actions
   setSelectedPitchDeckTypeId: (id) => set({ selectedPitchDeckTypeId: id }),
+  setSelectedBlogTypeId: (id) => set({ selectedBlogTypeId: id }),
   setProjectName: (name) => set({ projectName: name }),
   setDescription: (desc) => set({ description: desc }),
   setPrivacy: (privacy) => set({ privacy: privacy }),

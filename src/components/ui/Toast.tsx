@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, forwardRef, HTMLAttributes, createContext, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { useDispatch } from 'react-redux';
 import { removeToast } from '@/store/slices/uiSlice';
@@ -10,6 +10,26 @@ interface ToastProps {
   message: string;
   duration?: number;
 }
+
+// Create context for the Toast provider
+const ToastContext = createContext<any>(null);
+
+// Types for additional components
+interface ToastActionElement {
+  altText?: string;
+}
+
+type ToastActionProps = React.ButtonHTMLAttributes<HTMLButtonElement> & ToastActionElement;
+
+type ToastDescriptionProps = React.HTMLAttributes<HTMLDivElement>;
+
+type ToastTitleProps = React.HTMLAttributes<HTMLDivElement>;
+
+type ToastViewportProps = React.HTMLAttributes<HTMLDivElement>;
+
+type ToastProviderProps = {
+  children: React.ReactNode;
+};
 
 export const Toast: React.FC<ToastProps> = ({
   id,
@@ -38,7 +58,7 @@ export const Toast: React.FC<ToastProps> = ({
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.2 }}
       className={cn(
-        'max-w-md w-full bg-white    shadow-lg rounded-lg pointer-events-auto flex items-center ring-1',
+        'max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex items-center ring-1',
         {
           'ring-green-500/20': type === 'success',
           'ring-red-500/20': type === 'error',
@@ -108,16 +128,16 @@ export const Toast: React.FC<ToastProps> = ({
             )}
           </div>
           <div className="ml-3 flex-1">
-            <p className="text-sm font-medium text-secondary   ">
+            <p className="text-sm font-medium text-secondary">
               {message}
             </p>
           </div>
         </div>
       </div>
-      <div className="flex border-l border-neutral-light   ">
+      <div className="flex border-l border-neutral-light">
         <button
           onClick={handleClose}
-          className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-neutral-medium hover:text-secondary    focus:outline-none"
+          className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-neutral-medium hover:text-secondary focus:outline-none"
         >
           <svg
             className="h-5 w-5"
@@ -136,3 +156,68 @@ export const Toast: React.FC<ToastProps> = ({
     </motion.div>
   );
 };
+
+// Additional components needed for the Toast system
+export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
+  return <ToastContext.Provider value={{}}>{children}</ToastContext.Provider>;
+};
+
+export const ToastAction = forwardRef<HTMLButtonElement, ToastActionProps>(
+  ({ className, children, ...props }, ref) => {
+    return (
+      <button
+        ref={ref}
+        className={cn(
+          "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+  }
+);
+ToastAction.displayName = "ToastAction";
+
+export const ToastDescription = forwardRef<HTMLDivElement, ToastDescriptionProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn("text-sm opacity-90", className)}
+        {...props}
+      />
+    );
+  }
+);
+ToastDescription.displayName = "ToastDescription";
+
+export const ToastTitle = forwardRef<HTMLDivElement, ToastTitleProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn("text-sm font-semibold", className)}
+        {...props}
+      />
+    );
+  }
+);
+ToastTitle.displayName = "ToastTitle";
+
+export const ToastViewport = forwardRef<HTMLDivElement, ToastViewportProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
+ToastViewport.displayName = "ToastViewport";

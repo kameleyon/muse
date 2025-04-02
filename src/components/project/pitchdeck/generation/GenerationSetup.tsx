@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Card, Button, RadioGroup, RadioGroupItem, Label } from '@/components/ui';
 import { Wand2, LineChart, Layout, Clock } from 'lucide-react';
-import { RadioGroup } from '@/components/ui/RadioGroup';
-import { RadioGroupItem } from '@/components/ui/RadioGroupItem';
-import { Label } from '@/components/ui/Label';
 
 // Define all option types
 type FactCheckLevel = 'basic' | 'standard' | 'thorough';

@@ -11,6 +11,13 @@ export interface AudienceState {
   personaConcerns: string[];
   personaCriteria: string[];
   personaCommPrefs: string[];
+  
+  // Additional properties for blog audience targeting
+  demographicInfo: string;
+  knowledgeLevel: string;
+  interests: string;
+  painPoints: string;
+  desiredOutcomes: string;
 }
 
 // Interface for Step 2 Actions
@@ -28,6 +35,13 @@ export const initialRequirementsState: AudienceState = {
   personaConcerns: [],
   personaCriteria: [],
   personaCommPrefs: [],
+  
+  // Initialize additional properties
+  demographicInfo: '',
+  knowledgeLevel: '',
+  interests: '',
+  painPoints: '',
+  desiredOutcomes: ''
 };
 
 // Create the slice

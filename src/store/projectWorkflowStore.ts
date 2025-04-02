@@ -9,6 +9,7 @@ import { createGenerationSlice, GenerationState, GenerationActions } from './sli
 import { createEditingSlice, EditingState, EditingActions } from './slices/editingSlice';
 import { createQASlice, QAState, QAActions } from './slices/qaSlice';
 import { createDeliverySlice, DeliveryState, DeliveryActions } from './slices/deliverySlice';
+import { createBlogSlice, BlogState, BlogActions } from './slices/blogSlice';
 
 // Import shared types from the central types file
 import { 
@@ -56,7 +57,8 @@ export type ProjectWorkflowState =
   GenerationState & 
   EditingState & 
   QAState & 
-  DeliveryState;
+  DeliveryState &
+  BlogState;
 
 export type ProjectWorkflowActions = 
   ProjectSetupActions & 
@@ -65,7 +67,8 @@ export type ProjectWorkflowActions =
   GenerationActions & 
   EditingActions & 
   QAActions & 
-  DeliveryActions;
+  DeliveryActions &
+  BlogActions;
 
 // --- Store Implementation using Slice Pattern ---
 // Define the type for the combined store creator function
@@ -76,12 +79,13 @@ export const useProjectWorkflowStore = create<ProjectWorkflowState & ProjectWork
     (...args) => ({
       // Combine slices by calling their creator functions
       ...createSetupSlice(...args),
-    ...createRequirementsSlice(...args),
-    ...createDesignSlice(...args),
-    ...createGenerationSlice(...args),
-    ...createEditingSlice(...args),
-    ...createQASlice(...args),
+      ...createRequirementsSlice(...args),
+      ...createDesignSlice(...args),
+      ...createGenerationSlice(...args),
+      ...createEditingSlice(...args),
+      ...createQASlice(...args),
       ...createDeliverySlice(...args),
+      ...createBlogSlice(...args),
     }),
     {
       name: 'project-workflow-storage', // Unique name for localStorage key
@@ -91,6 +95,7 @@ export const useProjectWorkflowStore = create<ProjectWorkflowState & ProjectWork
         projectId: state.projectId,
         projectName: state.projectName,
         selectedPitchDeckTypeId: state.selectedPitchDeckTypeId,
+        selectedBlogTypeId: state.selectedBlogTypeId,
         description: state.description,
         privacy: state.privacy,
         tags: state.tags,

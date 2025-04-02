@@ -14,7 +14,13 @@ import {
   FormActions,
 } from '@/components/ui/Form';
 import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import ModelSelector from '@/components/content/generation/ModelSelector';
 import PresetSelector from '@/components/content/generation/PresetSelector';
@@ -95,14 +101,24 @@ const ContentGeneratorForm: React.FC<ContentGeneratorFormProps> = ({
           name="type"
           render={({ field }) => (
             <Select
-              id="type"
-              options={contentTypes}
-              error={errors.type?.message}
+              value={field.value}
+              onValueChange={field.onChange}
               disabled={isGenerating}
-              {...field}
-            />
+            >
+              <SelectTrigger id="type" ref={field.ref}>
+                <SelectValue placeholder="Select content type..." />
+              </SelectTrigger>
+              <SelectContent>
+                {contentTypes.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
         />
+        {errors.type && <FormError>{errors.type.message}</FormError>}
       </FormGroup>
 
       <FormGroup>
@@ -128,14 +144,24 @@ const ContentGeneratorForm: React.FC<ContentGeneratorFormProps> = ({
             name="tone"
             render={({ field }) => (
               <Select
-                id="tone"
-                options={toneOptions}
-                error={errors.tone?.message}
+                value={field.value}
+                onValueChange={field.onChange}
                 disabled={isGenerating}
-                {...field}
-              />
+              >
+                <SelectTrigger id="tone" ref={field.ref}>
+                  <SelectValue placeholder="Select tone..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {toneOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
           />
+          {errors.tone && <FormError>{errors.tone.message}</FormError>}
         </FormGroup>
 
         <FormGroup>
@@ -147,14 +173,24 @@ const ContentGeneratorForm: React.FC<ContentGeneratorFormProps> = ({
             name="length"
             render={({ field }) => (
               <Select
-                id="length"
-                options={lengthOptions}
-                error={errors.length?.message}
+                value={field.value}
+                onValueChange={field.onChange}
                 disabled={isGenerating}
-                {...field}
-              />
+              >
+                <SelectTrigger id="length" ref={field.ref}>
+                  <SelectValue placeholder="Select length..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {lengthOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
           />
+          {errors.length && <FormError>{errors.length.message}</FormError>}
         </FormGroup>
       </div>
 

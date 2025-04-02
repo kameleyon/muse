@@ -6,6 +6,30 @@ export type AudienceSize = 'Small' | 'Medium' | 'Enterprise' | '';
 export type ComplexityLevel = 'basic' | 'intermediate' | 'advanced';
 export type FactCheckLevel = 'basic' | 'standard' | 'thorough';
 export type GenerationPhase = 'idle' | 'preparing' | 'researching' | 'content' | 'finalizing' | 'complete'; // Removed 'visuals'
+
+// Blog-specific types
+export interface ContentElement {
+  id: string;
+  type: string;
+  name: string;
+}
+
+export interface Heading {
+  id: string;
+  level: number;
+  title: string;
+  parentId: string | null;
+}
+
+// Generation phase data
+export interface PhaseData {
+  currentPhase: 'researching' | 'content' | 'finalizing';
+  phaseProgress: number;
+  currentSection?: number;
+  totalSections?: number;
+  currentSlide?: number;
+  totalSlides?: number;
+}
 export type ValidationStatus = 'Not Run' | 'Running' | 'Passed' | 'Issues Found';
 export type ClientPdfStatus = 'idle' | 'generating' | 'success' | 'error';
 // Removed 'image' to align with SlideInfo in pitchDeckPrompts.ts
