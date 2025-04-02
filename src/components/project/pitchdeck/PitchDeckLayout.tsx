@@ -674,7 +674,7 @@ const PitchDeckLayout: React.FC<PitchDeckLayoutProps> = ({ initialName }) => {
            </>
          )}
 
-         {/* Step 6 Content */}
+         {/* Step 6 Content 
          {currentStep === 6 && (
            <>
              <div className="p-4 border-b border-neutral-light/40 bg-white/5">
@@ -682,7 +682,7 @@ const PitchDeckLayout: React.FC<PitchDeckLayoutProps> = ({ initialName }) => {
                <p className="text-sm text-neutral-medium mt-1">Validate content, check compliance, assess impact, and refine.</p>
              </div>
              <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Left Column: Validation & Refinement */}
+                {/* Left Column: Validation & Refinement 
                 <div className="lg:col-span-7 space-y-6">
                    <ValidationInterface
                       onVerifyFacts={handleRunFactCheck}
@@ -702,8 +702,8 @@ const PitchDeckLayout: React.FC<PitchDeckLayoutProps> = ({ initialName }) => {
                       onPolish={handleRunFinalPolish}
                       isLoading={isLoadingQA}
                    />
-                </div>
-                {/* Right Column: Dashboard */}
+                </div>*/}
+                {/* Right Column: Dashboard
                 <div className="lg:col-span-5">
                    <div className="sticky top-[80px]">
                       <QualityDashboard
@@ -726,17 +726,17 @@ const PitchDeckLayout: React.FC<PitchDeckLayoutProps> = ({ initialName }) => {
                 </div>
              </div>
            </>
-         )}
+         )}*/}
 
          {/* Step 7 Content */}
          {currentStep === 7 && (
            <>
              <div className="p-4 border-b border-neutral-light/40 bg-white/5">
-               <h2 className="text-lg font-semibold font-heading text-secondary/80">Step 7: Finalization & Delivery</h2>
+               <h2 className="text-lg font-semibold font-heading text-secondary/80">Step 6: Finalization & Delivery</h2>
                <p className="text-sm text-neutral-medium mt-1">Prepare for presentation, export, share, and archive.</p>
              </div>
               <div className="p-4 md:p-6 space-y-6">
-                 <PresenterTools />
+                 {/*<PresenterTools />*/}
                  <ExportConfiguration
                     onGenerateClientPdf={handleGenerateClientPdf}
                     isGeneratingClientPdf={isGeneratingClientPdf}
