@@ -48,7 +48,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     category: any; // Use 'any' or import specific types if needed here
     subcategory: any;
     section: any;
-    item: any;
+    // item: any; // Removed item
     projectName: string;
   }): Promise<string | null> => {
     console.log('MainLayout: Project creation initiated with details:', details);

@@ -21,7 +21,7 @@ interface WelcomeSectionProps {
     category: ProjectCategory;
     subcategory: ProjectSubcategory;
     section: ProjectSection;
-    item: ProjectItem;
+    // item: ProjectItem; // Removed item
     projectName: string;
   }) => Promise<string | null>; // Change return type
 }
@@ -76,7 +76,7 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
     category: ProjectCategory;
     subcategory: ProjectSubcategory;
     section: ProjectSection;
-    item: ProjectItem;
+    // item: ProjectItem; // Removed item
     projectName: string;
   }): Promise<string | null> => {
     console.log('Creating project with details:', details);
