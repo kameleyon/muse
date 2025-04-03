@@ -6,7 +6,7 @@ interface ProjectNameInputProps {
   categoryName: string;
   subcategoryName: string;
   sectionName: string;
-  itemName: string;
+  itemName?: string; // Made itemName optional
 }
 
 const ProjectNameInput: React.FC<ProjectNameInputProps> = ({
@@ -14,7 +14,7 @@ const ProjectNameInput: React.FC<ProjectNameInputProps> = ({
   categoryName,
   subcategoryName,
   sectionName,
-  itemName,
+  // itemName, // No longer needed for display logic
 }) => {
   const [name, setName] = useState('');
 
@@ -29,7 +29,7 @@ const ProjectNameInput: React.FC<ProjectNameInputProps> = ({
     <div className="selector-container">
       <h3>Enter Project Name</h3>
       <p className="breadcrumb-final">
-        Selected Path: {categoryName} {'>'} {subcategoryName} {'>'} {sectionName} {'>'} {itemName}
+        Selected Path: {categoryName} {'>'} {subcategoryName} {'>'} {sectionName}
       </p>
       <form onSubmit={handleSubmit} className="project-name-form">
         <label htmlFor="projectName">Project Name:</label>

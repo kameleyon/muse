@@ -6,7 +6,7 @@ import {
   findCategoryById,
   findSubcategoryById,
   findSectionById,
-  findItemById,
+  // findItemById, // Removed
   ProjectCategory,
   ProjectSubcategory,
   ProjectSection,
@@ -15,7 +15,7 @@ import {
 import CategorySelector from './CategorySelector.tsx';
 import SubcategorySelector from './SubcategorySelector.tsx';
 import SectionSelector from './SectionSelector.tsx';
-import ItemSelector from './ItemSelector.tsx';
+// import ItemSelector from './ItemSelector.tsx'; // Removed
 import ProjectNameInput from './ProjectNameInput.tsx';
 import './NewProjectModal.css';
 
@@ -26,12 +26,12 @@ interface NewProjectModalProps {
     category: ProjectCategory;
     subcategory: ProjectSubcategory;
     section: ProjectSection;
-    item: ProjectItem;
+    // item: ProjectItem; // Removed item
     projectName: string;
   }) => Promise<string | null>; // Assume it returns the new project ID or null on failure
 }
 
-type Step = 'category' | 'subcategory' | 'section' | 'item' | 'name';
+type Step = 'category' | 'subcategory' | 'section' | 'name'; // Removed 'item' step
 
 const NewProjectModal: React.FC<NewProjectModalProps> = ({
   isOpen,
@@ -43,13 +43,13 @@ const NewProjectModal: React.FC<NewProjectModalProps> = ({
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string | null>(null);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  // const [selectedItemId, setSelectedItemId] = useState<string | null>(null); // Removed item state
   const [projectName, setProjectName] = useState<string>('');
 
   const selectedCategory = selectedCategoryId ? findCategoryById(selectedCategoryId) : undefined;
   const selectedSubcategory = selectedSubcategoryId ? findSubcategoryById(selectedCategory, selectedSubcategoryId) : undefined;
   const selectedSection = selectedSectionId ? findSectionById(selectedSubcategory, selectedSectionId) : undefined;
-  const selectedItem = selectedItemId ? findItemById(selectedSection, selectedItemId) : undefined;
+  // const selectedItem = selectedItemId ? findItemById(selectedSection, selectedItemId) : undefined; // Removed item derived state
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategoryId(categoryId);
@@ -63,24 +63,24 @@ const NewProjectModal: React.FC<NewProjectModalProps> = ({
 
   const handleSectionSelect = (sectionId: string) => {
     setSelectedSectionId(sectionId);
-    setCurrentStep('item');
+    setCurrentStep('name'); // Go directly to 'name' step
   };
 
-  const handleItemSelect = (itemId: string) => {
-    setSelectedItemId(itemId);
-    setCurrentStep('name');
-  };
+  // const handleItemSelect = (itemId: string) => { // Removed item handler
+  //   setSelectedItemId(itemId);
+  //   setCurrentStep('name');
+  // };
 
   const handleNameSubmit = async (name: string) => { // Make function async
     setProjectName(name);
     // All selections are made, call the final creation function
-    if (selectedCategory && selectedSubcategory && selectedSection && selectedItem) {
+    if (selectedCategory && selectedSubcategory && selectedSection) { // Removed check for selectedItem
       try {
         const newProjectId = await onCreateProject({ // Await the result
           category: selectedCategory,
           subcategory: selectedSubcategory,
           section: selectedSection,
-          item: selectedItem,
+          // item: selectedItem, // Removed item
           projectName: name,
         });
 
@@ -142,13 +142,14 @@ const NewProjectModal: React.FC<NewProjectModalProps> = ({
         setSelectedSubcategoryId(null);
         setCurrentStep('subcategory');
         break;
-      case 'item':
-        setSelectedSectionId(null);
-        setCurrentStep('section');
-        break;
+      // case 'item': // Removed item case
+      //   setSelectedSectionId(null);
+      //   setCurrentStep('section');
+      //   break;
       case 'name':
-        setSelectedItemId(null);
-        setCurrentStep('item');
+        // setSelectedItemId(null); // Removed item state reset
+        setSelectedSectionId(null); // Go back to section selection
+        setCurrentStep('section'); // Set step back to section
         break;
       default:
         break; // Cannot go back from category step
@@ -160,7 +161,7 @@ const NewProjectModal: React.FC<NewProjectModalProps> = ({
     setSelectedCategoryId(null);
     setSelectedSubcategoryId(null);
     setSelectedSectionId(null);
-    setSelectedItemId(null);
+    // setSelectedItemId(null); // Removed item state reset
     setProjectName('');
     onClose();
   };
@@ -195,24 +196,25 @@ const NewProjectModal: React.FC<NewProjectModalProps> = ({
             subcategoryName={selectedSubcategory.name}
           />
         ) : null; // Should not happen
-      case 'item':
-        return selectedSection ? (
-          <ItemSelector
-            items={selectedSection.items}
-            onSelect={handleItemSelect}
-            categoryName={selectedCategory?.name || ''}
-            subcategoryName={selectedSubcategory?.name || ''}
-            sectionName={selectedSection.name}
-          />
-        ) : null; // Should not happen
+      // case 'item': // Removed item step rendering
+      //   return selectedSection ? (
+      //     <ItemSelector
+      //       items={selectedSection.items} // This would cause error now as items is optional/removed
+      //       onSelect={handleItemSelect}
+      //       categoryName={selectedCategory?.name || ''}
+      //       subcategoryName={selectedSubcategory?.name || ''}
+      //       sectionName={selectedSection.name}
+      //     />
+      //   ) : null; // Should not happen
       case 'name':
-        return selectedItem ? (
+        // Depend on selectedSection instead of selectedItem
+        return selectedSection ? (
           <ProjectNameInput
             onSubmit={handleNameSubmit}
             categoryName={selectedCategory?.name || ''}
             subcategoryName={selectedSubcategory?.name || ''}
-            sectionName={selectedSection?.name || ''}
-            itemName={selectedItem.name}
+            sectionName={selectedSection.name}
+            // itemName={selectedItem.name} // Removed itemName prop
           />
         ) : null; // Should not happen
       default:

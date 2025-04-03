@@ -3,17 +3,17 @@
 
 import {
   professionalWritingCategory,
-  creativeWritingCategory,
-  academicEducationalCategory,
+  // creativeWritingCategory,
+  // academicEducationalCategory,
   technicalSpecializedCategory,
-  journalismMediaCategory,
+  // journalismMediaCategory,
   enhancementOptimizationCategory,
   aiWorkflowSolutionsCategory,
-  industrySpecificCategory,
-  governmentPublicSectorCategory,
-  emergingTechnologiesCategory,
-  educationalLearningCategory,
-  customizationIntegrationCategory,
+  // industrySpecificCategory,
+  // governmentPublicSectorCategory,
+  // emergingTechnologiesCategory,
+  // educationalLearningCategory,
+  // customizationIntegrationCategory,
 } from './categories'; // Import all categories
 
 export interface ProjectItem {
@@ -24,7 +24,7 @@ export interface ProjectItem {
 export interface ProjectSection {
   id: string;
   name: string;
-  items: ProjectItem[];
+  items?: ProjectItem[]; // Made items optional
 }
 
 export interface ProjectSubcategory {
@@ -56,17 +56,17 @@ const generateId = (name: string): string => {
 // Assemble the projectCategories array from imported category objects
 export const projectCategories: ProjectCategory[] = [
   professionalWritingCategory,
-  creativeWritingCategory,
-  academicEducationalCategory,
+  // creativeWritingCategory,
+  // academicEducationalCategory,
   technicalSpecializedCategory,
-  journalismMediaCategory,
+  // journalismMediaCategory,
   enhancementOptimizationCategory,
   aiWorkflowSolutionsCategory,
-  industrySpecificCategory,
-  governmentPublicSectorCategory,
-  emergingTechnologiesCategory,
-  educationalLearningCategory,
-  customizationIntegrationCategory,
+  // industrySpecificCategory,
+  // governmentPublicSectorCategory,
+  // emergingTechnologiesCategory,
+  // educationalLearningCategory,
+  // customizationIntegrationCategory,
 ];
 
 // --- PARSED CATEGORIES END ---
@@ -91,4 +91,4 @@ export const findSectionById = (
 export const findItemById = (
   section: ProjectSection | undefined,
   id: string
-): ProjectItem | undefined => section?.items.find((item) => item.id === id);
+): ProjectItem | undefined => section?.items?.find((item) => item.id === id); // Added optional chaining
