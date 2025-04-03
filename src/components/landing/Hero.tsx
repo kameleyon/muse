@@ -26,8 +26,8 @@ const Hero: React.FC = () => {
               Craft AI-Powered On-Demand Content in seconds with our most intuitive AI writing companion.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button size="lg" className="bg-primary rounded-xl shadow-sm font-regular text-[#edeae2] hover:bg-secondary/90">
-                <Link to="/auth/register">Start your free trial</Link>
+              <Button size="lg" className=" text-[#edeae2] bg-primary rounded-xl shadow-sm font-regular hover:bg-secondary/90">
+                <Link to="/auth/register"><span className=" text-[#edeae2]/80">Start your free trial</span></Link>
               </Button>
               <Button size="lg" variant="outline" className="text-secondary    font-light    shadow-sm rounded-xl border-secondary hover:bg-secondary/10">
                 <Link to="#how-it-works">See How it works</Link>

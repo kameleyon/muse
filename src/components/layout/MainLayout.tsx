@@ -176,13 +176,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <div className="flex items-center">
           <Link to="/dashboard" className="flex items-center">
             <img src="/mmlogolight.png" alt="MagicMuse Logo" className="h-8 w-auto mr-3" />
-            <span className="text-3xl font-comfortaa hidden md:inline">magicmuse</span>
+            <span className="text-3xl font-comfortaa hidden text-white/70 hover:text-white md:inline">magicmuse</span>
           </Link>
         </div>
         <div className="flex items-center gap-4">
           {/* Profile Link */}
           <Link to="/profile" className="flex items-center gap-2 group">
-             <span className="text-sm font-questrial inline group-hover:text-primary transition-colors">{displayName}</span>
+             <span className="text-sm text-white/70 font-questrial inline group-hover:text-white transition-colors">{displayName}</span>
              <div className="w-8 h-8 rounded-full bg-[#ae5630] flex items-center justify-center group-hover:ring-2 group-hover:ring-primary transition-all">
                {profile?.avatar_url ? (
                  <img src={profile.avatar_url} alt="Avatar" className="w-full h-full rounded-full object-cover" />

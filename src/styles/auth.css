@@ -25,10 +25,10 @@
   position: relative;
   background-color: #EDEAE2;
   border-radius: 1rem;
-  box-shadow: 0 10px 25px -5px rgba(61, 61, 58, 0.6), 0 10px 10px -5px rgba(61, 61, 58, 0.3);
+  /*box-shadow: 0 10px 25px -5px rgba(61, 61, 58, 0.6), 0 10px 10px -5px rgba(61, 61, 58, 0.3);*/
   width: 100%;
   max-width: 420px;
-  padding: 2rem 2.5rem;
+  padding: 1rem 1.5rem;
   margin: 0 auto;
   overflow: hidden;
 }
@@ -49,9 +49,9 @@
   color: #ae5630;
   font-family: 'Comfortaa', cursive;
   font-weight: 600;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.7rem;
   font-size: 1.75rem;
-  line-height: 1.2;
+  line-height: 1;
   text-align: center;
 }
 
@@ -83,8 +83,8 @@
 /* Form Input Styling - Matching AfroWiki Aesthetic */
 .auth-input {
   width: 100%;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
+  padding: 0.7rem 1rem;
+  margin-bottom: 0.1rem;
   background-color: #faf9f5;
   border: 1px solid #bcb7af;
   border-radius: 0.5rem;

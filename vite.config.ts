@@ -75,49 +75,78 @@ export default defineConfig({
       transformMixedEsModules: true
     },
     rollupOptions: {
+      // Ensure React is loaded before other modules
+      input: {
+        main: path.resolve(__dirname, 'index.html')
+      },
       output: {
         manualChunks: (id) => {
-          // Dynamic chunking based on patterns
-          if (id.includes('node_modules')) {
-            // Ensure all React and React DOM related packages are in the same chunk
-            if (id.includes('react') || 
-                id.includes('scheduler') || 
-                id.includes('react-dom') || 
-                id.includes('react-is') || 
-                id.includes('prop-types') || 
-                id.includes('object-assign') ||
-                id.includes('use-sync-external-store')) {
-              return 'vendor-react';
-            }
-            if (id.includes('@radix-ui') || id.includes('@headlessui') || id.includes('lucide-react')) {
-              return 'vendor-ui';
-            }
-            if (id.includes('recharts') || id.includes('chart.js') || id.includes('d3')) {
-              return 'vendor-charts';
-            }
-            if (id.includes('react-hook-form') || id.includes('zod')) {
-              return 'vendor-forms';
-            }
-            if (id.includes('redux') || id.includes('zustand') || id.includes('react-query')) {
-              return 'vendor-state';
-            }
-            if (id.includes('supabase')) {
-              return 'vendor-auth';
-            }
-            return 'vendor-others'; // All other node_modules
+          // Ensure React and related packages are in a single chunk
+          if (id.includes('node_modules/react/') || 
+              id.includes('node_modules/react-dom/') || 
+              id.includes('node_modules/scheduler/') || 
+              id.includes('node_modules/react-is/') || 
+              id.includes('node_modules/prop-types/') || 
+              id.includes('node_modules/object-assign/') ||
+              id.includes('node_modules/use-sync-external-store/')) {
+            return 'vendor-react';
           }
           
-          // Chunk app code by feature
+          // UI component libraries
+          if (id.includes('node_modules/@radix-ui/') || 
+              id.includes('node_modules/@headlessui/') || 
+              id.includes('node_modules/lucide-react/')) {
+            return 'vendor-ui';
+          }
+          
+          // Chart libraries
+          if (id.includes('node_modules/recharts/') || 
+              id.includes('node_modules/chart.js/') || 
+              id.includes('node_modules/d3/')) {
+            return 'vendor-charts';
+          }
+          
+          // Form libraries
+          if (id.includes('node_modules/react-hook-form/') || 
+              id.includes('node_modules/zod/')) {
+            return 'vendor-forms';
+          }
+          
+          // State management libraries
+          if (id.includes('node_modules/redux/') || 
+              id.includes('node_modules/zustand/') || 
+              id.includes('node_modules/react-query/')) {
+            return 'vendor-state';
+          }
+          
+          // Auth libraries
+          if (id.includes('node_modules/supabase/')) {
+            return 'vendor-auth';
+          }
+          
+          // Other node_modules
+          if (id.includes('node_modules/')) {
+            return 'vendor-others';
+          }
+          
+          // App code by feature
           if (id.includes('/src/features/')) {
             const feature = id.split('/src/features/')[1].split('/')[0];
             return `feature-${feature}`;
           }
+          
+          // Pages
           if (id.includes('/src/pages/')) {
             return 'pages';
           }
+          
+          // Components
           if (id.includes('/src/components/')) {
             return 'components';
           }
+          
+          // Default chunk
+          return undefined;
         }
       }
     },
