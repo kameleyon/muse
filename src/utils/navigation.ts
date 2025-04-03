@@ -1,29 +1,25 @@
 import { NavigateFunction } from 'react-router-dom';
 
-// Store the navigate function when it becomes available
-let navigateFunction: NavigateFunction | null = null;
+// Global reference to the navigate function from react-router-dom
+let navigateRef: NavigateFunction | null = null;
 
 /**
- * Sets the navigate function from a component
- * @param navigate - The navigate function from useNavigate hook
+ * Set the navigate function reference
+ * This should be called once when the app initializes
  */
-export const setNavigate = (navigate: NavigateFunction) => {
-  navigateFunction = navigate;
+export const setNavigate = (navigate: NavigateFunction): void => {
+  navigateRef = navigate;
 };
 
 /**
- * Navigate to a new route
- * @param to - The path to navigate to
- * @param options - Navigation options
+ * Helper to use navigate function from anywhere in the app
+ * No need to use the useNavigate hook in every component
  */
-export const navigate = (to: string, options?: any) => {
-  if (navigateFunction) {
-    navigateFunction(to, options);
-  } else {
-    console.error('Navigation function not set. Call setNavigate first.');
-    // Fallback to window.location if navigate function is not available
-    if (typeof window !== 'undefined') {
-      window.location.href = to;
-    }
+export const navigateTo = (path: string, options?: { replace?: boolean; state?: any }): void => {
+  if (!navigateRef) {
+    console.error('Navigation is not initialized');
+    return;
   }
+  
+  navigateRef(path, options);
 };

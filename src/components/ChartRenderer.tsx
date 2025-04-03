@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   LineChart,
   BarChart,
@@ -23,7 +23,6 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer,
   Cell,
   PolarGrid,
   PolarAngleAxis,
@@ -59,8 +58,18 @@ interface ChartRendererProps {
     showLegend?: boolean;
     title?: string;
     subTitle?: string;
+    width?: number;
+    height?: number;
   };
 }
+
+// Default colors for fallback
+const DEFAULT_COLORS = {
+  primary: '#ae5630',
+  secondary: '#232321',
+  accent: '#9d4e2c',
+  highlight: '#9d4e2c'
+};
 
 /**
  * Attempts to fix common JSON formatting issues
@@ -90,17 +99,39 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
   },
   options = {} 
 }) => {
-  // Set default colors using optional chaining and defaults
-  const primaryColor = colors?.primary || '#8884d8';
-  const secondaryColor = colors?.secondary || '#82ca9d';
-  const accentColor = colors?.accent || '#ffc658';
-  const highlightColor = colors?.highlight || '#ff7300';
+  // Reference to container for data attribute color retrieval
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Use brand colors with fallbacks for PDF export compatibility
+  // First check for explicit colors passed in props
+  let primaryColor = colors?.primary || DEFAULT_COLORS.primary;
+  let secondaryColor = colors?.secondary || DEFAULT_COLORS.secondary;
+  let accentColor = colors?.accent || DEFAULT_COLORS.accent;
+  let highlightColor = colors?.highlight || DEFAULT_COLORS.highlight;
+  
+  // Check parent element data attributes for export scenarios
+  useEffect(() => {
+    // Get colors from parent data attributes if they exist (for PDF exports)
+    if (containerRef.current) {
+      const parent = containerRef.current.closest('[data-primary-color]');
+      if (parent instanceof HTMLElement) {
+        if (parent.dataset.primaryColor) {
+          primaryColor = parent.dataset.primaryColor;
+        }
+        if (parent.dataset.secondaryColor) {
+          secondaryColor = parent.dataset.secondaryColor;
+        }
+        if (parent.dataset.accentColor) {
+          accentColor = parent.dataset.accentColor;
+        }
+      }
+    }
+  }, []);
   
   // Set default options
   const showGrid = options?.showGrid !== undefined ? options.showGrid : true;
   const showLegend = options?.showLegend !== undefined ? options.showLegend : true;
   const showValues = options?.showValues !== undefined ? options.showValues : false;
-  const chartHeight = options?.aspectRatio ? 300 * options.aspectRatio : 300;
 
   try {
     // Parse the data if it's a string (from a code block)
@@ -195,6 +226,19 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
       }
     } else {
       chartData = data;
+    }
+    
+    // Check if data is in enhanced format with type and data
+    if (chartData && typeof chartData === 'object' && !Array.isArray(chartData) && chartData.data) {
+      // If it has a data property that's an array, use that as the data
+      if (Array.isArray(chartData.data)) {
+        // Use the provided type if available
+        if (chartData.type && !type) {
+          type = chartData.type as any;
+        }
+        // Use data array
+        chartData = chartData.data;
+      }
     }
     
     // Validate and fix the data
@@ -295,17 +339,19 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
     // Dynamic Title Component if needed
     const ChartTitle = options?.title ? (
       <div className="text-center mb-2">
-        <div className="font-semibold text-lg">{options.title}</div>
-        {options.subTitle && <div className="text-sm text-gray-500">{options.subTitle}</div>}
+        <div className="font-semibold text-lg" style={{ color: primaryColor }}>{options.title}</div>
+        {options.subTitle && (
+          <div className="text-sm" style={{ color: secondaryColor }}>{options.subTitle}</div>
+        )}
       </div>
     ) : null;
     
     // Render the appropriate chart based on the type
     let chartComponent = null;
     
-    // Set width and height for all charts - reduced to avoid horizontal scrolling
-    const chartWidth = 450; // Reduced from 600
-    const chartHeight = options?.aspectRatio ? 250 * options.aspectRatio : 250; // Reduced from 300
+    // Set width and height for all charts optimized for PDF export
+    const chartWidth = options?.width || 450;
+    const chartHeight = options?.height || (options?.aspectRatio ? 250 * options.aspectRatio : 250);
     
     switch (chartType) {
       case 'bar':
@@ -740,16 +786,18 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
         );
     }
 
-    // Log debug information to console only (not visible in UI)
-    console.log("Rendering chart with data:", chartData);
-    console.log("Chart type:", chartType);
-    console.log("Chart keys:", dataKeys);
-    
     // Add a visualization caption if provided in the chart data
     const visualizationCaption = chartData[0]?.visualization || '';
     
     return (
-      <div className="chart-container my-4">
+      <div 
+        className="chart-container my-4" 
+        ref={containerRef}
+        data-primary-color={primaryColor}
+        data-secondary-color={secondaryColor}
+        data-accent-color={accentColor}
+        data-chart-type={chartType}
+      >
         {/* Add a fixed height to the container to ensure the chart renders */}
         <div style={{ width: '100%', height: `${chartHeight}px`, position: 'relative' }}>
           {/* Render the chart directly without ResponsiveContainer */}
@@ -758,7 +806,8 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
         
         {/* Only show visualization caption if it exists */}
         {visualizationCaption && (
-          <div className="visualization-caption text-sm text-center text-gray-600 mt-2 italic">
+          <div className="visualization-caption text-sm text-center mt-2 italic"
+               style={{ color: secondaryColor }}>
             {visualizationCaption}
           </div>
         )}
@@ -788,3 +837,5 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
     );
   }
 };
+
+export default ChartRenderer;

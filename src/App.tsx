@@ -1,4 +1,4 @@
-import { useEffect, lazy, Suspense } from 'react';
+import { useEffect, lazy, Suspense, useState, useCallback, memo } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { setNavigate } from './utils/navigation';
 import { AnimatePresence } from 'framer-motion';
@@ -8,45 +8,193 @@ import AuthInit from './components/auth/AuthInit';
 import ChatPanel from './components/chat/ChatPanel';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
-// Lazy loaded components
+// Custom route config for better organization and performance
+const routeConfig = [
+  {
+    path: '/',
+    element: lazy(() => import('./pages/Landing')),
+    auth: false
+  },
+  {
+    path: '/auth/*',
+    element: lazy(() => import('./pages/Auth')),
+    auth: false
+  },
+  {
+    path: '/dashboard',
+    element: lazy(() => import('./pages/Dashboard')),
+    auth: true
+  },
+  {
+    path: '/generator',
+    element: lazy(() => import('./pages/ContentGenerator')),
+    auth: true
+  },
+  {
+    path: '/projects',
+    element: lazy(() => import('./pages/ContentLibrary')),
+    auth: true
+  },
+  {
+    path: '/chat',
+    element: lazy(() => import('./pages/Chat')),
+    auth: true
+  },
+  {
+    path: '/profile/*',
+    element: lazy(() => import('./pages/Profile')),
+    auth: true
+  },
+  {
+    path: '/settings',
+    element: lazy(() => import('./pages/Settings')),
+    auth: true
+  },
+  {
+    path: '/project/:projectId/setup',
+    element: lazy(() => import('./pages/ProjectSetup')),
+    auth: true
+  },
+  {
+    path: '/pdf-export',
+    element: lazy(() => import('./pages/PdfExport')),
+    auth: false
+  },
+  {
+    path: '/pdf-export-test',
+    element: lazy(() => import('./pages/PdfExportTest')),
+    auth: false
+  },
+  {
+    path: '/chart-test',
+    element: lazy(() => import('./pages/ChartTest')),
+    auth: false
+  }
+];
+
+// Redirects for legacy routes
+const redirects = [
+  { from: '/library', to: '/projects' },
+  { from: '/app', to: '/dashboard' },
+  { from: '/app/generator', to: '/generator' },
+  { from: '/app/library', to: '/projects' },
+  { from: '/app/profile', to: '/profile' },
+  { from: '/app/profile/*', to: '/profile/*' }
+];
+
+// Lazy loaded components with prefetching
 const AuthModalContainer = lazy(() => import('./components/auth/AuthModalContainer'));
 const MainLayout = lazy(() => import('./components/layout/MainLayout'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
-// Lazy loaded pages with named chunks for better code splitting
-const Landing = lazy(() => import(/* webpackChunkName: "landing" */ './pages/Landing'));
-const Dashboard = lazy(() => import(/* webpackChunkName: "dashboard" */ './pages/Dashboard'));
-const Auth = lazy(() => import(/* webpackChunkName: "auth" */ './pages/Auth'));
-const ContentGenerator = lazy(() => import(/* webpackChunkName: "content-generator" */ './pages/ContentGenerator'));
-const ContentLibrary = lazy(() => import(/* webpackChunkName: "content-library" */ './pages/ContentLibrary'));
-const Chat = lazy(() => import(/* webpackChunkName: "chat" */ './pages/Chat'));
-const Profile = lazy(() => import(/* webpackChunkName: "profile" */ './pages/Profile'));
-const Settings = lazy(() => import(/* webpackChunkName: "settings" */ './pages/Settings'));
-// Removed NewProject import
-const ProjectSetup = lazy(() => import(/* webpackChunkName: "project-setup" */ './pages/ProjectSetup')); // Added ProjectSetup page
-const PdfExport = lazy(() => import(/* webpackChunkName: "pdf-export" */ './pages/PdfExport')); // Added PdfExport page
-const PdfExportTest = lazy(() => import(/* webpackChunkName: "pdf-export-test" */ './pages/PdfExportTest')); // Added PdfExportTest page
-const ChartTest = lazy(() => import(/* webpackChunkName: "chart-test" */ './pages/ChartTest')); // Added ChartTest page
-const NotFound = lazy(() => import(/* webpackChunkName: "not-found" */ './pages/NotFound'));
+// Prefetch important routes when idle
+const prefetchImportantRoutes = () => {
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(() => {
+      import('./pages/Dashboard');
+      import('./pages/ContentGenerator');
+      import('./components/layout/MainLayout');
+    });
+  }
+};
+
+// Memoized layout component to prevent unnecessary re-renders
+const MemoizedLayout = memo(({ children }: { children: React.ReactNode }) => (
+  <MainLayout>{children}</MainLayout>
+));
+
+// Performance-optimized route component
+const RouteWithSuspense = memo(({ 
+  Component, 
+  requireAuth = false 
+}: { 
+  Component: React.LazyExoticComponent<React.ComponentType<any>>, 
+  requireAuth?: boolean 
+}) => {
+  const RouteContent = () => {
+    const [isReady, setIsReady] = useState(false);
+    
+    // Use an effect to simulate proper loading state
+    useEffect(() => {
+      let mounted = true;
+      
+      // Small timeout to avoid flickering for fast loads
+      const timer = setTimeout(() => {
+        if (mounted) setIsReady(true);
+      }, 50);
+      
+      return () => {
+        mounted = false;
+        clearTimeout(timer);
+      };
+    }, []);
+    
+    return (
+      <Suspense fallback={<Loading />}>
+        {!isReady ? <Loading /> : (
+          requireAuth ? (
+            <ProtectedRoute>
+              <MemoizedLayout>
+                <Component />
+              </MemoizedLayout>
+            </ProtectedRoute>
+          ) : (
+            <Component />
+          )
+        )}
+      </Suspense>
+    );
+  };
+  
+  return <RouteContent />;
+});
 
 function App() {
   // Initialize navigation utility
   const navigate = useNavigate();
+  
   useEffect(() => {
     setNavigate(navigate);
   }, [navigate]);
   
-  // Set favicon
+  // Optimize favicon loading
   useEffect(() => {
-    const favicon = document.querySelector("link[rel='icon']");
-    if (favicon) {
-      favicon.setAttribute('href', '/favicon.ico');
-    } else {
-      const newFavicon = document.createElement('link');
-      newFavicon.rel = 'icon';
-      newFavicon.href = '/favicon.ico';
-      document.head.appendChild(newFavicon);
+    if (!document.querySelector("link[rel='icon']")) {
+      const link = document.createElement('link');
+      link.rel = 'icon';
+      link.href = '/favicon.ico';
+      document.head.appendChild(link);
     }
+    
+    // Prefetch important routes
+    prefetchImportantRoutes();
   }, []);
+
+  // Memoize the routes to prevent unnecessary re-renders
+  const renderRoutes = useCallback(() => (
+    <Routes>
+      {/* Main routes from config */}
+      {routeConfig.map(({ path, element: Component, auth }) => (
+        <Route 
+          key={path} 
+          path={path} 
+          element={<RouteWithSuspense Component={Component} requireAuth={auth} />} 
+        />
+      ))}
+      
+      {/* Redirects */}
+      {redirects.map(({ from, to }) => (
+        <Route key={from} path={from} element={<Navigate to={to} replace />} />
+      ))}
+      
+      {/* Catch all */}
+      <Route path="*" element={
+        <Suspense fallback={<Loading />}>
+          <NotFound />
+        </Suspense>
+      } />
+    </Routes>
+  ), []);
 
   return (
     <AuthModalProvider>
@@ -54,156 +202,7 @@ function App() {
       <AuthInit />
       
       <AnimatePresence mode="wait">
-        <Suspense fallback={<Loading />}>
-          <Routes>
-            {/* Landing page as root */}
-            <Route index element={<Landing />} />
-            
-            {/* Auth pages */}
-            <Route path="/auth/*" element={<Auth />} />
-            
-            {/* Dashboard routes */}
-            <Route 
-              path="/dashboard" 
-              element={
-                <Suspense fallback={<Loading />}>
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <Dashboard />
-                    </MainLayout>
-                  </ProtectedRoute>
-                </Suspense>
-              } 
-            />
-            
-            {/* Content Generator routes */}
-            <Route 
-              path="/generator" 
-              element={
-                <Suspense fallback={<Loading />}>
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <ContentGenerator />
-                    </MainLayout>
-                  </ProtectedRoute>
-                </Suspense>
-              } 
-            />
-            
-            {/* Content Library routes */}
-            <Route 
-              path="/projects" 
-              element={
-                <Suspense fallback={<Loading />}>
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <ContentLibrary />
-                    </MainLayout>
-                  </ProtectedRoute>
-                </Suspense>
-              } 
-            />
-            
-            <Route 
-              path="/library" 
-              element={<Navigate to="/projects" replace />} 
-            />
-
-            {/* Chat with MagicMuse */}
-            <Route 
-              path="/chat" 
-              element={
-                <Suspense fallback={<Loading />}>
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <Chat />
-                    </MainLayout>
-                  </ProtectedRoute>
-                </Suspense>
-              } 
-            />
-            
-            {/* Profile routes */}
-            <Route 
-              path="/profile/*" 
-              element={
-                <Suspense fallback={<Loading />}>
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <Profile />
-                    </MainLayout>
-                  </ProtectedRoute>
-                </Suspense>
-              } 
-            />
-            
-            {/* Settings routes */}
-            <Route 
-              path="/settings" 
-              element={
-                <Suspense fallback={<Loading />}>
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <Settings />
-                    </MainLayout>
-                  </ProtectedRoute>
-                </Suspense>
-              }
-            />
-
-            {/* Project Setup Route */}
-            <Route
-              path="/project/:projectId/setup"
-              element={
-                <Suspense fallback={<Loading />}>
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <ProjectSetup />
-                    </MainLayout>
-                  </ProtectedRoute>
-                </Suspense>
-              }
-            />
-            
-            {/* PDF Export Routes */}
-            <Route
-              path="/pdf-export"
-              element={
-                <Suspense fallback={<Loading />}>
-                  <PdfExport />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/pdf-export-test"
-              element={
-                <Suspense fallback={<Loading />}>
-                  <PdfExportTest />
-                </Suspense>
-              }
-            />
-            
-            {/* Chart Test Route - for development/testing */}
-            <Route
-              path="/chart-test"
-              element={
-                <Suspense fallback={<Loading />}>
-                  <ChartTest />
-                </Suspense>
-              }
-            />
-            
-            {/* Legacy /app routes - redirect to new routes */}
-            <Route path="/app" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/app/generator" element={<Navigate to="/generator" replace />} />
-            <Route path="/app/library" element={<Navigate to="/projects" replace />} />
-            <Route path="/app/profile" element={<Navigate to="/profile" replace />} />
-            <Route path="/app/profile/*" element={<Navigate to="/profile/*" replace />} />
-            
-            {/* Catch all */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
+        {renderRoutes()}
       </AnimatePresence>
       
       {/* Auth modal container - will be available throughout the app */}

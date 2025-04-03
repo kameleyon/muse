@@ -133,59 +133,167 @@ export const generateColorPalette = (
   return palette;
 };
 
+// Helper function to safely parse JSON with proper error handling
+const safeJsonParse = (jsonStr: string): any => {
+  try {
+    // First attempt - standard parse
+    return JSON.parse(jsonStr);
+  } catch (e) {
+    try {
+      // Second attempt - fix common JSON formatting issues
+      // Replace single quotes with double quotes
+      let fixedJson = jsonStr.replace(/'/g, '"');
+      
+      // Fix property names that are not quoted
+      fixedJson = fixedJson.replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3');
+      
+      // Remove trailing commas before closing brackets
+      fixedJson = fixedJson.replace(/,(\s*[\]}])/g, '$1');
+      
+      return JSON.parse(fixedJson);
+    } catch (e2) {
+      // If both attempts fail, log error and return null
+      console.error("Failed to parse JSON even after fixing:", e2);
+      return null;
+    }
+  }
+};
+
 // Process markdown content to automatically extract and enhance chart data
 export const enhanceMarkdownWithCharts = (markdown: string): string => {
   let enhancedMarkdown = markdown;
   
-  // First, replace explicit chart code blocks with enhanced versions
-  enhancedMarkdown = enhancedMarkdown.replace(/```chart\s+([\s\S]*?)```/g, (match, chartData) => {
-    try {
-      const data = JSON.parse(chartData.trim());
-      
-      if (!Array.isArray(data)) {
-        return match; // Return original if not valid chart data
+  try {
+    // First, replace explicit chart code blocks with enhanced versions
+    enhancedMarkdown = enhancedMarkdown.replace(/```chart\s+([\s\S]*?)```/g, (match, chartData) => {
+      try {
+        // Use safe JSON parsing to handle common formatting issues
+        const data = safeJsonParse(chartData.trim());
+        
+        if (!data || (Array.isArray(data) && data.length === 0)) {
+          return match; // Return original if not valid chart data
+        }
+        
+        // If it's already in the enhanced format, return as is with proper formatting
+        if (data && typeof data === 'object' && data.data && data.type) {
+          return '```chart\n' + JSON.stringify(data, null, 2) + '\n```';
+        }
+        
+        // If it's not an array, return original
+        if (!Array.isArray(data)) {
+          return match;
+        }
+        
+        // Detect the best chart type
+        const recommendedType = recommendChartType(data);
+        
+        // Add metadata to the chart data to hint at the type
+        const enhancedData = {
+          data,
+          type: recommendedType,
+          options: {
+            showValues: data.length <= 10, // Show values for small datasets
+            showGrid: true,
+            showLegend: true
+          }
+        };
+        
+        // Return the enhanced chart code block
+        return '```chart\n' + JSON.stringify(enhancedData, null, 2) + '\n```';
+      } catch (e) {
+        console.error("Failed to enhance chart data:", e);
+        // Create a valid chart block with fallback data
+        const fallbackData = [
+          { name: "Error", value: 100 },
+          { name: "Parsing Failed", value: 50 }
+        ];
+        
+        const fallbackChart = {
+          data: fallbackData,
+          type: "bar",
+          options: {
+            showValues: true,
+            showGrid: true,
+            showLegend: true
+          }
+        };
+        
+        return '```chart\n' + JSON.stringify(fallbackChart, null, 2) + '\n```';
+      }
+    });
+    
+    // Then, look for JSON code blocks that might be chart data
+    enhancedMarkdown = enhancedMarkdown.replace(/```json\s+([\s\S]*?)```/g, (match, jsonData) => {
+      try {
+        // Check if this looks like chart data
+        if (jsonData.includes('"name"') && (jsonData.includes('"value"') || jsonData.includes('"data"'))) {
+          const data = safeJsonParse(jsonData.trim());
+          
+          if (!data) {
+            return match; // Return original if parsing failed
+          }
+          
+          // If it's already in the enhanced format, return as is
+          if (data && typeof data === 'object' && data.data && data.type) {
+            return '```chart\n' + JSON.stringify(data, null, 2) + '\n```';
+          }
+          
+          // If it's an array of objects with name/value pairs, treat as chart data
+          if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
+            // Check if it has name/value properties
+            const hasNameValue = data[0].name !== undefined && 
+                               (data[0].value !== undefined || 
+                                Object.keys(data[0]).some(key => key !== 'name' && typeof data[0][key] === 'number'));
+            
+            if (hasNameValue) {
+              // Detect the best chart type
+              const recommendedType = recommendChartType(data);
+              
+              // Add metadata to the chart data to hint at the type
+              const enhancedData = {
+                data,
+                type: recommendedType,
+                options: {
+                  showValues: data.length <= 10, // Show values for small datasets
+                  showGrid: true,
+                  showLegend: true
+                }
+              };
+              
+              // Convert to chart code block
+              return '```chart\n' + JSON.stringify(enhancedData, null, 2) + '\n```';
+            }
+          }
+        }
+        
+        return match; // Return original if not chart data
+      } catch (e) {
+        console.error("Failed to enhance JSON data:", e);
+        return match; // Return original on error
+      }
+    });
+    
+    // Finally, look for plain JSON arrays in the text (not in code blocks)
+    enhancedMarkdown = enhancedMarkdown.replace(/(\[[\s\S]*?\])/g, (match, jsonData) => {
+      // Skip if it's already inside a code block
+      if (match.includes('```') || match.includes('`')) {
+        return match;
       }
       
-      // Detect the best chart type
-      const recommendedType = recommendChartType(data);
-      
-      // Add metadata to the chart data to hint at the type
-      const enhancedData = {
-        data,
-        type: recommendedType,
-        options: {
-          showValues: data.length <= 10, // Show values for small datasets
-          showGrid: true,
-          showLegend: true
-        }
-      };
-      
-      // Return the enhanced chart code block
-      return '```chart\n' + JSON.stringify(enhancedData, null, 2) + '\n```';
-    } catch (e) {
-      console.error("Failed to enhance chart data:", e);
-      return match; // Return original on error
-    }
-  });
-  
-  // Then, look for JSON code blocks that might be chart data
-  enhancedMarkdown = enhancedMarkdown.replace(/```json\s+([\s\S]*?)```/g, (match, jsonData) => {
-    try {
-      // Check if this looks like chart data
-      if (jsonData.includes('"name"') && (jsonData.includes('"value"') || jsonData.includes('"data"'))) {
-        const data = JSON.parse(jsonData.trim());
+      try {
+        // Try to parse as JSON
+        const data = safeJsonParse(jsonData.trim());
         
-        // If it's already in the enhanced format, return as is
-        if (data && typeof data === 'object' && data.data && data.type) {
-          return match;
+        if (!data) {
+          return match; // Return original if parsing failed
         }
         
         // If it's an array of objects with name/value pairs, treat as chart data
         if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
           // Check if it has name/value properties
           const hasNameValue = data[0].name !== undefined && 
-                              (data[0].value !== undefined || 
-                               Object.keys(data[0]).some(key => key !== 'name' && typeof data[0][key] === 'number'));
+                             (data[0].value !== undefined || 
+                              Object.keys(data[0]).some(key => key !== 'name' && typeof data[0][key] === 'number'));
           
           if (hasNameValue) {
             // Detect the best chart type
@@ -206,61 +314,20 @@ export const enhanceMarkdownWithCharts = (markdown: string): string => {
             return '```chart\n' + JSON.stringify(enhancedData, null, 2) + '\n```';
           }
         }
-      }
-      
-      return match; // Return original if not chart data
-    } catch (e) {
-      console.error("Failed to enhance JSON data:", e);
-      return match; // Return original on error
-    }
-  });
-  
-  // Finally, look for plain JSON arrays in the text (not in code blocks)
-  enhancedMarkdown = enhancedMarkdown.replace(/(\[[\s\S]*?\])/g, (match, jsonData) => {
-    // Skip if it's already inside a code block
-    if (match.startsWith('```') || match.endsWith('```')) {
-      return match;
-    }
-    
-    try {
-      // Try to parse as JSON
-      const data = JSON.parse(jsonData.trim());
-      
-      // If it's an array of objects with name/value pairs, treat as chart data
-      if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
-        // Check if it has name/value properties
-        const hasNameValue = data[0].name !== undefined && 
-                            (data[0].value !== undefined || 
-                             Object.keys(data[0]).some(key => key !== 'name' && typeof data[0][key] === 'number'));
         
-        if (hasNameValue) {
-          // Detect the best chart type
-          const recommendedType = recommendChartType(data);
-          
-          // Add metadata to the chart data to hint at the type
-          const enhancedData = {
-            data,
-            type: recommendedType,
-            options: {
-              showValues: data.length <= 10, // Show values for small datasets
-              showGrid: true,
-              showLegend: true
-            }
-          };
-          
-          // Convert to chart code block
-          return '```chart\n' + JSON.stringify(enhancedData, null, 2) + '\n```';
-        }
+        return match; // Return original if not chart data
+      } catch (e) {
+        // Not valid JSON, return original
+        return match;
       }
-      
-      return match; // Return original if not chart data
-    } catch (e) {
-      // Not valid JSON, return original
-      return match;
-    }
-  });
-  
-  return enhancedMarkdown;
+    });
+    
+    return enhancedMarkdown;
+  } catch (e) {
+    console.error("Critical error in enhanceMarkdownWithCharts:", e);
+    // Return original markdown on critical error
+    return markdown;
+  }
 };
 
 // Generate example chart data for various chart types
@@ -348,10 +415,14 @@ export const convertDataToChartFormat = (data: string, format: string = 'auto'):
       case 'json':
         let parsedData: any;
         try {
-          parsedData = JSON.parse(data);
+          parsedData = safeJsonParse(data);
         } catch (e) {
           console.error("Failed to parse JSON data:", e);
           return []; // Return empty on parse error
+        }
+
+        if (!parsedData) {
+          return []; // Return empty if parsing failed
         }
 
         // Check if parsedData is an array directly

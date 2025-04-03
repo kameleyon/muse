@@ -1,165 +1,234 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { generateFormattedPdf } from '@/services/exportService';
-import ContentEditor from '@/components/project/pitchdeck/editing/ContentEditor';
+import { Textarea } from '@/components/ui/Textarea';
+import { Label } from '@/components/ui/Label';
+import { Input } from '@/components/ui/Input';
 
 /**
- * PdfExportTest - A test page for demonstrating PDF export functionality
+ * PDF Export Test - Page to test PDF export functionality
+ * Tests margin handling, chart rendering, and color preservation
  */
 const PdfExportTest: React.FC = () => {
-  const [content, setContent] = useState<string>(`
-    <h1>Revolutionizing Learning with InstaSmart</h1>
-    <div style="text-align: center;">
-      <img src="/logo-placeholder.svg" alt="Logo" style="width: 100px; height: 100px;" />
-    </div>
-    <p>Welcome to InstaSmart —an AI-powered educational platform designed to create personalized learning experiences. Our mission is to make education accessible, engaging, and tailored to every learner's unique needs, paving the way for the next generation of smart learning.</p>
-    
-    <h2>Addressing the Learning Gap</h2>
-    <p>The traditional one-size-fits-all approach to education leaves many learners behind. Students often encounter challenges such as:</p>
-    <p><strong>Inflexible Learning Paths</strong>: Static curriculums fail to cater to individual preferences, skill levels, and learning paces.</p>
-    <p><strong>Engagement Issues</strong>: Outdated materials and lack of interactive tools result in disengaged learners.</p>
-    <p><strong>Accessibility Barriers</strong>: Conventional platforms often overlook the diverse needs of learners with disabilities or specific requirements.</p>
-    <p><strong>Data Privacy Concerns</strong>: With the rise of digital learning, ensuring secure and private data handling has become paramount.</p>
-    
-    <p>According to recent studies:</p>
-    <p><strong>87% of users</strong> prioritize privacy and security in educational apps.</p>
-    <p>The <strong>average cost of a data breach</strong> in the educational sector is $5.85 million.</p>
-    
-    <h2>Our Solution: InstaSmart</h2>
-    <p>InstaSmart transforms personalized learning by utilizing advanced AI to generate customized syllabuses and adaptive learning pathways. Our platform dynamically adjusts content based on:</p>
-    <p><strong>Skill Levels</strong>: Catering to both beginners and advanced learners.</p>
-    <p><strong>Preferred Learning Styles</strong>: Incorporating visual, auditory, and kinesthetic elements.</p>
-    <p><strong>Reading Proficiency</strong>: Simplifying or enriching content as needed.</p>
-    <p><strong>Communication Preferences</strong>: Offering voice interfaces and augmented reality visualizations.</p>
-    
-    <p>Through real-time analytics, InstaSmart continuously refines the learning journey, ensuring every student achieves their full potential.</p>
-    
-    <h2>How InstaSmart Works</h2>
-    <p>InstaSmart employs a streamlined three-step process:</p>
-    <pre><code class="language-json">
-[
-  {"step": "Step 1: Input", "value": 30},
-  {"step": "Step 2: Generation", "value": 50},
-  {"step": "Step 3: Adaptation", "value": 20}
-]
-    </code></pre>
-    <p>This seamless integration ensures users enjoy a consistent and intuitive experience across devices.</p>
-    
-    <h2>Core Features of InstaSmart</h2>
-    <h3>Learning Redefined:</h3>
-    <p><strong>Dynamic Content</strong>: Real-time adjustments based on learning progress.</p>
-    <p><strong>Interactive Tools</strong>: Voice interfaces, AR visualizations, and synchronized text narration.</p>
-    <p><strong>Accessibility</strong>: Dyslexia-friendly modes and compliance with global accessibility standards.</p>
-    <p><strong>Collaborative Learning</strong>: Group learning sessions and shared progress tracking.</p>
-    <p><strong>Enterprise Solutions</strong>: Integration with LMS, detailed analytics dashboards, and blockchain-certified credentials.</p>
-    
-    <table>
-      <thead>
-        <tr>
-          <th>Feature</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>AI Syllabus Generator</td>
-          <td>Produces personalized curriculums instantly.</td>
-        </tr>
-        <tr>
-          <td>Adaptive Quizzes</td>
-          <td>Tailored questions that adjust difficulty.</td>
-        </tr>
-        <tr>
-          <td>Mobile Learning</td>
-          <td>Seamlessly available on all devices.</td>
-        </tr>
-        <tr>
-          <td>Offline Mode</td>
-          <td>Learn without internet connectivity.</td>
-        </tr>
-      </tbody>
-    </table>
-    
-    <h2>Market Opportunity</h2>
-    <p>The global EdTech market stands at a staggering <strong>$389.1 billion</strong> in 2023 and is projected to grow to <strong>$1,379.3 billion by 2030</strong>, with a CAGR of 19.8%.</p>
-    
-    <pre><code class="language-json">
-[
-  {"year": "2023", "marketSize": 389.1},
-  {"year": "2024", "marketSize": 465.8},
-  {"year": "2025", "marketSize": 556.5},
-  {"year": "2026", "marketSize": 663.4},
-  {"year": "2027", "marketSize": 790.7},
-  {"year": "2028", "marketSize": 942.9},
-  {"year": "2029", "marketSize": 1125.4},
-  {"year": "2030", "marketSize": 1379.3}
-]
-    </code></pre>
-    
-    <p>Key growth drivers include:</p>
-    <p><strong>AI and IoT Integration</strong></p>
-  `);
+  const navigate = useNavigate();
+  const [content, setContent] = useState<string>(`# MagicMuse PDF Export Test
 
-  const handleExportPdf = async () => {
-    if (!content) {
-      alert('Please enter some content first');
-      return;
-    }
+## Testing Margin Handling
+This test document will verify proper margin handling in PDF exports.
 
-    await generateFormattedPdf(
-      'test-export',
-      content,
-      {
-        title: 'InstaSmart Presentation',
-        fileName: 'instasmart-presentation',
+## Testing Color Preservation
+- The **Primary Color** should be displayed properly
+- The *Secondary Color* should be displayed properly
+- The [Accent Color](#) should be displayed properly
+
+## Testing Chart Rendering
+
+### Line Chart Test
+\`\`\`chart
+[
+  {"name": "Jan", "value": 400, "trend": 240},
+  {"name": "Feb", "value": 300, "trend": 139},
+  {"name": "Mar", "value": 200, "trend": 980},
+  {"name": "Apr", "value": 278, "trend": 390},
+  {"name": "May", "value": 189, "trend": 480},
+  {"name": "Jun", "value": 239, "trend": 380}
+]
+\`\`\`
+
+### Bar Chart Test
+\`\`\`chart
+[
+  {"name": "Category A", "value": 400},
+  {"name": "Category B", "value": 300},
+  {"name": "Category C", "value": 200},
+  {"name": "Category D", "value": 278},
+  {"name": "Category E", "value": 189}
+]
+\`\`\`
+
+### Testing Table Rendering
+
+| Feature | Benefit | Key Metrics |
+| ------- | ------- | ----------- |
+| AI Syllabus Generator | Tailored content for each learner | Personalization: 98% |
+| Adaptive Quizzes | Real-time difficulty adjustment | Retention: +25% |
+| Augmented Reality Learning | Immersive visualizations | Engagement: +30% |
+| Cross-Platform Sync | Seamless access across devices | Usage: 95% |
+| Dyslexia-Friendly Mode | Enhanced accessibility | Accessibility: 100% |
+
+## Testing Page Breaks and Long Content
+This section tests how the PDF generator handles long content and page breaks. The content should flow naturally across pages without awkward breaks or content loss.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies aliquam, nunc nisl aliquet nunc, vitae aliquam nisl nunc vitae nisl. Nullam auctor, nisl eget ultricies aliquam, nunc nisl aliquet nunc, vitae aliquam nisl nunc vitae nisl.
+
+* Item 1 with some extended text to test wrapping behavior
+* Item 2 with more text
+* Item 3 with even more text to ensure proper handling of list items across page boundaries
+* Item 4 with content
+
+### More Charts for Testing Multiple Pages
+
+\`\`\`chart
+{
+  "type": "line",
+  "data": [
+    {"name": "2020", "revenue": 300, "expenses": 200, "profit": 100},
+    {"name": "2021", "revenue": 500, "expenses": 300, "profit": 200},
+    {"name": "2022", "revenue": 700, "expenses": 400, "profit": 300},
+    {"name": "2023", "revenue": 900, "expenses": 500, "profit": 400},
+    {"name": "2024", "revenue": 1100, "expenses": 600, "profit": 500}
+  ]
+}
+\`\`\`
+
+This should complete our comprehensive PDF export test document.`);
+
+  const [title, setTitle] = useState<string>('PDF Export Test');
+  const [fileName, setFileName] = useState<string>('pdf-export-test');
+  const [primaryColor, setPrimaryColor] = useState<string>('#ae5630');
+  const [secondaryColor, setSecondaryColor] = useState<string>('#232321');
+  const [accentColor, setAccentColor] = useState<string>('#9d4e2c');
+
+  const handleExport = () => {
+    navigate('/pdf-export', {
+      state: {
+        content,
+        title,
+        fileName,
         brandColors: {
-          primary: '#ae5630',
-          secondary: '#232321',
-          accent: '#9d4e2c',
-          title: 'InstaSmart Presentation'
+          primary: primaryColor,
+          secondary: secondaryColor,
+          accent: accentColor,
+          highlight: accentColor,
+          background: '#ffffff'
         }
       }
-    );
+    });
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-6">
+      <h1 className="text-2xl font-bold mb-6">PDF Export Test</h1>
+      
       <Card className="p-6 mb-6">
-        <h1 className="text-2xl font-bold mb-4">PDF Export Test</h1>
-        <p className="mb-6">
-          This page demonstrates the PDF export functionality. Edit the content below and click "Export to PDF" to generate a PDF that matches the content editor's appearance.
-        </p>
-        
-        <div className="mb-6">
-          <Button 
-            variant="primary" 
-            onClick={handleExportPdf}
-            className="flex items-center gap-2"
-          >
-            Export to PDF
-          </Button>
+        <div className="grid gap-4 mb-4">
+          <div>
+            <Label htmlFor="title">Document Title</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="fileName">File Name (without extension)</Label>
+            <Input
+              id="fileName"
+              value={fileName}
+              onChange={(e) => setFileName(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="primaryColor">Primary Color</Label>
+              <div className="flex items-center">
+                <Input
+                  id="primaryColor"
+                  value={primaryColor}
+                  onChange={(e) => setPrimaryColor(e.target.value)}
+                  className="w-full"
+                />
+                <div 
+                  className="w-6 h-6 ml-2 border" 
+                  style={{ backgroundColor: primaryColor }}
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="secondaryColor">Secondary Color</Label>
+              <div className="flex items-center">
+                <Input
+                  id="secondaryColor"
+                  value={secondaryColor}
+                  onChange={(e) => setSecondaryColor(e.target.value)}
+                  className="w-full"
+                />
+                <div 
+                  className="w-6 h-6 ml-2 border" 
+                  style={{ backgroundColor: secondaryColor }}
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="accentColor">Accent Color</Label>
+              <div className="flex items-center">
+                <Input
+                  id="accentColor"
+                  value={accentColor}
+                  onChange={(e) => setAccentColor(e.target.value)}
+                  className="w-full"
+                />
+                <div 
+                  className="w-6 h-6 ml-2 border" 
+                  style={{ backgroundColor: accentColor }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
+        
+        <div className="mb-4">
+          <Label htmlFor="content">Test Content</Label>
+          <Textarea
+            id="content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="w-full h-96 font-mono text-sm"
+          />
+        </div>
+        
+        <Button onClick={handleExport} className="w-full">
+          Test PDF Export
+        </Button>
       </Card>
       
-      <Card className="p-0 overflow-hidden">
-        <div className="p-4 bg-neutral-100 border-b border-neutral-200">
-          <h2 className="font-semibold">Content Editor</h2>
-        </div>
-        <div className="p-0">
-          <ContentEditor 
-            content={content}
-            onChange={setContent}
-            brandColors={{
-              primary: '#ae5630',
-              secondary: '#232321',
-              accent: '#9d4e2c'
-            }}
-            brandFonts={{
-              headingFont: 'Comfortaa, sans-serif',
-              bodyFont: 'Questrial, sans-serif'
-            }}
-          />
+      <Card className="p-6">
+        <h2 className="text-xl font-bold mb-4">Test Instructions</h2>
+        <div className="space-y-4">
+          <p>
+            This test page allows you to test the PDF export functionality with custom content and colors.
+            The default test content includes:
+          </p>
+          
+          <ul className="list-disc pl-6 space-y-2">
+            <li>Margin handling tests</li>
+            <li>Color preservation tests</li>
+            <li>Chart rendering tests (line and bar charts)</li>
+            <li>Table rendering tests</li>
+            <li>Page break handling tests with long content</li>
+          </ul>
+          
+          <p>
+            You can customize the colors to verify proper color application in the exported PDF.
+            Click the "Test PDF Export" button to generate a PDF with the current settings.
+          </p>
+          
+          <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
+            <h3 className="font-bold text-yellow-800">Common Issues Fixed</h3>
+            <ul className="list-disc pl-6 space-y-1 text-yellow-700">
+              <li>Chart rendering issues - Charts now properly render with correct colors</li>
+              <li>Margin handling issues - Content now respects page margins</li>
+              <li>Color preservation issues - Brand colors are now properly applied throughout the document</li>
+              <li>Page break issues - Content now flows naturally across pages</li>
+            </ul>
+          </div>
         </div>
       </Card>
     </div>

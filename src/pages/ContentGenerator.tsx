@@ -16,7 +16,7 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from '@/components/ui/Card';
+} from '@/components/ui';
 
 // Lazy loaded components to reduce initial bundle size
 const ContentGeneratorForm = lazy(() => 

@@ -23,13 +23,15 @@ const AuthModal: React.FC = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50"
+          className="fixed inset-0 z-50 flex items-center justify-center"
         >
-          {activeForm === 'login' && <Login />}
-          {activeForm === 'register' && <Register />}
-          {activeForm === 'forgotPassword' && <ForgotPassword />}
-          {activeForm === 'resetPassword' && <ResetPassword />}
-          {activeForm === 'magicLink' && <MagicLink />}
+          <div className="auth-overlay">
+            {activeForm === 'login' && <Login />}
+            {activeForm === 'register' && <Register />}
+            {activeForm === 'forgotPassword' && <ForgotPassword />}
+            {activeForm === 'resetPassword' && <ResetPassword />}
+            {activeForm === 'magicLink' && <MagicLink />}
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

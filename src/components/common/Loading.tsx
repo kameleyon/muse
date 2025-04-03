@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 interface LoadingProps {
   fullScreen?: boolean;
@@ -10,53 +9,24 @@ const Loading: React.FC<LoadingProps> = ({
   fullScreen = false, 
   message = 'Loading...' 
 }) => {
-  const loadingContainer = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const loadingCircle = {
-    hidden: { opacity: 0, y: 20 },
-    show: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        repeat: Infinity,
-        repeatType: 'reverse' as const,
-        duration: 0.6,
-      },
-    },
-  };
-
   const content = (
     <div className="flex flex-col items-center justify-center p-6">
-      <motion.div
-        className="flex space-x-2 mb-3"
-        variants={loadingContainer}
-        initial="hidden"
-        animate="show"
-      >
+      <div className="flex space-x-2 mb-3">
         {[...Array(3)].map((_, i) => (
-          <motion.div
+          <div
             key={i}
-            className="w-3 h-3 rounded-full bg-primary"
-            variants={loadingCircle}
-            transition={{ delay: i * 0.1 }}
+            className={`w-3 h-3 rounded-full bg-primary animate-pulse`}
+            style={{ animationDelay: `${i * 0.15}s` }}
           />
         ))}
-      </motion.div>
+      </div>
       {message && <p className="text-neutral-medium">{message}</p>}
     </div>
   );
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white    bg-opacity-80   ">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-80">
         {content}
       </div>
     );

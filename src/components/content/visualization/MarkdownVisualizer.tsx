@@ -28,6 +28,21 @@ interface MarkdownVisualizerProps {
   };
 }
 
+// Default brand colors - used for fallbacks in PDF rendering
+const DEFAULT_BRAND_COLORS = {
+  primary: '#ae5630',
+  secondary: '#232321',
+  accent: '#9d4e2c',
+  highlight: '#9d4e2c',
+  background: '#ffffff'
+};
+
+// Default fonts - used for fallbacks in PDF rendering
+const DEFAULT_FONTS = {
+  headingFont: 'Comfortaa, sans-serif',
+  bodyFont: 'Questrial, sans-serif'
+};
+
 /**
  * MarkdownVisualizer - Advanced Markdown renderer with rich visualization capabilities
  * Renders markdown content with enhanced support for charts, tables, and diagrams
@@ -93,15 +108,15 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
     processedContent = enhanceMarkdownWithCharts(processedContent);
   }
   
-  // CSS Custom Properties for styling
+  // CSS Custom Properties for styling with fallbacks for PDF export
   const cssVars = {
-    '--primary-color': brandColors.primary,
-    '--secondary-color': brandColors.secondary,
-    '--accent-color': brandColors.accent,
-    '--highlight-color': brandColors.highlight,
-    '--background-color': brandColors.background,
-    '--heading-font': fonts.headingFont,
-    '--body-font': fonts.bodyFont,
+    '--primary-color': brandColors.primary || DEFAULT_BRAND_COLORS.primary,
+    '--secondary-color': brandColors.secondary || DEFAULT_BRAND_COLORS.secondary,
+    '--accent-color': brandColors.accent || DEFAULT_BRAND_COLORS.accent,
+    '--highlight-color': brandColors.highlight || DEFAULT_BRAND_COLORS.highlight,
+    '--background-color': brandColors.background || DEFAULT_BRAND_COLORS.background,
+    '--heading-font': fonts.headingFont || DEFAULT_FONTS.headingFont,
+    '--body-font': fonts.bodyFont || DEFAULT_FONTS.bodyFont,
   } as React.CSSProperties;
   
   // Configure custom renderers for ReactMarkdown
@@ -110,12 +125,12 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
     h1: ({ node, ...props }) => (
       <h1 
         style={{ 
-          fontFamily: fonts.headingFont, 
-          color: brandColors.primary,
+          fontFamily: fonts.headingFont || DEFAULT_FONTS.headingFont, 
+          color: brandColors.primary || DEFAULT_BRAND_COLORS.primary,
           fontSize: '2rem',
           marginTop: '1.5rem',
           marginBottom: '1rem',
-          borderBottom: `1px solid ${brandColors.primary}20`
+          borderBottom: `1px solid ${brandColors.primary || DEFAULT_BRAND_COLORS.primary}20`
         }} 
         {...props} 
       />
@@ -123,8 +138,8 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
     h2: ({ node, ...props }) => (
       <h2 
         style={{ 
-          fontFamily: fonts.headingFont, 
-          color: brandColors.secondary,
+          fontFamily: fonts.headingFont || DEFAULT_FONTS.headingFont, 
+          color: brandColors.secondary || DEFAULT_BRAND_COLORS.secondary,
           fontSize: '1.75rem',
           marginTop: '1.4rem',
           marginBottom: '0.8rem' 
@@ -135,8 +150,8 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
     h3: ({ node, ...props }) => (
       <h3 
         style={{ 
-          fontFamily: fonts.headingFont, 
-          color: brandColors.secondary,
+          fontFamily: fonts.headingFont || DEFAULT_FONTS.headingFont, 
+          color: brandColors.secondary || DEFAULT_BRAND_COLORS.secondary,
           fontSize: '1.5rem',
           marginTop: '1.2rem',
           marginBottom: '0.6rem' 
@@ -147,8 +162,8 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
     h4: ({ node, ...props }) => (
       <h4
         style={{
-          fontFamily: fonts.headingFont,
-          color: brandColors.accent,
+          fontFamily: fonts.headingFont || DEFAULT_FONTS.headingFont,
+          color: brandColors.accent || DEFAULT_BRAND_COLORS.accent,
           fontSize: '1.25rem',
           marginTop: '1rem',
           marginBottom: '0.5rem'
@@ -160,7 +175,7 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
     p: ({ node, ...props }) => (
       <p 
         style={{ 
-          fontFamily: fonts.bodyFont, 
+          fontFamily: fonts.bodyFont || DEFAULT_FONTS.bodyFont, 
           lineHeight: 1.6,
           marginBottom: '1rem',
           color: '#333333' 
@@ -171,7 +186,7 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
     strong: ({ node, ...props }) => (
       <strong 
         style={{ 
-          color: brandColors.primary,
+          color: brandColors.primary || DEFAULT_BRAND_COLORS.primary,
           fontWeight: 600
         }} 
         {...props} 
@@ -180,7 +195,7 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
     em: ({ node, ...props }) => (
       <em 
         style={{ 
-          color: brandColors.secondary 
+          color: brandColors.secondary || DEFAULT_BRAND_COLORS.secondary 
         }} 
         {...props} 
       />
@@ -209,7 +224,7 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
     li: ({ node, ...props }) => (
       <li 
         style={{ 
-          fontFamily: fonts.bodyFont,
+          fontFamily: fonts.bodyFont || DEFAULT_FONTS.bodyFont,
           marginBottom: '0.25rem' 
         }} 
         {...props} 
@@ -222,7 +237,7 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
           style={{ 
             width: '100%',
             borderCollapse: 'collapse',
-            border: `1px solid ${brandColors.primary}30`,
+            border: `1px solid ${brandColors.primary || DEFAULT_BRAND_COLORS.primary}30`,
             fontSize: '0.9rem'
           }} 
           {...props} 
@@ -232,8 +247,8 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
     thead: ({ node, ...props }) => (
       <thead 
         style={{ 
-          backgroundColor: `${brandColors.primary}15`,
-          fontFamily: fonts.headingFont,
+          backgroundColor: `${brandColors.primary || DEFAULT_BRAND_COLORS.primary}15`,
+          fontFamily: fonts.headingFont || DEFAULT_FONTS.headingFont,
           fontWeight: 600
         }} 
         {...props} 
@@ -243,9 +258,9 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
       <th 
         style={{ 
           padding: '0.75rem',
-          borderBottom: `2px solid ${brandColors.primary}30`,
+          borderBottom: `2px solid ${brandColors.primary || DEFAULT_BRAND_COLORS.primary}30`,
           textAlign: 'left',
-          color: brandColors.primary
+          color: brandColors.primary || DEFAULT_BRAND_COLORS.primary
         }} 
         {...props} 
       />
@@ -254,17 +269,15 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
       <td 
         style={{ 
           padding: '0.75rem',
-          borderBottom: `1px solid ${brandColors.primary}20`,
-          borderRight: `1px solid ${brandColors.primary}10`
+          borderBottom: `1px solid ${brandColors.primary || DEFAULT_BRAND_COLORS.primary}20`,
+          borderRight: `1px solid ${brandColors.primary || DEFAULT_BRAND_COLORS.primary}10`
         }} 
         {...props} 
       />
     ),
     tr: ({ node, ...props }) => {
-      // TODO: Consider adding zebra striping via CSS if needed
       return (
         <tr
-          // Removed background color logic based on index
           {...props}
         />
       );
@@ -273,9 +286,9 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
     a: ({ node, ...props }) => (
       <a 
         style={{ 
-          color: brandColors.accent,
+          color: brandColors.accent || DEFAULT_BRAND_COLORS.accent,
           textDecoration: 'none',
-          borderBottom: `1px dotted ${brandColors.accent}` 
+          borderBottom: `1px dotted ${brandColors.accent || DEFAULT_BRAND_COLORS.accent}` 
         }} 
         {...props} 
       />
@@ -342,7 +355,7 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
             showGrid: true,
             showLegend: true,
             width: 600,
-            height: 350
+            height: options.chartHeight || 350
           };
           
           // Check if this is the enhanced format with configuration
@@ -396,14 +409,26 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
           }
           }
           
+          // Apply brand colors with fallbacks for PDF export
+          const enhancedColors = {
+            primary: brandColors.primary || DEFAULT_BRAND_COLORS.primary,
+            secondary: brandColors.secondary || DEFAULT_BRAND_COLORS.secondary,
+            accent: brandColors.accent || DEFAULT_BRAND_COLORS.accent,
+            highlight: brandColors.highlight || DEFAULT_BRAND_COLORS.highlight,
+            background: brandColors.background || DEFAULT_BRAND_COLORS.background
+          };
+          
           return (
             <ChartRenderer 
               data={safeData}
               type={chartType}
               layout={chartLayout}
               stacked={chartStacked}
-              colors={brandColors}
-              fonts={fonts}
+              colors={enhancedColors}
+              fonts={{
+                headingFont: fonts.headingFont || DEFAULT_FONTS.headingFont,
+                bodyFont: fonts.bodyFont || DEFAULT_FONTS.bodyFont
+              }}
               options={chartOptions}
             />
           );
@@ -436,8 +461,11 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
                   data={fallbackData}
                   type="bar"
                   colors={{
-                    ...brandColors,
                     primary: '#d97706', // Amber color for error state
+                    secondary: '#232321',
+                    accent: '#ffc658',
+                    highlight: '#ff7300',
+                    background: '#ffffff'
                   }}
                   options={{
                     animation: false,
@@ -470,10 +498,10 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
       if (match && match[1] === 'diagram' && options.showDiagrams) {
         return (
           <div className="diagram-container p-4 border rounded my-4" style={{ backgroundColor: '#f8f9fa' }}>
-            <div className="text-center mb-2 font-semibold" style={{ color: brandColors.primary }}>
+            <div className="text-center mb-2 font-semibold" style={{ color: brandColors.primary || DEFAULT_BRAND_COLORS.primary }}>
               Diagram Visualization
             </div>
-            <div className="diagram-placeholder p-8 border-dashed border-2 rounded text-center" style={{ borderColor: `${brandColors.primary}50` }}>
+            <div className="diagram-placeholder p-8 border-dashed border-2 rounded text-center" style={{ borderColor: `${brandColors.primary || DEFAULT_BRAND_COLORS.primary}50` }}>
               {codeContent}
             </div>
           </div>
@@ -490,7 +518,7 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
             overflow: 'auto',
             fontSize: '0.85rem',
             marginBottom: '1rem',
-            border: `1px solid ${brandColors.primary}20`
+            border: `1px solid ${brandColors.primary || DEFAULT_BRAND_COLORS.primary}20`
           }}>
             <code className={className} {...props}>{children}</code>
           </pre>
@@ -501,7 +529,7 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
       return (
         <code 
           style={{ 
-            backgroundColor: `${brandColors.primary}10`,
+            backgroundColor: `${brandColors.primary || DEFAULT_BRAND_COLORS.primary}10`,
             padding: '0.2rem 0.4rem',
             borderRadius: '3px',
             fontSize: '0.85em',
@@ -517,7 +545,7 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
     blockquote: ({ node, ...props }) => (
       <blockquote 
         style={{ 
-          borderLeft: `4px solid ${brandColors.accent}`,
+          borderLeft: `4px solid ${brandColors.accent || DEFAULT_BRAND_COLORS.accent}`,
           paddingLeft: '1rem',
           marginLeft: '0',
           marginRight: '0',
@@ -534,7 +562,7 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
         style={{ 
           border: 'none',
           height: '1px',
-          backgroundColor: `${brandColors.primary}30`,
+          backgroundColor: `${brandColors.primary || DEFAULT_BRAND_COLORS.primary}30`,
           margin: '1.5rem 0'
         }} 
         {...props} 

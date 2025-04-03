@@ -97,13 +97,12 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="auth-overlay">
-      <div className="auth-modal auth-modal-animate">
-        <button className="auth-close" onClick={closeForm}>×</button>
-        
-        <div className="auth-logo-container">
-          <img src="/mmlogo.png" alt="MagicMuse Logo" className="auth-logo" />
-        </div>
+    <div className="auth-modal auth-modal-animate">
+      <button className="auth-close" onClick={closeForm}>×</button>
+      
+      <div className="auth-logo-container">
+        <img src="/mmlogo.png" alt="MagicMuse Logo" className="auth-logo" />
+      </div>
         
         <h1 className="auth-heading">Welcome Back!</h1>
         <p className="auth-subheading">Sign in to continue your journey</p>
@@ -221,7 +220,6 @@ const Login: React.FC = () => {
           </div>
         </Form>
       </div>
-    </div>
   );
 };
 

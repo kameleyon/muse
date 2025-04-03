@@ -3,7 +3,7 @@ import { cleanupJsonCodeBlocks } from '@/utils/markdownFormatter'; // Keep clean
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'jspdf-autotable'; // Keep for potential future table handling if needed directly
-import { navigate } from '@/utils/navigation';
+import { navigateTo } from '@/utils/navigation';
 
 // Placeholder for API base URL
 const API_BASE_URL = '/api/export';
@@ -112,7 +112,7 @@ export const generateFormattedPdf = async (
   }
   
   // Navigate to the PDF export page with content and options
-  navigate('/pdf-export', {
+  navigateTo('/pdf-export', {
     state: {
       content: htmlContent,
       title: options?.title || 'Markdown Export',

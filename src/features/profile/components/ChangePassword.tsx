@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form'; // Re-add direct FormProvider import
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { updateUserPassword } from '@/services/supabase';
@@ -15,10 +15,13 @@ import {
 } from '@/components/ui/Card';
 import {
   Form,
-  FormGroup,
+  FormField, // Add FormField
+  FormGroup, // Keep FormGroup (alias for FormItem)
   FormLabel,
-  FormError,
-  FormHint,
+  FormControl, // Add FormControl
+  FormError,   // Keep FormError (alias for FormMessage)
+  FormHint,    // Keep FormHint (alias for FormDescription)
+  // FormProvider // Remove FormProvider from this import
 } from '@/components/ui/Form';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -47,14 +50,10 @@ const ChangePassword: React.FC = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const dispatch = useDispatch();
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<ChangePasswordFormData>({
+  const methods = useForm<ChangePasswordFormData>({
     resolver: zodResolver(changePasswordSchema),
   });
+  const { handleSubmit, reset, control } = methods; // Use control, remove register/errors
 
   const onSubmit = async (data: ChangePasswordFormData) => {
     try {
@@ -97,66 +96,83 @@ const ChangePassword: React.FC = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Form onSubmit={handleSubmit(onSubmit)}>
-          <FormGroup>
-            <FormLabel htmlFor="currentPassword" required>
-              Current Password
-            </FormLabel>
-            <Input
-              id="currentPassword"
-              type="password"
-              placeholder="••••••••"
-              {...register('currentPassword')}
-              error={errors.currentPassword?.message}
-              disabled={isLoading}
-              className="bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
+        <FormProvider {...methods}>
+          <Form onSubmit={handleSubmit(onSubmit)}>
+            <FormField
+              control={control}
+              name="currentPassword"
+              render={({ field }) => (
+                <FormGroup>
+                  <FormLabel required>Current Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      disabled={isLoading}
+                      className="bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormError />
+                </FormGroup>
+              )}
             />
-          </FormGroup>
 
-          <FormGroup>
-            <FormLabel htmlFor="newPassword" required>
-              New Password
-            </FormLabel>
-            <Input
-              id="newPassword"
-              type="password"
-              placeholder="••••••••"
-              {...register('newPassword')}
-              error={errors.newPassword?.message}
-              disabled={isLoading}
-              className="bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
+            <FormField
+              control={control}
+              name="newPassword"
+              render={({ field }) => (
+                <FormGroup>
+                  <FormLabel required>New Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      disabled={isLoading}
+                      className="bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormHint>
+                    Password must be at least 8 characters and include uppercase, lowercase, and numbers.
+                  </FormHint>
+                  <FormError />
+                </FormGroup>
+              )}
             />
-            <FormHint>
-              Password must be at least 8 characters and include uppercase, lowercase, and numbers.
-            </FormHint>
-          </FormGroup>
 
-          <FormGroup>
-            <FormLabel htmlFor="confirmPassword" required>
-              Confirm New Password
-            </FormLabel>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              {...register('confirmPassword')}
-              error={errors.confirmPassword?.message}
-              disabled={isLoading}
-              className="bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
+            <FormField
+              control={control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormGroup>
+                  <FormLabel required>Confirm New Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      disabled={isLoading}
+                      className="bg-secondary/10 shadow-inner border border-primary shadow-black text-secondary rounded-lg"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormError /> {/* Handles the password match error via schema refine */}
+                </FormGroup>
+              )}
             />
-          </FormGroup>
 
-          <div className="mt-6">
-            <Button type="submit" isLoading={isLoading} className="rounded-lg">
-              Update Password
-            </Button>
-            {isSuccess && (
-              <p className="mt-2 text-sm text-success">
-                Your password has been updated successfully.
-              </p>
-            )}
-          </div>
-        </Form>
+            <div className="mt-6">
+              <Button type="submit" isLoading={isLoading} className="rounded-lg">
+                Update Password
+              </Button>
+              {isSuccess && (
+                <p className="mt-2 text-sm text-success">
+                  Your password has been updated successfully.
+                </p>
+              )}
+            </div>
+          </Form>
+        </FormProvider>
       </CardContent>
     </Card>
   );

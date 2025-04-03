@@ -42,7 +42,8 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       }
-    }
+    },
+    force: true // Force dependency rebuild
   },
   preview: {
     port: 4000,
@@ -51,34 +52,57 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: process.env.NODE_ENV === 'development', // Only enable sourcemaps in development
+    minify: 'terser', // Use terser for better minification
+    terserOptions: {
+      compress: {
+        drop_console: process.env.NODE_ENV === 'production', // Remove console.logs in production
+        drop_debugger: true
+      }
+    },
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Split vendor code into separate chunks
-          'vendor-react': ['react', 'react-dom', 'react-router-dom', 'framer-motion'],
-          'vendor-ui': [
-            '@headlessui/react', 
-            '@radix-ui/react-dialog', 
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-icons',
-            '@radix-ui/react-slot',
-            '@radix-ui/react-switch',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-toast',
-            'class-variance-authority',
-            'clsx',
-            'tailwind-merge',
-            'lucide-react'
-          ],
-          'vendor-form': ['react-hook-form', '@hookform/resolvers', 'zod'],
-          'vendor-auth': ['@supabase/supabase-js'],
-          'vendor-state': ['@reduxjs/toolkit', 'react-redux', 'zustand', '@tanstack/react-query'],
-          'vendor-utils': ['date-fns', 'uuid', 'axios', 'marked']
+        manualChunks: (id) => {
+          // Dynamic chunking based on patterns
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('scheduler') || id.includes('react-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@radix-ui') || id.includes('@headlessui') || id.includes('lucide-react')) {
+              return 'vendor-ui';
+            }
+            if (id.includes('recharts') || id.includes('chart.js') || id.includes('d3')) {
+              return 'vendor-charts';
+            }
+            if (id.includes('react-hook-form') || id.includes('zod')) {
+              return 'vendor-forms';
+            }
+            if (id.includes('redux') || id.includes('zustand') || id.includes('react-query')) {
+              return 'vendor-state';
+            }
+            if (id.includes('supabase')) {
+              return 'vendor-auth';
+            }
+            return 'vendor-others'; // All other node_modules
+          }
+          
+          // Chunk app code by feature
+          if (id.includes('/src/features/')) {
+            const feature = id.split('/src/features/')[1].split('/')[0];
+            return `feature-${feature}`;
+          }
+          if (id.includes('/src/pages/')) {
+            return 'pages';
+          }
+          if (id.includes('/src/components/')) {
+            return 'components';
+          }
         }
       }
     },
-    // Increase the warning limit for now (while also implementing chunking)
-    chunkSizeWarningLimit: 1000
+    chunkSizeWarningLimit: 1000,
+    cssCodeSplit: true, // Split CSS to load only what's needed
+    reportCompressedSize: false, // Disable compressed size reporting to speed up build
+    assetsInlineLimit: 4096 // Inline assets smaller than 4kb
   }
 });
