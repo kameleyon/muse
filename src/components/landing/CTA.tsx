@@ -57,7 +57,7 @@ const CTA: React.FC = () => {
           >
             <Button 
               size="lg" 
-              className="bg-[#bcb7af] text-secondary hover:bg-[#bcb7af]/90"
+              className="bg-white/10 text-secondary hover:bg-[#bcb7af]/90"
               onClick={handleRegister}
             >
               Start Your Free Trial

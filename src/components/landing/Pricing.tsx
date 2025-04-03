@@ -237,7 +237,7 @@ const Pricing: React.FC = () => {
                   <Button 
                     fullWidth 
                     variant={plan.highlighted ? 'primary' : 'outline'}
-                    className={plan.highlighted ? 'bg-primary/90 text-white/80 font-regular rounded-xl' : 'border-primary font-regular text-primary rounded-xl'}
+                    className={plan.highlighted ? 'bg-primary/90 text-white/80 font-regular rounded-xl' : 'border-primary font-regular text-black rounded-xl'}
                   >
                     {plan.cta}
                   </Button>

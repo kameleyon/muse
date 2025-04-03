@@ -80,9 +80,10 @@ export default defineConfig({
         main: path.resolve(__dirname, 'index.html')
       },
       output: {
+        /*
         manualChunks: (id) => {
           // Ensure React and related packages are in a single chunk
-          if (id.includes('node_modules/react/') || 
+          if (id.includes('node_modules/react/') ||
               id.includes('node_modules/react-dom/') || 
               id.includes('node_modules/scheduler/') || 
               id.includes('node_modules/react-is/') || 
@@ -148,6 +149,7 @@ export default defineConfig({
           // Default chunk
           return undefined;
         }
+        */
       }
     },
     chunkSizeWarningLimit: 1000,
