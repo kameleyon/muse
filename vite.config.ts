@@ -19,7 +19,13 @@ export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-is'],
-    force: true
+    force: true,
+    esbuildOptions: {
+      // Ensure proper bundling of JSX
+      jsx: 'automatic',
+      jsxFactory: 'React.createElement',
+      jsxFragment: 'React.Fragment'
+    }
   },
   resolve: {
     alias: {
@@ -63,8 +69,12 @@ export default defineConfig({
         drop_debugger: true
       }
     },
+    commonjsOptions: {
+      // Ensure React is properly bundled
+      include: [/node_modules/],
+      transformMixedEsModules: true
+    },
     rollupOptions: {
-      external: ['react/jsx-runtime'],
       output: {
         manualChunks: (id) => {
           // Dynamic chunking based on patterns
