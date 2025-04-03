@@ -17,6 +17,10 @@ interface ImportMeta {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-is'],
+    force: true
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -42,8 +46,7 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       }
-    },
-    force: true // Force dependency rebuild
+    }
   },
   preview: {
     port: 4000,
@@ -61,11 +64,19 @@ export default defineConfig({
       }
     },
     rollupOptions: {
+      external: ['react/jsx-runtime'],
       output: {
         manualChunks: (id) => {
           // Dynamic chunking based on patterns
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('scheduler') || id.includes('react-dom')) {
+            // Ensure all React and React DOM related packages are in the same chunk
+            if (id.includes('react') || 
+                id.includes('scheduler') || 
+                id.includes('react-dom') || 
+                id.includes('react-is') || 
+                id.includes('prop-types') || 
+                id.includes('object-assign') ||
+                id.includes('use-sync-external-store')) {
               return 'vendor-react';
             }
             if (id.includes('@radix-ui') || id.includes('@headlessui') || id.includes('lucide-react')) {

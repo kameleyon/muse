@@ -1,4 +1,4 @@
-/* Import other fonts with font-display:swap */
+/* Import Google Fonts with font-display:swap */
 @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Questrial&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
@@ -11,23 +11,6 @@
 @import './dashboard/dashboard.css';
 @import './settings.css';
 @import './generation.css';
-
-/* Load critical fonts with font-display:swap */
-@font-face {
-  font-family: 'Comfortaa';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts/comfortaa-v40-latin-regular.woff2') format('woff2');
-}
-
-@font-face {
-  font-family: 'Questrial';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts/questrial-v18-latin-regular.woff2') format('woff2');
-}
 
 /* Tailwind directives */
 @tailwind base;
