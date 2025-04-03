@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom'; // Renamed react-router Link
+// ScrollLink import removed
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Menu, X } from 'lucide-react';
@@ -25,6 +26,27 @@ const LandingNav: React.FC = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  // Smooth scroll handler
+  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    const targetElement = document.getElementById(targetId);
+    if (targetElement) {
+      // Calculate offset for fixed header (approximate header height)
+      const headerOffset = 80; // Adjust as needed
+      const elementPosition = targetElement.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+    // Close mobile menu if open
+    if (isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
+    }
+  };
+
   // Authentication modal handlers
   const handleOpenLogin = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -46,30 +68,42 @@ const LandingNav: React.FC = () => {
     >
       <div className="container mx-auto px-4 lg:px-8">
         <nav className="flex items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="flex items-center">
+          {/* Logo - Use RouterLink */}
+          <RouterLink to="/" className="flex items-center">
             <img
               src="/mmlogo.png"
               alt="magicmuse Logo"
               className="h-12 w-auto mr-2"
             />
             <span className="font-heading text-4xl mt-3 text-[#3d3d3a] web-only">magicmuse</span>
-          </Link>
+          </RouterLink> 
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation - Use <a> tags with onClick for smooth scroll */}
           <div className="hidden md:flex items-center space-x-8 font-medium">
-            <Link to="#features" className="text-[#3d3d3a] hover:text-[#3d3d3a] transition-colors">
+            <a 
+              href="#features" 
+              onClick={(e) => handleSmoothScroll(e, 'features')}
+              className="text-[#3d3d3a] hover:text-[#ae5630] transition-colors cursor-pointer"
+            >
               FEATURES
-            </Link>
-            <Link to="#how-it-works" className="text-[#3d3d3a] hover:text-[#3d3d3a] transition-colors">
+            </a>
+            <a 
+              href="#how-it-works" 
+              onClick={(e) => handleSmoothScroll(e, 'how-it-works')}
+              className="text-[#3d3d3a] hover:text-[#ae5630] transition-colors cursor-pointer"
+            >
               HOW IT WORKS
-            </Link>
-            <Link to="#prices" className="text-[#3d3d3a] hover:text-[#3d3d3a] transition-colors">
+            </a>
+            <a 
+              href="#prices" 
+              onClick={(e) => handleSmoothScroll(e, 'prices')}
+              className="text-[#3d3d3a] hover:text-[#ae5630] transition-colors cursor-pointer"
+            >
               PRICES
-            </Link>
-            <Link to="#api" className="text-[#3d3d3a] hover:text-[#3d3d3a] transition-colors">
-              API
-            </Link>
+            </a>
+            <RouterLink to="/api" className="text-[#3d3d3a] hover:text-[#ae5630] transition-colors">
+              API 
+            </RouterLink>
           </div>
 
           {/* Action Buttons */}
@@ -113,34 +147,36 @@ const LandingNav: React.FC = () => {
             className="md:hidden bg-[#edeae2]/90 backdrop-blur-sm mt-2 rounded-xl p-4 shadow-md"
           >
             <div className="flex flex-col space-y-4">
-              <Link
-                to="#features"
-                className="text-[#3d3d3a] hover:text-[#3d3d3a]/80 py-2 transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
+              {/* Mobile Menu - Use <a> tags with onClick for smooth scroll */}
+              <a
+                href="#features"
+                onClick={(e) => handleSmoothScroll(e, 'features')}
+                className="text-[#3d3d3a] hover:text-[#ae5630] py-2 transition-colors cursor-pointer"
+                // onClick handler already closes menu via handleSmoothScroll
               >
                 FEATURES
-              </Link>
-              <Link
-                to="#how-it-works"
-                className="text-[#3d3d3a] hover:text-[#3d3d3a]/80 py-2 transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
+              </a>
+              <a
+                href="#how-it-works"
+                onClick={(e) => handleSmoothScroll(e, 'how-it-works')}
+                className="text-[#3d3d3a] hover:text-[#ae5630] py-2 transition-colors cursor-pointer"
               >
                 HOW IT WORKS
-              </Link>
-              <Link
-                to="#prices"
-                className="text-[#3d3d3a] hover:text-[#3d3d3a]/80 py-2 transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
+              </a>
+              <a
+                href="#prices"
+                onClick={(e) => handleSmoothScroll(e, 'prices')}
+                className="text-[#3d3d3a] hover:text-[#ae5630] py-2 transition-colors cursor-pointer"
               >
                 PRICES
-              </Link>
-              <Link
-                to="#api"
-                className="text-[#3d3d3a] hover:text-[#3d3d3a]/80 py-2 transition-colors"
+              </a>
+              <RouterLink
+                to="/api"
+                className="text-[#3d3d3a] hover:text-[#ae5630] py-2 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 API
-              </Link>
+              </RouterLink>
               <div className="pt-2 flex flex-col space-y-2">
                 <Button 
                   variant="outline" 

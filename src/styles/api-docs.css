@@ -1,0 +1,81 @@
+/* src/styles/api-docs.css */
+
+/* General API Doc Styles */
+.api-docs-content h2 {
+  @apply text-3xl font-heading text-secondary mt-10 mb-4 border-b border-neutral-light pb-2;
+}
+
+.api-docs-content h3 {
+  @apply text-2xl font-heading text-secondary mt-8 mb-3;
+}
+
+.api-docs-content h4 {
+  @apply text-xl font-heading text-primary mt-6 mb-2;
+}
+
+.api-docs-content p {
+  @apply text-secondary mb-4 leading-relaxed;
+}
+
+.api-docs-content ul {
+  @apply list-disc list-inside mb-4 pl-4 text-secondary;
+}
+
+.api-docs-content li {
+  @apply mb-1;
+}
+
+.api-docs-content a {
+  @apply text-primary hover:text-secondary underline; /* Changed hover color */
+}
+
+/* Code Block Styling */
+.api-docs-content pre {
+  @apply bg-neutral-light/50 border border-neutral-medium/30 rounded-lg p-4 mb-4 overflow-x-auto text-sm font-mono text-secondary;
+  /* Custom scrollbar for webkit browsers */
+  scrollbar-width: thin;
+  scrollbar-color: #bcb7af #edeae2; /* thumb track */
+}
+
+.api-docs-content pre::-webkit-scrollbar {
+  height: 8px;
+}
+
+.api-docs-content pre::-webkit-scrollbar-track {
+  background: #edeae2;
+  border-radius: 4px;
+}
+
+.api-docs-content pre::-webkit-scrollbar-thumb {
+  background-color: #bcb7af;
+  border-radius: 4px;
+  border: 2px solid #edeae2;
+}
+
+.api-docs-content code {
+  /* Inline code */
+  @apply bg-neutral-light/60 text-primary px-1 py-0.5 rounded text-sm font-mono;
+}
+
+.api-docs-content pre code {
+  /* Reset inline styles within pre blocks */
+  @apply bg-transparent text-inherit p-0 rounded-none;
+}
+
+/* Table Styling */
+.api-docs-content table {
+  @apply w-full border-collapse border border-neutral-medium/50 mb-6 text-sm;
+}
+
+.api-docs-content th,
+.api-docs-content td {
+  @apply border border-neutral-medium/50 p-2 text-left text-secondary;
+}
+
+.api-docs-content th {
+  @apply bg-neutral-light/40 font-semibold;
+}
+
+.api-docs-content tr:nth-child(even) {
+  @apply bg-neutral-light/20;
+}

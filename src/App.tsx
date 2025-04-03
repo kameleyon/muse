@@ -69,6 +69,11 @@ const routeConfig = [
     path: '/chart-test',
     element: lazy(() => import('./pages/ChartTest')),
     auth: false
+  },
+  {
+    path: '/api', // New route for API docs
+    element: lazy(() => import('./pages/ApiDocs')),
+    auth: false
   }
 ];
 

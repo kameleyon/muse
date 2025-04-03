@@ -1,10 +1,13 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // Keep Link for "See How it works"
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import TypingAnimation from './TypingAnimation';
+import { useAuthModal } from '@/context/AuthModalContext'; // Import useAuthModal
 
 const Hero: React.FC = () => {
+  const { openForm } = useAuthModal(); // Instantiate the hook
+
   return (
     <section className="pt-28 pb-20 md:pt-36 md:pb-28 relative overflow-hidden">
       {/* Solid yellow background instead of gradient */}
@@ -26,11 +29,17 @@ const Hero: React.FC = () => {
               Craft AI-Powered On-Demand Content in seconds with our most intuitive AI writing companion.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button size="lg" className=" text-[#edeae2] bg-primary rounded-xl shadow-sm font-regular hover:bg-secondary/90" >
-                <Link to="/auth/register"><span className=" text-[#edeae2]/80">Start your free trial</span></Link>
+              {/* Updated Button: Removed Link, added onClick */}
+              <Button 
+                size="lg" 
+                className=" text-[#edeae2]/80 bg-primary rounded-xl shadow-sm font-regular hover:bg-secondary/90" 
+                onClick={() => openForm('register')} // Call openForm on click
+              >
+                Start your free trial 
               </Button>
+              {/* Keep the "See How it works" button as a Link */}
               <Button size="lg" variant="outline" className="text-secondary    font-light    shadow-sm rounded-xl border-secondary hover:bg-secondary/10">
-                <Link to="#how-it-works">See How it works</Link>
+                <Link to="#how-it-works">See How it works</Link> 
               </Button>
             </div>
           </motion.div>

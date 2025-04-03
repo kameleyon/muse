@@ -137,3 +137,4 @@
 2025-03-31 17:21:22 [error]: Supabase error creating project: invalid input syntax for type uuid: "test-user-id"
 2025-03-31 17:29:11 [error]: Supabase error creating project: null value in column "project_type" of relation "projects" violates not-null constraint
 2025-03-31 17:32:22 [error]: Supabase error creating project: null value in column "project_type" of relation "projects" violates not-null constraint
+2025-04-03 13:42:40 [error]: Supabase error creating project: Could not find the 'project_name' column of 'projects' in the schema cache

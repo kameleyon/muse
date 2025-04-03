@@ -19,6 +19,7 @@ export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-is'],
+    // exclude: ['react-scroll'], // Removed react-scroll exclusion
     force: true,
     esbuildOptions: {
       // Ensure proper bundling of JSX
@@ -70,8 +71,8 @@ export default defineConfig({
       }
     },
     commonjsOptions: {
-      // Ensure React is properly bundled
-      include: [/node_modules/],
+      // Ensure React is properly bundled, and try processing react-scroll here
+      include: [/node_modules/, /react-scroll/], 
       transformMixedEsModules: true
     },
     rollupOptions: {
@@ -80,7 +81,7 @@ export default defineConfig({
         main: path.resolve(__dirname, 'index.html')
       },
       output: {
-        /*
+        // Enabled manualChunks for better code splitting
         manualChunks: (id) => {
           // Ensure React and related packages are in a single chunk
           if (id.includes('node_modules/react/') ||
@@ -149,10 +150,9 @@ export default defineConfig({
           // Default chunk
           return undefined;
         }
-        */
       }
     },
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1000, // Keep warning limit, but chunks should be smaller now
     cssCodeSplit: true, // Split CSS to load only what's needed
     reportCompressedSize: false, // Disable compressed size reporting to speed up build
     assetsInlineLimit: 4096 // Inline assets smaller than 4kb

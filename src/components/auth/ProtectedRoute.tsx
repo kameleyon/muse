@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Navigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom'; // Navigate removed
 import { RootState } from '@/store/store';
-import { useAuthModal } from '@/context/AuthModalContext';
+// import { useAuthModal } from '@/context/AuthModalContext'; // Removed
+import { logoutUser } from '@/services/auth'; // Added logoutUser import
 import Loading from '../common/Loading';
 
 interface ProtectedRouteProps {
@@ -11,8 +12,8 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, user, isLoading } = useSelector((state: RootState) => state.auth);
-  const location = useLocation();
-  const { openForm } = useAuthModal();
+  // const location = useLocation(); // No longer needed here if not used in logout message
+  // const { openForm } = useAuthModal(); // Removed
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   useEffect(() => {
@@ -21,24 +22,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       setInitialLoadComplete(true);
     }
     
-    // Handle showing the auth modal only after we've confirmed authentication status
+    // If loading is complete and user is not authenticated, log them out (clears session) and redirect.
     if (initialLoadComplete && !isLoading && !isAuthenticated && !user) {
-      openForm('login', `You need to login to access ${location.pathname}`);
+      // Call logoutUser which handles Supabase signout and redirect to '/'
+      logoutUser(); 
     }
-  }, [isLoading, isAuthenticated, user, location.pathname, openForm, initialLoadComplete]);
+  }, [isLoading, isAuthenticated, user, initialLoadComplete]); // Dependencies updated
 
   // Show loading during initial auth state check
   if (isLoading || !initialLoadComplete) {
     return <Loading />;
   }
 
-  // If not authenticated after auth check is complete, redirect
-  if (!isAuthenticated && !user) {
-    // Redirect to landing page, preserving the intended destination
-    return <Navigate to="/" state={{ from: location.pathname }} replace />;
-  }
-
-  // If authenticated, render the protected content
+  // If authenticated after auth check is complete, render the protected content
+  // The unauthenticated case is handled by the useEffect calling logoutUser, which redirects.
   return <>{children}</>;
 };
 

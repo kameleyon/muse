@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom'; // Link removed
+import { useAuthModal } from '@/context/AuthModalContext'; // Import useAuthModal
 
 const Pricing: React.FC = () => {
+  const { openForm } = useAuthModal(); // Instantiate the hook
   const [isAnnual, setIsAnnual] = useState(false);
   const [showAPI, setShowAPI] = useState(false);
 
@@ -233,15 +235,16 @@ const Pricing: React.FC = () => {
                     </li>
                   ))}
                 </ul>
-                <Link to="/auth/register">
-                  <Button 
-                    fullWidth 
-                    variant={plan.highlighted ? 'primary' : 'outline'}
-                    className={plan.highlighted ? 'bg-primary/90 text-white/80 font-regular rounded-xl' : 'border-primary font-regular text-primary rounded-xl'}
-                  >
-                    {plan.cta}
-                  </Button>
-                </Link>
+                {/* Removed Link, added onClick to Button */}
+                <Button 
+                  fullWidth
+                  variant={plan.highlighted ? 'primary' : 'outline'}
+                  // Explicitly ensure text-primary is applied for outline variant
+                  className={plan.highlighted ? 'bg-primary/90 text-white/80 font-regular rounded-lg shadow-sm hover:bg-primary border border-white' : 'border border-white shadow-sm bg-neutral-medium/70 hover:bg-primary font-regular rounded-lg text-primary'} 
+                  onClick={() => openForm('register')} // Call openForm on click
+                >
+                  {plan.cta}
+                </Button>
               </div>
             </motion.div>
           ))}

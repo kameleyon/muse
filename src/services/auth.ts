@@ -1,6 +1,9 @@
 // src/services/auth.ts
 
 // Define expected user data structure (adjust as needed)
+import { signOut as supabaseSignOut } from './supabase'; // Renamed to avoid naming conflict
+
+// Define expected user data structure (adjust as needed)
 interface User {
   id: string;
   name: string;
@@ -61,14 +64,24 @@ export const signupUser = async (name: string, email: string, password: string):
 };
 
 /**
- * Placeholder function for user logout.
- * Replace with actual logic (e.g., clear token, update state).
+ * Logs the user out by calling Supabase signout and redirecting to the home page.
  */
 export const logoutUser = async (): Promise<void> => {
-  console.log('Placeholder: logoutUser called');
-  // Simulate API call or local cleanup
-  await new Promise(resolve => setTimeout(resolve, 500));
-  // No return value needed for logout usually
+  console.log('logoutUser called');
+  try {
+    const { error } = await supabaseSignOut();
+    if (error) {
+      console.error('Error logging out:', error);
+      // Optionally handle the error, e.g., show a notification
+    }
+    // Redirect to the home page after successful logout or even if there's an error,
+    // as the session might be invalid anyway.
+    window.location.href = '/'; 
+  } catch (err) {
+    console.error('Unexpected error during logout:', err);
+    // Fallback redirect in case of unexpected errors
+    window.location.href = '/';
+  }
 };
 
 // Add other auth-related service functions as needed (e.g., password reset, verify email)

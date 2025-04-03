@@ -167,7 +167,8 @@ const Register: React.FC = () => {
 
   return (
     <div className="auth-overlay">
-      <div className="auth-modal auth-modal-animate">
+      {/* Reverted height/overflow classes */}
+      <div className="  auth-modal auth-modal-animate">
         <button className="auth-close" onClick={closeForm}>×</button>
         
         <div className="auth-logo-container">

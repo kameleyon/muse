@@ -63,7 +63,7 @@ const CTA: React.FC = () => {
               Start Your Free Trial
             </Button>
             <Link to="#how-it-works">
-              <Button size="lg" variant="outline" className="border-[#bcb7af] text-[#bcb7af] hover:bg-[#bcb7af]/10">
+              <Button size="lg" variant="outline" className="border-[#bcb7af] text-[#bcb7af] hover:bg-white/10">
                 See How It Works
               </Button>
             </Link>

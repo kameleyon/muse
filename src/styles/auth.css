@@ -340,17 +340,79 @@
 
 /* Responsive adjustments */
 @media (max-width: 480px) {
+
+  .auth-overlay {
+    max-width: 70%;
+  }
+
   .auth-modal {
-    padding: 1.5rem;
-    max-width: 90%;
+    padding: 1rem; /* Reduced padding */
+    max-width: 70%;
   }
   
+  .auth-logo-container {
+    margin-bottom: 1rem; /* Reduced margin */
+  }
+
   .auth-logo {
-    height: 2.75rem;
+    height: 2.75rem; 
   }
   
   .auth-heading {
     font-size: 1.5rem;
+    margin-bottom: 0.5rem; /* Reduced margin */
+  }
+
+  .auth-subheading {
+    margin-bottom: 1rem; /* Reduced margin */
+    font-size: 0.85rem; /* Slightly smaller font */
+  }
+
+  /* Reduce spacing between form groups */
+  .auth-modal form > div { 
+    margin-bottom: 0.75rem; /* Reduced margin */
+  }
+
+  .auth-label {
+    font-size: 0.85rem; /* Slightly smaller font */
+    margin-bottom: 0.25rem; /* Reduced margin */
+  }
+
+  .auth-input {
+    padding: 0.6rem 0.8rem; /* Reduced padding */
+    font-size: 0.9rem; /* Slightly smaller font */
+  }
+
+  .auth-hint {
+    margin-top: 0.1rem; /* Reduced margin */
+    margin-bottom: 0.75rem; /* Reduced margin */
+    font-size: 0.75rem; /* Slightly smaller font */
+  }
+
+  .auth-terms-container {
+    margin-bottom: 1rem; /* Reduced margin */
+  }
+
+  .auth-terms-text {
+    font-size: 0.8rem; /* Slightly smaller font */
+  }
+
+  .auth-button {
+    padding: 0.7rem 1rem; /* Reduced padding */
+    margin-top: 0.75rem; /* Reduced margin */
+    font-size: 0.9rem; /* Slightly smaller font */
+  }
+
+  .auth-footer {
+    margin-top: 1rem; /* Reduced margin */
+    font-size: 0.85rem; /* Slightly smaller font */
+  }
+
+  /* Ensure error messages don't add too much space */
+  .auth-error {
+    margin-top: 0.1rem; /* Reduced margin */
+    margin-bottom: 0.75rem; /* Reduced margin */
+    font-size: 0.8rem; /* Slightly smaller font */
   }
 }
 
