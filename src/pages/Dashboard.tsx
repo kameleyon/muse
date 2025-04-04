@@ -34,18 +34,8 @@ interface RecentActivityProps {
   activities: ActivityItem[];
 }
 
-interface Project {
-  id: string;
-  title: string;
-  date: string;
-  views: number;
-  status: 'Draft' | 'Published';
-}
-
-interface RecentProjectsProps {
-  projects: Project[];
-}
-import { 
+// Removed local Project and RecentProjectsProps interfaces
+import {
   Home, FolderOpen, FileText, Bookmark, Users, Bell, Settings, LogOut, 
   BarChart2, Calendar, Clock, TrendingUp
 } from 'lucide-react';
@@ -53,13 +43,13 @@ import {
 import {
   dashboardStats,
   recentActivities,
-  sampleNotifications,
+  // Removed sampleNotifications import
   sampleTokenUsage,
   monthlyContentData as sampleMonthlyContentData, // Alias to avoid naming conflict
   weeklyContentData as sampleWeeklyContentData,   // Alias to avoid naming conflict
   contentTypeData as sampleContentTypeData,       // Alias to avoid naming conflict
-  chartColors,
-  recentProjectsData
+  chartColors
+  // Removed recentProjectsData import
 } from '@/data/dashboardSampleData';
 
 const Dashboard: React.FC = () => {
@@ -134,8 +124,8 @@ const Dashboard: React.FC = () => {
                   View all
                 </a>
               </div>
-              <div className="p-4">
-                <RecentProjects projects={recentProjectsData} /> {/* Use imported data */}
+              <div className="p-0 text-lg">
+                <RecentProjects /> {/* Removed projects prop */}
               </div>
             </Card>
 
@@ -364,12 +354,13 @@ const Dashboard: React.FC = () => {
                   </svg>
                   Notifications
                 </h2>
-                <span className="bg-neutral-light/80 text-neutral-medium text-xs px-2 py-1 rounded-full">
-                  {sampleNotifications.filter(n => !n.read).length} new {/* Use imported data */}
-                </span>
+                {/* TODO: Update unread count logic if needed - requires fetching count or lifting state */}
+                {/* <span className="bg-neutral-light/80 text-neutral-medium text-xs px-2 py-1 rounded-full">
+                  {unreadCount} new
+                </span> */}
               </div>
               <div className="py-4">
-                <NotificationsPanel notifications={sampleNotifications}/> {/* Use imported data */}
+                <NotificationsPanel /> {/* Removed notifications prop */}
               </div>
             </Card>
 

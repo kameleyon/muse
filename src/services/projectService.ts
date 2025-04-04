@@ -9,10 +9,10 @@ interface ProjectData {
   tags?: string[];
   teamMembers?: string[]; // Add teamMembers
   pitchDeckTypeId?: string | null; // Add pitchDeckTypeId (allow null)
-  // Add other fields as needed
+// Add other fields as needed
 }
 
-interface Project {
+export interface Project { // Added export here
   id: string;
   user_id: string;
   name: string;
@@ -23,6 +23,7 @@ interface Project {
   pitch_deck_type_id: string | null; // Added pitch_deck_type_id
   created_at: string;
   updated_at: string;
+  status?: 'Draft' | 'Published' | string; // Added status field (optional for safety)
   // Add other fields returned by the backend
 }
 

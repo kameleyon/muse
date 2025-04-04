@@ -74,6 +74,11 @@ const routeConfig = [
     path: '/api', // New route for API docs
     element: lazy(() => import('./pages/ApiDocs')),
     auth: false
+  },
+  {
+    path: '/notifications', // New route for Notifications page
+    element: lazy(() => import('./pages/NotificationsPage')),
+    auth: true // Requires authentication
   }
 ];
 

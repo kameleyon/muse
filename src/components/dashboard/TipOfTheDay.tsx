@@ -58,7 +58,7 @@ const TipOfTheDay: React.FC = () => {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            "model": "featherless/qwerky-72b:free",
+            "model": "qwen/qwen-plus",
             "messages": [
               {
                 "role": "system",
@@ -66,7 +66,7 @@ const TipOfTheDay: React.FC = () => {
               },
               {
                 "role": "user",
-                "content": `Generate a random, engaging 'Tip of the Day' based on one of the following MagicMuse features:\n\n${featuresList}\n\nMake it sound helpful and insightful, encouraging exploration. make it short concise catchy, a bit casual and witty yet still professional. less than 100 words`
+                "content": `Generate a random, engaging 'Tip of the Day' based on one of the following MagicMuse features:\n\n${featuresList}\n\nMake it sound helpful and insightful, encouraging exploration. make it short concise catchy, a bit casual and witty yet still professional. NO EMOJI. less than 100 words.`
               }
             ],
             "max_tokens": 150, // Slightly increased max_tokens for potentially more descriptive tips
@@ -79,13 +79,15 @@ const TipOfTheDay: React.FC = () => {
         }
 
         const data = await response.json();
-        const tip = data.choices[0]?.message?.content?.trim();
+        // Add check for data.choices before accessing index 0
+        const tip = data?.choices?.[0]?.message?.content?.trim();
 
-        if (tip) {
-          setTipContent(tip);
-        } else {
-          throw new Error("No tip content received");
-        }
+         if (tip) {
+           setTipContent(tip);
+         } else {
+           console.log("OpenRouter Response (Tip):", data); // Log full response
+           throw new Error("No tip content received");
+         }
 
       } catch (error) {
         console.error("Failed to fetch tip:", error);

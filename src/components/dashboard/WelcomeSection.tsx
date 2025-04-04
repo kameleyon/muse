@@ -66,7 +66,7 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            "model": "deepseek/deepseek-chat-v3-0324:free",
+            "model": "qwen/qwen-plus",
             "messages": [
               { "role": "user", "content": "Provide a random meaningful quote suitable for a creative professional. Only return the quote text and the author, separated by ' - '. Example: 'Creativity takes courage.' - Henri Matisse" }
             ],
@@ -80,7 +80,8 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
         }
 
         const data = await response.json();
-        const quoteContent = data.choices[0]?.message?.content?.trim();
+         // Add check for data.choices
+        const quoteContent = data?.choices?.[0]?.message?.content?.trim();
 
         if (quoteContent) {
           // Attempt to parse the quote and author
@@ -92,11 +93,12 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
           } else {
              // Fallback if parsing fails - use the whole content as text
              console.warn("Could not parse author from quote:", quoteContent);
-             setQuote({ text: quoteContent.replace(/^['"]|['"]$/g, ''), author: 'Unknown' });
-          }
-        } else {
-          throw new Error("No quote content received");
-        }
+              setQuote({ text: quoteContent.replace(/^['"]|['"]$/g, ''), author: 'Unknown' });
+           }
+         } else {
+           console.log("OpenRouter Response (Quote):", data); // Log full response
+           throw new Error("No quote content received");
+         }
 
       } catch (error) {
         console.error("Failed to fetch quote:", error);

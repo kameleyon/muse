@@ -1637,3 +1637,103 @@
 2025-04-03 15:26:36 [info]: Server running in development mode on port 9998
 2025-04-03 17:23:07 [warn]: API Error: 404 - Not Found - /api
 2025-04-03 20:09:35 [info]: Server running in development mode on port 9998
+2025-04-03 20:49:48 [info]: Server running in development mode on port 9998
+2025-04-03 21:28:35 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:28:35 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:28:43 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:28:54 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:28:55 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:30:45 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:33:06 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:35:48 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:36:11 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:36:49 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:36:50 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:39:34 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:39:34 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:39:41 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:39:41 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:41:03 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:41:03 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:41:07 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 21:41:07 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:22:33 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:22:33 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:22:45 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:22:45 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:23:07 [info]: Request body: {"projectName":"eCareAgent","description":"","privacy":"private","tags":[],"teamMembers":[],"pitchDeckTypeId":"partnership","projectType":"partnership"}
+2025-04-03 22:23:07 [info]: User ID from request: f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:23:07 [info]: Creating project "eCareAgent" (Type: partnership) for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:23:07 [info]: Inserting data: {"user_id":"f16a8792-74c7-4741-9ad0-7b9d5a951f63","project_name":"eCareAgent","project_type":"partnership","description":"","privacy":"private","tags":[],"team_members":[],"pitch_deck_type_id":"partnership"}
+2025-04-03 22:23:07 [error]: Supabase error creating project: Could not find the 'project_name' column of 'projects' in the schema cache
+2025-04-03 22:23:07 [warn]: Falling back to mock project due to error: Error: Supabase error: Could not find the 'project_name' column of 'projects' in the schema cache
+2025-04-03 22:23:07 [info]: Created mock project with ID: proj_1743733387589
+2025-04-03 22:43:47 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:43:48 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:44:16 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:44:16 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:44:33 [info]: Request body: {"projectName":"astrogenie","description":"","privacy":"private","tags":[],"teamMembers":[],"pitchDeckTypeId":"investment","projectType":"investment"}
+2025-04-03 22:44:33 [info]: User ID from request: f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:44:33 [info]: Creating project "astrogenie" (Type: investment) for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:44:33 [info]: Inserting data: {"user_id":"f16a8792-74c7-4741-9ad0-7b9d5a951f63","project_name":"astrogenie","project_type":"investment","description":"","privacy":"private","tags":[],"team_members":[],"pitch_deck_type_id":"investment"}
+2025-04-03 22:44:34 [error]: Supabase error creating project: Could not find the 'project_name' column of 'projects' in the schema cache
+2025-04-03 22:44:34 [warn]: Falling back to mock project due to error: Error: Supabase error: Could not find the 'project_name' column of 'projects' in the schema cache
+2025-04-03 22:44:34 [info]: Created mock project with ID: proj_1743734674057
+2025-04-03 22:47:12 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:47:12 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:47:23 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:47:23 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:50:09 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:50:09 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:51:14 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:51:14 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:54:37 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:55:22 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:56:07 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:56:07 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:56:38 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:56:38 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:57:50 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:57:56 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 22:58:46 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:00:37 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:00:37 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:00:39 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:00:39 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:00:43 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:00:43 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:01:27 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:04:00 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:04:09 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:04:31 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:05:06 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:05:43 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:07:00 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:07:07 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:07:09 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:09:11 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:09:11 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:09:40 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:09:40 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:09:59 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:10:00 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:10:13 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:10:13 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:14:03 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:16:42 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:16:52 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:16:52 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:24:08 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:24:09 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:27:29 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:27:29 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:31:33 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:31:52 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:31:53 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:40:15 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:40:15 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:53:56 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:53:56 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:54:59 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:55:00 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-03 23:56:58 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
