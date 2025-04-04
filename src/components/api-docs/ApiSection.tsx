@@ -1,18 +1,15 @@
-import React, { forwardRef } from 'react';
+import React from 'react';
 
 interface ApiSectionProps {
   title: string;
   level?: number; // Optional level for heading (h2, h3, h4)
   children: React.ReactNode;
-  className?: string; // Allow passing additional classes
 }
 
-// Wrap component definition with forwardRef
-const ApiSection = forwardRef<HTMLElement, ApiSectionProps>(
-  ({ title, level = 2, children, className = '' }, ref) => {
-    const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
+const ApiSection: React.FC<ApiSectionProps> = ({ title, level = 2, children }) => {
+  const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
 
-    const getHeadingClasses = (lvl: number) => {
+  const getHeadingClasses = (lvl: number) => {
     // Added responsive text sizes (e.g., text-2xl sm:text-3xl)
     switch (lvl) {
       case 2:
@@ -24,22 +21,17 @@ const ApiSection = forwardRef<HTMLElement, ApiSectionProps>(
       default:
         return "text-2xl sm:text-3xl font-heading text-primary mt-8 sm:mt-10 mb-4 sm:mb-6 border-b border-neutral-light pb-2 sm:pb-3"; // Default to h2 style
     }
-    };
+  };
 
-    return (
-      // Pass the ref to the underlying section element
-      <section ref={ref} className={`api-section mb-8 ${className}`}>
-        <HeadingTag className={getHeadingClasses(level)}>{title}</HeadingTag>
-        <div className="prose prose-neutral max-w-none prose-pre:bg-transparent prose-pre:p-0 prose-code:before:content-none prose-code:after:content-none">
-          {/* Prose styles for paragraphs, lists, etc. Reset pre/code styles as CodeBlock handles them */}
-          {children}
-        </div>
-      </section>
-    );
-  }
-);
-
-// Add display name for better debugging
-ApiSection.displayName = 'ApiSection';
+  return (
+    <section className="api-section mb-8">
+      <HeadingTag className={getHeadingClasses(level)}>{title}</HeadingTag>
+      <div className="prose prose-neutral max-w-none prose-pre:bg-transparent prose-pre:p-0 prose-code:before:content-none prose-code:after:content-none">
+        {/* Prose styles for paragraphs, lists, etc. Reset pre/code styles as CodeBlock handles them */}
+        {children}
+      </div>
+    </section>
+  );
+};
 
 export default ApiSection;

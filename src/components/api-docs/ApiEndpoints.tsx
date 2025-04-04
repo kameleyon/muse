@@ -1,12 +1,12 @@
 import React from 'react';
 import ApiSection from './ApiSection';
-import ApiContentGenerationEndpoints from './endpoints/ApiContentGenerationEndpoints';
-import ApiProjectsEndpoints from './endpoints/ApiProjectsEndpoints';
-import ApiVersionControlEndpoints from './endpoints/ApiVersionControlEndpoints';
-import ApiContentModulesEndpoints from './endpoints/ApiContentModulesEndpoints';
-import ApiCollaborationEndpoints from './endpoints/ApiCollaborationEndpoints';
-import ApiExportDeliveryEndpoints from './endpoints/ApiExportDeliveryEndpoints';
-import ApiTemplatesEndpoints from './endpoints/ApiTemplatesEndpoints';
+import ApiContentGenerationEndpoints from './endpoints/ApiContentGenerationEndpoints.tsx';
+import ApiProjectsEndpoints from './endpoints/ApiProjectsEndpoints.tsx';
+import ApiVersionControlEndpoints from './endpoints/ApiVersionControlEndpoints.tsx';
+import ApiContentModulesEndpoints from './endpoints/ApiContentModulesEndpoints.tsx';
+import ApiCollaborationEndpoints from './endpoints/ApiCollaborationEndpoints.tsx';
+import ApiExportDeliveryEndpoints from './endpoints/ApiExportDeliveryEndpoints.tsx';
+import ApiTemplatesEndpoints from './endpoints/ApiTemplatesEndpoints.tsx';
 
 const ApiEndpoints: React.FC = () => {
   return (

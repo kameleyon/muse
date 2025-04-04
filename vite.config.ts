@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 // Define environment variables for TypeScript
 interface ImportMetaEnv {
@@ -16,7 +17,15 @@ interface ImportMeta {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    visualizer({
+      filename: './dist/stats.html', // Output file path
+      open: false, // Don't open automatically, let the user decide
+      gzipSize: true, // Show gzip size
+      brotliSize: true, // Show brotli size
+    }),
+  ],
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-is'],
     // exclude: ['react-scroll'], // Removed react-scroll exclusion
@@ -83,7 +92,7 @@ export default defineConfig({
       output: {
         // Enabled manualChunks for better code splitting
         manualChunks: (id) => {
-          // Ensure React and related packages are in a single chunk
+          // React core and UI libraries that depend on React
           if (id.includes('node_modules/react/') ||
               id.includes('node_modules/react-dom/') || 
               id.includes('node_modules/scheduler/') || 
@@ -91,21 +100,33 @@ export default defineConfig({
               id.includes('node_modules/prop-types/') || 
               id.includes('node_modules/object-assign/') ||
               id.includes('node_modules/use-sync-external-store/')) {
-            return 'vendor-react';
+            return 'vendor-react-core';
           }
           
-          // UI component libraries
-          if (id.includes('node_modules/@radix-ui/') || 
-              id.includes('node_modules/@headlessui/') || 
-              id.includes('node_modules/lucide-react/')) {
-            return 'vendor-ui';
+          // UI component libraries - split into smaller chunks
+          if (id.includes('node_modules/@radix-ui/')) {
+            return 'vendor-radix-ui';
           }
           
-          // Chart libraries
-          if (id.includes('node_modules/recharts/') || 
-              id.includes('node_modules/chart.js/') || 
-              id.includes('node_modules/d3/')) {
-            return 'vendor-charts';
+          if (id.includes('node_modules/@headlessui/')) {
+            return 'vendor-headless-ui';
+          }
+          
+          if (id.includes('node_modules/lucide-react/')) {
+            return 'vendor-lucide-icons';
+          }
+          
+          // Chart libraries - split by library
+          if (id.includes('node_modules/recharts/')) {
+            return 'vendor-recharts';
+          }
+          
+          if (id.includes('node_modules/chart.js/')) {
+            return 'vendor-chartjs';
+          }
+          
+          if (id.includes('node_modules/d3/')) {
+            return 'vendor-d3';
           }
           
           // Form libraries
@@ -114,37 +135,132 @@ export default defineConfig({
             return 'vendor-forms';
           }
           
-          // State management libraries
-          if (id.includes('node_modules/redux/') || 
-              id.includes('node_modules/zustand/') || 
+          // State management libraries - split by library
+          if (id.includes('node_modules/redux/') ||
+              id.includes('node_modules/@reduxjs/')) {
+            return 'vendor-redux';
+          }
+          
+          if (id.includes('node_modules/zustand/')) {
+            return 'vendor-zustand';
+          }
+          
+          if (id.includes('node_modules/@tanstack/react-query') ||
               id.includes('node_modules/react-query/')) {
-            return 'vendor-state';
+            return 'vendor-react-query';
           }
           
           // Auth libraries
-          if (id.includes('node_modules/supabase/')) {
-            return 'vendor-auth';
+          if (id.includes('node_modules/@supabase/')) {
+            return 'vendor-supabase';
           }
           
-          // Other node_modules
+          // Animation libraries
+          if (id.includes('node_modules/framer-motion/')) {
+            return 'vendor-framer-motion';
+          }
+          
+          // Document processing - Split docx
+          if (id.includes('node_modules/docx/')) {
+            return 'vendor-docx';
+          }
+          if (id.includes('node_modules/jspdf/') ||
+              id.includes('node_modules/html2pdf') || // html2pdf often includes jspdf & html2canvas
+              id.includes('node_modules/html2canvas/')) {
+            return 'vendor-pdf-generation';
+          }
+
+          // Markdown processing
+          if (id.includes('node_modules/marked/') ||
+              id.includes('node_modules/react-markdown/') ||
+              id.includes('node_modules/remark-') ||
+              id.includes('node_modules/rehype-') ||
+              id.includes('node_modules/micromark/') ||
+              id.includes('node_modules/mdast-') ||
+              id.includes('node_modules/turndown/')) {
+            return 'vendor-markdown';
+          }
+          
+          // Date handling
+          if (id.includes('node_modules/date-fns/')) {
+            return 'vendor-date-fns';
+          }
+          
+          // Rich text editor and dependencies
+          if (id.includes('node_modules/@tiptap/') || id.includes('node_modules/prosemirror-')) {
+            return 'vendor-tiptap-prosemirror';
+          }
+          
+          // Routing
+          if (id.includes('node_modules/react-router/') ||
+              id.includes('node_modules/react-router-dom/')) {
+            return 'vendor-router';
+          }
+          
+          // HTTP client
+          if (id.includes('node_modules/axios/')) {
+            return 'vendor-axios';
+          }
+          
+          // Utility libraries
+          if (id.includes('node_modules/clsx/') ||
+              id.includes('node_modules/class-variance-authority/') ||
+              id.includes('node_modules/tailwind-merge/')) {
+            return 'vendor-styling-utils';
+          }
+
+          // Specific large libraries often caught in 'others'
+          if (id.includes('node_modules/lodash-es/')) {
+            return 'vendor-lodash-es';
+          }
+
+          if (id.includes('node_modules/react-scroll/')) {
+            return 'vendor-react-scroll';
+          }
+
+          // Moment.js (often large and sometimes pulled in transitively)
+          if (id.includes('node_modules/moment/')) {
+            return 'vendor-moment';
+          }
+
+          // Syntax highlighting
+          if (id.includes('node_modules/highlight.js/')) {
+            return 'vendor-highlightjs';
+          }
+
+          // Lodash (non-ES version)
+          if (id.includes('node_modules/lodash/')) {
+            return 'vendor-lodash';
+          }
+
+          // Other node_modules - catch remaining libraries
           if (id.includes('node_modules/')) {
+            // Keep this less specific catch-all last
             return 'vendor-others';
           }
-          
+
           // App code by feature
           if (id.includes('/src/features/')) {
             const feature = id.split('/src/features/')[1].split('/')[0];
             return `feature-${feature}`;
           }
           
-          // Pages
-          if (id.includes('/src/pages/')) {
-            return 'pages';
+          // Split components by type
+          if (id.includes('/src/components/')) {
+            const componentType = id.split('/src/components/')[1].split('/')[0];
+            // Group smaller component categories together
+            if (['common', 'icons', 'ui'].includes(componentType)) {
+              return 'components-common';
+            }
+            return `components-${componentType}`;
           }
           
-          // Components
-          if (id.includes('/src/components/')) {
-            return 'components';
+          // Pages - split by page type if possible
+          if (id.includes('/src/pages/')) {
+            if (id.includes('/src/pages/auth/')) {
+              return 'pages-auth';
+            }
+            return 'pages-main';
           }
           
           // Default chunk
