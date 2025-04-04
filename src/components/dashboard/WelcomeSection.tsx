@@ -1,8 +1,8 @@
 // src/components/dashboard/WelcomeSection.tsx
-import React, { useEffect, useState, lazy, Suspense } from 'react'; // Added lazy, Suspense
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
-import Loading from '@/components/common/Loading'; // Added Loading for Suspense fallback
+import Loading from '@/components/common/Loading';
 
 // Lazy load the modal
 const NewProjectModal = lazy(() => import('@/features/project_creation/components/NewProjectModal'));
@@ -38,11 +38,9 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
   onProjectCreated, // Destructure the new prop
 }) => {
   const [timeOfDay, setTimeOfDay] = useState<string>('');
-  const [quote, setQuote] = useState<DailyQuote>({
-    text: 'The best way to predict the future is to create it.',
-    author: 'Abraham Lincoln',
-  });
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
+  const [quote, setQuote] = useState<DailyQuote | null>(null); // Initialize as null
+  const [isQuoteLoading, setIsQuoteLoading] = useState(true); // Add loading state for quote
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Get the greeting based on time of day
   useEffect(() => {
@@ -56,6 +54,64 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
     } else {
       setTimeOfDay('Night');
     }
+
+    // Fetch quote from OpenRouter
+    const fetchQuote = async () => {
+      setIsQuoteLoading(true);
+      try {
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            "model": "deepseek/deepseek-chat-v3-0324:free",
+            "messages": [
+              { "role": "user", "content": "Provide a random meaningful quote suitable for a creative professional. Only return the quote text and the author, separated by ' - '. Example: 'Creativity takes courage.' - Henri Matisse" }
+            ],
+            "max_tokens": 100,
+            "temperature": 0.8
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const quoteContent = data.choices[0]?.message?.content?.trim();
+
+        if (quoteContent) {
+          // Attempt to parse the quote and author
+          const parts = quoteContent.split(' - ');
+          if (parts.length >= 2) {
+            const text = parts.slice(0, -1).join(' - ').replace(/^['"]|['"]$/g, ''); // Remove surrounding quotes if any
+            const author = parts[parts.length - 1];
+            setQuote({ text, author });
+          } else {
+             // Fallback if parsing fails - use the whole content as text
+             console.warn("Could not parse author from quote:", quoteContent);
+             setQuote({ text: quoteContent.replace(/^['"]|['"]$/g, ''), author: 'Unknown' });
+          }
+        } else {
+          throw new Error("No quote content received");
+        }
+
+      } catch (error) {
+        console.error("Failed to fetch quote:", error);
+        // Fallback to a default quote on error
+        setQuote({
+          text: 'The best way to predict the future is to create it.',
+          author: 'Abraham Lincoln',
+        });
+      } finally {
+        setIsQuoteLoading(false);
+      }
+    };
+
+    fetchQuote();
+
   }, []);
 
   // Extract first name for greeting
@@ -164,9 +220,17 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
         </div>
 
         {/* Quote of the Day */}
-        <div className="mt-4 p-4 bg-neutral-light/30 rounded-xl border border-neutral-light">
-          <p className="text-neutral-medium italic">"{quote.text}"</p>
-          <p className="text-right text-sm text-neutral-medium mt-1">— {quote.author}</p>
+        <div className="mt-4 p-4 bg-neutral-light/30 rounded-xl border border-neutral-light min-h-[80px] flex flex-col justify-center"> {/* Added min-height and flex for loading */}
+          {isQuoteLoading ? (
+            <p className="text-neutral-medium italic text-center">Fetching inspiration...</p>
+          ) : quote ? (
+            <>
+              <p className="text-neutral-medium italic">"{quote.text}"</p>
+              <p className="text-right text-sm text-neutral-medium mt-1">— {quote.author}</p>
+            </>
+          ) : (
+             <p className="text-neutral-medium italic">Could not load quote.</p> // Fallback message if quote is null after loading
+          )}
         </div>
       </div>
 
