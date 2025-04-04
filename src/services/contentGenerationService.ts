@@ -4,7 +4,7 @@ import { useProjectWorkflowStore } from '@/store/projectWorkflowStore';
 
 // Read environment variables (Vite specific)
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const CONTENT_MODEL = import.meta.env.VITE_DEFAULT_CONTENT_MODEL || 'qwen/qwen-plus';
+const CONTENT_MODEL = import.meta.env.VITE_DEFAULT_CONTENT_MODEL || 'openrouter/quasar-alpha';
 const RESEARCH_MODEL = import.meta.env.VITE_DEFAULT_RESEARCH_MODEL || 'openai/gpt-4o-search-preview';
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'http://localhost:5173';
 const APP_NAME = import.meta.env.VITE_APP_NAME || 'MagicMuse';

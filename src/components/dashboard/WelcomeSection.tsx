@@ -70,7 +70,7 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
             "messages": [
               { "role": "user", "content": "Provide a random meaningful quote suitable for a creative professional. Only return the quote text and the author, separated by ' - '. Example: 'Creativity takes courage.' - Henri Matisse" }
             ],
-            "max_tokens": 100,
+            "max_tokens": 200,
             "temperature": 0.8
           })
         });

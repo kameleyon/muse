@@ -1773,3 +1773,27 @@
 2025-04-04 08:45:39 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
 2025-04-04 08:45:39 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
 2025-04-04 08:51:14 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 08:57:13 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 08:57:14 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 10:07:02 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 10:07:02 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 10:09:59 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 10:09:59 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 11:46:15 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 11:46:16 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 12:05:04 [info]: Server running in development mode on port 9998
+2025-04-04 12:05:29 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 12:05:29 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 12:06:10 [info]: Request body: {"projectName":"astrogenie","description":"","privacy":"private","tags":[],"teamMembers":[],"pitchDeckTypeId":"business","projectType":"business"}
+2025-04-04 12:06:10 [info]: User ID from request: f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 12:06:10 [info]: Creating project "astrogenie" (Type: business) for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 12:06:10 [info]: Inserting data: {"user_id":"f16a8792-74c7-4741-9ad0-7b9d5a951f63","project_name":"astrogenie","project_type":"business","description":"","privacy":"private","tags":[],"team_members":[],"pitch_deck_type_id":"business"}
+2025-04-04 12:06:10 [error]: Supabase error creating project: Could not find the 'project_name' column of 'projects' in the schema cache
+2025-04-04 12:06:10 [warn]: Falling back to mock project due to error: Error: Supabase error: Could not find the 'project_name' column of 'projects' in the schema cache
+2025-04-04 12:06:10 [info]: Created mock project with ID: proj_1743782770424
+2025-04-04 12:12:32 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 12:12:32 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 12:12:43 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 12:12:43 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 12:13:45 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-04-04 12:13:46 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
