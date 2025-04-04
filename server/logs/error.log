@@ -138,3 +138,5 @@
 2025-03-31 17:29:11 [error]: Supabase error creating project: null value in column "project_type" of relation "projects" violates not-null constraint
 2025-03-31 17:32:22 [error]: Supabase error creating project: null value in column "project_type" of relation "projects" violates not-null constraint
 2025-04-03 13:42:40 [error]: Supabase error creating project: Could not find the 'project_name' column of 'projects' in the schema cache
+2025-04-03 22:23:07 [error]: Supabase error creating project: Could not find the 'project_name' column of 'projects' in the schema cache
+2025-04-03 22:44:34 [error]: Supabase error creating project: Could not find the 'project_name' column of 'projects' in the schema cache

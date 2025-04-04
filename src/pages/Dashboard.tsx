@@ -336,8 +336,8 @@ const Dashboard: React.FC = () => {
 
             {/* Notifications */}
             <Card className="mb-6 shadow-sm sm:shadow-md hover:shadow-lg transition-shadow bg-[#bcb7af]/30 border border-neutral-light rounded-2xl">
-              <div className="p-4 border-b border-neutral-light/40 bg-white/5 flex justify-between items-center">
-                <h2 className="text-xl font-bold font-heading text-secondary mb-4">
+              <div className="p-4  bg-white/5 flex justify-between items-center">
+                <h2 className="text-xl font-bold font-heading text-secondary">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5 inline-block mr-2 text-primary"
@@ -359,7 +359,7 @@ const Dashboard: React.FC = () => {
                   {unreadCount} new
                 </span> */}
               </div>
-              <div className="py-4">
+              <div className="py-0">
                 <NotificationsPanel /> {/* Removed notifications prop */}
               </div>
             </Card>

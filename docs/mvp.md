@@ -8,13 +8,13 @@
 
 ## Proposal & Pitch Deck Generation
 - [ ] **Finalize the 7-Step Workflow Implementation**
-  - [x] **Step 1: Project Setup:** Functionality for initiating a new project.
+  - [ ] **Step 1: Project Setup:** Functionality for initiating a new project.
   - [ ] **Step 2: Requirements Gathering:** Interface for inputting project details and goals.
   - [ ] **Step 3: Design & Structure Configuration:** Options for selecting layout and structure.
   - [x] **Step 4: Content Generation:** Core system for AI-powered content creation.
   - [x] **Step 5: Basic Editing:** Capabilities for refining generated content.
   - [ ] **Step 6: Quality Assurance Tools:** Features for user-driven review and checks.
-  - [x] **Step 7: Finalization & Export Options:** Preparing and exporting the final document (PDF confirmed).
+  - [ ] **Step 7: Finalization & Export Options:** Preparing and exporting the final document (PDF confirmed).
 - [ ] **Support for Core Proposal Types:**
   - [ ] Business proposal
   - [ ] Investment pitch

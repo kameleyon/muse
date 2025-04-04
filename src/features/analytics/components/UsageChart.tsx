@@ -3,12 +3,10 @@ import React from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import resolveConfig from 'tailwindcss/resolveConfig';
 import tailwindConfig from '../../../../tailwind.config.js'; // Adjust path as needed
 
-// Resolve the Tailwind config to get actual color values
-const fullConfig = resolveConfig(tailwindConfig);
-const themeColors = fullConfig.theme.colors as any; // Use 'as any' for simplicity, refine type if needed
+// Access Tailwind theme colors directly from config
+const themeColors = (tailwindConfig?.theme?.colors ?? {}) as any; // Use 'as any' for simplicity, refine type if needed
 
 // Placeholder data (replace with actual data fetching)
 const data = [

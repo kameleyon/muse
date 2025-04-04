@@ -102,7 +102,7 @@ const RecentProjects: React.FC = () => {
 
   return (
     <> {/* Wrap in Fragment to include Modal */}
-      <Card className="w-full bornder-0 shadow-0 text-xl ">
+      <Card className="w-full bornder-0 border-transparent shadow-0 shadow-transparent text-xl ">
         
       <CardContent>
         {loading && <p>Loading recent projects...</p>}
@@ -111,10 +111,10 @@ const RecentProjects: React.FC = () => {
           <>
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[50%]">Title</TableHead>
+                <TableRow key="header-row">
+                  <TableHead className="w-[40%]">Title</TableHead>
                   <TableHead className="w-[30%]">Date</TableHead>
-                  <TableHead className="w-[10%]">Status</TableHead>
+                  <TableHead className="w-[20%]">Status</TableHead>
                   <TableHead className="w-[10%] text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -139,7 +139,7 @@ const RecentProjects: React.FC = () => {
                     </TableRow>
                   ))
                 ) : (
-                  <TableRow>
+                  <TableRow key="no-projects-row"> {/* Added static key */}
                     <TableCell colSpan={4} className="text-center text-muted-foreground">
                       No recent projects found.
                     </TableCell>

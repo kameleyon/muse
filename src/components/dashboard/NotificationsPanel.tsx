@@ -59,11 +59,11 @@ const NotificationsPanel: React.FC = () => { // Removed props
       {!loading && !error && ( // Only render list if not loading and no error
         // Removed Fragment wrapper below
           notifications.length > 0 ? (
-            <div className="space-y-3 bg-white/40 rounded-xl border p-2 border-neutral-light">
+            <div className="space-y-3">
             {notifications.map((notification) => (
               <div
               key={notification.id} 
-              className={`p-3`}
+              className={`p-3  bg-white/20 rounded-xl border border-neutral-light`}
             >
                 <div className="flex justify-between items-start"> {/* Use items-start */}
                   <div> {/* Wrap title and message */}

@@ -230,22 +230,22 @@
   height: 8px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: theme('colors.neutral.light / 0.5'); 
+  background: rgb(237 234 226 / 0.5); 
   border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: theme('colors.primary.DEFAULT / 0.6');
+  background: rgb(174 86 48 / 0.6);
   border-radius: 10px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: theme('colors.primary.hover / 0.8');
+  background: rgb(156 79 44 / 0.8);
 }
 /* Firefox scrollbar */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: theme('colors.primary.DEFAULT / 0.6') theme('colors.neutral.light / 0.5');
+  scrollbar-color: rgb(174 86 48 / 0.6) rgb(237 234 226 / 0.5);
 }
 
 /* Chat panel styling with performance optimizations */
