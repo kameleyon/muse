@@ -21,6 +21,7 @@ export interface Project { // Added export here
   tags: string[] | null;
   team_members: string[] | null; // Added team_members
   pitch_deck_type_id: string | null; // Added pitch_deck_type_id
+  project_type: string | null; // Added project_type based on user feedback/DB schema
   created_at: string;
   updated_at: string;
   status?: 'Draft' | 'Published' | string; // Added status field (optional for safety)
@@ -114,6 +115,7 @@ export const createProjectAPI = async (projectData: ProjectData): Promise<Projec
           tags: projectData.tags || null,
           team_members: projectData.teamMembers || null,
           pitch_deck_type_id: projectData.pitchDeckTypeId || null,
+          project_type: null, // Added missing field
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
@@ -142,12 +144,13 @@ export const createProjectAPI = async (projectData: ProjectData): Promise<Projec
             description: projectData.description || null,
             privacy: projectData.privacy || "private",
             tags: projectData.tags || null,
-            team_members: projectData.teamMembers || null,
-            pitch_deck_type_id: projectData.pitchDeckTypeId || null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-        }
+          team_members: projectData.teamMembers || null,
+          pitch_deck_type_id: projectData.pitchDeckTypeId || null,
+          project_type: null, // Added missing field
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+      }
         return null;
       }
     } catch (error) {

@@ -68,7 +68,7 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
           body: JSON.stringify({
             "model": "qwen/qwen-plus",
             "messages": [
-              { "role": "user", "content": "Provide a random meaningful quote suitable for a creative professional. Only return the quote text and the author, separated by ' - '. Example: 'Creativity takes courage.' - Henri Matisse" }
+              { "role": "user", "content": "Share an inspiring quote about the creative writing process from a renowned author, poet, or thought leader that captures the transformative power of words and would resonate with the users . Only return the quote text and the author, separated by ' - '. Example: 'Creativity takes courage.' - Henri Matisse" }
             ],
             "max_tokens": 200,
             "temperature": 0.8

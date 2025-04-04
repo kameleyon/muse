@@ -13,7 +13,7 @@ import { setContentFilters } from '@/store/slices/contentSlice'; // Import Redux
 
 // Filter options (can be moved to a data file)
 const contentTypeFilters = [
-  { value: '', label: 'All Types' },
+  { value: 'all', label: 'All Types' },
   { value: 'blog', label: 'Blog Posts' },
   { value: 'marketing', label: 'Marketing Copy' },
   { value: 'creative', label: 'Creative Writing' },
@@ -22,7 +22,7 @@ const contentTypeFilters = [
 ];
 
 const dateFilters = [
-  { value: '', label: 'All Time' },
+  { value: 'all', label: 'All Time' },
   { value: 'today', label: 'Today' },
   { value: 'yesterday', label: 'Yesterday' },
   { value: 'week', label: 'This Week' },
@@ -42,8 +42,8 @@ const ContentLibraryToolbar: React.FC<ContentLibraryToolbarProps> = ({
 }) => {
   const dispatch = useDispatch();
   const [searchInput, setSearchInput] = useState(initialSearch);
-  const [typeFilter, setTypeFilter] = useState(initialType);
-  const [dateFilter, setDateFilter] = useState(''); // Local state for date filter
+  const [typeFilter, setTypeFilter] = useState(initialType || 'all');
+  const [dateFilter, setDateFilter] = useState('all'); // Local state for date filter
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
@@ -52,7 +52,7 @@ const ContentLibraryToolbar: React.FC<ContentLibraryToolbarProps> = ({
   const applyFilters = () => {
     dispatch(
       setContentFilters({
-        type: typeFilter || null, // Send null if 'All Types' is selected
+        type: typeFilter === 'all' ? null : typeFilter,
         search: searchInput,
         // Add date filter later
       })
@@ -70,7 +70,7 @@ const ContentLibraryToolbar: React.FC<ContentLibraryToolbarProps> = ({
     setTypeFilter(newType);
     dispatch(
       setContentFilters({
-        type: newType || null,
+        type: newType === 'all' ? null : newType,
         search: searchInput, // Keep current search term
       })
     );
