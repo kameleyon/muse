@@ -1,30 +1,27 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { Card } from '@/components/ui/Card';
-import { settingsCategories, SettingsCategory, SettingsSubcategory } from '@/features/settings/data/settingsCategories';
 import { ChevronUp, ChevronDown } from 'lucide-react';
+import { SettingsCategory } from '../types/settings';
 
-interface SettingsMenuProps {
+interface SettingsNavigationProps {
   activeCategory: string;
   activeSubcategory: string;
-  setActiveCategory: (category: string) => void;
-  setActiveSubcategory: (subcategory: string) => void;
+  setActiveCategory: (categoryId: string) => void;
+  setActiveSubcategory: (subcategoryId: string) => void;
   mobileMenuExpanded: boolean;
-  setMobileMenuExpanded: (expanded: boolean) => void;
+  toggleMobileMenu: () => void;
+  settingsCategories: SettingsCategory[];
 }
 
-const SettingsMenu: React.FC<SettingsMenuProps> = ({
+const SettingsNavigation: React.FC<SettingsNavigationProps> = ({
   activeCategory,
   activeSubcategory,
   setActiveCategory,
   setActiveSubcategory,
   mobileMenuExpanded,
-  setMobileMenuExpanded
-}) => {
-  // Toggle mobile menu visibility
-  const toggleMobileMenu = () => {
-    setMobileMenuExpanded(!mobileMenuExpanded);
-  };
-
+  toggleMobileMenu,
+  settingsCategories
+}): ReactElement => {
   return (
     <Card className="settings-menu shadow-sm sm:shadow-md hover:shadow-lg transition-shadow mb-4 lg:mb-6 sticky top-0">
       <div className="p-3 sm:p-4 border-b border-neutral-light/40 bg-white/5 flex items-center justify-between">
@@ -41,10 +38,10 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
           )}
         </button>
       </div>
-      <div className={`p-3 sm:p-4 ${mobileMenuExpanded ? 'block' : 'hidden lg:block'}`}>
+      <div className={`p-3 sm:p-4 ${mobileMenuExpanded ? 'block' : 'hidden lg:block'}`}> {/* Removed max-h and overflow-y-auto */}
         <nav>
           <ul className="space-y-1">
-            {settingsCategories.map((category: SettingsCategory) => (
+            {settingsCategories.map((category) => (
               <li key={category.id}>
                 <button
                   className={`settings-menu-item w-full text-left ${
@@ -56,7 +53,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
                     setActiveCategory(category.id);
                     setActiveSubcategory(category.subcategories[0].id);
                     if (window.innerWidth < 1024) {
-                      setMobileMenuExpanded(false);
+                      toggleMobileMenu();
                     }
                   }}
                 >
@@ -67,7 +64,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
                 {/* Show subcategories if category is active */}
                 {activeCategory === category.id && (
                   <ul className="settings-submenu space-y-1">
-                    {category.subcategories.map((subcategory: SettingsSubcategory) => (
+                    {category.subcategories.map((subcategory) => (
                       <li key={subcategory.id}>
                         <button
                           className={`settings-submenu-item w-full text-left ${
@@ -78,7 +75,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
                           onClick={() => {
                             setActiveSubcategory(subcategory.id);
                             if (window.innerWidth < 1024) {
-                              setMobileMenuExpanded(false);
+                              toggleMobileMenu();
                             }
                           }}
                         >
@@ -98,4 +95,4 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
   );
 };
 
-export default SettingsMenu;
+export default SettingsNavigation;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/Button';
-import { PlusCircle, Check as CheckIcon } from 'lucide-react';
+import { CheckIcon, PlusCircle } from 'lucide-react';
 
 const ThemeSettings: React.FC = () => {
   return (
@@ -66,10 +66,10 @@ const ThemeSettings: React.FC = () => {
             <label className="settings-label">
               Primary Color
             </label>
-            <div className="color-picker-container flex items-center gap-2">
+            <div className="color-picker-container">
               <input
                 type="color"
-                className="w-10 h-10 rounded overflow-hidden"
+                className="color-picker"
                 value="#ae5630"
               />
               <input
@@ -84,10 +84,10 @@ const ThemeSettings: React.FC = () => {
             <label className="settings-label">
               Secondary Color
             </label>
-            <div className="color-picker-container flex items-center gap-2">
+            <div className="color-picker-container">
               <input
                 type="color"
-                className="w-10 h-10 rounded overflow-hidden"
+                className="color-picker"
                 value="#6d371f"
               />
               <input
@@ -105,23 +105,25 @@ const ThemeSettings: React.FC = () => {
         <p className="settings-form-description">Create and save custom theme presets</p>
         
         <div className="flex flex-wrap gap-3 mt-4">
-          <div className="w-24 h-24 rounded-md border-2 border-dashed border-[#bcb7af] flex flex-col items-center justify-center cursor-pointer hover:border-[#ae5630] transition-colors">
-            <PlusCircle size={24} className="mx-auto text-[#3d3d3a]" />
-            <span className="text-sm block mt-1">New Theme</span>
+          <div className="new-theme-preset-card">
+            <div className="text-center">
+              <PlusCircle size={24} className="mx-auto text-[#3d3d3a]" />
+              <span className="text-sm block mt-1">New Theme</span>
+            </div>
           </div>
           
-          <div className="w-24 h-24 rounded-md overflow-hidden shadow-sm cursor-pointer hover:shadow-md transition-shadow">
+          <div className="theme-preset-card">
             <div className="w-full h-full bg-gradient-to-br from-[#2a9d8f] to-[#264653]">
-              <div className="w-full h-full flex items-end p-2 bg-black/10">
-                <span className="text-xs text-white">Ocean Breeze</span>
+              <div className="theme-preset-name">
+                <span>Ocean Breeze</span>
               </div>
             </div>
           </div>
           
-          <div className="w-24 h-24 rounded-md overflow-hidden shadow-sm cursor-pointer hover:shadow-md transition-shadow">
+          <div className="theme-preset-card">
             <div className="w-full h-full bg-gradient-to-br from-[#f4a261] to-[#e76f51]">
-              <div className="w-full h-full flex items-end p-2 bg-black/10">
-                <span className="text-xs text-white">Sunset</span>
+              <div className="theme-preset-name">
+                <span>Sunset</span>
               </div>
             </div>
           </div>
@@ -133,10 +135,10 @@ const ThemeSettings: React.FC = () => {
         <p className="settings-form-description">Automatically switch themes based on time of day</p>
         
         <div className="space-y-4 mt-4">
-          <div className="flex items-center gap-2">
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#ae5630]"></div>
+          <div className="toggle-switch-container">
+            <label className="toggle-switch">
+              <input type="checkbox" />
+              <span className="toggle-slider"></span>
             </label>
             <span className="toggle-label">Enable automatic theme switching</span>
           </div>
@@ -146,7 +148,7 @@ const ThemeSettings: React.FC = () => {
               <label className="settings-label">
                 Day Theme (6:00 AM - 6:00 PM)
               </label>
-              <select className="settings-input">
+              <select className="settings-select">
                 <option>Light Theme</option>
                 <option>Ocean Breeze</option>
                 <option>Sunset</option>
@@ -157,7 +159,7 @@ const ThemeSettings: React.FC = () => {
               <label className="settings-label">
                 Night Theme (6:00 PM - 6:00 AM)
               </label>
-              <select className="settings-input">
+              <select className="settings-select">
                 <option>Dark Theme</option>
                 <option>Ocean Breeze</option>
                 <option>Sunset</option>

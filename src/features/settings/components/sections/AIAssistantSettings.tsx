@@ -37,7 +37,7 @@ const AIAssistantSettings: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
           <div>
             <label className="settings-label">Default Tone</label>
-            <select className="settings-input">
+            <select className="settings-select">
               <option>Professional</option>
               <option>Casual</option>
               <option>Academic</option>
@@ -49,7 +49,7 @@ const AIAssistantSettings: React.FC = () => {
           
           <div>
             <label className="settings-label">Content Complexity</label>
-            <select className="settings-input">
+            <select className="settings-select">
               <option>Simple</option>
               <option>Standard</option>
               <option>Detailed</option>
@@ -110,17 +110,17 @@ const AIAssistantSettings: React.FC = () => {
         <p className="settings-form-description">Control how much context the AI remembers during your session</p>
         
         <div className="space-y-4 mt-4">
-          <div className="flex items-center gap-2">
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" defaultChecked />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#ae5630]"></div>
+          <div className="toggle-switch-container">
+            <label className="toggle-switch">
+              <input type="checkbox" defaultChecked />
+              <span className="toggle-slider"></span>
             </label>
             <span className="toggle-label">Enable contextual awareness</span>
           </div>
           
           <div>
             <label className="settings-label">Context Window Size</label>
-            <select className="settings-input">
+            <select className="settings-select">
               <option>Small (recent paragraphs only)</option>
               <option>Medium (current section)</option>
               <option>Large (entire document)</option>
@@ -172,6 +172,85 @@ const AIAssistantSettings: React.FC = () => {
               className="settings-input"
               placeholder="Enter specialized knowledge area (e.g., 'Medieval History')"
             />
+          </div>
+        </div>
+      </div>
+      
+      <div className="settings-form-section">
+        <h3 className="settings-form-title">Citation Preferences</h3>
+        <p className="settings-form-description">Configure citation style and source quality preferences</p>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          <div>
+            <label className="settings-label">Citation Style</label>
+            <select className="settings-select">
+              <option>APA (7th Edition)</option>
+              <option>MLA (8th Edition)</option>
+              <option>Chicago (17th Edition)</option>
+              <option>Harvard</option>
+              <option>IEEE</option>
+              <option>Custom</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="settings-label">Source Quality Priority</label>
+            <select className="settings-select">
+              <option>Academic Sources Only</option>
+              <option>High-quality Publications</option>
+              <option>Balanced Mix</option>
+              <option>Diverse Sources</option>
+              <option>All Available Sources</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div className="settings-form-section">
+        <h3 className="settings-form-title">AI Intervention Timing</h3>
+        <p className="settings-form-description">Control when the AI offers suggestions</p>
+        
+        <div className="space-y-4 mt-4">
+          <div>
+            <label className="settings-label">Suggestion Timing</label>
+            <div className="space-y-2">
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="intervention-timing"
+                  className="form-radio text-[#ae5630]"
+                  defaultChecked
+                />
+                <span className="ml-2">Real-time (as you type)</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="intervention-timing"
+                  className="form-radio text-[#ae5630]"
+                />
+                <span className="ml-2">On pause (when you stop typing)</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="intervention-timing"
+                  className="form-radio text-[#ae5630]"
+                />
+                <span className="ml-2">On-demand only (when requested)</span>
+              </label>
+            </div>
+          </div>
+          
+          <div>
+            <label className="settings-label">Pause Threshold</label>
+            <select className="settings-select">
+              <option>Short (1 second)</option>
+              <option>Medium (3 seconds)</option>
+              <option>Long (5 seconds)</option>
+              <option>Very Long (10 seconds)</option>
+              <option>Custom</option>
+            </select>
           </div>
         </div>
       </div>

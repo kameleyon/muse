@@ -104,6 +104,64 @@ const UserProfileSettings: React.FC = () => {
         </div>
       </div>
       
+      <div className="settings-form-section">
+        <h3 className="settings-form-title">Professional Credentials</h3>
+        <p className="settings-form-description">Add your expertise areas and credentials</p>
+        
+        <div className="space-y-4 mt-4">
+          <div className="settings-field-group">
+            <label className="settings-label">
+              Areas of Expertise
+            </label>
+            <input
+              type="text"
+              className="settings-input"
+              placeholder="e.g. Fiction Writing, Content Marketing, UX Design"
+            />
+            <p className="text-xs text-[#3d3d3a] mt-1">
+              Separate multiple areas with commas
+            </p>
+          </div>
+          
+          <div className="settings-field-group">
+            <label className="settings-label">
+              Credentials & Certifications
+            </label>
+            <textarea
+              className="settings-textarea"
+              placeholder="List your relevant credentials, degrees, or certifications"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+      
+      <div className="settings-form-section">
+        <h3 className="settings-form-title">Portfolio Showcase</h3>
+        <p className="settings-form-description">Select projects to showcase on your profile</p>
+        
+        <div className="space-y-2 mt-4">
+          <label className="inline-flex items-center">
+            <input type="checkbox" className="form-checkbox text-[#ae5630]" />
+            <span className="ml-2">Fantasy Novel</span>
+          </label>
+          
+          <label className="inline-flex items-center">
+            <input type="checkbox" className="form-checkbox text-[#ae5630]" />
+            <span className="ml-2">Character Profiles</span>
+          </label>
+          
+          <label className="inline-flex items-center">
+            <input type="checkbox" className="form-checkbox text-[#ae5630]" />
+            <span className="ml-2">World Building</span>
+          </label>
+          
+          <label className="inline-flex items-center">
+            <input type="checkbox" className="form-checkbox text-[#ae5630]" />
+            <span className="ml-2">Plot Outline</span>
+          </label>
+        </div>
+      </div>
+      
       <div className="settings-footer">
         <Button variant="primary" className="text-white">
           Save Changes

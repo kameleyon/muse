@@ -1,111 +1,124 @@
-import React, { Suspense, lazy } from 'react';
-import { Button } from '@/components/ui/Button';
+import React, { Suspense, ReactElement } from 'react';
 
-// Lazy load settings modules
-const UserProfileSettings = lazy(() => import('@/features/settings/components/account/UserProfileSettings'));
-const ThemeSettings = lazy(() => import('@/features/settings/components/interface/ThemeSettings'));
-const AIAssistantSettings = lazy(() => import('@/features/settings/components/ai/AIAssistantSettings'));
-const WritingStyleSettings = lazy(() => import('@/features/settings/components/ai/WritingStyleSettings'));
-const LanguageSettings = lazy(() => import('@/features/settings/components/ai/LanguageSettings'));
-const ContentPrivacySettings = lazy(() => import('@/features/settings/components/privacy/ContentPrivacySettings'));
-const CollaborationSettings = lazy(() => import('@/features/settings/components/privacy/CollaborationSettings'));
-const DataUsageSettings = lazy(() => import('@/features/settings/components/privacy/DataUsageSettings'));
-const EmailNotificationSettings = lazy(() => import('@/features/settings/components/notifications/EmailNotificationSettings'));
-const InAppNotificationSettings = lazy(() => import('@/features/settings/components/notifications/InAppNotificationSettings'));
-const RemindersSettings = lazy(() => import('@/features/settings/components/notifications/RemindersSettings'));
-const ConnectedServicesSettings = lazy(() => import('@/features/settings/components/integration/ConnectedServicesSettings'));
-
-// Fallback for lazy-loaded components
-const Fallback = () => (
-  <div className="p-4 flex items-center justify-center">
-    <div className="animate-pulse text-[#ae5630]">Loading settings...</div>
-  </div>
-);
-
-// Generic settings placeholder for not yet implemented settings
-const GenericSettings = ({ title }: { title: string }) => (
-  <div className="space-y-4">
-    <p>Settings for: {title}</p>
-    <p className="text-[#3d3d3a]">
-      These settings are currently being implemented. Please check back soon!
-    </p>
-    <div className="flex justify-end">
-      <Button variant="primary" className="text-white">
-        Save Changes
-      </Button>
-    </div>
-  </div>
-);
+// Import settings components lazily
+const UserProfileSettings = React.lazy(() => import('./sections/UserProfileSettings'));
+const ThemeSettings = React.lazy(() => import('./sections/ThemeSettings'));
+const AIAssistantSettings = React.lazy(() => import('./sections/AIAssistantSettings'));
+const WritingStyleSettings = React.lazy(() => import('./sections/WritingStyleSettings'));
+const LanguageSettings = React.lazy(() => import('./sections/LanguageSettings'));
+const ContentPrivacySettings = React.lazy(() => import('./sections/ContentPrivacySettings'));
+const CollaborationSettings = React.lazy(() => import('./sections/CollaborationSettings'));
+const AccountSettings = React.lazy(() => import('./sections/AccountSettings'));
+const SubscriptionSettings = React.lazy(() => import('@/features/profile/components/SubscriptionSettings'));
+const APIAccessSettings = React.lazy(() => import('./sections/APIAccessSettings'));
+const EditorSettings = React.lazy(() => import('./sections/EditorSettings'));
+const LayoutSettings = React.lazy(() => import('./sections/LayoutSettings'));
+const AccessibilitySettings = React.lazy(() => import('./sections/AccessibilitySettings'));
+const DataUsageSettings = React.lazy(() => import('./sections/DataUsageSettings'));
+const EmailNotificationSettings = React.lazy(() => import('./sections/EmailNotificationSettings'));
+const InAppNotificationSettings = React.lazy(() => import('./sections/InAppNotificationSettings'));
+const RemindersSettings = React.lazy(() => import('./sections/RemindersSettings'));
+const ConnectedServicesSettings = React.lazy(() => import('./sections/ConnectedServicesSettings'));
+const ImportExportSettings = React.lazy(() => import('./sections/ImportExportSettings'));
+const WorkflowSettings = React.lazy(() => import('./sections/WorkflowSettings'));
+const PerformanceSettings = React.lazy(() => import('./sections/PerformanceSettings'));
+const SecuritySettings = React.lazy(() => import('@/features/profile/components/SecuritySettings'));
+const TeamAdminSettings = React.lazy(() => import('./sections/TeamAdminSettings'));
+const VersionHistorySettings = React.lazy(() => import('@/features/profile/components/VersionHistorySettings'));
+const BackupRecoverySettings = React.lazy(() => import('@/features/profile/components/BackupRecoverySettings'));
+const TemplateSettings = React.lazy(() => import('@/features/profile/components/TemplateSettings'));
+const ResourceLibrarySettings = React.lazy(() => import('@/features/profile/components/ResourceLibrarySettings'));
+const VoiceSpeechSettings = React.lazy(() => import('@/features/profile/components/VoiceSpeechSettings'));
+const KeyboardInputSettings = React.lazy(() => import('@/features/profile/components/KeyboardInputSettings'));
+const AIEthicsSettings = React.lazy(() => import('@/features/profile/components/AIEthicsSettings'));
+const LearningSettings = React.lazy(() => import('@/features/profile/components/LearningSettings'));
+const MobileSettings = React.lazy(() => import('@/features/profile/components/MobileSettings'));
+const CrossDeviceSettings = React.lazy(() => import('@/features/profile/components/CrossDeviceSettings'));
 
 interface SettingsContentProps {
   subcategoryId: string;
 }
 
-const SettingsContent: React.FC<SettingsContentProps> = ({ subcategoryId }) => {
-  return (
-    <Suspense fallback={<Fallback />}>
-      {(() => {
-        // Map subcategory IDs to their corresponding components
-        switch (subcategoryId) {
-          // Account & Profile
-          case 'user-profile':
-            return <UserProfileSettings />;
-          case 'account-settings':
-            return <GenericSettings title="Account Settings" />;
-          case 'subscription':
-            return <GenericSettings title="Subscription Management" />;
-          case 'api-access':
-            return <GenericSettings title="API Access Settings" />;
-          
-          // User Interface
-          case 'theme':
-            return <ThemeSettings />;
-          case 'editor':
-            return <GenericSettings title="Editor Preferences" />;
-          case 'layout':
-            return <GenericSettings title="Layout Customization" />;
-          case 'accessibility':
-            return <GenericSettings title="Accessibility Settings" />;
-          
-          // AI Behavior
-          case 'writing-style':
-            return <WritingStyleSettings />;
-          case 'ai-assistant':
-            return <AIAssistantSettings />;
-          case 'language':
-            return <LanguageSettings />;
-          
-          // Privacy & Data
-          case 'content-privacy':
-            return <ContentPrivacySettings />;
-          case 'collaboration':
-            return <CollaborationSettings />;
-          case 'data-usage':
-            return <DataUsageSettings />;
-          
-          // Notifications
-          case 'email-notifications':
-            return <EmailNotificationSettings />;
-          case 'in-app-notifications':
-            return <InAppNotificationSettings />;
-          case 'reminders':
-            return <RemindersSettings />;
-          
-          // Integration
-          case 'connected-services':
-            return <ConnectedServicesSettings />;
-          case 'import-export':
-            return <GenericSettings title="Import/Export Preferences" />;
-          case 'workflow':
-            return <GenericSettings title="Workflow Integration" />;
-          
-          // Other categories
-          default:
-            return <GenericSettings title={subcategoryId.replace(/-/g, ' ')} />;
-        }
-      })()}
-    </Suspense>
-  );
+// This component will render different settings content based on the selected subcategory
+const SettingsContent: React.FC<SettingsContentProps> = ({ subcategoryId }): ReactElement => {
+  // Fallback for lazy-loaded components
+  const fallback = <div className="p-4 text-center">Loading settings...</div>;
+  
+  // Render different settings based on subcategoryId
+  const renderSettings = () => {
+    switch (subcategoryId) {
+      case 'user-profile':
+        return <Suspense fallback={fallback}><UserProfileSettings /></Suspense>;
+      case 'account-settings':
+        return <Suspense fallback={fallback}><AccountSettings /></Suspense>;
+      case 'subscription':
+        return <Suspense fallback={fallback}><SubscriptionSettings /></Suspense>;
+      case 'api-access':
+        return <Suspense fallback={fallback}><APIAccessSettings /></Suspense>;
+      case 'theme':
+        return <Suspense fallback={fallback}><ThemeSettings /></Suspense>;
+      case 'editor':
+        return <Suspense fallback={fallback}><EditorSettings /></Suspense>;
+      case 'layout':
+        return <Suspense fallback={fallback}><LayoutSettings /></Suspense>;
+      case 'accessibility':
+        return <Suspense fallback={fallback}><AccessibilitySettings /></Suspense>;
+      case 'writing-style':
+        return <Suspense fallback={fallback}><WritingStyleSettings /></Suspense>;
+      case 'ai-assistant':
+        return <Suspense fallback={fallback}><AIAssistantSettings /></Suspense>;
+      case 'language':
+        return <Suspense fallback={fallback}><LanguageSettings /></Suspense>;
+      case 'content-privacy':
+        return <Suspense fallback={fallback}><ContentPrivacySettings /></Suspense>;
+      case 'collaboration':
+        return <Suspense fallback={fallback}><CollaborationSettings /></Suspense>;
+      case 'data-usage':
+        return <Suspense fallback={fallback}><DataUsageSettings /></Suspense>;
+      case 'email-notifications':
+        return <Suspense fallback={fallback}><EmailNotificationSettings /></Suspense>;
+      case 'in-app-notifications':
+        return <Suspense fallback={fallback}><InAppNotificationSettings /></Suspense>;
+      case 'reminders':
+        return <Suspense fallback={fallback}><RemindersSettings /></Suspense>;
+      case 'connected-services':
+        return <Suspense fallback={fallback}><ConnectedServicesSettings /></Suspense>;
+      case 'import-export':
+        return <Suspense fallback={fallback}><ImportExportSettings /></Suspense>;
+      case 'workflow':
+        return <Suspense fallback={fallback}><WorkflowSettings /></Suspense>;
+      case 'performance':
+        return <Suspense fallback={fallback}><PerformanceSettings /></Suspense>;
+      case 'security':
+        return <Suspense fallback={fallback}><SecuritySettings /></Suspense>;
+      case 'team-admin':
+        return <Suspense fallback={fallback}><TeamAdminSettings /></Suspense>;
+      case 'version-history':
+        return <Suspense fallback={fallback}><VersionHistorySettings /></Suspense>;
+      case 'backup-recovery':
+        return <Suspense fallback={fallback}><BackupRecoverySettings /></Suspense>;
+      case 'template-settings':
+        return <Suspense fallback={fallback}><TemplateSettings /></Suspense>;
+      case 'resource-library':
+        return <Suspense fallback={fallback}><ResourceLibrarySettings /></Suspense>;
+      case 'voice-speech':
+        return <Suspense fallback={fallback}><VoiceSpeechSettings /></Suspense>;
+      case 'keyboard-input':
+        return <Suspense fallback={fallback}><KeyboardInputSettings /></Suspense>;
+      case 'responsible-ai':
+        return <Suspense fallback={fallback}><AIEthicsSettings /></Suspense>;
+      case 'learning':
+        return <Suspense fallback={fallback}><LearningSettings /></Suspense>;
+      case 'mobile-specific':
+        return <Suspense fallback={fallback}><MobileSettings /></Suspense>;
+      case 'cross-device':
+        return <Suspense fallback={fallback}><CrossDeviceSettings /></Suspense>;
+      default:
+        return <div>Settings not found</div>;
+    }
+  };
+
+  return renderSettings();
 };
 
 export default SettingsContent;
