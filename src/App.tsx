@@ -80,6 +80,7 @@ const routeConfig = [
     element: lazy(() => import('./pages/NotificationsPage')),
     auth: true // Requires authentication
   }
+  // Removed About page route - now handled by modal in footer
 ];
 
 // Redirects for legacy routes

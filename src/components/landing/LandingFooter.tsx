@@ -1,5 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import AboutModal from '@/components/common/AboutModal';
+import CookiePolicyModal from '@/components/common/CookiePolicyModal'; // Import Cookie Policy Modal
+import PrivacyPolicyModal from '@/components/common/PrivacyPolicyModal'; // Import Privacy Policy Modal
+import TermsOfServiceModal from '@/components/common/TermsOfServiceModal'; // Import Terms Modal
+import GdprComplianceModal from '@/components/common/GdprComplianceModal'; // Import GDPR Modal
 import { 
   Github, 
   Twitter, 
@@ -70,29 +75,39 @@ const LandingFooter: React.FC = () => {
             <h3 className="font-heading text-lg text-neutral-white mb-6">Legal</h3>
             <ul className="space-y-3">
               <li>
-                <Link to="/about" className="text-neutral-white/80 hover:text-neutral-white transition-colors">
-                  About
-                </Link>
+                <AboutModal trigger={
+                  <button className="text-neutral-white/80 hover:text-neutral-white transition-colors text-left">
+                    About
+                  </button>
+                } />
               </li>
               <li>
-                <Link to="/terms" className="text-neutral-white/80 hover:text-neutral-white transition-colors">
-                  Terms of Service
-                </Link>
+                <TermsOfServiceModal trigger={
+                  <button className="text-neutral-white/80 hover:text-neutral-white transition-colors text-left">
+                    Terms of Service
+                  </button>
+                } />
               </li>
               <li>
-                <Link to="/privacy" className="text-neutral-white/80 hover:text-neutral-white transition-colors">
-                  Privacy Policy
-                </Link>
+                <PrivacyPolicyModal trigger={
+                  <button className="text-neutral-white/80 hover:text-neutral-white transition-colors text-left">
+                    Privacy Policy
+                  </button>
+                } />
               </li>
               <li>
-                <Link to="/cookies" className="text-neutral-white/80 hover:text-neutral-white transition-colors">
-                  Cookie Policy
-                </Link>
+                <CookiePolicyModal trigger={
+                  <button className="text-neutral-white/80 hover:text-neutral-white transition-colors text-left">
+                    Cookie Policy
+                  </button>
+                } />
               </li>
               <li>
-                <Link to="/gdpr" className="text-neutral-white/80 hover:text-neutral-white transition-colors">
-                  GDPR Compliance
-                </Link>
+                <GdprComplianceModal trigger={
+                  <button className="text-neutral-white/80 hover:text-neutral-white transition-colors text-left">
+                    GDPR Compliance
+                  </button>
+                } />
               </li>
             </ul>
           </div>
