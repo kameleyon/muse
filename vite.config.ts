@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { VitePWA } from 'vite-plugin-pwa';
 
 // Define environment variables for TypeScript
 interface ImportMetaEnv {
@@ -24,6 +25,30 @@ export default defineConfig({
       open: false, // Don't open automatically, let the user decide
       gzipSize: true, // Show gzip size
       brotliSize: true, // Show brotli size
+    }),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'logo-placeholder.png', 'logo-placeholder.svg', 'magicmuse-icon.svg'],
+      manifest: {
+        name: 'MagicMuse',
+        short_name: 'MagicMuse',
+        description: 'AI-Powered Content Generation Platform',
+        theme_color: '#4f46e5',
+        icons: [
+          {
+            src: '/favicon.ico',
+            sizes: '64x64',
+            type: 'image/x-icon'
+          }
+        ]
+      },
+      workbox: {
+        // Exclude stats.html from precaching
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        globIgnores: ['**/stats.html'],
+        // Increase max file size for precaching (default is 2MB)
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MiB to be safe
+      }
     }),
   ],
   optimizeDeps: {

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check PWA Configuration</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 {
+      color: #4338ca;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 10px;
+    }
+    .card {
+      background-color: #f9fafb;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    button {
+      background-color: #4f46e5;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background-color: #4338ca;
+    }
+    button.danger {
+      background-color: #ef4444;
+    }
+    button.danger:hover {
+      background-color: #dc2626;
+    }
+    pre {
+      background-color: #f1f5f9;
+      padding: 10px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    .success {
+      background-color: #ecfdf5;
+      color: #047857;
+      padding: 10px;
+      border-radius: 6px;
+      margin: 10px 0;
+    }
+    .warning {
+      background-color: #fffbeb;
+      color: #92400e;
+      padding: 10px;
+      border-radius: 6px;
+      margin: 10px 0;
+    }
+    .error {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      padding: 10px;
+      border-radius: 6px;
+      margin: 10px 0;
+    }
+    #status {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>PWA Configuration Checker</h1>
+  
+  <div class="card">
+    <h2>Service Worker Status</h2>
+    <div id="swStatus">Checking...</div>
+    <button id="checkSW">Check Service Workers</button>
+    <button id="unregisterSW" class="danger">Unregister All Service Workers</button>
+  </div>
+  
+  <div class="card">
+    <h2>Cache Storage</h2>
+    <div id="cacheStatus">Checking...</div>
+    <button id="checkCache">Check Cache Storage</button>
+    <button id="clearCache" class="danger">Clear All Caches</button>
+  </div>
+  
+  <div class="card">
+    <h2>Manifest Check</h2>
+    <div id="manifestStatus">Checking...</div>
+    <button id="checkManifest">Check Web Manifest</button>
+  </div>
+  
+  <div class="card">
+    <h2>PWA Plugin Check</h2>
+    <div id="pwaPluginStatus">Checking...</div>
+    <button id="checkPWAPlugin">Check for PWA Plugin</button>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const swStatusEl = document.getElementById('swStatus');
+      const cacheStatusEl = document.getElementById('cacheStatus');
+      const manifestStatusEl = document.getElementById('manifestStatus');
+      const pwaPluginStatusEl = document.getElementById('pwaPluginStatus');
+      
+      // Check Service Workers
+      async function checkServiceWorkers() {
+        swStatusEl.innerHTML = 'Checking service workers...';
+        
+        try {
+          if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            
+            if (registrations.length === 0) {
+              swStatusEl.innerHTML = '<div class="success">No service workers registered.</div>';
+            } else {
+              let html = `<div class="warning">Found ${registrations.length} service worker registrations:</div><ul>`;
+              
+              registrations.forEach(registration => {
+                html += `<li>Scope: ${registration.scope}</li>`;
+              });
+              
+              html += '</ul>';
+              swStatusEl.innerHTML = html;
+            }
+          } else {
+            swStatusEl.innerHTML = '<div class="warning">Service Worker API not supported in this browser.</div>';
+          }
+        } catch (error) {
+          swStatusEl.innerHTML = `<div class="error">Error checking service workers: ${error.message}</div>`;
+        }
+      }
+      
+      // Unregister Service Workers
+      async function unregisterServiceWorkers() {
+        swStatusEl.innerHTML = 'Unregistering service workers...';
+        
+        try {
+          if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            
+            if (registrations.length === 0) {
+              swStatusEl.innerHTML = '<div class="success">No service workers to unregister.</div>';
+            } else {
+              await Promise.all(registrations.map(registration => registration.unregister()));
+              swStatusEl.innerHTML = `<div class="success">Successfully unregistered ${registrations.length} service worker(s).</div>`;
+            }
+          } else {
+            swStatusEl.innerHTML = '<div class="warning">Service Worker API not supported in this browser.</div>';
+          }
+        } catch (error) {
+          swStatusEl.innerHTML = `<div class="error">Error unregistering service workers: ${error.message}</div>`;
+        }
+      }
+      
+      // Check Cache Storage
+      async function checkCacheStorage() {
+        cacheStatusEl.innerHTML = 'Checking cache storage...';
+        
+        try {
+          if ('caches' in window) {
+            const cacheNames = await caches.keys();
+            
+            if (cacheNames.length === 0) {
+              cacheStatusEl.innerHTML = '<div class="success">No caches found.</div>';
+            } else {
+              let html = `<div class="warning">Found ${cacheNames.length} caches:</div><ul>`;
+              
+              for (const cacheName of cacheNames) {
+                const cache = await caches.open(cacheName);
+                const requests = await cache.keys();
+                html += `<li>${cacheName}: ${requests.length} cached requests</li>`;
+              }
+              
+              html += '</ul>';
+              cacheStatusEl.innerHTML = html;
+            }
+          } else {
+            cacheStatusEl.innerHTML = '<div class="warning">Cache Storage API not supported in this browser.</div>';
+          }
+        } catch (error) {
+          cacheStatusEl.innerHTML = `<div class="error">Error checking cache storage: ${error.message}</div>`;
+        }
+      }
+      
+      // Clear Cache Storage
+      async function clearCacheStorage() {
+        cacheStatusEl.innerHTML = 'Clearing cache storage...';
+        
+        try {
+          if ('caches' in window) {
+            const cacheNames = await caches.keys();
+            
+            if (cacheNames.length === 0) {
+              cacheStatusEl.innerHTML = '<div class="success">No caches to clear.</div>';
+            } else {
+              await Promise.all(cacheNames.map(name => caches.delete(name)));
+              cacheStatusEl.innerHTML = `<div class="success">Successfully cleared ${cacheNames.length} cache(s).</div>`;
+            }
+          } else {
+            cacheStatusEl.innerHTML = '<div class="warning">Cache Storage API not supported in this browser.</div>';
+          }
+        } catch (error) {
+          cacheStatusEl.innerHTML = `<div class="error">Error clearing cache storage: ${error.message}</div>`;
+        }
+      }
+      
+      // Check Web Manifest
+      async function checkWebManifest() {
+        manifestStatusEl.innerHTML = 'Checking web manifest...';
+        
+        try {
+          // Check if there's a manifest link in the document
+          const manifestLink = document.querySelector('link[rel="manifest"]');
+          
+          if (!manifestLink) {
+            manifestStatusEl.innerHTML = '<div class="success">No manifest link found in the document.</div>';
+            return;
+          }
+          
+          const manifestUrl = manifestLink.href;
+          manifestStatusEl.innerHTML = `<div class="warning">Found manifest link: ${manifestUrl}</div>`;
+          
+          try {
+            // Try to fetch the manifest
+            const response = await fetch(manifestUrl);
+            const manifestText = await response.text();
+            
+            try {
+              // Try to parse the manifest
+              const manifest = JSON.parse(manifestText);
+              manifestStatusEl.innerHTML += `<div class="success">Manifest parsed successfully:</div><pre>${JSON.stringify(manifest, null, 2)}</pre>`;
+            } catch (parseError) {
+              manifestStatusEl.innerHTML += `<div class="error">Error parsing manifest: ${parseError.message}</div><pre>${manifestText}</pre>`;
+            }
+          } catch (fetchError) {
+            manifestStatusEl.innerHTML += `<div class="error">Error fetching manifest: ${fetchError.message}</div>`;
+          }
+        } catch (error) {
+          manifestStatusEl.innerHTML = `<div class="error">Error checking web manifest: ${error.message}</div>`;
+        }
+      }
+      
+      // Check for PWA Plugin
+      function checkPWAPlugin() {
+        pwaPluginStatusEl.innerHTML = 'Checking for PWA plugin...';
+        
+        try {
+          // Check for any script tags that might be related to the PWA plugin
+          const scripts = Array.from(document.scripts);
+          const pwaScripts = scripts.filter(script => 
+            script.src && (
+              script.src.includes('vite-plugin-pwa') || 
+              script.src.includes('pwa-register')
+            )
+          );
+          
+          if (pwaScripts.length === 0) {
+            pwaPluginStatusEl.innerHTML = '<div class="success">No PWA plugin scripts found in the document.</div>';
+          } else {
+            let html = `<div class="warning">Found ${pwaScripts.length} PWA-related scripts:</div><ul>`;
+            
+            pwaScripts.forEach(script => {
+              html += `<li>${script.src}</li>`;
+            });
+            
+            html += '</ul>';
+            pwaPluginStatusEl.innerHTML = html;
+          }
+          
+          // Check for any global variables that might be related to the PWA plugin
+          const pwaGlobals = [
+            'registerSW', 
+            'VitePWA', 
+            '__vite_plugin_pwa_enabled',
+            '__vite_plugin_pwa_register',
+            '__vite_plugin_pwa_manifest'
+          ];
+          
+          const foundGlobals = pwaGlobals.filter(name => name in window);
+          
+          if (foundGlobals.length > 0) {
+            pwaPluginStatusEl.innerHTML += `<div class="warning">Found PWA-related global variables: ${foundGlobals.join(', ')}</div>`;
+          }
+        } catch (error) {
+          pwaPluginStatusEl.innerHTML = `<div class="error">Error checking for PWA plugin: ${error.message}</div>`;
+        }
+      }
+      
+      // Run initial checks
+      checkServiceWorkers();
+      checkCacheStorage();
+      checkWebManifest();
+      checkPWAPlugin();
+      
+      // Add event listeners
+      document.getElementById('checkSW').addEventListener('click', checkServiceWorkers);
+      document.getElementById('unregisterSW').addEventListener('click', unregisterServiceWorkers);
+      document.getElementById('checkCache').addEventListener('click', checkCacheStorage);
+      document.getElementById('clearCache').addEventListener('click', clearCacheStorage);
+      document.getElementById('checkManifest').addEventListener('click', checkWebManifest);
+      document.getElementById('checkPWAPlugin').addEventListener('click', checkPWAPlugin);
+    });
+  </script>
+</body>
+</html>
