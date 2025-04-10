@@ -1,29 +1,34 @@
-import React, { useRef, useState } from 'react'; // Combined import
+import React, { useRef, useState } from 'react';
+import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { UploadCloud, Copy, Cloud } from 'lucide-react'; // Icons for options
-import { useProjectWorkflowStore } from '@/store/projectWorkflowStore'; // Import store to get projectId
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
+import { Label } from '@/components/ui/Label';
+import { UploadCloud, Copy, Cloud } from 'lucide-react';
+import { useProjectWorkflowStore } from '@/store/projectWorkflowStore';
 import {
   uploadProjectFile,
   getAllProjectsAPI,
   getProjectAPI,
   updateProjectAPI
-} from '@/services/projectService'; // Import API functions
-import { store } from '@/store/store'; // Import store for dispatching actions
-import { addToast } from '@/store/slices/uiSlice'; // Import toast action
+} from '@/services/projectService';
+import { store } from '@/store/store';
+import { addToast } from '@/store/slices/uiSlice';
 
-interface ImportOptionsProps {
-  // Add props for handling import actions later if needed
-  // onFileSelected: (file: File) => void;
-  // onCloudImportClick: (provider: 'google' | 'dropbox' | 'onedrive') => void;
-  // onCloneClick: () => void;
-}
-
-const ImportOptions: React.FC<ImportOptionsProps> = (props) => {
+const ImportOptions: React.FC = () => {
+  // State for tabs and form inputs
+  const [activeTab, setActiveTab] = useState('file');
+  const [importUrl, setImportUrl] = useState('');
+  const [outlineContent, setOutlineContent] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  
   // Ref for the hidden file input
   const fileInputRef = useRef<HTMLInputElement>(null);
   // State for the selected file and upload status
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  
   // Get projectId and projectName from store to determine if project is saved
   const projectId = useProjectWorkflowStore((state) => state.projectId);
   const projectName = useProjectWorkflowStore((state) => state.projectName);
@@ -31,17 +36,12 @@ const ImportOptions: React.FC<ImportOptionsProps> = (props) => {
   // Flag to indicate if we can use import features
   const isProjectSaved = !!projectId;
 
-  // Trigger the hidden file input when the button is clicked
-  const handleUploadButtonClick = () => {
-    fileInputRef.current?.click();
-  };
-
   // Handle file selection and upload
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => { // Make async
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       console.log('File selected:', file.name, file.type);
-      setSelectedFile(file); // Set state
+      setSelectedFile(file);
 
       // Check if projectId exists before uploading
       if (!isProjectSaved) {
@@ -51,107 +51,127 @@ const ImportOptions: React.FC<ImportOptionsProps> = (props) => {
           message: 'File selected! Click "Continue to Requirements" to save your project first, then your file will be uploaded.'
         }));
         
-        // Highlight the continue button or add a visual cue
-        const continueButton = document.querySelector('[data-continue-button="true"]');
-        if (continueButton) {
-          continueButton.classList.add('animate-pulse', 'bg-amber-100');
-          setTimeout(() => {
-            continueButton.classList.remove('animate-pulse', 'bg-amber-100');
-          }, 2000);
-        }
-        
         // Store the file selection in state but don't upload yet
         if (event.target) event.target.value = '';
         return; // Don't proceed with upload yet
       }
 
-      setIsUploading(true); // Set uploading state
+      setIsUploading(true);
       try {
         const result = await uploadProjectFile(projectId, file);
         if (result) {
           console.log('Upload successful:', result);
-          // Optionally, update UI or state based on successful upload
           setSelectedFile(null); // Clear selection after successful upload
+          store.dispatch(addToast({
+            type: 'success',
+            message: `Successfully uploaded ${file.name}`
+          }));
         } else {
           console.error('Upload failed (service returned null)');
-          // Error toast is handled in the service
         }
       } catch (error) {
         console.error('Upload failed unexpectedly:', error);
-        // Error toast is handled in the service
       } finally {
-        setIsUploading(false); // Reset uploading state
-        // Reset the input value after attempt (success or fail)
+        setIsUploading(false);
         if (event.target) event.target.value = '';
       }
     } else {
-       // Handle case where user cancels file selection
-       setSelectedFile(null);
-       if (event.target) event.target.value = ''; // Still reset input
+      setSelectedFile(null);
+      if (event.target) event.target.value = '';
     }
   };
 
-  // Cloud import handler
-  const handleCloudImport = async (provider: string) => {
-    // Check if projectId exists before proceeding
+  // URL import handler
+  const handleUrlImport = async () => {
+    if (!importUrl) return;
+    
     if (!isProjectSaved) {
-      console.error("Cannot import from cloud: Project ID is missing.");
-      // Show better guidance
       store.dispatch(addToast({
         type: 'info',
-        message: `To import from ${provider}, first create your project by clicking "Continue to Requirements"`
+        message: 'Please save your project first before importing from URL.'
       }));
       return;
     }
     
-    setIsUploading(true);
-    
+    setIsImporting(true);
     try {
-      // Different handling based on provider
-      switch(provider) {
-        case 'Google Drive':
-          // Initialize the Google Drive picker
-          await initGoogleDrivePicker(projectId);
-          break;
-        case 'Dropbox':
-          // Initialize Dropbox Chooser
-          await initDropboxChooser(projectId);
-          break;
-        case 'OneDrive':
-          // Initialize OneDrive picker
-          await initOneDrivePicker(projectId);
-          break;
-        default:
-          throw new Error(`Unsupported provider: ${provider}`);
-      }
+      // Simulate URL import process
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      store.dispatch(addToast({
-        type: 'success',
-        message: `Successfully connected to ${provider}`
-      }));
+      // Update project with imported content
+      const updateResult = await updateProjectAPI(projectId, {
+        description: `${useProjectWorkflowStore.getState().description || ''}\n\nImported from URL: ${importUrl}`,
+      });
+      
+      if (updateResult) {
+        store.dispatch(addToast({
+          type: 'success',
+          message: `Successfully imported content from URL`
+        }));
+        setImportUrl('');
+      }
     } catch (error: any) {
-      console.error(`Error initializing ${provider} integration:`, error);
+      console.error("Error importing from URL:", error);
       store.dispatch(addToast({
         type: 'error',
-        message: `Failed to connect to ${provider}: ${error.message}`
+        message: `Failed to import from URL: ${error.message || 'Unknown error'}`
       }));
     } finally {
-      setIsUploading(false);
+      setIsImporting(false);
+    }
+  };
+
+  // Outline import handler
+  const handleOutlineImport = async () => {
+    if (!outlineContent) return;
+    
+    if (!isProjectSaved) {
+      store.dispatch(addToast({
+        type: 'info',
+        message: 'Please save your project first before creating from outline.'
+      }));
+      return;
+    }
+    
+    setIsImporting(true);
+    try {
+      // Simulate outline processing
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Update project with outline content
+      const updateResult = await updateProjectAPI(projectId, {
+        description: `${useProjectWorkflowStore.getState().description || ''}\n\nOutline:\n${outlineContent}`,
+      });
+      
+      if (updateResult) {
+        store.dispatch(addToast({
+          type: 'success',
+          message: `Successfully created content from outline`
+        }));
+        setOutlineContent('');
+      }
+    } catch (error: any) {
+      console.error("Error creating from outline:", error);
+      store.dispatch(addToast({
+        type: 'error',
+        message: `Failed to create from outline: ${error.message || 'Unknown error'}`
+      }));
+    } finally {
+      setIsImporting(false);
     }
   };
 
   // Clone project handler
   const handleClone = async () => {
-    // Check if we have a current projectId
     if (!isProjectSaved) {
-      console.error("Cannot clone: Current project ID is missing.");
       store.dispatch(addToast({
         type: 'info',
-        message: `To clone from an existing project, first create this project by clicking "Continue to Requirements"`
+        message: 'Please save your project first before cloning from an existing project.'
       }));
       return;
     }
     
+    setIsImporting(true);
     try {
       // Get list of user's projects to select from
       const result = await getAllProjectsAPI();
@@ -164,7 +184,6 @@ const ImportOptions: React.FC<ImportOptionsProps> = (props) => {
         return;
       }
       
-      // Open modal for project selection (implementation would depend on your UI components)
       // For now, we'll simulate selecting the first project
       const sourceProject = result.projects[0];
       
@@ -180,7 +199,6 @@ const ImportOptions: React.FC<ImportOptionsProps> = (props) => {
       }
       
       // Update the current project with appropriate data from the source
-      // (excluding unique identifiers and timestamps)
       const updateResult = await updateProjectAPI(projectId, {
         description: sourceProjectData.description ?
           `Cloned from "${sourceProjectData.name}": ${sourceProjectData.description}` :
@@ -201,162 +219,157 @@ const ImportOptions: React.FC<ImportOptionsProps> = (props) => {
         type: 'error',
         message: `Failed to clone project: ${error.message || 'Unknown error'}`
       }));
-    }
-  };
-  
-  // Helper functions for cloud storage providers
-  const initGoogleDrivePicker = async (projectId: string): Promise<void> => {
-    // In production, this would initialize the Google Drive API and open a picker
-    // For now, we'll simulate the process
-    const mockFile = {
-      name: 'example-presentation.pptx',
-      size: 1024 * 1024 * 2, // 2MB
-      mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      url: 'https://example.com/mock-file-url'
-    };
-    
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Process the selected file
-    await processCloudFile(projectId, mockFile);
-  };
-  
-  const initDropboxChooser = async (projectId: string): Promise<void> => {
-    // Similar implementation to Google Drive but for Dropbox
-    const mockFile = {
-      name: 'business-proposal.pdf',
-      size: 1024 * 1024 * 3, // 3MB
-      mimeType: 'application/pdf',
-      url: 'https://example.com/mock-dropbox-url'
-    };
-    
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await processCloudFile(projectId, mockFile);
-  };
-  
-  const initOneDrivePicker = async (projectId: string): Promise<void> => {
-    // Similar implementation to Google Drive but for OneDrive
-    const mockFile = {
-      name: 'project-pitch.docx',
-      size: 1024 * 1024 * 1.5, // 1.5MB
-      mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      url: 'https://example.com/mock-onedrive-url'
-    };
-    
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await processCloudFile(projectId, mockFile);
-  };
-  
-  // Process the selected cloud file
-  const processCloudFile = async (projectId: string, fileInfo: any): Promise<void> => {
-    // In a real implementation, you'd:
-    // 1. Download the file from the cloud URL
-    // 2. Process it (e.g., extract text, parse structure)
-    // 3. Update the project with the extracted data
-    
-    // Simulate processing
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Update project with cloud file reference
-    const updateResult = await updateProjectAPI(projectId, {
-      description: `${useProjectWorkflowStore.getState().description || ''}\n\nImported from cloud: ${fileInfo.name}`,
-      // In a real implementation, you would extract and update more data
-    });
-    
-    if (updateResult) {
-      store.dispatch(addToast({
-        type: 'success',
-        message: `Successfully imported ${fileInfo.name} from cloud storage`
-      }));
+    } finally {
+      setIsImporting(false);
     }
   };
 
   return (
-    <div className="mb-8">
-      <h3 className="text-lg font-semibold font-heading text-secondary mb-3">Import Options (Optional)</h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Upload Option */}
-        <Button
-          variant="outline"
-          onClick={handleUploadButtonClick}
-          className="flex flex-col items-center justify-center p-4 h-24 text-center relative"
-        >
-          <UploadCloud size={24} className="mb-1 text-[#ae5630]" />
-          <span className="text-sm">Upload File</span>
-          <span className="text-xs text-neutral-medium">(PDF, PPTX, DOCX)</span>
+    <Card className="p-6">
+      <h3 className="text-lg font-semibold font-heading text-secondary mb-4">Import Content (Optional)</h3>
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="grid grid-cols-3 md:w-[400px]">
+          <TabsTrigger value="file">Upload File</TabsTrigger>
+          <TabsTrigger value="url">Import from URL</TabsTrigger>
+          <TabsTrigger value="outline">Create from Outline</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="file" className="space-y-4">
+          <div className="border-2 border-dashed border-neutral-light rounded-lg p-6 text-center">
+            <div className="mb-4">
+              <UploadCloud className="mx-auto h-12 w-12 text-neutral-muted" />
+            </div>
+            <p className="text-sm text-neutral-muted mb-4">
+              Drag and drop file here, or click to select file
+            </p>
+            <div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="relative"
+                disabled={!isProjectSaved}
+              >
+                Browse Files
+                <input 
+                  type="file" 
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                  accept=".pdf,.pptx,.docx"
+                  disabled={!isProjectSaved}
+                />
+              </Button>
+            </div>
+            <p className="text-xs text-neutral-muted mt-4">
+              Supported formats: .pdf, .pptx, .docx
+            </p>
+            {!isProjectSaved && (
+              <p className="text-xs text-amber-600 mt-2">
+                Please save your project first before uploading files.
+              </p>
+            )}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="url" className="space-y-4">
+          <div>
+            <Label htmlFor="importUrl" className="block mb-2">URL to Import From</Label>
+            <Input
+              id="importUrl"
+              type="url"
+              value={importUrl}
+              onChange={(e) => setImportUrl(e.target.value)}
+              placeholder="https://example.com/presentation"
+              className="w-full"
+            />
+            <p className="text-xs text-neutral-muted mt-1">
+              Enter the URL of the content you'd like to import as a starting point for your pitch deck.
+            </p>
+          </div>
+          <Button 
+            onClick={handleUrlImport} 
+            disabled={!importUrl || isImporting || !isProjectSaved} 
+            variant="outline" 
+            className="w-full sm:w-auto"
+          >
+            {isImporting ? 'Importing...' : 'Import Content'}
+          </Button>
           {!isProjectSaved && (
-            <div className="absolute bottom-1 left-0 right-0 text-xs text-amber-600 bg-amber-50 py-1 rounded-b-md">
-              Save project first
-            </div>
+            <p className="text-xs text-amber-600">
+              Please save your project first before importing from URL.
+            </p>
           )}
-        </Button>
-        {/* Hidden File Input */}
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          className="hidden"
-          accept=".pdf,.pptx,.docx" // Specify accepted formats
-        />
+        </TabsContent>
+        
+        <TabsContent value="outline" className="space-y-4">
+          <div>
+            <Label htmlFor="outlineContent" className="block mb-2">Pitch Deck Outline</Label>
+            <Textarea
+              id="outlineContent"
+              value={outlineContent}
+              onChange={(e) => setOutlineContent(e.target.value)}
+              placeholder="# Introduction
+- Company overview
+- Problem statement
 
-        {/* Cloud Import Option */}
-        <div className="border border-neutral-light rounded-lg p-4 flex flex-col items-center justify-center h-24 text-center bg-white/50 relative">
-           <Cloud size={24} className="mb-1 text-[#ae5630]" />
-           <span className="text-sm mb-1">Import from Cloud</span>
-           <div className="flex gap-2">
-             {/* Add specific cloud provider buttons/icons here later */}
-             <button
-               onClick={() => handleCloudImport('Google Drive')}
-               title="Google Drive"
-               className="text-neutral-medium hover:text-[#ae5630]"
-               disabled={!isProjectSaved}
-             >
-               <small>G Drive</small>
-             </button>
-             <button
-               onClick={() => handleCloudImport('Dropbox')}
-               title="Dropbox"
-               className="text-neutral-medium hover:text-[#ae5630]"
-               disabled={!isProjectSaved}
-             >
-               <small>Dropbox</small>
-             </button>
-             <button
-               onClick={() => handleCloudImport('OneDrive')}
-               title="OneDrive"
-               className="text-neutral-medium hover:text-[#ae5630]"
-               disabled={!isProjectSaved}
-             >
-               <small>OneDrive</small>
-             </button>
-           </div>
-           {!isProjectSaved && (
-            <div className="absolute bottom-1 left-0 right-0 text-xs text-amber-600 bg-amber-50 py-1">
-              Save project first
-            </div>
-           )}
+## Market Analysis
+- Target market
+- Market size
+- Competitors
+
+## Solution
+- Product/service description
+- Unique value proposition
+- Demo or visuals"
+              className="w-full h-48 font-mono text-sm"
+            />
+            <p className="text-xs text-neutral-muted mt-1">
+              Paste your outline using markdown formatting or simple bullet points.
+            </p>
+          </div>
+          <Button 
+            onClick={handleOutlineImport} 
+            disabled={!outlineContent || isImporting || !isProjectSaved} 
+            variant="outline" 
+            className="w-full sm:w-auto"
+          >
+            {isImporting ? 'Processing...' : 'Use Outline'}
+          </Button>
+          {!isProjectSaved && (
+            <p className="text-xs text-amber-600">
+              Please save your project first before creating from outline.
+            </p>
+          )}
+        </TabsContent>
+      </Tabs>
+      
+      {/* Comment out for now - will add later | Clone Existing Project Option
+      <div className="mt-6 pt-6 border-t border-neutral-light">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="text-sm font-medium">Clone Existing Project</h4>
+            <p className="text-xs text-neutral-muted">
+              Start with content from one of your existing pitch decks
+            </p>
+          </div>
+          <Button 
+            onClick={handleClone} 
+            disabled={isImporting || !isProjectSaved}
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Copy size={16} /> Clone Project
+          </Button>
         </div>
-
-
-        {/* Clone Option */}
-        <Button
-          variant="outline"
-          onClick={handleClone}
-          className="flex flex-col items-center justify-center p-4 h-24 text-center relative"
-          disabled={!isProjectSaved}
-        >
-          <Copy size={24} className="mb-1 text-[#ae5630]" />
-          <span className="text-sm">Clone Existing Project</span>
-          {!isProjectSaved && (
-            <div className="absolute bottom-1 left-0 right-0 text-xs text-amber-600 bg-amber-50 py-1 rounded-b-md">
-              Save project first
-            </div>
-          )}
-        </Button>
-      </div>
-    </div>
+        {!isProjectSaved && (
+          <p className="text-xs text-amber-600 mt-2">
+            Please save your project first before cloning from an existing project.
+          </p>
+        )}
+      </div>*/}
+    </Card>
   );
 };
-
 export default ImportOptions;

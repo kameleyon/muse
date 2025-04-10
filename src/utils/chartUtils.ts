@@ -133,16 +133,28 @@ export const generateColorPalette = (
   return palette;
 };
 
-// Helper function to safely parse JSON with proper error handling
+// Enhanced function to safely parse JSON with advanced error recovery
 const safeJsonParse = (jsonStr: string): any => {
+  // Guard against null or undefined input
+  if (!jsonStr) return null;
+  
+  // Trim the input to remove whitespace
+  const input = jsonStr.trim();
+  
+  // Log the input for debugging (truncated for large inputs)
+  if (input.length > 150) {
+    console.log(`Parsing JSON input (truncated): ${input.substring(0, 100)}...`);
+  }
+  
   try {
     // First attempt - standard parse
-    return JSON.parse(jsonStr);
+    return JSON.parse(input);
   } catch (e) {
     try {
       // Second attempt - fix common JSON formatting issues
+      
       // Replace single quotes with double quotes
-      let fixedJson = jsonStr.replace(/'/g, '"');
+      let fixedJson = input.replace(/'/g, '"');
       
       // Fix property names that are not quoted
       fixedJson = fixedJson.replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3');
@@ -150,11 +162,92 @@ const safeJsonParse = (jsonStr: string): any => {
       // Remove trailing commas before closing brackets
       fixedJson = fixedJson.replace(/,(\s*[\]}])/g, '$1');
       
+      // Try basic parse again
       return JSON.parse(fixedJson);
     } catch (e2) {
-      // If both attempts fail, log error and return null
-      console.error("Failed to parse JSON even after fixing:", e2);
-      return null;
+      try {
+        // Third attempt - more aggressive fixing
+        
+        // Get the original input again
+        let advFixedJson = input;
+        
+        // Replace backticks and other quote types with double quotes
+        advFixedJson = advFixedJson.replace(/[`'']/g, '"');
+        
+        // Replace escaped quotes that might be breaking things
+        advFixedJson = advFixedJson.replace(/\\"/g, '"').replace(/\\'/g, "'");
+        
+        // More aggressive property name quoting, including kebab case and other characters
+        advFixedJson = advFixedJson.replace(/([{,]\s*)([a-zA-Z0-9_-]+)(\s*:)/g, '$1"$2"$3');
+        
+        // Fix extra or missing brackets if they seem mismatched
+        const openBrackets = (advFixedJson.match(/\[/g) || []).length;
+        const closeBrackets = (advFixedJson.match(/\]/g) || []).length;
+        const openBraces = (advFixedJson.match(/{/g) || []).length;
+        const closeBraces = (advFixedJson.match(/}/g) || []).length;
+        
+        // Add missing closing brackets if needed
+        if (openBrackets > closeBrackets) {
+          advFixedJson += ']'.repeat(openBrackets - closeBrackets);
+        }
+        
+        // Add missing closing braces if needed
+        if (openBraces > closeBraces) {
+          advFixedJson += '}'.repeat(openBraces - closeBraces);
+        }
+        
+        // Try to parse the aggressively fixed JSON
+        try {
+          return JSON.parse(advFixedJson);
+        } catch (e3) {
+          // Special case - try to handle plain arrays of values
+          if (input.startsWith('[') && input.endsWith(']')) {
+            try {
+              // If it looks like a simple array, try creating a chart-friendly structure
+              const simpleItems = input.substring(1, input.length - 1).split(',').map(item => item.trim());
+              
+              if (simpleItems.length > 0) {
+                return simpleItems.map((item, index) => {
+                  const value = !isNaN(parseFloat(item)) ? parseFloat(item) : item;
+                  return { name: `Item ${index + 1}`, value };
+                });
+              }
+            } catch (e4) {
+              // If this fails too, continue to fallback
+              console.log("Failed to parse as simple array:", e4);
+            }
+          }
+          
+          // Last resort - try to extract usable data with regex
+          try {
+            // Look for patterns like "name":"value" or "key":number
+            const pairs = advFixedJson.match(/"([^"]+)"\s*:\s*("[^"]*"|[0-9]+)/g);
+            
+            if (pairs && pairs.length > 0) {
+              // Construct a valid JSON object from the extracted pairs
+              const extractedObj = `{${pairs.join(',')}}`;
+              return JSON.parse(extractedObj);
+            }
+          } catch (e5) {
+            // All attempts have failed
+            console.error("Failed to parse JSON after all recovery attempts", e3);
+          }
+          
+          // If we've tried everything and nothing works, return a valid fallback
+          console.error("All JSON parsing attempts failed, returning fallback object");
+          return [
+            { name: "Error", value: 100 },
+            { name: "Parsing Failed", value: 0 }
+          ];
+        }
+      } catch (e3) {
+        // If both attempts fail, log error and return fallback
+        console.error("Failed to parse JSON even after fixing:", e2);
+        return [
+          { name: "Error", value: 100 },
+          { name: "Parsing Failed", value: 0 }
+        ];
+      }
     }
   }
 };
@@ -167,6 +260,13 @@ export const enhanceMarkdownWithCharts = (markdown: string): string => {
     // First, replace explicit chart code blocks with enhanced versions
     enhancedMarkdown = enhancedMarkdown.replace(/```chart\s+([\s\S]*?)```/g, (match, chartData) => {
       try {
+        // Skip logo placeholders and non-JSON content
+        if (chartData.includes('![Logo]') || chartData.includes('![logo]') || 
+            chartData.includes('/logo-placeholder.svg') || 
+            !chartData.trim().startsWith('[') && !chartData.trim().startsWith('{')) {
+          return match; // Return original for non-JSON content
+        }
+        
         // Use safe JSON parsing to handle common formatting issues
         const data = safeJsonParse(chartData.trim());
         

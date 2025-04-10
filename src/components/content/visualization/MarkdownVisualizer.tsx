@@ -5,6 +5,9 @@ import { ChartRenderer } from '@/components/ChartRenderer';
 import { enhanceMarkdownWithCharts, extractChartData } from '@/utils/chartUtils';
 import { safeJsonParse, convertToChartData, validateChartData } from '@/utils/jsonUtils';
 
+// Define allowed chart types for TypeScript safety
+type ChartType = 'bar' | 'line' | 'area' | 'scatter' | 'radar' | 'pie' | 'radialBar' | 'composed' | 'treemap' | 'sankey';
+
 interface MarkdownVisualizerProps {
   content: string;
   enhanceVisuals?: boolean;
@@ -14,6 +17,7 @@ interface MarkdownVisualizerProps {
     accent?: string;
     highlight?: string;
     background?: string;
+    logoUrl?: string; // URL to the custom brand logo
   };
   fonts?: {
     headingFont?: string;
@@ -72,40 +76,61 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
   // Process and enhance the markdown content if requested
   let processedContent = content;
   
-  // First, try to detect and wrap any standalone JSON blocks in the content
   if (enhanceVisuals) {
-    // Look for JSON-like patterns that aren't already in code blocks
-    processedContent = processedContent.replace(/(\[{.*?}\])/gs, (match) => {
-      // Skip if it's already inside a code block
-      if (match.includes('```') || match.startsWith('`') || match.endsWith('`')) {
+    try {
+      // First, try to detect and wrap any standalone JSON blocks in the content
+      // Look for JSON-like patterns that aren't already in code blocks
+      processedContent = processedContent.replace(/(\[{.*?}\])/gs, (match) => {
+        // Skip if it's already inside a code block
+        if (match.includes('```') || match.startsWith('`') || match.endsWith('`')) {
+          return match;
+        }
+        
+        // Check if it looks like chart data
+        if (match.includes('"name"') && match.includes('"value"')) {
+          return '```chart\n' + match + '\n```';
+        }
+        
         return match;
-      }
+      });
       
-      // Check if it looks like chart data
-      if (match.includes('"name"') && match.includes('"value"')) {
-        return '```chart\n' + match + '\n```';
-      }
-      
-      return match;
-    });
-    
-    // Also look for JSON objects with a data property
-    processedContent = processedContent.replace(/({.*?"data":\s*\[.*?\].*?})/gs, (match) => {
-      // Skip if it's already inside a code block
-      if (match.includes('```') || match.startsWith('`') || match.endsWith('`')) {
+      // Also look for JSON objects with a data property
+      processedContent = processedContent.replace(/({.*?"data":\s*\[.*?\].*?})/gs, (match) => {
+        // Skip if it's already inside a code block
+        if (match.includes('```') || match.startsWith('`') || match.endsWith('`')) {
+          return match;
+        }
+        
+        // Check if it looks like chart data
+        if (match.includes('"data"') && (match.includes('"name"') || match.includes('"type"'))) {
+          return '```chart\n' + match + '\n```';
+        }
+        
         return match;
-      }
+      });
       
-      // Check if it looks like chart data
-      if (match.includes('"data"') && (match.includes('"name"') || match.includes('"type"'))) {
-        return '```chart\n' + match + '\n```';
-      }
+      // Handle graph diagrams that aren't in code blocks
+      processedContent = processedContent.replace(/(graph\s+TB\s+[\s\S]*?[A-Z]\s+-->\s+[A-Z][\s\S]*?)(?=\n\n|\n#|\n\*\*|$)/gs, (match) => {
+        // Skip if it's already inside a code block
+        if (match.includes('```') || match.startsWith('`') || match.endsWith('`')) {
+          return match;
+        }
+        
+        // Wrap it in a mermaid code block
+        return '```graph TB\n' + match + '\n```';
+      });
       
-      return match;
-    });
-    
-    // Process the content with the chart enhancer
-    processedContent = enhanceMarkdownWithCharts(processedContent);
+      // Process the content with the chart enhancer, but catch any errors
+      try {
+        processedContent = enhanceMarkdownWithCharts(processedContent);
+      } catch (error) {
+        console.error("Error enhancing markdown with charts:", error);
+        // Continue with the original content if enhancement fails
+      }
+    } catch (error) {
+      console.error("Error processing markdown content:", error);
+      // Continue with the original content if processing fails
+    }
   }
   
   // CSS Custom Properties for styling with fallbacks for PDF export
@@ -121,6 +146,38 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
   
   // Configure custom renderers for ReactMarkdown
   const customComponents: Components = {
+    // Handle images specially - especially for logo rendering
+    img: ({ node, src, alt, ...props }) => {
+      // Replace logo placeholder with the actual brand logo if available
+      if (src === '/logo-placeholder.svg' || src === 'logo-placeholder.svg' || alt === 'Logo') {
+        // Check if we're in a pitch deck context with a custom logo
+        if (brandColors.logoUrl) {
+          // Return the custom logo with appropriate styling
+          return (
+            <img 
+              src={brandColors.logoUrl} 
+              alt="Company Logo" 
+              style={{ 
+                maxWidth: '250px', 
+                maxHeight: '120px',
+                margin: '0 auto',
+                display: 'block'
+              }} 
+              {...props} 
+            />
+          );
+        } else {
+          // No logo uploaded, don't show any placeholder
+          return (
+            <span style={{display: 'none'}}></span> // Empty span to avoid breaking layout but not show placeholder
+          );
+        }
+      }
+      
+      // Regular image handling
+      return <img src={src} alt={alt} {...props} />;
+    },
+    
     // Headers with customized styling
     h1: ({ node, ...props }) => (
       <h1 
@@ -298,54 +355,46 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
       const match = /language-(\w+)/.exec(className || '');
       const codeContent = String(children).replace(/\n$/, '');
       
-      // Special handling for chart code blocks
-      if ((match && match[1] === 'chart' && options.showCharts) || 
-          (match && match[1] === 'json' && options.showCharts) ||
+      // Improved handling for chart and graph code blocks
+      if ((match && (match[1] === 'chart' || match[1] === 'json' || match[1] === 'graph') && options.showCharts) || 
           (!match && codeContent.includes('"name"') && codeContent.includes('"value"') && options.showCharts) ||
           (!match && codeContent.includes('[{') && codeContent.includes('}]') && options.showCharts)) {
-        console.log("MarkdownVisualizer: Processing chart code block:", codeContent);
-        try {
-          // First, try to parse using our enhanced JSON utilities
-          const chartData = convertToChartData(codeContent);
-          console.log("MarkdownVisualizer: Chart data after conversion:", chartData);
-          
-          // Ensure we have valid data
-          if (!chartData || chartData.length === 0) {
-            throw new Error("Could not generate valid chart data");
-          }
-          
-          // Check for generic "Line 1", "Line 2" labels and replace them
-          let safeData = validateChartData(chartData);
-          
-          // Fix generic labels if present
-          const hasGenericLabels = safeData.some(item => 
-            item && typeof item === 'object' && 
-            Object.keys(item).some(key => /^Line \d+$/.test(key))
+        
+        // If this is a Mermaid graph TB diagram
+        if (match && match[1] === 'graph' || (codeContent.trim().startsWith('graph TB') || codeContent.trim().startsWith('graph TD'))) {
+          return (
+            <div className="diagram-container p-4 border rounded my-4" style={{ 
+              backgroundColor: '#f9f9f9',
+              borderColor: `${brandColors.primary || DEFAULT_BRAND_COLORS.primary}30`
+            }}>
+              <div className="text-center mb-3 font-semibold" style={{ 
+                color: brandColors.primary || DEFAULT_BRAND_COLORS.primary,
+                borderBottom: `1px solid ${brandColors.primary || DEFAULT_BRAND_COLORS.primary}30`,
+                paddingBottom: '8px'
+              }}>
+                Business Model Diagram
+              </div>
+              <div className="diagram-content p-4 border rounded bg-white" style={{ 
+                fontFamily: 'monospace',
+                fontSize: '13px',
+                lineHeight: '1.5',
+                whiteSpace: 'pre-wrap',
+                textAlign: 'left',
+                overflow: 'auto'
+              }}>
+                {codeContent}
+              </div>
+            </div>
           );
-          
-          if (hasGenericLabels) {
-            console.log("MarkdownVisualizer: Fixing generic Line labels in chart data");
-            safeData = safeData.map(item => {
-              if (item && typeof item === 'object') {
-                const newItem: Record<string, any> = { ...item };
-                Object.entries(item).forEach(([key, value]) => {
-                  if (/^Line \d+$/.test(key)) {
-                    // Replace with more descriptive name based on position
-                    const seriesNumber = key.replace('Line ', '');
-                    delete newItem[key];
-                    newItem[`Data Series ${seriesNumber}`] = value;
-                  }
-                });
-                return newItem;
-              }
-              return item;
-            });
-          }
-          
-          console.log("MarkdownVisualizer: Safe chart data after validation and label fixing:", safeData);
-          
-          // Determine if this is already in the enhanced format with type and options
-          let chartType;
+        }
+        
+        // For regular chart data, try to render with chart renderer
+        console.log("MarkdownVisualizer: Processing chart code block");
+        try {
+          // Try to parse chart data safely with error handling
+          let safeData = [];
+          // Define the chart type with proper typing
+          let chartType: ChartType = 'bar';
           let chartLayout;
           let chartStacked = false;
           let chartOptions = {
@@ -358,55 +407,90 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
             height: options.chartHeight || 350
           };
           
-          // Check if this is the enhanced format with configuration
-          if (chartData[0] && chartData[0].data && Array.isArray(chartData[0].data)) {
-            // It's the enhanced format
-            safeData = validateChartData(chartData[0].data);
-            chartType = chartData[0].type;
-            chartLayout = chartData[0].layout;
-            chartStacked = chartData[0].stacked;
-            chartOptions = { ...chartOptions, ...(chartData[0].options || {}) };
-          } else {
-          // Auto-detect chart type based on data structure
-          const keys = Object.keys(safeData[0]).filter(k => k !== 'name' && k !== 'color');
-          
-          // Check if data looks like time series
-          const isTimeSeries = typeof safeData[0].name === 'string' && 
-            /^\d{4}-\d{2}-\d{2}|^\d{2}\/\d{2}\/\d{4}|^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/.test(safeData[0].name);
-          
-          // Check if data has year property (common in market data)
-          const hasYearProperty = typeof safeData[0].year === 'string' || typeof safeData[0].year === 'number';
-          
-          // Never use pie charts as requested
-          if (keys.includes('x') && keys.includes('y')) {
-            chartType = 'scatter';
-          } else if (isTimeSeries || hasYearProperty || keys.length > 2) {
-            chartType = 'line';
-          } else if (keys.length >= 4 && safeData.length <= 8) {
-            chartType = 'radar';
-          } else {
-            // Default to bar chart instead of pie
-            chartType = 'bar';
-          }
-          
-          // For market data with year property, ensure proper formatting
-          if (hasYearProperty && chartType === 'line') {
-            // Ensure data is sorted by year
-            safeData.sort((a, b) => {
-              const yearA = typeof a.year === 'string' ? parseInt(a.year) : a.year;
-              const yearB = typeof b.year === 'string' ? parseInt(b.year) : b.year;
-              return yearA - yearB;
-            });
-            
-            // Set chart options for better display
-            chartOptions = {
-              ...chartOptions,
-              showGrid: true,
-              showValues: true,
-              showLegend: true,
-              aspectRatio: 1.5
+          try {
+            // Enhanced cleaning function for chart data
+            const cleanChartData = (content: string): string => {
+              let cleaned = content.trim();
+              
+              // Handle nested code blocks by finding the outermost JSON object
+              const jsonPattern = /\{[\s\S]*\}/;
+              const jsonMatch = cleaned.match(jsonPattern);
+              if (jsonMatch && jsonMatch[0]) {
+                cleaned = jsonMatch[0];
+              } else {
+                // If no JSON object found, try standard cleaning
+                // 1. Remove opening fence with language
+                cleaned = cleaned.replace(/^```(?:chart|json|graph)?[ \t]*\r?\n?/, '');
+                // 2. Remove any backticks at the beginning of the string
+                cleaned = cleaned.replace(/^`+/, '');
+                // 3. Remove closing fence
+                cleaned = cleaned.replace(/\r?\n?```$/, '');
+                // 4. Remove any trailing backticks
+                cleaned = cleaned.replace(/`+$/, '');
+                // 5. Remove any nested markdown code blocks
+                cleaned = cleaned.replace(/```(?:json|chart|graph)?[\s\S]*?```/g, '');
+                // 6. Remove any remaining backticks
+                cleaned = cleaned.replace(/`/g, '');
+              }
+              
+              // Final trim to clean whitespace
+              return cleaned.trim();
             };
-          }
+            
+            // Clean the data before parsing
+            const jsonString = cleanChartData(codeContent);
+            console.log("Cleaned chart data:", jsonString.substring(0, 50) + "...");
+            
+            // Parse the cleaned JSON string with error handling
+            let parsedData;
+            try {
+              parsedData = JSON.parse(jsonString);
+            } catch (parseError) {
+              console.error("JSON parse error:", parseError);
+              throw parseError; // Re-throw to be caught by the outer try-catch
+            }
+            
+            if (parsedData && typeof parsedData === 'object') {
+              // If it has a data property and type, it's enhanced format
+              if (parsedData.data && Array.isArray(parsedData.data) && parsedData.type) {
+                safeData = parsedData.data;
+                // Ensure type is one of the valid chart types
+                if (['bar', 'line', 'area', 'scatter', 'radar', 'pie', 'radialBar', 'composed', 'treemap', 'sankey'].includes(parsedData.type)) {
+                  chartType = parsedData.type as ChartType;
+                }
+                chartLayout = parsedData.layout;
+                chartStacked = parsedData.stacked;
+                chartOptions = { ...chartOptions, ...(parsedData.options || {}) };
+              } 
+              // Simple array of objects with name/value
+              else if (Array.isArray(parsedData) && parsedData.length > 0) {
+                safeData = parsedData;
+                // Auto-detect chart type
+                const keys = Object.keys(safeData[0]).filter(k => k !== 'name' && k !== 'color');
+                
+                // Check if data looks like time series
+                const isTimeSeries = typeof safeData[0].name === 'string' && 
+                  /^\d{4}-\d{2}-\d{2}|^\d{2}\/\d{2}\/\d{4}|^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/.test(safeData[0].name);
+                
+                // Set chart type with proper typing
+                if (keys.includes('x') && keys.includes('y')) {
+                  chartType = 'scatter';
+                } else if (isTimeSeries || keys.length > 2) {
+                  chartType = 'line';
+                } else if (keys.length >= 4 && safeData.length <= 8) {
+                  chartType = 'radar';
+                } else {
+                  chartType = 'bar';
+                }
+              }
+            }
+          } catch (parseError) {
+            console.error("Failed to parse chart data:", parseError);
+            // Use fallback data
+            safeData = [
+              { name: "Error", value: 100 },
+              { name: "Please check format", value: 50 }
+            ];
           }
           
           // Apply brand colors with fallbacks for PDF export
@@ -419,89 +503,73 @@ export const MarkdownVisualizer: React.FC<MarkdownVisualizerProps> = ({
           };
           
           return (
-            <ChartRenderer 
-              data={safeData}
-              type={chartType}
-              layout={chartLayout}
-              stacked={chartStacked}
-              colors={enhancedColors}
-              fonts={{
-                headingFont: fonts.headingFont || DEFAULT_FONTS.headingFont,
-                bodyFont: fonts.bodyFont || DEFAULT_FONTS.bodyFont
-              }}
-              options={chartOptions}
-            />
+            <div className="chart-container" style={{
+              margin: '20px 0',
+              padding: '10px',
+              backgroundColor: '#f9f9f9',
+              borderRadius: '6px',
+              border: `1px solid ${enhancedColors.primary}20`
+            }}>
+              <ChartRenderer 
+                data={safeData}
+                type={chartType}
+                layout={chartLayout}
+                stacked={chartStacked}
+                colors={enhancedColors}
+                fonts={{
+                  headingFont: fonts.headingFont || DEFAULT_FONTS.headingFont,
+                  bodyFont: fonts.bodyFont || DEFAULT_FONTS.bodyFont
+                }}
+                options={chartOptions}
+              />
+            </div>
           );
         } catch (error) {
-          console.error("Failed to parse chart data:", error);
+          console.error("Chart renderer error:", error);
           
-          // Create a fallback chart with error message
-          const fallbackData = [
-            { name: "Error", value: 100 },
-            { name: "Example", value: 50 }
-          ];
-          
-          // Show error message but still render a chart
+          // Create a fallback display for chart data
           return (
-            <div className="chart-error-container">
-              <div className="chart-error p-3 border border-red-300 rounded bg-red-50 mb-2">
-                <div className="text-red-600 font-semibold text-sm">Chart data format error</div>
-                <div className="text-xs text-red-500 mb-1">{error instanceof Error ? error.message : String(error)}</div>
-                <details className="text-xs">
-                  <summary className="cursor-pointer font-medium text-gray-700">View error details</summary>
-                  <div className="mt-1 p-2 bg-gray-100 rounded text-gray-600 overflow-auto max-h-24">
-                    {codeContent}
-                  </div>
-                </details>
+            <div className="chart-error-container p-4 border rounded my-4" style={{ backgroundColor: '#f8f9fa' }}>
+              <div className="text-center mb-2 font-semibold" style={{ color: brandColors.primary || DEFAULT_BRAND_COLORS.primary }}>
+                Chart Data
               </div>
-              
-              {/* Render a fallback chart anyway */}
-              <div className="mt-2">
-                <ChartRenderer 
-                  data={fallbackData}
-                  type="bar"
-                  colors={{
-                    primary: '#d97706', // Amber color for error state
-                    secondary: '#232321',
-                    accent: '#ffc658',
-                    highlight: '#ff7300',
-                    background: '#ffffff'
-                  }}
-                  options={{
-                    animation: false,
-                    aspectRatio: 0.5, // Shorter height for error chart
-                    showValues: true,
-                    title: "Error Parsing Chart Data",
-                    subTitle: "Please check your JSON format"
-                  }}
-                />
-              </div>
-              
-              <div className="mt-2 p-3 border border-amber-200 rounded bg-amber-50">
-                <div className="text-amber-700 font-medium text-xs mb-1">Correct format example:</div>
-                <pre className="text-xs overflow-auto max-h-24 bg-white p-2 rounded text-gray-800">
-{`\`\`\`chart
-[
-  {"name": "Category A", "value": 30},
-  {"name": "Category B", "value": 45},
-  {"name": "Category C", "value": 25}
-]
-\`\`\``}
-                </pre>
+              <div className="chart-content p-4 border rounded bg-white" style={{ 
+                fontFamily: 'monospace',
+                fontSize: '13px',
+                lineHeight: '1.5',
+                whiteSpace: 'pre-wrap',
+                textAlign: 'left',
+                overflow: 'auto'
+              }}>
+                {codeContent}
               </div>
             </div>
           );
         }
       }
       
-      // Special handling for diagram code blocks (using a placeholder until actual implementation)
+      // Enhanced handling for diagram code blocks
       if (match && match[1] === 'diagram' && options.showDiagrams) {
         return (
-          <div className="diagram-container p-4 border rounded my-4" style={{ backgroundColor: '#f8f9fa' }}>
-            <div className="text-center mb-2 font-semibold" style={{ color: brandColors.primary || DEFAULT_BRAND_COLORS.primary }}>
-              Diagram Visualization
+          <div className="diagram-container p-4 border rounded my-4" style={{ 
+            backgroundColor: '#f9f9f9',
+            borderColor: `${brandColors.primary || DEFAULT_BRAND_COLORS.primary}30`
+          }}>
+            <div className="text-center mb-3 font-semibold" style={{ 
+              color: brandColors.primary || DEFAULT_BRAND_COLORS.primary,
+              borderBottom: `1px solid ${brandColors.primary || DEFAULT_BRAND_COLORS.primary}30`,
+              paddingBottom: '8px'
+            }}>
+              Diagram
             </div>
-            <div className="diagram-placeholder p-8 border-dashed border-2 rounded text-center" style={{ borderColor: `${brandColors.primary || DEFAULT_BRAND_COLORS.primary}50` }}>
+            <div className="diagram-content p-4 border rounded bg-white" style={{ 
+              fontFamily: 'monospace',
+              fontSize: '13px',
+              lineHeight: '1.5',
+              whiteSpace: 'pre-wrap',
+              textAlign: 'left',
+              overflow: 'auto'
+            }}>
               {codeContent}
             </div>
           </div>

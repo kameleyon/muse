@@ -87,7 +87,7 @@ const QualityDashboard: React.FC<QualityDashboardProps> = ({ metrics: propMetric
     switch (severity) {
       case 'critical': return 'text-error'; 
       case 'warning': return 'text-warning'; 
-      case 'info': return 'text-blue-600'; 
+      case 'info': return 'text-primary'; 
       default: return 'text-neutral-medium';
     }
   };
@@ -119,64 +119,72 @@ const QualityDashboard: React.FC<QualityDashboardProps> = ({ metrics: propMetric
       </h4>
       
       {displayIsLoading ? (
-         <div className="absolute inset-0 bg-white/70 flex justify-center items-center z-10 rounded-md">
-           <div className="flex flex-col items-center">
-             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-2"></div>
-             <p className="text-sm text-neutral-dark">Analyzing quality...</p>
-           </div>
-         </div>
+        <div className="absolute inset-0 bg-white/70 flex justify-center items-center z-10 rounded-md">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-2"></div>
+            <p className="text-sm text-neutral-dark">Analyzing quality...</p>
+          </div>
+        </div>
       ) : !displayMetrics ? (
-         <div className="text-center text-neutral-medium italic p-4">
-           <p className="mb-4">Quality data not available.</p>
-           <Button 
-             variant="outline" 
-             size="sm" 
-             onClick={loadQualityMetrics}
-             disabled={!projectId || !editorContent}
-           >
-             Analyze Quality
-           </Button>
-         </div>
+        <div className="text-center text-neutral-medium italic p-4">
+          <p className="mb-4">Quality data not available.</p>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={loadQualityMetrics}
+            disabled={!projectId || !editorContent}
+          >
+            Analyze Quality
+          </Button>
+        </div>
       ) : (
-         <div className="space-y-4">
-           {/* Overall Score */}
-           <div className="text-center">
-              <label className="settings-label flex items-center justify-center gap-1 mb-1"><Gauge size={14}/> Overall Score</label>
-              <p className="text-4xl font-bold" style={{ color: '#ae5630' }}>{displayMetrics.overallScore}<span className="text-lg font-normal">/100</span></p>
-              <p className="text-xs text-neutral-medium mt-1">(Benchmark: 85)</p>
-           </div>
+        <div className="space-y-4">
+          {/* Overall Score */}
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <Gauge size={14}/>
+              <span className="settings-label">Overall Score</span>
+            </div>
+            <p className="text-4xl font-bold" style={{ color: '#ae5630' }}>{displayMetrics.overallScore}<span className="text-lg font-normal">/100</span></p>
+            <p className="text-xs text-neutral-medium mt-1">(Benchmark: 85)</p>
+          </div>
 
-           {/* Category Breakdown */}
-           <div>
-              <label className="settings-label flex items-center gap-1 mb-2"><BarChartHorizontal size={14}/> Category Scores</label>
-              <ul className="space-y-1 text-xs">
-                {displayMetrics.categories.map(cat => (
-                  <li key={cat.name} className="flex justify-between items-center">
-                    <span>{cat.name}</span>
-                    <span className={`font-medium ${getScoreColor(cat.score)}`}>{cat.score}</span>
-                  </li>
-                ))}
-              </ul>
-           </div>
+          {/* Category Breakdown */}
+          <div>
+            <div className="flex items-center gap-1 mb-2">
+              <BarChartHorizontal size={14}/>
+              <span className="settings-label">Category Scores</span>
+            </div>
+            <ul className="space-y-1 text-xs">
+              {displayMetrics.categories.map(cat => (
+                <li key={cat.name} className="flex justify-between items-center">
+                  <span>{cat.name}</span>
+                  <span className={`font-medium ${getScoreColor(cat.score)}`}>{cat.score}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-           {/* Issue Summary */}
-           <div>
-              <label className="settings-label flex items-center gap-1 mb-2"><ListChecks size={14}/> Issue Summary</label>
-              <ul className="space-y-1 text-xs max-h-24 overflow-y-auto custom-scrollbar pr-1">
-                 {displayMetrics.issues.map(issue => (
-                    <li key={issue.id} className={`flex items-start gap-1 ${getSeverityClass(issue.severity)}`}>
-                       <span className="mt-0.5">•</span> 
-                       <span>{issue.text}</span>
-                    </li>
-                 ))}
-                 {displayMetrics.issues.length === 0 && <li className="text-neutral-medium italic">No major issues found.</li>}
-              </ul>
-           </div>
-         </div>
+          {/* Issue Summary */}
+          <div>
+            <div className="flex items-center gap-1 mb-2">
+              <ListChecks size={14}/>
+              <span className="settings-label">Issue Summary</span>
+            </div>
+            <ul className="space-y-1 text-xs max-h-24 overflow-y-auto custom-scrollbar pr-1">
+              {displayMetrics.issues.map(issue => (
+                <li key={issue.id} className={`flex items-start gap-1 ${getSeverityClass(issue.severity)}`}>
+                  <span className="mt-0.5">•</span> 
+                  <span>{issue.text}</span>
+                </li>
+              ))}
+              {displayMetrics.issues.length === 0 && <li className="text-neutral-medium italic">No major issues found.</li>}
+            </ul>
+          </div>
+        </div>
       )}
     </Card>
   );
 };
 
-// Export the component
 export default QualityDashboard;

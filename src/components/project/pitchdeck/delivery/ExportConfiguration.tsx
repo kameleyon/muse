@@ -35,8 +35,17 @@ const ExportConfiguration: React.FC<ExportConfigurationProps> = ({
     includeNotes: true
   });
   
-  // Get project ID from store
-  const { projectId, editorContent } = useProjectWorkflowStore();
+  // Get project and styling information from store
+  const { 
+    projectId, 
+    editorContent, 
+    selectedTemplateId, 
+    primaryColor,
+    secondaryColor,
+    accentColor,
+    headingFont,
+    bodyFont 
+  } = useProjectWorkflowStore();
   const dispatch = useDispatch();
   
   // Clear export result when format changes
@@ -424,6 +433,18 @@ const ExportConfiguration: React.FC<ExportConfigurationProps> = ({
               content={editorContent || ''}
               title={`${projectId || 'Document'} - Markdown Export`}
               fileName={`${projectId || 'document'}_export`}
+              templateId={selectedTemplateId || 'minimalist-pro'}
+              brandColors={{
+                primary: primaryColor || '#ae5630',
+                secondary: secondaryColor || '#232321',
+                accent: accentColor || '#9d4e2c',
+                highlight: accentColor || '#9d4e2c',
+                background: '#ffffff'
+              }}
+              fonts={{
+                headingFont: headingFont || 'Comfortaa, sans-serif',
+                bodyFont: bodyFont || 'Questrial, sans-serif'
+              }}
               onExportComplete={handlePdfExportComplete}
               onExportError={handlePdfExportError}
             />

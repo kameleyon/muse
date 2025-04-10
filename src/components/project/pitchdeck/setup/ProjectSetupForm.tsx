@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react'; // Import useState and useEffect
-import { Input, RadioGroup, RadioGroupItem } from '@/components/ui';
+import React, { useState } from 'react';
+import { Input, RadioGroup, RadioGroupItem, Label, Card, Textarea } from '@/components/ui';
 import { Lock, Users, Globe } from 'lucide-react';
+import ImportOptions from './ImportOptions';
 
 interface ProjectSetupFormProps {
   projectName: string;
@@ -9,9 +10,8 @@ interface ProjectSetupFormProps {
   setDescription: (desc: string) => void;
   privacy: 'private' | 'team' | 'public';
   setPrivacy: (privacy: 'private' | 'team' | 'public') => void;
-  // Removed tagsInput and teamInput props
-  setTagsInput: (tags: string) => void; // Renamed prop for clarity (maps to setTagsFromString)
-  setTeamInput: (team: string) => void; // Renamed prop for clarity (maps to setTeamMembersFromString)
+  setTagsInput: (tags: string) => void;
+  setTeamInput: (team: string) => void;
 }
 
 const ProjectSetupForm: React.FC<ProjectSetupFormProps> = ({
@@ -56,94 +56,114 @@ const ProjectSetupForm: React.FC<ProjectSetupFormProps> = ({
   };
 
   return (
-    <div className="project-setup-form space-y-6 mb-8">
-      {/* Project Name */}
-      <div>
-        <label htmlFor="projectName" className="settings-label">Project Name <span className="text-red-500">*</span></label>
-        <Input
-          id="projectName"
-          type="text"
-          value={projectName} // Still controlled by prop/store
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProjectName(e.target.value)}
-          placeholder="Enter a name for your project"
-          required
-          className="settings-input"
-        />
-         <p className="text-xs text-neutral-medium mt-1">Category: Proposal & Pitch Deck Generation</p>
-      </div>
-
-      {/* Project Description */}
-      <div>
-        <label htmlFor="description" className="settings-label">Project Description (Optional)</label>
-        <textarea
-          id="description"
-          value={description} // Still controlled by prop/store
-          onChange={handleDescriptionChange}
-          placeholder="Briefly describe your project..."
-          className="settings-textarea w-full"
-          rows={4}
-        />
-      </div>
-
-     {/* Tags Input - Uses local state */}
-     <div>
-       <label htmlFor="tagsInput" className="settings-label">Tags (Optional)</label>
-       <Input
-         id="tagsInput"
-         type="text"
-         value={localTagsInput} // Use local state for value
-         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalTagsInput(e.target.value)} // Update local state
-         onBlur={handleTagsBlur} // Update global store on blur
-         placeholder="Enter tags, separated by commas"
-         className="settings-input"
-       />
-       <p className="text-xs text-neutral-medium mt-1">Separate multiple tags with commas (e.g., proposal, investment, tech).</p>
-     </div>
-
-     {/* Team Members Input - Uses local state */}
-     <div>
-       <label htmlFor="teamInput" className="settings-label">Team Members (Optional)</label>
-       <Input
-         id="teamInput"
-         type="text"
-         value={localTeamInput} // Use local state for value
-         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalTeamInput(e.target.value)} // Update local state
-         onBlur={handleTeamBlur} // Update global store on blur
-         placeholder="Enter team member emails, separated by commas"
-         className="settings-input"
-       />
-        <p className="text-xs text-neutral-medium mt-1">Separate multiple emails with commas.</p>
-      </div>
-
-      {/* Privacy Settings */}
-      <div>
-        <label className="settings-label">Privacy Settings</label>
-        <RadioGroup
-          value={privacy} // Still controlled by prop/store
-          onValueChange={handlePrivacyChange}
-          className="flex flex-col sm:flex-row gap-4 mt-2"
-        >
-          <div className="flex items-center space-x-2 p-3 border rounded-md flex-1 cursor-pointer hover:border-[#ae5630] has-[:checked]:border-[#ae5630]  has-[:checked]:ring-1 has-[:checked]:ring-[#ae5630]">
-            <RadioGroupItem value="private" id="privacy-private" />
-            <label htmlFor="privacy-private" className="flex items-center gap-2 cursor-pointer">
-              <Lock size={16} /> Private (Only you)
-            </label>
+    <>
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold font-heading text-secondary mb-4">Pitch Deck Details</h3>
+        
+        <div className="space-y-4">
+          {/* Project Name */}
+          <div>
+            <Label htmlFor="projectName" className="block mb-2">Project Name <span className="text-red-500">*</span></Label>
+            <Input
+              id="projectName"
+              type="text"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              placeholder="Enter a name for your project"
+              required
+              className="w-full"
+            />
+            <p className="text-xs text-neutral-muted mt-1">
+              A clear, descriptive name for your pitch deck project.
+            </p>
+            <p className="text-xs text-neutral-muted">Category: Proposal & Pitch Deck Generation</p>
           </div>
-          <div className="flex items-center space-x-2 p-3 border rounded-md flex-1 cursor-pointer hover:border-[#ae5630] has-[:checked]:border-[#ae5630] has-[:checked]:ring-1 has-[:checked]:ring-[#ae5630]">
-            <RadioGroupItem value="team" id="privacy-team" />
-            <label htmlFor="privacy-team" className="flex items-center gap-2 cursor-pointer">
-              <Users size={16} /> Team (Invited members)
-            </label>
+
+          {/* Project Description */}
+          <div>
+            <Label htmlFor="description" className="block mb-2">Project Description (Optional)</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Briefly describe your project..."
+              className="w-full h-24"
+            />
+            <p className="text-xs text-neutral-muted mt-1">
+              A concise overview that captures the essence of your pitch deck project.
+            </p>
           </div>
-          <div className="flex items-center space-x-2 p-3 border rounded-md flex-1 cursor-pointer hover:border-[#ae5630] has-[:checked]:border-[#ae5630] has-[:checked]:ring-1 has-[:checked]:ring-[#ae5630]">
-            <RadioGroupItem value="public" id="privacy-public" />
-            <label htmlFor="privacy-public" className="flex items-center gap-2 cursor-pointer">
-              <Globe size={16} /> Public (Anyone with link)
-            </label>
+
+          {/* Tags Input */}
+          <div>
+            <Label htmlFor="tagsInput" className="block mb-2">Tags (Optional)</Label>
+            <Input
+              id="tagsInput"
+              type="text"
+              value={localTagsInput}
+              onChange={(e) => setLocalTagsInput(e.target.value)}
+              onBlur={handleTagsBlur}
+              placeholder="proposal, investment, tech"
+              className="w-full"
+            />
+            <p className="text-xs text-neutral-muted mt-1">
+              Comma-separated keywords related to your pitch deck (helps with organization).
+            </p>
           </div>
-        </RadioGroup>
+
+          {/* Contributors Input */}
+          <div>
+            <Label htmlFor="teamInput" className="block mb-2">Contributors</Label>
+            <Input
+              id="teamInput"
+              type="text"
+              value={localTeamInput}
+              onChange={(e) => setLocalTeamInput(e.target.value)}
+              onBlur={handleTeamBlur}
+              placeholder="john@example.com, jane@example.com"
+              className="w-full"
+            />
+            <p className="text-xs text-neutral-muted mt-1">
+              Email addresses of team members who will collaborate on this pitch deck.
+            </p>
+          </div>
+
+          {/* Privacy Settings */}
+          <div>
+            <Label className="block mb-2">Privacy Settings</Label>
+            <RadioGroup
+              value={privacy}
+              onValueChange={handlePrivacyChange}
+              className="space-y-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="private" id="privacy-private" />
+                <Label htmlFor="privacy-private" className="cursor-pointer flex items-center gap-2">
+                  <Lock size={16} /> Private (Only you can access)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="team" id="privacy-team" />
+                <Label htmlFor="privacy-team" className="cursor-pointer flex items-center gap-2">
+                  <Users size={16} /> Team (You and contributors can access)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="public" id="privacy-public" />
+                <Label htmlFor="privacy-public" className="cursor-pointer flex items-center gap-2">
+                  <Globe size={16} /> Public (Anyone with the link can access)
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+        </div>
+      </Card>
+      
+      {/* Import Options Section */}
+      <div className="mt-6">
+        <ImportOptions />
       </div>
-    </div>
+    </>
   );
 };
 

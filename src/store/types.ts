@@ -33,7 +33,7 @@ export interface PhaseData {
 export type ValidationStatus = 'Not Run' | 'Running' | 'Passed' | 'Issues Found';
 export type ClientPdfStatus = 'idle' | 'generating' | 'success' | 'error';
 // Removed 'image' to align with SlideInfo in pitchDeckPrompts.ts
-export type VisualElementType = 'chart' | 'table' | 'diagram' | 'infographic';
+export type VisualElementType = 'chart' | 'table' | 'diagram' | 'infographic' | 'logo';
 export type VisualElementPosition = 'left' | 'right' | 'center' | 'full';
 export type SlideCompletionStatus = 'pending' | 'researching' | 'drafting' | 'complete';
 
@@ -97,7 +97,8 @@ export interface Suggestion {
   id: string; 
   text: string; 
   impact: string; 
-  effort: string; 
+  effort: string;
+  type?: 'quality' | 'fact' | 'financial' | 'general'; // Added to categorize suggestions
 }
 
 // --- Placeholder for ProjectInfo if needed outside prompts ---

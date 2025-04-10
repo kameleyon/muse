@@ -8,6 +8,7 @@ interface PdfExporterProps {
   content: string;
   title?: string;
   fileName?: string;
+  templateId?: string; // Add template ID to control styling
   onExportComplete?: (url: string) => void;
   onExportError?: (error: Error) => void;
   brandColors?: {
@@ -17,16 +18,101 @@ interface PdfExporterProps {
     highlight?: string;
     background?: string;
   };
+  fonts?: {
+    headingFont?: string;
+    bodyFont?: string;
+  };
 }
 
+// Template-specific styling configurations
+const TEMPLATE_STYLES: Record<string, {
+  fonts: { headingFont: string; bodyFont: string };
+  extraStyles?: React.CSSProperties;
+}> = {
+  'minimalist-pro': {
+    fonts: {
+      headingFont: 'Helvetica, Arial, sans-serif',
+      bodyFont: 'Helvetica, Arial, sans-serif'
+    },
+    extraStyles: {
+      lineHeight: '1.5',
+      letterSpacing: '0.01em'
+    }
+  },
+  'corporate-blue': {
+    fonts: {
+      headingFont: 'Georgia, serif',
+      bodyFont: 'Arial, sans-serif'
+    },
+    extraStyles: {
+      lineHeight: '1.6'
+    }
+  },
+  'creative-splash': {
+    fonts: {
+      headingFont: 'Segoe UI, Roboto, sans-serif',
+      bodyFont: 'Segoe UI, Roboto, sans-serif'
+    },
+    extraStyles: {
+      lineHeight: '1.7',
+      letterSpacing: '0.02em'
+    }
+  },
+  'data-focus': {
+    fonts: {
+      headingFont: 'Tahoma, sans-serif',
+      bodyFont: 'Tahoma, sans-serif'
+    },
+    extraStyles: {
+      letterSpacing: '0'
+    }
+  },
+  'narrative-arc': {
+    fonts: {
+      headingFont: 'Palatino, serif',
+      bodyFont: 'Palatino, serif'
+    },
+    extraStyles: {
+      lineHeight: '1.8',
+      letterSpacing: '0.01em'
+    }
+  },
+  'tech-startup': {
+    fonts: {
+      headingFont: 'Consolas, monospace',
+      bodyFont: 'Arial, sans-serif'
+    }
+  },
+  'elegant-gradient': {
+    fonts: {
+      headingFont: 'Garamond, serif',
+      bodyFont: 'Garamond, serif'
+    },
+    extraStyles: {
+      lineHeight: '1.6',
+      letterSpacing: '0.02em'
+    }
+  },
+  'bold-contrast': {
+    fonts: {
+      headingFont: 'Impact, sans-serif',
+      bodyFont: 'Arial, sans-serif'
+    },
+    extraStyles: {
+      letterSpacing: '0.02em',
+      fontWeight: '500'
+    }
+  }
+};
+
 /**
- * Simplified PdfExporter that uses a single-pass direct rendering approach
- * to ensure consistency and reliability
+ * Enhanced PdfExporter that maintains template styling with consistent branding
  */
 const PdfExporter: React.FC<PdfExporterProps> = ({
   content,
   title = 'Document Export',
   fileName = 'document-export',
+  templateId = 'minimalist-pro', // Default to minimalist if no template specified
   onExportComplete,
   onExportError,
   brandColors = {
@@ -35,7 +121,8 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
     accent: '#9d4e2c',
     highlight: '#9d4e2c',
     background: '#ffffff'
-  }
+  },
+  fonts
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [markdownContent, setMarkdownContent] = useState('');
@@ -55,32 +142,307 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
           .replace(/Back to QA/gi, '');
         
         // Convert to markdown
-        const markdown = htmlToMarkdown(processedContent);
+        let markdown = htmlToMarkdown(processedContent);
+        
+        // Format code blocks with Mermaid syntax for better PDF display
+        markdown = markdown.replace(/```graph TB\s+([\s\S]*?)```/g, (match, code) => {
+          return `\n<div class="diagram-block">\n<div class="diagram-title">Business Model Diagram</div>\n<pre class="diagram-content">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>\n</div>\n`;
+        });
+        
+        // Format chart data blocks for better PDF display
+        markdown = markdown.replace(/```chart\s+([\s\S]*?)```/g, (match, code) => {
+          let title = "Chart Data";
+          try {
+            // Try to detect chart type from the data
+            if (code.includes('"revenue"') || code.includes('"sales"')) {
+              title = "Revenue Chart";
+            } else if (code.includes('"market"') || code.includes('"share"')) {
+              title = "Market Analysis";
+            } else if (code.includes('"trend"')) {
+              title = "Trend Analysis";
+            }
+          } catch (e) {}
+          
+          return `\n<div class="chart-data">\n<div class="chart-title">${title}</div>\n${code}\n</div>\n`;
+        });
+        
+        // Enhanced table rendering with proper styling
+        markdown = markdown.replace(/```(\s*\|.*\|[\s\S]*?\|.*\|)\s*```/g, (match, tableContent) => {
+          return `\n<div class="table-container">\n<div class="table-title">Comparison Data</div>\n${tableContent}\n</div>\n`;
+        });
+        
+        // Remove horizontal rules and other slide separators
+        markdown = markdown.replace(/^\s*---+\s*$/gm, '');
+        markdown = markdown.replace(/^\s*\*\*\*+\s*$/gm, '');
+        markdown = markdown.replace(/<!--\s*slide-separator\s*-->/gi, '');
+        
+        // Remove code block style syntax markers (```css, ```ts, etc) 
+        markdown = markdown.replace(/```(css|js|typescript|json|xml|html|bash|shell)\n/g, "```\n");
+        
         setMarkdownContent(markdown);
       } catch (err) {
         console.error("Error processing content:", err);
         if (onExportError) onExportError(err as Error);
       }
     }
-  }, [content]);
+  }, [content, onExportError]);
   
   // Apply styling to container when markdown is ready
   useEffect(() => {
     if (markdownContent && containerRef.current) {
       // Add styling to container
       const container = containerRef.current;
-      container.style.width = '800px';
-      container.style.padding = '40px';
-      container.style.backgroundColor = brandColors.background ?? '#ffffff'; // Default to white if undefined
+      // Get template-specific styling
+      const templateStyle = TEMPLATE_STYLES[templateId] || TEMPLATE_STYLES['minimalist-pro'];
+      const templateFonts = fonts || templateStyle.fonts;
+      
+      // Apply styles with increased width for better readability
+      container.style.width = '850px';
+      container.style.padding = '50px 60px';
+      container.style.backgroundColor = brandColors.background || '#ffffff';
       container.style.color = '#333333';
-      container.style.fontFamily = 'Arial, sans-serif';
+      
+      // Apply font family
+      if (templateFonts.bodyFont) {
+        container.style.fontFamily = templateFonts.bodyFont;
+      } else {
+        container.style.fontFamily = 'Arial, sans-serif';
+      }
+      
       container.style.fontSize = '14px';
+      
+      // Default line height
       container.style.lineHeight = '1.5';
+      
+      // Apply template-specific line height if available
+      if (templateStyle.extraStyles && typeof templateStyle.extraStyles.lineHeight === 'string') {
+        container.style.lineHeight = templateStyle.extraStyles.lineHeight;
+      }
+      
+      // Apply other template-specific styles
+      if (templateStyle.extraStyles) {
+        if (typeof templateStyle.extraStyles.letterSpacing === 'string') {
+          container.style.letterSpacing = templateStyle.extraStyles.letterSpacing;
+        }
+        
+        if (typeof templateStyle.extraStyles.fontWeight === 'string') {
+          container.style.fontWeight = templateStyle.extraStyles.fontWeight;
+        }
+      }
+      
+      // Enhanced styles for better PDF rendering
+      const styleEl = document.createElement('style');
+      styleEl.innerHTML = `
+        #content-for-pdf {
+          color: #333333;
+          padding-bottom: 60px; /* Extra space at bottom */
+        }
+        
+        #content-for-pdf h1, #content-for-pdf h2, #content-for-pdf h3, #content-for-pdf h4, #content-for-pdf h5, #content-for-pdf h6 {
+          font-family: ${templateFonts.headingFont || 'Arial, sans-serif'};
+          margin-top: 1.5em;
+          margin-bottom: 0.5em;
+          page-break-after: avoid;
+          color: ${brandColors.primary || '#ae5630'};
+        }
+        
+        #content-for-pdf h1 {
+          font-size: 26px;
+          color: ${brandColors.primary || '#ae5630'};
+          border-bottom: 2px solid ${brandColors.primary + '30' || '#ae563030'};
+          padding-bottom: 8px;
+        }
+        
+        #content-for-pdf h2 {
+          font-size: 22px;
+          color: ${brandColors.secondary || '#232321'};
+        }
+        
+        #content-for-pdf h3 {
+          font-size: 18px;
+          color: ${brandColors.secondary || '#232321'};
+        }
+        
+        #content-for-pdf h4 {
+          font-size: 16px;
+          color: ${brandColors.accent || '#9d4e2c'};
+        }
+        
+        #content-for-pdf p {
+          margin-bottom: 1em;
+          line-height: ${typeof templateStyle.extraStyles?.lineHeight === 'string' ? 
+            templateStyle.extraStyles.lineHeight : '1.5'};
+        }
+        
+        #content-for-pdf strong {
+          color: ${brandColors.primary || '#ae5630'};
+          font-weight: 600;
+        }
+        
+        #content-for-pdf em {
+          color: ${brandColors.secondary || '#232321'};
+        }
+        
+        #content-for-pdf a {
+          color: ${brandColors.accent || '#9d4e2c'};
+          text-decoration: none;
+          border-bottom: 1px dotted ${brandColors.accent || '#9d4e2c'};
+        }
+        
+        #content-for-pdf ul, #content-for-pdf ol {
+          padding-left: 1.5rem;
+          margin-bottom: 1rem;
+        }
+        
+        #content-for-pdf li {
+          margin-bottom: 0.25rem;
+        }
+        
+        #content-for-pdf pre {
+          background-color: #f6f8fa;
+          padding: 16px;
+          border-radius: 4px;
+          overflow-x: auto;
+          font-family: 'Courier New', monospace;
+          font-size: 13px;
+          line-height: 1.4;
+          white-space: pre-wrap;
+          margin-bottom: 1.5em;
+          page-break-inside: avoid;
+          border: 1px solid #e1e4e8;
+          max-width: 100%;
+        }
+        
+        #content-for-pdf code {
+          font-family: 'Courier New', monospace;
+          background-color: rgba(0, 0, 0, 0.05);
+          padding: 0.2em 0.4em;
+          border-radius: 3px;
+          font-size: 0.9em;
+        }
+        
+        #content-for-pdf pre code {
+          background-color: transparent;
+          padding: 0;
+          border-radius: 0;
+        }
+        
+        #content-for-pdf .table-container {
+          margin: 30px 0;
+          page-break-inside: avoid;
+          background: #ffffff;
+          border-radius: 6px;
+          border: 1px solid #e0e0e0;
+          overflow: hidden;
+        }
+        
+        #content-for-pdf .table-title {
+          font-family: ${templateFonts.headingFont || 'Arial, sans-serif'};
+          font-size: 15px;
+          font-weight: bold;
+          text-align: center;
+          padding: 10px;
+          background-color: ${brandColors.primary + '15' || '#ae563015'};
+          color: ${brandColors.secondary || '#232321'};
+          border-bottom: 1px solid #e0e0e0;
+        }
+        
+        #content-for-pdf table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 0;
+          font-size: 14px;
+        }
+        
+        #content-for-pdf th, #content-for-pdf td {
+          border: 1px solid #ddd;
+          padding: 12px 15px;
+          text-align: left;
+          vertical-align: top;
+        }
+        
+        #content-for-pdf th {
+          background-color: ${brandColors.primary + '10' || '#ae563010'};
+          border-bottom: 2px solid ${brandColors.primary + '30' || '#ae563030'};
+          font-weight: bold;
+          color: ${brandColors.primary || '#ae5630'};
+          font-size: 14px;
+        }
+        
+        #content-for-pdf tr:nth-child(even) {
+          background-color: #f9f9f9;
+        }
+        
+        #content-for-pdf tr:hover {
+          background-color: #f5f5f5;
+        }
+        
+        #content-for-pdf blockquote {
+          border-left: 4px solid ${brandColors.accent || '#9d4e2c'};
+          padding-left: 1rem;
+          margin-left: 0;
+          margin-right: 0;
+          margin-bottom: 1rem;
+          font-style: italic;
+          color: #555;
+        }
+        
+        #content-for-pdf hr {
+          display: none;
+        }
+        
+        #content-for-pdf img {
+          max-width: 100%;
+          height: auto;
+          display: block;
+          margin: 0 auto;
+          page-break-inside: avoid;
+        }
+        
+        #content-for-pdf .chart-data,
+        #content-for-pdf .mermaid-diagram,
+        #content-for-pdf .diagram-block {
+          text-align: center;
+          margin: 20px auto;
+          page-break-inside: avoid;
+          max-width: 100%;
+          background: #f9f9f9;
+          padding: 15px;
+          border-radius: 4px;
+          border: 1px solid #e0e0e0;
+        }
+        
+        #content-for-pdf .chart-title,
+        #content-for-pdf .diagram-title {
+          font-family: ${templateFonts.headingFont || 'Arial, sans-serif'};
+          font-size: 14px;
+          font-weight: bold;
+          margin-bottom: 10px;
+          color: ${brandColors.primary || '#ae5630'};
+          border-bottom: 1px solid ${brandColors.primary + '30' || '#ae563030'};
+          padding-bottom: 5px;
+        }
+        
+        #content-for-pdf .diagram-content {
+          font-family: 'Courier New', monospace;
+          font-size: 12px;
+          line-height: 1.4;
+          text-align: left;
+          white-space: pre-wrap;
+          padding: 10px;
+          background: white;
+          border: 1px solid #e0e0e0;
+          border-radius: 3px;
+          overflow-x: auto;
+          max-width: 100%;
+        }
+      `;
+      container.appendChild(styleEl);
       
       // Signal that the container is ready for rendering
       setTimeout(() => setIsReady(true), 1000);
     }
-  }, [markdownContent, brandColors]);
+  }, [markdownContent, brandColors, templateId, fonts]);
   
   // When ready, start the PDF generation
   useEffect(() => {
@@ -125,11 +487,12 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
       });
       
       // A4 dimensions in points
+      // Use slightly wider margins to improve readability
       const a4Width = 595;
       const a4Height = 842;
       
       // Calculate scale to fit content width to page width, with margins
-      const margin = 40;
+      const margin = 50;
       const contentWidth = a4Width - (margin * 2);
       const scale = contentWidth / docWidth;
       
@@ -158,7 +521,7 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
           scale: 2, // Higher scale for better quality
           useCORS: true,
           allowTaint: true,
-          backgroundColor: brandColors.background,
+          backgroundColor: brandColors.background || '#ffffff',
           logging: false
         }).then(canvas => {
           // Add a new page for all pages after the first
@@ -176,16 +539,23 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
             (canvas.height * contentWidth) / canvas.width
           );
           
-          // Add page number
+          // Add header with title
           pdf.setFontSize(9);
           pdf.setTextColor(100, 100, 100);
+          pdf.text(
+            title,
+            margin,
+            margin / 2
+          );
           
-          // Page number at bottom center
+          // Page number at bottom right
+          pdf.setFontSize(9);
+          pdf.setTextColor(100, 100, 100);
           pdf.text(
             `Page ${i + 1} of ${pageCount}`,
-            a4Width / 2,
+            a4Width - margin,
             a4Height - 20,
-            { align: 'center' }
+            { align: 'right' }
           );
           
           // Generation date at bottom left
@@ -262,7 +632,7 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
           content={markdownContent}
           enhanceVisuals={true}
           brandColors={brandColors}
-          fonts={{
+          fonts={fonts || TEMPLATE_STYLES[templateId]?.fonts || {
             headingFont: 'Arial, sans-serif',
             bodyFont: 'Arial, sans-serif'
           }}

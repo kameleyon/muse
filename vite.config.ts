@@ -21,14 +21,14 @@ export default defineConfig({
   plugins: [
     react(),
     visualizer({
-      filename: './dist/stats.html', // Output file path
+      filename: './dist/stats-visualizer.html', // Output file path changed to avoid PWA precaching
       open: false, // Don't open automatically, let the user decide
       gzipSize: true, // Show gzip size
       brotliSize: true, // Show brotli size
     }),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'logo-placeholder.png', 'logo-placeholder.svg', 'magicmuse-icon.svg'],
+      includeAssets: ['favicon.ico', 'magicmuse-icon.svg'],
       manifest: {
         name: 'MagicMuse',
         short_name: 'MagicMuse',
@@ -45,7 +45,7 @@ export default defineConfig({
       workbox: {
         // Exclude stats.html from precaching
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        globIgnores: ['**/stats.html'],
+        globIgnores: ['dist/stats.html', '**/stats.html'],
         // Increase max file size for precaching (default is 2MB)
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MiB to be safe
       }

@@ -14,15 +14,28 @@ const PdfExport: React.FC = () => {
   const [content, setContent] = useState<string>('');
   const [title, setTitle] = useState<string>('Markdown Export');
   const [fileName, setFileName] = useState<string>('document-export');
+  const [templateId, setTemplateId] = useState<string>('minimalist-pro');
   const [exportUrl, setExportUrl] = useState<string | null>(null);
+  const [brandColors, setBrandColors] = useState<any>(null);
+  const [fonts, setFonts] = useState<any>(null);
   
-  // Parse state from location
+  // Parse state from location, including template details
   useEffect(() => {
     if (location.state) {
-      const { content: stateContent, title: stateTitle, fileName: stateFileName } = location.state as {
+      const { 
+        content: stateContent, 
+        title: stateTitle, 
+        fileName: stateFileName,
+        templateId: stateTemplateId,
+        brandColors: stateBrandColors,
+        fonts: stateFonts
+      } = location.state as {
         content?: string;
         title?: string;
         fileName?: string;
+        templateId?: string;
+        brandColors?: any;
+        fonts?: any;
       };
       
       if (stateContent) {
@@ -35,6 +48,20 @@ const PdfExport: React.FC = () => {
       
       if (stateFileName) {
         setFileName(stateFileName);
+      }
+      
+      if (stateTemplateId) {
+        setTemplateId(stateTemplateId);
+        console.log(`Using template: ${stateTemplateId}`);
+      }
+      
+      if (stateBrandColors) {
+        setBrandColors(stateBrandColors);
+        console.log(`Using brand colors:`, stateBrandColors);
+      }
+      
+      if (stateFonts) {
+        setFonts(stateFonts);
       }
     }
   }, [location]);
@@ -118,6 +145,9 @@ const PdfExport: React.FC = () => {
             content={content}
             title={title}
             fileName={fileName}
+            templateId={templateId}
+            brandColors={brandColors}
+            fonts={fonts}
             onExportComplete={handleExportComplete}
             onExportError={handleExportError}
           />

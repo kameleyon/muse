@@ -8,6 +8,7 @@ import { generateExampleChartData, recommendChartType } from '@/utils/chartUtils
 interface GenerationPreviewProps {
   content?: string;
   templateId?: string;
+  brandLogo?: string; // URL to the brand logo
   brandColors?: {
     primary?: string;
     secondary?: string;
@@ -33,6 +34,7 @@ interface GenerationPreviewProps {
 const GenerationPreview: React.FC<GenerationPreviewProps> = ({
   content = '',
   templateId = 'default',
+  brandLogo,
   brandColors = {
     primary: '#ae5630',
     secondary: '#232321',
@@ -74,27 +76,44 @@ const GenerationPreview: React.FC<GenerationPreviewProps> = ({
   useEffect(() => {
     if (!content) {
       // Generate example chart data
-      const chartType = Math.random() > 0.5 ? 'bar' : 'line';
+      const chartType = Math.random() > 0.5 ? 'line' : 'bar';
       const chartData = generateExampleChartData(chartType);
       
+      // Create a simplified chart with fewer data points
+      const simplifiedChartData = chartType === 'bar' 
+        ? [
+            { name: 'Category A', value: 400 },
+            { name: 'Category B', value: 300 },
+            { name: 'Category C', value: 200 }
+          ]
+        : [
+            { name: 'Jan', value: 400, trend: 240 },
+            { name: 'Feb', value: 300, trend: 139 },
+            { name: 'Mar', value: 200, trend: 280 }
+          ];
+      
+      // Even simpler chart data - just two points for a more compact display
+      const verySimpleChartData = chartType === 'bar' 
+        ? [
+            { name: 'A', value: 400 },
+            { name: 'B', value: 300 }
+          ]
+        : [
+            { name: 'Q1', value: 400 },
+            { name: 'Q2', value: 300 }
+          ];
+
       setPlaceholderContent(`
-# Real-Time Preview
 
-This is a preview of your generated content. Click "Start Content Generation" to begin, or explore the visualization capabilities below.
 
-## Sample Chart
+# Sample
+
 \`\`\`chart
-${JSON.stringify(chartData, null, 2)}
+${JSON.stringify(verySimpleChartData, null, 0)}
 \`\`\`
 
-## Features
-- **Rich Charts**: Line, bar, pie, area, radar, and more
-- **Beautiful Tables**: Automatically styled to match your brand
-- **Smart Diagrams**: Visualize processes and relationships
-- **Responsive Design**: Looks great on any device
-- **Theme Consistency**: Matches your brand identity
+**Your content will include all customizations**
 
-Click "Start Content Generation" to create your own content with these visualizations!
       `);
     }
   }, [content]);
@@ -117,12 +136,12 @@ Click "Start Content Generation" to create your own content with these visualiza
   }, [displayContent]);
   
   return (
-    <Card className="p-4 border border-neutral-light bg-white shadow-md h-[850px] flex flex-col">
-      <h4 className="font-semibold text-neutral-dark mb-4 text-center text-sm flex-shrink-0">
+    <Card className="p-3 border border-neutral-light bg-white shadow-md h-[750px] flex flex-col">
+      <h4 className="font-semibold text-neutral-dark mb-2 text-center text-sm flex-shrink-0">
         Real-Time Preview
       </h4>
       <div
-        className={`flex-grow overflow-y-auto text-sm text-neutral-dark bg-white/50 p-6 rounded custom-scrollbar template-${templateId} whitespace-pre-wrap`}
+        className={`flex-grow overflow-y-auto custom-scrollbar overflow-x-hidden text-sm text-neutral-dark bg-white/50 p-1 rounded template-${templateId} whitespace-pre-wrap`}
         style={{ overflowWrap: 'break-word', ...getTemplateStyles() }}
       >
         {displayContent ? (
@@ -130,14 +149,17 @@ Click "Start Content Generation" to create your own content with these visualiza
             <MarkdownVisualizer 
               content={displayContent}
               enhanceVisuals={options.enhanceVisuals}
-              brandColors={brandColors}
+              brandColors={{
+                ...brandColors,
+                logoUrl: brandLogo || undefined // Pass the logo URL to the MarkdownVisualizer
+              }}
               fonts={fonts}
               options={{
                 showCharts: options.showCharts,
                 showTables: options.showTables,
                 showDiagrams: options.showDiagrams,
-                chartHeight: options.chartHeight,
-                animateCharts: options.animateCharts
+                chartHeight: 180, // Further reduced chart height for perfect fit in preview
+                animateCharts: false // Disable animation for preview to reduce visual clutter
               }}
             />
           </>

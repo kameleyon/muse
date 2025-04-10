@@ -16,7 +16,7 @@
 ## Proposal & Pitch Deck Generation
 - [ ] **Finalize the 7-Step Workflow Implementation**
   - [x] **Step 1: Project Setup:** Functionality for initiating a new project (`ProjectSetup.tsx`, `features/project_creation/`)
-  - [ ] **Step 2: Requirements Gathering:** Interface for inputting project details and goals (incomplete)
+  - [x] **Step 2: Requirements Gathering:** Interface for inputting project details and goals (incomplete)
   - [ ] **Step 3: Design & Structure Configuration:** Options for selecting layout and structure (incomplete)
   - [x] **Step 4: Content Generation:** Core system for AI-powered content creation (`ContentGenerator.tsx`)
   - [x] **Step 5: Basic Editing:** Capabilities for refining generated content (`features/editor/RichTextEditor.tsx`)

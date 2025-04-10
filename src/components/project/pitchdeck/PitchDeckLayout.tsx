@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/Button';
 // Corrected relative paths for the new location, adding .tsx extension
 import PitchDeckTypeGrid from './setup/PitchDeckTypeGrid';
 import ProjectSetupForm from './setup/ProjectSetupForm';
-import ImportOptions from './setup/ImportOptions';
 import TargetAudienceForm from './requirements/TargetAudienceForm';
+import ProjectDetailsForm from './requirements/ProjectDetailsForm';
 import TemplateGallery from './design/TemplateGallery';
 import BrandCustomization from './design/BrandCustomization';
 import StructurePlanning from './design/StructurePlanning';
@@ -18,9 +18,10 @@ import EnhancementTools from './editing/EnhancementTools';
 // VisualElementStudio and CollaborationTools seem removed based on comments in original code
 // import VisualElementStudio from './editing/VisualElementStudio';
 // import CollaborationTools from './editing/CollaborationTools';
-import QualityDashboard from './qa/QualityDashboard';
-import ValidationInterface from './qa/ValidationInterface';
+// import QualityDashboard from './qa/QualityDashboard'; // Commented out for replacement
+// import ValidationInterface from './qa/ValidationInterface'; // Commented out for replacement
 import RefinementPanel from './qa/RefinementPanel';
+import { ComprehensiveQAPanel } from './qa/ComprehensiveQAPanel'; // Import the new component
 import PresenterTools from './delivery/PresenterTools';
 import ExportConfiguration from './delivery/ExportConfiguration';
 import SharingPermissions from './delivery/SharingPermissions';
@@ -115,17 +116,32 @@ const PitchDeckLayout: React.FC<PitchDeckLayoutProps> = ({ initialName }) => {
   // Let's keep it for now but mark it for potential refactoring.
   // TODO: Consider moving project creation logic upstream.
   const handleContinueFromStep1 = async () => {
-    if (!projectName) {
+    // Get the current value directly from the input field as a backup
+    const formProjectName = document.getElementById('projectName') as HTMLInputElement;
+    const currentProjectName = projectName || (formProjectName ? formProjectName.value : '');
+    
+    if (!currentProjectName || currentProjectName.trim() === '') {
       alert('Project Name is required.');
       return;
     }
+    
     if (!selectedPitchDeckTypeId) {
       alert('Please select a Pitch Deck Type.');
       return;
     }
 
+    // Make sure we use the current name value, not the potentially stale state
+    // Also ensure it's set in state for future reference
+    if (currentProjectName !== projectName) {
+      setProjectName(currentProjectName);
+    }
+
     const projectData = {
-      projectName, description, privacy, tags, teamMembers,
+      projectName: currentProjectName, // Use current name directly
+      description, 
+      privacy, 
+      tags, 
+      teamMembers,
       pitchDeckTypeId: selectedPitchDeckTypeId,
       projectType: selectedPitchDeckTypeId, // Assuming pitch deck type ID is the project type key
     };
@@ -136,6 +152,10 @@ const PitchDeckLayout: React.FC<PitchDeckLayoutProps> = ({ initialName }) => {
     if (createdProject) {
       console.log('PitchDeckLayout: Project created successfully:', createdProject);
       setProjectId(createdProject.id); // Set ID in store
+      
+      // If we need to access the project name from the response, use name field (not project_name)
+      // This ensures compatibility with the database schema
+      console.log('Project name from response:', createdProject.name);
       setCurrentStep(2);
     } else {
       console.error('PitchDeckLayout: Failed to create project. Staying on Step 1.');
@@ -380,7 +400,6 @@ const PitchDeckLayout: React.FC<PitchDeckLayoutProps> = ({ initialName }) => {
                setTagsInput={setTagsFromString}
                setTeamInput={setTeamMembersFromString}
              />
-             <ImportOptions />
              <div className="flex flex-col md:flex-row md:justify-end pt-6 border-t border-neutral-light/40 gap-2">
                <Button
                  variant="primary"
@@ -403,7 +422,9 @@ const PitchDeckLayout: React.FC<PitchDeckLayoutProps> = ({ initialName }) => {
              <h2 className="text-lg font-semibold font-heading text-secondary/80">Step 2: Requirements Gathering</h2>
              <p className="text-sm text-neutral-medium mt-1">Provide details about your audience, product, objectives, and more.</p>
            </div>
+
            <div className="p-4 md:p-6 space-y-6">
+             <ProjectDetailsForm />
              <TargetAudienceForm />
              {/* Add other Step 2 sections here later */}
               <div className="flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
@@ -538,14 +559,19 @@ const PitchDeckLayout: React.FC<PitchDeckLayoutProps> = ({ initialName }) => {
                  </div>
               </div>
              <div className="lg:col-span-12 flex flex-col md:flex-row md:justify-between pt-6 mt-6 border-t border-neutral-light/40 gap-2">
-               <Button variant="outline" onClick={() => setCurrentStep(3)} className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto">
+               <Button 
+                 variant="outline" 
+                 onClick={() => setCurrentStep(3)} 
+                 className="px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"
+                 disabled={isGenerating} // Disable back button while generating
+               >
                  Back to Design
                </Button>
                <Button
                  variant="primary"
                  className="text-white px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base w-full md:w-auto"
                  onClick={handleContinueFromStep4}
-                 disabled={isGenerating} // Disable continue while generating
+                 disabled={isGenerating || !generatedContentPreview} // Enable only when generation is complete
                >
                  Continue to Editing
                 </Button>
@@ -600,19 +626,20 @@ const PitchDeckLayout: React.FC<PitchDeckLayoutProps> = ({ initialName }) => {
                            </div>
                         </div>
                      </Card>*/}
-                     <QualityDashboard
-                        metrics={qualityMetrics}
-                        isLoading={isLoadingQA}
-                     />
-                     <div className=" space-y-6">
-                     <RefinementPanel
+                     {/* <QualityDashboard
+                       metrics={qualityMetrics}
+                       isLoading={isLoadingQA}
+                     /> */}
+                     <div className="space-y-6">
+                       <ComprehensiveQAPanel /> {/* Render the new component here */}
+                     {/*<RefinementPanel
                       suggestions={refinementSuggestions}
                       onImplement={handleImplementSuggestion}
                       onCompare={handleCompareSuggestion}
                       onPolish={handleRunFinalPolish}
                       isLoading={isLoadingQA}
-                   />
-                   <ValidationInterface
+                   />*/}
+                   {/* <ValidationInterface
                       onVerifyFacts={handleRunFactCheck}
                       onCheckCompliance={handleRunComplianceCheck}
                       onValidateFinancials={handleRunFinancialValidation}
@@ -622,7 +649,7 @@ const PitchDeckLayout: React.FC<PitchDeckLayoutProps> = ({ initialName }) => {
                       financialValidationStatus={financialValidationStatus}
                       languageCheckStatus={languageCheckStatus}
                       isLoading={isLoadingQA}
-                   />
+                   /> */}
                    
                 </div>
                      {/* VisualElementStudio removed */}

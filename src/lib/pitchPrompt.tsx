@@ -54,7 +54,9 @@ export const collectProjectData = (projectId: string, store: any) => {
       name: state.projectName,
       description: state.description,
       pitchDeckType: state.selectedPitchDeckTypeId,
-      tags: state.tags
+      tags: state.tags,
+      goals: state.projectGoals || "", // Include project goals from Step 2
+      additionalDetails: state.additionalDetails || "" // Include additional details from Step 2
     },
     audience: {
       name: state.audienceName,
@@ -110,12 +112,12 @@ export const generateResearchPrompt = (projectData: any) => {
     ${researchDepth}
 
     Please provide detailed information on:
-    1. Market size and growth projections (with specific numbers)
-    2. Competitive analysis (3-5 main competitors with strengths/weaknesses)
-    3. Customer pain points and needs
-    4. Industry trends and future outlook
-    5. Potential business models and revenue streams
-    6. Key risks and mitigation strategies
+    1. Market size and growth projections (with specific and accurate numbers and data)
+    2. Competitive analysis (3-7 main competitors with strengths/weaknesses)
+    3. Customer pain points and needs (give 3-5 elaborated in a substancial paragraph each)
+    4. Industry trends and future outlook (remains straightforward but give a deep analysis supported by accurate information )
+    5. Potential business models and revenue streams (remains straightforward but give a comprehensive data and information supported by accurate information )
+    6. Key risks and mitigation strategies (list between 4-7 that will be address in a straightforward and profesional way)
 
     Format the data to enable visualization:
     - Use standard Markdown table syntax directly for tables.
@@ -125,7 +127,7 @@ export const generateResearchPrompt = (projectData: any) => {
 
     Structure your response with clear sections and data summaries. Ensure data formats are precise for rendering.
     
-    Important: Do not use any emojis in your response.
+    Important: DO NOT EVER AT ANY POINT USE EMOJIS. Do not use any emojis in your response.
   `;
 };
 
@@ -250,6 +252,9 @@ export const generateFullContentPrompt = (projectData: any, researchData: string
     detailLevel = 'Create comprehensive, detailed content with in-depth analysis, supporting data, and thorough explanations. Include nuanced insights and address potential questions or objections.';
   }
 
+  // Extract logo information for emphasis
+  const logoInfo = projectData?.design?.brandLogo ? "User has uploaded a custom logo." : "No custom logo uploaded, use placeholder.";
+  
   return `
     Generate a complete, polished pitch deck for "${projectName}" with the following specs:
 
@@ -261,8 +266,10 @@ export const generateFullContentPrompt = (projectData: any, researchData: string
 
     DESIGN PREFERENCES:
     ${JSON.stringify(projectData?.design || {}, null, 2)}
+    
+    LOGO INFORMATION: ${logoInfo}
 
-    SLIDE STRUCTURE:
+    SLIDE STRUCTURE (TOTAL: ${slideCount} SLIDES):
     ${JSON.stringify(projectData?.structure || [], null, 2)}
 
     RESEARCH FINDINGS (Use this data to populate the deck content):
@@ -273,10 +280,12 @@ export const generateFullContentPrompt = (projectData: any, researchData: string
 
     Guidelines:
     1. Format your response entirely in Markdown.
-    2. CRITICAL: You MUST create content for EXACTLY ${slideCount} slides as defined in the SLIDE STRUCTURE above. The standard structure has 14 slides, but the user may have modified this. Do not add or remove slides from what is provided.
+    2. CRITICAL: You MUST create content for EXACTLY ${slideCount} slides as defined in the SLIDE STRUCTURE above. Follow the SLIDE STRUCTURE exactly, including respecting any specified visualType properties. The standard structure has 14 slides, but the user may have modified this. Do not add or remove slides from what is provided.
     3. Structure the content logically according to the provided slide structure. Use Markdown headers (##) for slide titles/sections.
-    4. For the Cover Slide, include a placeholder for the company logo by adding an empty line with just: ![Logo](/logo-placeholder.svg)
-       DO NOT use [CompanyLogo] or any other text that would appear in the rendered output.
+    4. For the Cover Slide (which has a visualType of "logo"), include a placeholder for the company logo only if one exists in LOGO INFORMATION. If the user has uploaded a logo, add an empty line with just: ![Logo](/logo-placeholder.svg)
+       This logo image will be automatically replaced with the user's uploaded logo.
+       If no logo has been uploaded, DO NOT include any logo placeholder or label.
+       IMPORTANT: Logo placeholders must always be on their own line, outside of any code blocks.
     5. DO NOT include literal slide numbers or prefixes or name like cover, problem - say it differently
     6. Integrate visualizations seamlessly within the content:
        - Tables: Use standard Markdown table syntax directly. Make sure tables have clear headers and are properly formatted.
@@ -288,38 +297,20 @@ export const generateFullContentPrompt = (projectData: any, researchData: string
          | Product C| 600   | 20%        |
          | Product D| 300   | 10%        |
        
-       - Charts: Use JSON format within code blocks labeled "chart". Use descriptive names instead of generic "Line 1", "Line 2", etc.
-         Example for line chart (preferred):
-         \`\`\`chart 
-         [
-           {"name": "2021", "revenue": 1200, "expenses": 800, "profit": 400},
-           {"name": "2022", "revenue": 1500, "expenses": 900, "profit": 600},
-           {"name": "2023", "revenue": 1800, "expenses": 1000, "profit": 800},
-           {"name": "2024", "revenue": 2100, "expenses": 1100, "profit": 1000},
-           {"name": "2025", "revenue": 2400, "expenses": 1200, "profit": 1200}
-         ]
-         \`\`\`
-         
-         Example for bar chart:
-         \`\`\`chart 
-         [
-           {"name": "Product A", "sales": 1200, "returns": 50},
-           {"name": "Product B", "sales": 900, "returns": 30},
-           {"name": "Product C", "sales": 600, "returns": 20}
-         ]
-         \`\`\`
-         
-      
-       
-       - Diagrams: Use standard Markdown lists or paragraphs for descriptions.
+  
        - Do not write Line 1, Line 2, Line 3, but right the specific label Name
-       - DO NOT USE PIE CHART -- Use scattered or line charts instead
+       - DO NOT USE PIE CHART, LINE, BAR OR DIAGRAM CHART -- Use scattered or line charts instead
     6. Maintain a professional tone consistent with the "${templateId}" style.
     7. Address the audience's key concerns: ${audienceConcerns}.
     8. Ensure the generated content is compelling, concise, and directly uses the research findings.
     9. Include at least 3 different types of charts (bar, line, pie, radar, etc.) to illustrate key data points.
-    10. Do not use any emojis in your response.
-    11. Place the logo in the logo placeholder.
+    10. DO NOT EVER use any emojis in your response.
+    11. IMPORTANT: For the Cover Slide, DO NOT draw or create a logo - just include the placeholder "![Logo](/logo-placeholder.svg)" which will be automatically replaced with the user's uploaded logo.
+    12. IMPORTANT: Always use current dates and timelines. Today's date is ${new Date().toLocaleDateString()}. For roadmaps, milestones, and projections, start from the current year (${new Date().getFullYear()}) and use realistic future dates.
+    13. Write the content with substance and important information/facts to catch the investors' attention and persuasive. 
+    14. DO NOT GENERATE TABLE THAT NEEDS SCROLLBAR.
+    15. EACH SLIDE WRITE A PARAGRAPH TO ELABORATE ON THE SECTION AND THEN ADD THE LIST, TABLE AND OTHER SUPPORTING DATA. 
+  
 
     Create the full pitch deck content below based on these instructions.
   `;

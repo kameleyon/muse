@@ -4,7 +4,7 @@ import { useProjectWorkflowStore } from '@/store/projectWorkflowStore';
 
 // Read environment variables (Vite specific)
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const CONTENT_MODEL = import.meta.env.VITE_DEFAULT_CONTENT_MODEL || 'openrouter/quasar-alpha';
+const CONTENT_MODEL = import.meta.env.VITE_DEFAULT_CONTENT_MODEL || 'openrouter/optimus-alpha';
 const RESEARCH_MODEL = import.meta.env.VITE_DEFAULT_RESEARCH_MODEL || 'openai/gpt-4o-search-preview';
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'http://localhost:5173';
 const APP_NAME = import.meta.env.VITE_APP_NAME || 'MagicMuse';
@@ -23,7 +23,7 @@ interface GenerationParams {
   systemPrompt?: string;
   factCheckLevel?: 'basic' | 'standard' | 'thorough';
   useResearchModel?: boolean; 
-  // temperature?: number; 
+  temperature?: number; 
 }
 
 interface GeneratedContent {
@@ -86,7 +86,7 @@ export const generateContent = async (params: GenerationParams): Promise<Generat
           { role: "user", content: params.prompt } 
         ],
         // Consider adding max_tokens if responses are truncated
-        // max_tokens: 4000, 
+        max_tokens: 80000, 
       }),
     });
 
@@ -488,3 +488,352 @@ export const generateFullContent = async (
 };
 
 // Add more functions as needed (getGenerationStatus, adjustParameters, etc.)
+
+// --- QA and Refinement Service Functions ---
+
+// Placeholder types matching the component (ideally these would be shared types)
+// Use the Suggestion type imported from the store or define it strictly here
+import { Suggestion } from '@/store/types'; // Import the canonical type
+type QualityCheckResult = { score: number; issues: string[]; suggestions?: Suggestion[] };
+type FinancialCheckResult = { coherence: string; issues: string[]; suggestions?: Suggestion[] };
+// No need to redefine Suggestion if imported
+
+/**
+ * Runs a quality check on the provided content.
+ * (Backend implementation needed)
+ * @param projectId - The ID of the project.
+ * @param content - The content to check.
+ * @returns Promise resolving to the quality check results.
+ */
+export const runQualityCheck = async (projectId: string, content: string): Promise<QualityCheckResult> => {
+  console.log('API CALL: runQualityCheck', projectId);
+  
+  if (!OPENROUTER_API_KEY) {
+    console.error("OpenRouter API Key is missing.");
+    throw new Error("API Key missing. Cannot perform quality check.");
+  }
+  
+  try {
+    const prompt = `Analyze the following pitch deck content for quality issues. Focus on clarity, persuasiveness, structure, and overall effectiveness. Provide a numerical score from 0-100 and identify specific issues that should be addressed.
+
+Content to analyze:
+${content}
+
+Return your analysis in this exact JSON format:
+{
+  "score": [overall quality score from 0-100],
+  "issues": ["issue 1", "issue 2", ...],
+  "suggestions": [
+    {"id": "q_sug1", "text": "suggestion text", "impact": "High/Medium/Low", "effort": "High/Medium/Low", "type": "quality"},
+    ...
+  ]
+}`;
+
+    // Make the API call using the existing infrastructure
+    const response = await fetch(OPENROUTER_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': SITE_URL,
+        'X-Title': APP_NAME,
+      },
+      body: JSON.stringify({
+        model: CONTENT_MODEL, // Use the content model for analysis
+        messages: [
+          {
+            role: "system",
+            content: "You are an expert pitch deck analyst with deep knowledge of business presentations. Your task is to analyze pitch deck content and provide quality feedback in a structured JSON format. Be specific, actionable, and thorough in your analysis."
+          },
+          { role: "user", content: prompt }
+        ],
+        response_format: { type: "json_object" }, // Request JSON response
+      }),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(`OpenRouter API Error (${response.status}): ${errorBody}`);
+      throw new Error(`API Error (${response.status}). Check console for details.`);
+    }
+
+    const result = await response.json();
+    
+    // Extract the content from the API response
+    let analysisText = '';
+    if (result.choices && Array.isArray(result.choices) && result.choices.length > 0) {
+      const choice = result.choices[0];
+      if (choice.message && typeof choice.message.content === 'string') {
+        analysisText = choice.message.content.trim();
+      }
+    }
+    if (!analysisText) {
+      throw new Error("Empty response from API");
+    }
+    
+    // Clean the response text to handle markdown code blocks
+    const cleanJsonString = (text: string): string => {
+      let cleaned = text;
+      
+      // Remove any markdown code blocks
+      cleaned = cleaned.replace(/```(?:json|chart|graph)?[\s\S]*?```/g, '');
+      
+      // Remove any remaining backticks
+      cleaned = cleaned.replace(/`/g, '');
+      
+      // Try to extract JSON if it's wrapped in text
+      const jsonMatch = cleaned.match(/(\{[\s\S]*\})/);
+      if (jsonMatch && jsonMatch[1]) {
+        cleaned = jsonMatch[1];
+      }
+      
+      return cleaned.trim();
+    };
+    
+    // Parse the JSON response with error handling
+    let analysis;
+    try {
+      const cleanedJson = cleanJsonString(analysisText);
+      analysis = JSON.parse(cleanedJson);
+    } catch (parseError) {
+      console.error("Failed to parse API response:", parseError, "Raw response:", analysisText);
+      throw new Error(`Failed to parse API response: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+    }
+    // Remove duplicate JSON.parse - we already parsed it above
+    
+    // Validate and return the result
+    if (typeof analysis.score !== 'number' || !Array.isArray(analysis.issues) || !Array.isArray(analysis.suggestions)) {
+      throw new Error("Invalid response format from API");
+    }
+    
+    // Ensure suggestions have the correct type
+    const validatedSuggestions = analysis.suggestions.map((s: any) => ({
+      ...s,
+      type: 'quality' as const // Ensure correct type
+    }));
+    
+    return {
+      score: analysis.score,
+      issues: analysis.issues,
+      suggestions: validatedSuggestions
+    };
+  } catch (error) {
+    console.error("Quality check failed:", error);
+    throw error; // Re-throw to be handled by the component
+  }
+};
+
+/**
+ * Runs a financial validation check on the provided content.
+ * (Backend implementation needed)
+ * @param projectId - The ID of the project.
+ * @param content - The content to check.
+ * @returns Promise resolving to the financial check results.
+ */
+export const runFinancialCheck = async (projectId: string, content: string): Promise<FinancialCheckResult> => {
+  console.log('API CALL: runFinancialCheck', projectId);
+  
+  if (!OPENROUTER_API_KEY) {
+    console.error("OpenRouter API Key is missing.");
+    throw new Error("API Key missing. Cannot perform financial validation.");
+  }
+  
+  try {
+    const prompt = `Analyze the following pitch deck content for financial accuracy, coherence, and validity. Focus on financial projections, revenue models, cost structures, and investment details.
+
+Content to analyze:
+${content}
+
+Return your analysis in this exact JSON format:
+{
+  "coherence": "Good/Needs Review",
+  "issues": ["issue 1", "issue 2", ...],
+  "suggestions": [
+    {"id": "fin_sug1", "text": "suggestion text", "impact": "High/Medium/Low", "effort": "High/Medium/Low", "type": "financial"},
+    ...
+  ]
+}`;
+
+    // Make the API call using the existing infrastructure
+    const response = await fetch(OPENROUTER_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': SITE_URL,
+        'X-Title': APP_NAME,
+      },
+      body: JSON.stringify({
+        model: RESEARCH_MODEL, // Use the research model for financial validation
+        messages: [
+          {
+            role: "system",
+            content: "You are a financial analyst specializing in startup pitch decks and business plans. Your task is to analyze financial content and provide validation feedback in a structured JSON format. Be specific about financial inconsistencies, unrealistic projections, or missing information."
+          },
+          { role: "user", content: prompt }
+        ],
+        response_format: { type: "json_object" }, // Request JSON response
+      }),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(`OpenRouter API Error (${response.status}): ${errorBody}`);
+      throw new Error(`API Error (${response.status}). Check console for details.`);
+    }
+
+    const result = await response.json();
+    
+    // Extract the content from the API response
+    let analysisText = '';
+    if (result.choices && Array.isArray(result.choices) && result.choices.length > 0) {
+      const choice = result.choices[0];
+      if (choice.message && typeof choice.message.content === 'string') {
+        analysisText = choice.message.content.trim();
+      }
+    }
+    
+    if (!analysisText) {
+      throw new Error("Empty response from API");
+    }
+    
+    // Clean the response text to handle markdown code blocks
+    const cleanJsonString = (text: string): string => {
+      let cleaned = text;
+      
+      // Remove any markdown code blocks
+      cleaned = cleaned.replace(/```(?:json|chart|graph)?[\s\S]*?```/g, '');
+      
+      // Remove any remaining backticks
+      cleaned = cleaned.replace(/`/g, '');
+      
+      // Try to extract JSON if it's wrapped in text
+      const jsonMatch = cleaned.match(/(\{[\s\S]*\})/);
+      if (jsonMatch && jsonMatch[1]) {
+        cleaned = jsonMatch[1];
+      }
+      
+      return cleaned.trim();
+    };
+    
+    // Parse the JSON response with error handling
+    let analysis;
+    try {
+      const cleanedJson = cleanJsonString(analysisText);
+      analysis = JSON.parse(cleanedJson);
+    } catch (parseError) {
+      console.error("Failed to parse API response:", parseError, "Raw response:", analysisText);
+      throw new Error(`Failed to parse API response: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+    }
+    
+    // Validate and return the result
+    if (typeof analysis.coherence !== 'string' || !Array.isArray(analysis.issues) || !Array.isArray(analysis.suggestions)) {
+      throw new Error("Invalid response format from API");
+    }
+    
+    // Ensure suggestions have the correct type
+    const validatedSuggestions = analysis.suggestions.map((s: any) => ({
+      ...s,
+      type: 'financial' as const // Ensure correct type
+    }));
+    
+    return {
+      coherence: analysis.coherence,
+      issues: analysis.issues,
+      suggestions: validatedSuggestions
+    };
+  } catch (error) {
+    console.error("Financial validation failed:", error);
+    throw error; // Re-throw to be handled by the component
+  }
+};
+
+/**
+ * Regenerates content based on selected suggestions.
+ * (Backend implementation needed)
+ * @param projectId - The ID of the project.
+ * @param content - The current content.
+ * @param suggestions - An array of selected suggestions to apply.
+ * @returns Promise resolving to the regeneration result.
+ */
+export const regenerateWithSuggestions = async (
+  projectId: string,
+  content: string,
+  suggestions: Suggestion[]
+): Promise<{ success: boolean; newContent?: string; error?: string }> => {
+  console.log('API CALL: regenerateWithSuggestions', projectId, suggestions.map(s => s.id));
+  
+  if (!OPENROUTER_API_KEY) {
+    console.error("OpenRouter API Key is missing.");
+    return { success: false, error: "API Key missing. Cannot regenerate content." };
+  }
+  
+  if (!suggestions || suggestions.length === 0) {
+    return { success: false, error: "No suggestions provided for regeneration." };
+  }
+  
+  try {
+    // Format the suggestions for the prompt
+    const suggestionsText = suggestions.map(s => `- ${s.text} (Impact: ${s.impact}, Type: ${s.type || 'general'})`).join('\n');
+    
+    const prompt = `Regenerate the following pitch deck content by applying these specific suggestions:
+
+SUGGESTIONS TO APPLY:
+${suggestionsText}
+
+ORIGINAL CONTENT:
+${content}
+
+Provide a complete, revised version of the content that incorporates all the suggestions. Maintain the original structure and formatting, but improve the content based on the suggestions. Return ONLY the regenerated content, with no explanations or meta-commentary.`;
+
+    // Make the API call using the existing infrastructure
+    const response = await fetch(OPENROUTER_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': SITE_URL,
+        'X-Title': APP_NAME,
+      },
+      body: JSON.stringify({
+        model: CONTENT_MODEL, // Use the content model for regeneration
+        messages: [
+          {
+            role: "system",
+            content: "You are an expert pitch deck writer specializing in revising and improving business presentations. Your task is to regenerate content based on specific suggestions, maintaining the original structure while enhancing the quality, clarity, and effectiveness."
+          },
+          { role: "user", content: prompt }
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(`OpenRouter API Error (${response.status}): ${errorBody}`);
+      return { success: false, error: `API Error (${response.status}). Check console for details.` };
+    }
+
+    const result = await response.json();
+    
+    // Extract the content from the API response
+    let regeneratedContent = '';
+    if (result.choices && Array.isArray(result.choices) && result.choices.length > 0) {
+      const choice = result.choices[0];
+      if (choice.message && typeof choice.message.content === 'string') {
+        regeneratedContent = choice.message.content.trim();
+      }
+    }
+    
+    if (!regeneratedContent) {
+      return { success: false, error: "Empty response from API" };
+    }
+    
+    return { success: true, newContent: regeneratedContent };
+  } catch (error) {
+    console.error("Regeneration failed:", error);
+    return {
+      success: false,
+      error: `Error during regeneration: ${error instanceof Error ? error.message : String(error)}`
+    };
+  }
+};

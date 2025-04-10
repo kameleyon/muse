@@ -56,8 +56,10 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
   onSlidesChange,
   complexity, // Receive ComplexityLevel string
   onComplexityChange, // Expects function taking ComplexityLevel string
-  primaryColor = '#AE5630', 
+  primaryColor = '#AE5630',
 }) => {
+  const [selectedStructure, setSelectedStructure] = useState('standard-14');
+
   // Convert complexity string to number for the slider
   const complexityValue = complexityLevelToNumber(complexity);
 
@@ -69,15 +71,26 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
     }
   };
 
+  const handleStructureChange = (structureId: string) => {
+    const newStructure = pitchDeckStructures.find(s => s.id === structureId);
+    if (newStructure) {
+      onSlidesChange(newStructure.slides);
+      setSelectedStructure(structureId);
+    }
+  };
+
   // ALWAYS ensure all 14 slides are present (or initialize if empty)
   useEffect(() => {
-    if (!slides || slides.length === 0) {
-       onSlidesChange(defaultPitchDeckStructure);
-    } else if (slides.length !== defaultPitchDeckStructure.length) {
-       // If somehow the length is wrong, reset (optional, depends on desired behavior)
-       // onSlidesChange(defaultPitchDeckStructure); 
+    const selectedStructureData = pitchDeckStructures.find(s => s.id === selectedStructure);
+    if (selectedStructureData) {
+      if (!slides || slides.length === 0) {
+        onSlidesChange(selectedStructureData.slides);
+      } else if (slides.length !== selectedStructureData.slides.length) {
+        // Optional: Reset to selected structure if length doesn't match
+        // onSlidesChange(selectedStructureData.slides);
+      }
     }
-  }, [slides, onSlidesChange]);
+  }, [slides, onSlidesChange, selectedStructure]);
   
   // Drag-and-drop handlers
   const handleDragStart = (e: React.DragEvent<HTMLLIElement>, index: number) => {
@@ -112,12 +125,22 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
   const [editingSlideTitle, setEditingSlideTitle] = useState('');
   const [editingSlideDescription, setEditingSlideDescription] = useState('');
 
-  // Add slide (disabled as per previous logic)
-  const addSlide = () => {
+// Add slide
+const addSlide = () => {
+  if (newSlideTitle.trim()) {
+    const newSlide: Slide = {
+      id: `slide-${Date.now()}`,
+      title: newSlideTitle,
+      description: newSlideDescription || '',
+      type: 'custom',
+      isRequired: false
+    };
+    onSlidesChange([...slides, newSlide]);
     setShowAddSlideModal(false);
     setNewSlideTitle('');
     setNewSlideDescription('');
   }
+};
 
   // Edit slide handlers
   const startEditSlideTitle = (index: number) => {
@@ -145,7 +168,28 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
   return (
     <Card className="p-4 border border-neutral-light bg-white/30 shadow-sm">
       <h4 className="font-semibold text-neutral-dark text-lg mb-4 border-b border-neutral-light/40 pb-2">Structure Planning</h4>
-      
+
+      {/* Structure Templates Section */}
+      <div className="mb-6">
+        <label className="settings-label mb-2">Pitch Deck Structure</label>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          {pitchDeckStructures.map((structure) => (
+            <button
+              key={structure.id}
+              onClick={() => handleStructureChange(structure.id)}
+              className={`p-3 border rounded-lg text-left ${
+                selectedStructure === structure.id
+                  ? 'border-primary bg-primary/5'
+                  : 'border-neutral-light hover:border-primary/50'
+              }`}
+            >
+              <p className="font-medium mb-1 text-md text-primary/80 align-top">{structure.name}</p>
+              <p className="text-xs text-neutral-medium">{structure.description}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {/* Slide Structure List */}
         <div className="md:col-span-2">
@@ -156,7 +200,7 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
             </Tooltip>
           </div>
           
-          <ul className="border rounded-xl p-1 bg-neutral-light/20 space-y-1 min-h-[800px]">
+          <ul className="border rounded-xl p-1 bg-neutral-light/20 space-y-1 min-h-auto">
             {slides.map((slide, index) => (
               <li 
                 key={slide.id} 
@@ -204,8 +248,8 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
           
           {/* Add Slide Button (kept but functionally disabled) */}
           <div className="pt-2">
-            <Button variant="outline" size="sm" className="w-full" onClick={() => setShowAddSlideModal(true)} disabled>
-              <Plus size={14} className="mr-1"/> Add Custom Slide (Disabled)
+            <Button variant="outline" size="sm" className="w-full" onClick={() => setShowAddSlideModal(true)}>
+              <Plus size={14} className="mr-1"/> Add Custom Slide
             </Button>
           </div>
           <p className="text-xs text-neutral-medium mt-1">Standard 14-slide pitch deck structure.</p>
@@ -215,11 +259,29 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
             <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
               <div className="bg-white p-4 rounded-md shadow-lg max-w-md w-full">
                 <h5 className="font-medium text-lg mb-4">Add Custom Slide</h5>
-                {/* ... modal content ... */}
-                 <div className="flex justify-end gap-2">
-                   <Button variant="outline" size="sm" onClick={() => setShowAddSlideModal(false)}>Cancel</Button>
-                   <Button size="sm" onClick={addSlide} disabled>Add Slide</Button>
-                 </div>
+                <div className="mb-3">
+                  <label className="block text-sm mb-1">Slide Title <span className="text-red-500">*</span></label>
+                  <Input
+                    type="text"
+                    value={newSlideTitle}
+                    onChange={(e) => setNewSlideTitle(e.target.value)}
+                    className="w-full"
+                    autoFocus
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm mb-1">Slide Description</label>
+                  <textarea
+                    value={newSlideDescription}
+                    onChange={(e) => setNewSlideDescription(e.target.value)}
+                    placeholder="Enter slide description or content summary..."
+                    className="w-full h-20 p-2 border rounded-md text-sm resize-none"
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setShowAddSlideModal(false)}>Cancel</Button>
+                  <Button size="sm" onClick={addSlide} disabled={!newSlideTitle.trim()}>Add Slide</Button>
+                </div>
               </div>
             </div>
           )}
@@ -360,5 +422,12 @@ const StructurePlanning: React.FC<StructurePlanningProps> = ({
     </Card>
   );
 };
+
+// Define available pitch deck structures
+import { pitchDeckStructures } from '@/data/pitchDeckStructures';
+
+// Remove the local pitchDeckStructures definition
+
+// Remove the duplicate handleStructureChange definition
 
 export default StructurePlanning;
