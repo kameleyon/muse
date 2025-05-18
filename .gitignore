@@ -49,6 +49,7 @@ lerna-debug.log*
 .classpath
 *.launch
 .settings/
+docs/
 
 # Testing
 /coverage

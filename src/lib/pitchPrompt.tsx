@@ -300,6 +300,7 @@ export const generateFullContentPrompt = (projectData: any, researchData: string
   
        - Do not write Line 1, Line 2, Line 3, but right the specific label Name
        - DO NOT USE PIE CHART, LINE, BAR OR DIAGRAM CHART -- Use scattered or line charts instead
+       - DO NOT WRITE RAW CODES - USE TABLE ONLY AS SUPPORTING DATA
     6. Maintain a professional tone consistent with the "${templateId}" style.
     7. Address the audience's key concerns: ${audienceConcerns}.
     8. Ensure the generated content is compelling, concise, and directly uses the research findings.

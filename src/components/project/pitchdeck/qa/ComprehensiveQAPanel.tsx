@@ -133,6 +133,11 @@ export const ComprehensiveQAPanel: React.FC = () => {
 
     try {
       const contentToCheck = editorContent || generatedContentPreview || '';
+      if (!contentToCheck.trim()) {
+        setFinancialStatus('error');
+        dispatch(addToast({ type: 'error', message: 'No content available for financial validation.' }));
+        return;
+      }
       const result = await runFinancialCheck(projectId, contentToCheck);
       setFinancialResult(result);
        // Add suggestions from the result, ensuring they have unique IDs if needed
