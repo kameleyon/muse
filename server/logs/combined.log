@@ -2279,3 +2279,18 @@
 2025-05-19 10:16:15 [info]: Server running in development mode on port 9999
 2025-05-19 10:19:06 [warn]: API Error: 401 - Invalid or expired token
 2025-05-19 10:27:20 [info]: Server running in development mode on port 9999
+2025-05-19 10:28:59 [info]: Making OpenRouter request to model: openai/gpt-4o-mini
+2025-05-19 10:29:10 [info]: OpenRouter request successful. Tokens used: 1577
+2025-05-19 10:29:10 [info]: Making OpenRouter request to model: openai/gpt-4o
+2025-05-19 10:29:27 [info]: OpenRouter request successful. Tokens used: 2137
+2025-05-19 10:34:52 [info]: Server running in development mode on port 9999
+2025-05-19 10:35:05 [info]: Making OpenRouter request to model: openai/gpt-4o-mini
+2025-05-19 10:35:12 [info]: OpenRouter request successful. Tokens used: 1513
+2025-05-19 10:35:12 [info]: Making OpenRouter request to model: openai/gpt-4o
+2025-05-19 10:35:25 [info]: Server running in development mode on port 9999
+2025-05-19 10:36:04 [info]: Server running in development mode on port 9999
+2025-05-19 10:37:40 [info]: Server running in development mode on port 9999
+2025-05-19 10:37:46 [info]: Making OpenRouter request to model: openai/gpt-4o-mini
+2025-05-19 10:37:53 [info]: OpenRouter request successful. Tokens used: 1603
+2025-05-19 10:37:53 [info]: Making OpenRouter request to model: openai/gpt-4o
+2025-05-19 10:38:12 [info]: OpenRouter request successful. Tokens used: 2180

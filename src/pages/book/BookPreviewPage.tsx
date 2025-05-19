@@ -80,28 +80,28 @@ const BookPreviewPage: React.FC = () => {
 
   if (loading) {
     return (
-      <DashboardLayout>
+      
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
-      </DashboardLayout>
+      
     )
   }
 
   if (!book) {
     return (
-      <DashboardLayout>
+      
         <div className="text-center py-12">
           <p className="text-xl text-neutral-dark">Book not found</p>
         </div>
-      </DashboardLayout>
+      
     )
   }
 
   const completeBook = chapters.map(chapter => chapter.content || '').join('\n\n---\n\n')
 
   return (
-    <DashboardLayout>
+    
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <button
@@ -220,7 +220,7 @@ const BookPreviewPage: React.FC = () => {
           />
         </div>
       </div>
-    </DashboardLayout>
+    
   )
 }
 

@@ -148,27 +148,27 @@ const BookEditorPage: React.FC = () => {
 
   if (loading) {
     return (
-      <DashboardLayout>
+      
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
-      </DashboardLayout>
+     
     )
   }
 
   if (!book) {
     return (
-      <DashboardLayout>
+      
         <div className="text-center py-12">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <p className="text-xl text-neutral-dark">Book not found</p>
         </div>
-      </DashboardLayout>
+      
     )
   }
 
   return (
-    <DashboardLayout>
+    
       <div className="flex h-[calc(100vh-6rem)]">
         {/* Sidebar */}
         <div className="w-64 bg-white border-r border-neutral-light overflow-y-auto">
@@ -342,7 +342,7 @@ const BookEditorPage: React.FC = () => {
           )}
         </div>
       </div>
-
+  )
       {/* Revision Modal */}
       {showRevisionModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -392,8 +392,8 @@ const BookEditorPage: React.FC = () => {
           </div>
         </div>
       )}
-    </DashboardLayout>
-  )
+    
+  
 }
 
 export default BookEditorPage
