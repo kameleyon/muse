@@ -22,7 +22,7 @@ const routeConfig = [
   },
   {
     path: '/dashboard',
-    element: lazy(() => import('./pages/Dashboard')),
+    element: lazy(() => import('./pages/DashboardMVP')),
     auth: true
   },
   {
