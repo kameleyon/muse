@@ -55,3 +55,6 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     next(error);
   }
 };
+
+// Export the auth middleware
+export { authenticate as auth };

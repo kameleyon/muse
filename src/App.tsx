@@ -79,6 +79,31 @@ const routeConfig = [
     path: '/notifications', // New route for Notifications page
     element: lazy(() => import('./pages/NotificationsPage')),
     auth: true // Requires authentication
+  },
+  {
+    path: '/new-book',
+    element: lazy(() => import('./pages/NewBookPage')),
+    auth: true
+  },
+  {
+    path: '/book/:bookId/review',
+    element: lazy(() => import('./pages/book/BookReviewPage')),
+    auth: true
+  },
+  {
+    path: '/book/:bookId/edit',
+    element: lazy(() => import('./pages/book/BookEditorPage')),
+    auth: true
+  },
+  {
+    path: '/book/:bookId/preview',
+    element: lazy(() => import('./pages/book/BookPreviewPage')),
+    auth: true
+  },
+  {
+    path: '/book-library',
+    element: lazy(() => import('./pages/BookLibrary')),
+    auth: true
   }
   // Removed About page route - now handled by modal in footer
 ];

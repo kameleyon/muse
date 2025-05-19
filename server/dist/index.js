@@ -24,6 +24,8 @@ const content_1 = __importDefault(require("./routes/content"));
 const user_1 = __importDefault(require("./routes/user"));
 const ai_1 = __importDefault(require("./routes/ai"));
 const projectRoutes_1 = __importDefault(require("./routes/projectRoutes")); // Import project routes
+const book_1 = __importDefault(require("./routes/book")); // Import book routes
+const bookAI_1 = __importDefault(require("./routes/bookAI")); // Import book AI routes
 const app = (0, express_1.default)();
 const PORT = config_1.default.port || 5000;
 // Middleware
@@ -59,6 +61,8 @@ app.use('/api/content', content_1.default);
 app.use('/api/user', user_1.default);
 app.use('/api/ai', ai_1.default);
 app.use('/api/projects', projectRoutes_1.default); // Mount project routes
+app.use('/api', book_1.default); // Mount book routes
+app.use('/api', bookAI_1.default); // Mount book AI routes
 // Error handling middleware
 app.use(error_1.notFound);
 app.use(error_1.errorHandler);

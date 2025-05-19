@@ -23,6 +23,8 @@ import contentRoutes from './routes/content';
 import userRoutes from './routes/user';
 import aiRoutes from './routes/ai';
 import projectRoutes from './routes/projectRoutes'; // Import project routes
+import bookRoutes from './routes/book'; // Import book routes
+import bookAIRoutes from './routes/bookAI'; // Import book AI routes
 
 const app = express();
 const PORT = config.port || 5000;
@@ -63,6 +65,8 @@ app.use('/api/content', contentRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/projects', projectRoutes); // Mount project routes
+app.use('/api', bookRoutes); // Mount book routes
+app.use('/api', bookAIRoutes); // Mount book AI routes
 
 // Error handling middleware
 app.use(notFound);

@@ -1,0 +1,420 @@
+
+> magicmuse-server@0.1.0 dev
+> nodemon --exec ts-node src/index.ts
+
+[33m[nodemon] 3.1.9[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: ts,json[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859
+    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+           ^
+TSError: ⨯ Unable to compile TypeScript:
+src/routes/book.ts(12,8): error TS2307: Cannot find module '../controllers/bookController' or its corresponding type declarations.
+
+    at createTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859:12)
+    at reportTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:863:19)
+    at getOutput (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1077:36)
+    at Object.compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1433:41)
+    at Module.m._compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1617:30)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Object.require.extensions.<computed> [as .ts] (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19) {
+  diagnosticCodes: [ 2307 ]
+}
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859
+    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+           ^
+TSError: ⨯ Unable to compile TypeScript:
+src/controllers/bookController.ts(4,48): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookController.ts(30,50): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookController.ts(35,17): error TS2304: Cannot find name 'supabase'.
+src/controllers/bookController.ts(56,45): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookController.ts(83,48): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookController.ts(107,48): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookController.ts(142,52): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookController.ts(168,51): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookController.ts(199,48): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+
+    at createTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859:12)
+    at reportTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:863:19)
+    at getOutput (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1077:36)
+    at Object.compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1433:41)
+    at Module.m._compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1617:30)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Object.require.extensions.<computed> [as .ts] (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19) {
+  diagnosticCodes: [
+    7006, 7006, 2304,
+    7006, 7006, 7006,
+    7006, 7006, 7006
+  ]
+}
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859
+    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+           ^
+TSError: ⨯ Unable to compile TypeScript:
+src/controllers/bookUpload.ts(2,10): error TS2305: Module '"../services/supabase"' has no exported member 'supabase'.
+src/controllers/bookUpload.ts(34,57): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookUpload.ts(92,52): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookUpload.ts(111,50): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookUpload.ts(150,52): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+
+    at createTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859:12)
+    at reportTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:863:19)
+    at getOutput (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1077:36)
+    at Object.compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1433:41)
+    at Module.m._compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1617:30)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Object.require.extensions.<computed> [as .ts] (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19) {
+  diagnosticCodes: [ 2305, 7006, 7006, 7006, 7006 ]
+}
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859
+    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+           ^
+TSError: ⨯ Unable to compile TypeScript:
+src/controllers/bookUpload.ts(2,10): error TS2305: Module '"../services/supabase"' has no exported member 'supabase'.
+src/controllers/bookUpload.ts(34,57): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookUpload.ts(92,52): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookUpload.ts(111,50): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookUpload.ts(150,52): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+
+    at createTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859:12)
+    at reportTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:863:19)
+    at getOutput (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1077:36)
+    at Object.compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1433:41)
+    at Module.m._compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1617:30)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Object.require.extensions.<computed> [as .ts] (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19) {
+  diagnosticCodes: [ 2305, 7006, 7006, 7006, 7006 ]
+}
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859
+    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+           ^
+TSError: ⨯ Unable to compile TypeScript:
+src/controllers/bookUpload.ts(2,10): error TS2305: Module '"../services/supabase"' has no exported member 'supabase'.
+src/controllers/bookUpload.ts(34,57): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookUpload.ts(92,52): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookUpload.ts(111,50): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookUpload.ts(150,52): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+
+    at createTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859:12)
+    at reportTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:863:19)
+    at getOutput (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1077:36)
+    at Object.compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1433:41)
+    at Module.m._compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1617:30)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Object.require.extensions.<computed> [as .ts] (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19) {
+  diagnosticCodes: [ 2305, 7006, 7006, 7006, 7006 ]
+}
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859
+    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+           ^
+TSError: ⨯ Unable to compile TypeScript:
+src/controllers/bookUpload.ts(2,10): error TS2305: Module '"../services/supabase"' has no exported member 'supabase'.
+src/controllers/bookUpload.ts(34,57): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookUpload.ts(92,52): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookUpload.ts(111,50): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookUpload.ts(150,52): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+
+    at createTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859:12)
+    at reportTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:863:19)
+    at getOutput (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1077:36)
+    at Object.compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1433:41)
+    at Module.m._compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1617:30)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Object.require.extensions.<computed> [as .ts] (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19) {
+  diagnosticCodes: [ 2305, 7006, 7006, 7006, 7006 ]
+}
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859
+    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+           ^
+TSError: ⨯ Unable to compile TypeScript:
+src/controllers/bookUpload.ts(34,57): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookUpload.ts(48,60): error TS2304: Cannot find name 'supabase'.
+src/controllers/bookUpload.ts(70,35): error TS2304: Cannot find name 'supabase'.
+src/controllers/bookUpload.ts(92,52): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookUpload.ts(96,35): error TS2304: Cannot find name 'supabase'.
+src/controllers/bookUpload.ts(111,50): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookUpload.ts(116,55): error TS2304: Cannot find name 'supabase'.
+src/controllers/bookUpload.ts(126,45): error TS2304: Cannot find name 'supabase'.
+src/controllers/bookUpload.ts(136,38): error TS2304: Cannot find name 'supabase'.
+src/controllers/bookUpload.ts(150,52): error TS7006: Parameter 'Response' implicitly has an 'any' type.
+src/controllers/bookUpload.ts(155,55): error TS2304: Cannot find name 'supabase'.
+src/controllers/bookUpload.ts(168,35): error TS2304: Cannot find name 'supabase'.
+
+    at createTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859:12)
+    at reportTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:863:19)
+    at getOutput (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1077:36)
+    at Object.compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1433:41)
+    at Module.m._compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1617:30)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Object.require.extensions.<computed> [as .ts] (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19) {
+  diagnosticCodes: [
+    7006, 2304, 2304,
+    7006, 2304, 7006,
+    2304, 2304, 2304,
+    7006, 2304, 2304
+  ]
+}
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859
+    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+           ^
+TSError: ⨯ Unable to compile TypeScript:
+src/controllers/bookUpload.ts(48,60): error TS2304: Cannot find name 'supabase'.
+src/controllers/bookUpload.ts(70,35): error TS2304: Cannot find name 'supabase'.
+src/controllers/bookUpload.ts(96,35): error TS2304: Cannot find name 'supabase'.
+src/controllers/bookUpload.ts(116,55): error TS2304: Cannot find name 'supabase'.
+src/controllers/bookUpload.ts(126,45): error TS2304: Cannot find name 'supabase'.
+src/controllers/bookUpload.ts(136,38): error TS2304: Cannot find name 'supabase'.
+src/controllers/bookUpload.ts(155,55): error TS2304: Cannot find name 'supabase'.
+src/controllers/bookUpload.ts(168,35): error TS2304: Cannot find name 'supabase'.
+
+    at createTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859:12)
+    at reportTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:863:19)
+    at getOutput (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1077:36)
+    at Object.compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1433:41)
+    at Module.m._compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1617:30)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Object.require.extensions.<computed> [as .ts] (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19) {
+  diagnosticCodes: [
+    2304, 2304, 2304,
+    2304, 2304, 2304,
+    2304, 2304
+  ]
+}
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859
+    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+           ^
+TSError: ⨯ Unable to compile TypeScript:
+src/controllers/bookAI.ts(3,10): error TS2305: Module '"../services/openrouter"' has no exported member 'openRouterService'.
+
+    at createTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859:12)
+    at reportTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:863:19)
+    at getOutput (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1077:36)
+    at Object.compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1433:41)
+    at Module.m._compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1617:30)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Object.require.extensions.<computed> [as .ts] (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19) {
+  diagnosticCodes: [ 2305 ]
+}
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859
+    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+           ^
+TSError: ⨯ Unable to compile TypeScript:
+src/controllers/bookAI.ts(90,30): error TS2304: Cannot find name 'openRouter'.
+src/controllers/bookAI.ts(162,30): error TS2304: Cannot find name 'openRouter'.
+src/controllers/bookAI.ts(262,27): error TS2304: Cannot find name 'openRouter'.
+src/controllers/bookAI.ts(330,34): error TS2304: Cannot find name 'openRouter'.
+
+    at createTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859:12)
+    at reportTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:863:19)
+    at getOutput (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1077:36)
+    at Object.compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1433:41)
+    at Module.m._compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1617:30)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Object.require.extensions.<computed> [as .ts] (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19) {
+  diagnosticCodes: [ 2304, 2304, 2304, 2304 ]
+}
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859
+    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+           ^
+TSError: ⨯ Unable to compile TypeScript:
+src/controllers/bookAI.ts(92,7): error TS2353: Object literal may only specify known properties, and 'messages' does not exist in type 'OpenRouterRequestParams'.
+src/controllers/bookAI.ts(97,46): error TS2345: Argument of type 'OpenRouterResponse' is not assignable to parameter of type 'string'.
+src/controllers/bookAI.ts(164,7): error TS2353: Object literal may only specify known properties, and 'messages' does not exist in type 'OpenRouterRequestParams'.
+src/controllers/bookAI.ts(169,41): error TS2345: Argument of type 'OpenRouterResponse' is not assignable to parameter of type 'string'.
+src/controllers/bookAI.ts(264,7): error TS2353: Object literal may only specify known properties, and 'messages' does not exist in type 'OpenRouterRequestParams'.
+src/controllers/bookAI.ts(332,7): error TS2353: Object literal may only specify known properties, and 'messages' does not exist in type 'OpenRouterRequestParams'.
+
+    at createTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859:12)
+    at reportTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:863:19)
+    at getOutput (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1077:36)
+    at Object.compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1433:41)
+    at Module.m._compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1617:30)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Object.require.extensions.<computed> [as .ts] (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19) {
+  diagnosticCodes: [ 2353, 2345, 2353, 2345, 2353, 2353 ]
+}
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859
+    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+           ^
+TSError: ⨯ Unable to compile TypeScript:
+src/controllers/bookAI.ts(97,46): error TS2345: Argument of type 'OpenRouterResponse' is not assignable to parameter of type 'string'.
+src/controllers/bookAI.ts(164,7): error TS2353: Object literal may only specify known properties, and 'messages' does not exist in type 'OpenRouterRequestParams'.
+src/controllers/bookAI.ts(169,41): error TS2345: Argument of type 'OpenRouterResponse' is not assignable to parameter of type 'string'.
+src/controllers/bookAI.ts(264,7): error TS2353: Object literal may only specify known properties, and 'messages' does not exist in type 'OpenRouterRequestParams'.
+src/controllers/bookAI.ts(332,7): error TS2353: Object literal may only specify known properties, and 'messages' does not exist in type 'OpenRouterRequestParams'.
+
+    at createTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859:12)
+    at reportTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:863:19)
+    at getOutput (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1077:36)
+    at Object.compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1433:41)
+    at Module.m._compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1617:30)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Object.require.extensions.<computed> [as .ts] (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19) {
+  diagnosticCodes: [ 2345, 2353, 2345, 2353, 2353 ]
+}
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859
+    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+           ^
+TSError: ⨯ Unable to compile TypeScript:
+src/controllers/bookAI.ts(97,46): error TS2345: Argument of type 'OpenRouterResponse' is not assignable to parameter of type 'string'.
+src/controllers/bookAI.ts(169,41): error TS2345: Argument of type 'OpenRouterResponse' is not assignable to parameter of type 'string'.
+src/controllers/bookAI.ts(264,7): error TS2353: Object literal may only specify known properties, and 'messages' does not exist in type 'OpenRouterRequestParams'.
+src/controllers/bookAI.ts(332,7): error TS2353: Object literal may only specify known properties, and 'messages' does not exist in type 'OpenRouterRequestParams'.
+
+    at createTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859:12)
+    at reportTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:863:19)
+    at getOutput (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1077:36)
+    at Object.compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1433:41)
+    at Module.m._compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1617:30)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Object.require.extensions.<computed> [as .ts] (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19) {
+  diagnosticCodes: [ 2345, 2345, 2353, 2353 ]
+}
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859
+    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+           ^
+TSError: ⨯ Unable to compile TypeScript:
+src/controllers/bookAI.ts(97,46): error TS2345: Argument of type 'OpenRouterResponse' is not assignable to parameter of type 'string'.
+src/controllers/bookAI.ts(169,41): error TS2345: Argument of type 'OpenRouterResponse' is not assignable to parameter of type 'string'.
+src/controllers/bookAI.ts(332,7): error TS2353: Object literal may only specify known properties, and 'messages' does not exist in type 'OpenRouterRequestParams'.
+
+    at createTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859:12)
+    at reportTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:863:19)
+    at getOutput (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1077:36)
+    at Object.compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1433:41)
+    at Module.m._compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1617:30)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Object.require.extensions.<computed> [as .ts] (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19) {
+  diagnosticCodes: [ 2345, 2345, 2353 ]
+}
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859
+    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+           ^
+TSError: ⨯ Unable to compile TypeScript:
+src/controllers/bookAI.ts(97,46): error TS2345: Argument of type 'OpenRouterResponse' is not assignable to parameter of type 'string'.
+src/controllers/bookAI.ts(169,41): error TS2345: Argument of type 'OpenRouterResponse' is not assignable to parameter of type 'string'.
+
+    at createTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:859:12)
+    at reportTSError (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:863:19)
+    at getOutput (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1077:36)
+    at Object.compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1433:41)
+    at Module.m._compile (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1617:30)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+    at Object.require.extensions.<computed> [as .ts] (/mnt/c/Users/Administrator/mm.io/server/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19) {
+  diagnosticCodes: [ 2345, 2345 ]
+}
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+2025-05-19 10:14:29 [[32minfo[39m]: Server running in development mode on port 9999
+[0mGET /api/health [32m200[0m 19.665 ms - 89[0m
+2025-05-19 10:19:06 [[33mwarn[39m]: API Error: 401 - Invalid or expired token
+[0mGET /api/books/user/test-user?bookType=self_improvement [33m401[0m 318.313 ms - 263[0m

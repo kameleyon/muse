@@ -86,6 +86,16 @@ const NewProjectModal: React.FC<NewProjectModalProps> = ({
 
         if (newProjectId) {
           onClose(); // Close the modal first
+          
+          // Check if this is a self-improvement book project
+          if (selectedCategory?.id === 'educational_learning_applications' && 
+              selectedSubcategory?.id === 'personal_transformation' &&
+              selectedSection?.id === 'self_improvement') {
+            // Navigate directly to book creation instead of project setup
+            navigate('/new-book');
+            return;
+          }
+          
           // Map subcategory ID to a valid project type recognized by ProjectArea component
           let projectType = "pitchdeck"; // Default fallback
           
