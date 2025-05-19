@@ -401,6 +401,25 @@ h3, .h3 { font-size: 1.25rem; }
   border-top: 1px solid rgba(188, 183, 175, 0.4);
 }
 
+/* Inspiration Topics */
+.topic-suggestion {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  font-weight: 400;
+}
+
+.topic-suggestion:hover {
+  background-color: #e5e7eb;
+  transform: translateY(-1px);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .dashboard-header,

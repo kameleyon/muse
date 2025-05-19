@@ -12,7 +12,7 @@ import {
   // industrySpecificCategory,
   // governmentPublicSectorCategory,
   // emergingTechnologiesCategory,
-  // educationalLearningCategory,
+  educationalLearningCategory,
   // customizationIntegrationCategory,
 } from './categories'; // Import all categories
 
@@ -58,14 +58,14 @@ export const projectCategories: ProjectCategory[] = [
   professionalWritingCategory,
   // creativeWritingCategory,
   // academicEducationalCategory,
-  technicalSpecializedCategory,
+  //technicalSpecializedCategory,
   // journalismMediaCategory,
-  enhancementOptimizationCategory,
-  aiWorkflowSolutionsCategory,
+  //enhancementOptimizationCategory,
+  //aiWorkflowSolutionsCategory,
   // industrySpecificCategory,
   // governmentPublicSectorCategory,
   // emergingTechnologiesCategory,
-  // educationalLearningCategory,
+  educationalLearningCategory,
   // customizationIntegrationCategory,
 ];
 

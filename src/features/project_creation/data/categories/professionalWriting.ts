@@ -13,11 +13,11 @@ export const professionalWritingCategory: ProjectCategory = {
           name: 'Proposal & Pitch Deck Generation',
           // items array removed
         },
-        {
-          id: 'executive_summary_creation',
-          name: 'Executive Summary Creation',
+        //{
+          //id: 'executive_summary_creation',
+          //name: 'Executive Summary Creation',
           // items array removed
-        },
+        //},
         // { // Non-MVP Section
         //   id: 'report_writing_data_analysis_narratives',
         //   name: 'Report Writing & Data Analysis Narratives',
@@ -35,7 +35,7 @@ export const professionalWritingCategory: ProjectCategory = {
         // },
       ],
     },
-    {
+    /*{
       id: 'marketing_content',
       name: 'Marketing Content',
       sections: [
@@ -65,7 +65,7 @@ export const professionalWritingCategory: ProjectCategory = {
         //   // items array removed
         // },
       ],
-    },
+    },*/
     // { // Non-MVP Subcategory
     //   id: 'digital_social_media',
     //   name: 'Digital & Social Media',

@@ -33,7 +33,6 @@ interface QuickStat {
 
 const DashboardMVP: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
-  const userName = user?.email?.split('@')[0] || 'User';
 
   // Sample data for MVP
   const recentFiles = [
@@ -45,10 +44,10 @@ const DashboardMVP: React.FC = () => {
   ];
 
   const quickStats: QuickStat[] = [
-    { label: 'Total Projects', value: 12, trend: 'up', icon: <FolderOpen size={20} />, color: 'text-blue-600' },
-    { label: 'AI Credits Used', value: '2,450', trend: 'stable', icon: <Zap size={20} />, color: 'text-purple-600' },
-    { label: 'Content Created', value: '34', trend: 'up', icon: <FileText size={20} />, color: 'text-green-600' },
-    { label: 'Success Rate', value: '94%', trend: 'up', icon: <TrendingUp size={20} />, color: 'text-orange-600' },
+    { label: 'Total Projects', value: 12, trend: 'up', icon: <FolderOpen size={20} />, color: 'text-[#ae5630]' }, // terracotta
+    { label: 'AI Credits Used', value: '2,450', trend: 'stable', icon: <Zap size={20} />, color: 'text-[#9d4e2c]' }, // terracotta-light
+    { label: 'Content Created', value: '34', trend: 'up', icon: <FileText size={20} />, color: 'text-[#3d3d3a]' }, // olive
+    { label: 'Success Rate', value: '94%', trend: 'up', icon: <TrendingUp size={20} />, color: 'text-[#ae5630]' }, // terracotta
   ];
 
   const smartNotifications: SmartNotification[] = [
@@ -94,37 +93,27 @@ const DashboardMVP: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#F7F9FA] min-h-screen p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Welcome back, {userName}! 👋
-        </h1>
-        <p className="text-gray-600">
-          Let's create something amazing today
-        </p>
-      </div>
-
+    <div className="bg-[#EDEAE2] w-full">
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {quickStats.map((stat) => (
           <Card key={stat.label} className="p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">{stat.label}</p>
-                <p className="text-2xl font-bold mt-1">{stat.value}</p>
+                <p className="text-sm text-[#3d3d3a]">{stat.label}</p>
+                <p className="text-2xl font-bold text-[#232321] mt-1">{stat.value}</p>
                 {stat.trend && (
                   <p className={`text-xs mt-1 ${
-                    stat.trend === 'up' ? 'text-green-600' : 
-                    stat.trend === 'down' ? 'text-red-600' : 
-                    'text-gray-500'
+                    stat.trend === 'up' ? 'text-[#3d3d3a]' : // olive for positive
+                    stat.trend === 'down' ? 'text-[#ae5630]' : // terracotta for negative
+                    'text-[#30302e]' // charcoal for neutral
                   }`}>
                     {stat.trend === 'up' ? '↑' : stat.trend === 'down' ? '↓' : '→'} 
                     {stat.trend === 'up' ? ' Increasing' : stat.trend === 'down' ? ' Decreasing' : ' Stable'}
                   </p>
                 )}
               </div>
-              <div className={`p-3 rounded-lg bg-gray-50 ${stat.color}`}>
+              <div className={`p-3 rounded-lg bg-[#faf9f5] ${stat.color}`}>
                 {stat.icon}
               </div>
             </div>
@@ -140,8 +129,8 @@ const DashboardMVP: React.FC = () => {
           <Card>
             <div className="p-6 border-b border-gray-100">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-900">Recent Files</h2>
-                <Link to="/projects" className="text-blue-600 hover:text-blue-700 text-sm">
+                <h2 className="text-xl font-semibold text-[#232321]">Recent Files</h2>
+                <Link to="/projects" className="text-[#ae5630] hover:text-[#9d4e2c] text-sm">
                   View all →
                 </Link>
               </div>
@@ -167,12 +156,12 @@ const DashboardMVP: React.FC = () => {
           </Card>
 
           {/* Create New Content CTA */}
-          <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+          <Card className="bg-gradient-to-r from-[#ae5630] to-[#9d4e2c] text-white">
             <div className="p-6">
               <h3 className="text-xl font-semibold mb-2">Ready to create?</h3>
               <p className="mb-4">Start a new project or use our AI to generate content</p>
               <Link to="/generator">
-                <Button variant="secondary" size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
+                <Button variant="secondary" size="lg" className="bg-[#faf9f5] text-[#ae5630] hover:bg-[#edeae2]">
                   <Plus size={20} className="mr-2" />
                   Create New Content
                 </Button>
@@ -186,20 +175,20 @@ const DashboardMVP: React.FC = () => {
           {/* Smart Notifications */}
           <Card>
             <div className="p-6 border-b border-gray-100">
-              <h2 className="text-xl font-semibold text-gray-900">Notifications</h2>
+              <h2 className="text-xl font-semibold text-[#232321]">Notifications</h2>
             </div>
             <div className="p-4 space-y-3">
               {smartNotifications.map((notification) => (
                 <div 
                   key={notification.id} 
                   className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                    notification.read ? 'bg-gray-50' : 'bg-blue-50'
-                  }`}
+                    notification.read ? 'bg-[#faf9f5]' : 'bg-[#faf9f5]' // cream for both states
+                  } hover:bg-[#edeae2]`}
                 >
                   <div className="flex items-start space-x-3">
-                    {notification.type === 'success' && <CheckCircle size={16} className="text-green-600 mt-0.5" />}
-                    {notification.type === 'warning' && <AlertCircle size={16} className="text-yellow-600 mt-0.5" />}
-                    {notification.type === 'info' && <Activity size={16} className="text-blue-600 mt-0.5" />}
+                    {notification.type === 'success' && <CheckCircle size={16} className="text-[#3d3d3a] mt-0.5" />}
+                    {notification.type === 'warning' && <AlertCircle size={16} className="text-[#9d4e2c] mt-0.5" />}
+                    {notification.type === 'info' && <Activity size={16} className="text-[#ae5630] mt-0.5" />}
                     <div className="flex-1">
                       <p className="font-medium text-gray-900 text-sm">{notification.title}</p>
                       <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
@@ -216,7 +205,7 @@ const DashboardMVP: React.FC = () => {
           {/* Resource Usage */}
           <Card>
             <div className="p-6 border-b border-gray-100">
-              <h2 className="text-xl font-semibold text-gray-900">Resource Usage</h2>
+              <h2 className="text-xl font-semibold text-[#232321]">Resource Usage</h2>
             </div>
             <div className="p-6 space-y-4">
               {/* AI Credits */}
@@ -229,7 +218,7 @@ const DashboardMVP: React.FC = () => {
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
-                    className="bg-purple-600 h-2 rounded-full"
+                    className="bg-[#ae5630] h-2 rounded-full"
                     style={{ width: `${(resourceUsage.aiCredits.used / resourceUsage.aiCredits.total) * 100}%` }}
                   />
                 </div>
@@ -245,12 +234,12 @@ const DashboardMVP: React.FC = () => {
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
-                    className="bg-blue-600 h-2 rounded-full"
+                    className="bg-[#9d4e2c] h-2 rounded-full"
                     style={{ width: `${(resourceUsage.storage.used / resourceUsage.storage.total) * 100}%` }}
                   />
                 </div>
                 {resourceUsage.storage.used / resourceUsage.storage.total > 0.8 && (
-                  <p className="text-xs text-orange-600 mt-1">Running low on storage</p>
+                  <p className="text-xs text-[#ae5630] mt-1">Running low on storage</p>
                 )}
               </div>
 
@@ -264,7 +253,7 @@ const DashboardMVP: React.FC = () => {
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
-                    className="bg-green-600 h-2 rounded-full"
+                    className="bg-[#3d3d3a] h-2 rounded-full"
                     style={{ width: `${(resourceUsage.projects.active / resourceUsage.projects.total) * 100}%` }}
                   />
                 </div>
@@ -273,10 +262,10 @@ const DashboardMVP: React.FC = () => {
           </Card>
 
           {/* Daily Tip */}
-          <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200">
+          <Card className="bg-gradient-to-br from-[#faf9f5] to-[#edeae2] border-[#ae5630]">
             <div className="p-6">
               <div className="flex items-start space-x-3">
-                <div className="p-2 bg-yellow-100 rounded-lg">
+                <div className="p-2 bg-[#faf9f5] rounded-lg">
                   {dailyTip.icon}
                 </div>
                 <div>

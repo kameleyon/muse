@@ -10,6 +10,7 @@ import {
   persistStore 
 } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
+import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import authReducer from './slices/authSlice';
 import contentReducer from './slices/contentSlice';
 import uiReducer from './slices/uiSlice';
@@ -63,3 +64,7 @@ export const persistor = persistStore(store);
 // Export types
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
+// Typed hooks for use throughout the app
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

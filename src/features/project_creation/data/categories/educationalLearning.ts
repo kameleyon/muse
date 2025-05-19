@@ -4,7 +4,7 @@ export const educationalLearningCategory: ProjectCategory = {
   id: 'educational_learning_applications',
   name: 'Educational & Learning Applications',
   subcategories: [
-    {
+   /* {
       id: 'student_support',
       name: 'Student Support',
       sections: [
@@ -65,6 +65,32 @@ export const educationalLearningCategory: ProjectCategory = {
           name: 'Presentation & Public Speaking',
           // items array removed
         },
+      ],
+    },*/
+    {
+      id: 'personal_transformation',
+      name: 'Personal Transformation',
+      sections: [
+        {
+          id: 'self_improvement',
+          name: 'Self Improvement',
+          // items array removed
+        },
+        /*{
+          //id: 'transformation',
+          //name: 'Transformation',
+          // items array removed
+        },
+        {
+          id: 'spirituality',
+          name: 'Spirituality',
+          // items array removed
+        },
+        {
+          id: 'mental_health',
+          name: 'Mental Health',
+          // items array removed
+        },*/
       ],
     },
   ],

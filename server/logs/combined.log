@@ -2222,3 +2222,50 @@
 2025-04-10 15:07:39 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
 2025-04-10 15:08:45 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
 2025-04-10 15:08:45 [info]: Fetching projects for user f16a8792-74c7-4741-9ad0-7b9d5a951f63
+2025-05-18 19:18:48 [info]: Server running in development mode on port 9998
+2025-05-18 19:22:17 [info]: Server running in development mode on port 9998
+2025-05-18 19:26:33 [info]: Server running in development mode on port 9998
+2025-05-18 19:34:13 [info]: Server running in development mode on port 9999
+2025-05-18 19:35:00 [info]: Server running in development mode on port 9999
+2025-05-18 19:35:23 [info]: Making OpenRouter request to model: openai/gpt-4o-search-preview
+2025-05-18 19:35:30 [info]: OpenRouter request successful. Tokens used: 1108
+2025-05-18 19:35:43 [info]: Making OpenRouter request to model: openai/gpt-4o-search-preview
+2025-05-18 19:35:49 [info]: OpenRouter request successful. Tokens used: 1112
+2025-05-18 19:37:13 [info]: Server running in development mode on port 9999
+2025-05-18 19:38:42 [info]: Server running in development mode on port 9999
+2025-05-18 19:39:50 [info]: Server running in development mode on port 9999
+2025-05-18 19:40:19 [info]: Making OpenRouter request to model: openai/gpt-4-turbo-preview
+2025-05-18 19:40:21 [info]: OpenRouter request successful. Tokens used: 65
+2025-05-18 19:40:23 [info]: Making OpenRouter request to model: openai/gpt-4o-search-preview
+2025-05-18 19:40:31 [info]: OpenRouter request successful. Tokens used: 1116
+2025-05-18 19:42:03 [info]: Server running in development mode on port 9999
+2025-05-18 19:42:12 [info]: Server running in development mode on port 9999
+2025-05-18 19:42:20 [info]: Server running in development mode on port 9999
+2025-05-18 19:42:31 [info]: Server running in development mode on port 9999
+2025-05-18 19:42:51 [info]: Server running in development mode on port 9999
+2025-05-18 19:44:34 [info]: Server running in development mode on port 9999
+2025-05-18 19:44:48 [info]: Making OpenRouter request to model: openai/gpt-4o-search-preview
+2025-05-18 19:44:55 [info]: OpenRouter request successful. Tokens used: 1148
+2025-05-18 19:45:02 [info]: Making OpenRouter request to model: openai/gpt-4-turbo-preview
+2025-05-18 19:45:04 [info]: OpenRouter request successful. Tokens used: 65
+2025-05-18 19:45:42 [info]: Making OpenRouter request to model: openai/gpt-4o-search-preview
+2025-05-18 19:45:49 [info]: OpenRouter request successful. Tokens used: 1134
+2025-05-18 19:47:49 [info]: Server running in development mode on port 9999
+2025-05-18 19:58:13 [info]: Making OpenRouter request to model: anthropic/claude-3.7-sonnet
+2025-05-18 19:58:55 [info]: OpenRouter request successful. Tokens used: 5300
+2025-05-18 20:11:54 [info]: Server running in development mode on port 9999
+2025-05-18 20:12:08 [info]: Server running in development mode on port 9999
+2025-05-18 20:12:24 [info]: Server running in development mode on port 9999
+2025-05-18 20:12:34 [info]: Server running in development mode on port 9999
+2025-05-18 20:12:52 [info]: Server running in development mode on port 9999
+2025-05-18 20:13:05 [info]: Server running in development mode on port 9999
+2025-05-18 20:19:50 [info]: Server running in development mode on port 9999
+2025-05-18 20:23:29 [info]: Server running in development mode on port 9999
+2025-05-18 20:33:01 [info]: Server running in development mode on port 9999
+2025-05-18 20:36:26 [info]: Server running in development mode on port 9999
+2025-05-18 20:46:04 [info]: Server running in development mode on port 9999
+2025-05-18 20:46:15 [info]: Server running in development mode on port 9999
+2025-05-18 20:46:44 [info]: Server running in development mode on port 9999
+2025-05-18 20:47:05 [info]: Server running in development mode on port 9999
+2025-05-18 20:49:04 [info]: Server running in development mode on port 9999
+2025-05-18 20:53:39 [info]: Server running in development mode on port 9999
