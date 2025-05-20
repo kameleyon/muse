@@ -282,8 +282,10 @@ The application employs a modern styling approach:
 -   **Development**: `npm run dev` (starts Vite dev server with HMR)
 -   **Staging Build**: `npm run build:staging` (creates a staging build in `dist/`)
 -   **Production Build**: `npm run build` or `npm run build:production` (creates an optimized production build in `dist/`)
+-   **Production Build without PWA**: `npm run build:no-pwa` (creates an optimized production build without PWA functionality)
 -   **Preview Build**: `npm run preview` (serves the production build locally)
--   **Deployment**: Configured for Render via `render.yaml` and `render-build.sh`. This likely handles building the frontend and potentially starting the backend server.
+-   **Deployment**: Configured for Render via `render.yaml` and `render-build.sh`. This handles building the frontend and starting the backend server.
+-   **PWA Configuration**: The PWA functionality can be disabled via the `VITE_PLUGIN_PWA_DISABLED` environment variable set to "true". This is especially useful for troubleshooting deployment issues related to service worker conflicts.
 
 ## Contributing
 
@@ -349,3 +351,6 @@ Built with ❤️ by the MagicMuse team
 - **Robust JSON Parsing**: Enhanced error handling for AI responses to ensure reliable book structure generation
 - **Fallback Mechanisms**: Added intelligent fallback structure generation for improved reliability
 - **Professional Book Format**: Added support for market positioning, unique value proposition, prologue, introduction, and conclusion
+- **PWA Configuration**: Added ability to disable PWA functionality via environment variables to troubleshoot deployment issues
+- **Build System Improvements**: Enhanced Render deployment configuration for better reliability on the Render platform
+- **Service Worker Management**: Added better control over service worker registration for production deployments

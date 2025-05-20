@@ -1,4 +1,6 @@
 // Simple service worker for MagicMuse PWA
+// Note: This service worker can be disabled via the VITE_PLUGIN_PWA_DISABLED environment variable
+// See register-sw.js for the logic that controls service worker registration
 
 const CACHE_NAME = 'magicmuse-cache-v1';
 const urlsToCache = [

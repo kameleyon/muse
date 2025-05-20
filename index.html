@@ -9,6 +9,8 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#4f46e5" />
     <title>magicmuse</title>
+    <!-- Service worker registration script - PWA is handled with vite-plugin-pwa and can be disabled via VITE_PLUGIN_PWA_DISABLED -->
+    <script type="module" src="/register-sw.js"></script>
   </head>
   <body>
     <div id="root"></div>

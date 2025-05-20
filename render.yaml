@@ -10,10 +10,14 @@ services:
         destination: /index.html
     envVars:
       - key: NODE_VERSION
-        value: 20
+        value: 18
       - key: NPM_CONFIG_PRODUCTION
         value: false
       - key: CI
         value: true
       - key: HUSKY
         value: 0
+      - key: SKIP_INSTALL_DEPS
+        value: false
+      - key: VITE_PLUGIN_PWA_DISABLED
+        value: "true"

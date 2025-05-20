@@ -1,8 +1,32 @@
+// Add debugging for dependency resolution
+try {
+  require.resolve('vite-plugin-pwa');
+  console.log('vite-plugin-pwa found and resolved successfully!');
+} catch (e) {
+  console.error('vite-plugin-pwa not found!', e);
+}
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { VitePWA } from 'vite-plugin-pwa';
+// Import with fallback to avoid breaking the build
+let VitePWA;
+try {
+  VitePWA = require('vite-plugin-pwa').VitePWA;
+} catch (e) {
+  console.warn('Failed to import VitePWA, will skip PWA functionality:', e.message);
+  VitePWA = () => ({
+    name: 'vite-plugin-pwa-fallback',
+    // Empty plugin that does nothing
+  });
+}
+
+// Check if PWA is disabled via environment variable
+const isPwaDisabled = process.env.VITE_PLUGIN_PWA_DISABLED === 'true';
+if (isPwaDisabled) {
+  console.log('PWA functionality is disabled via VITE_PLUGIN_PWA_DISABLED environment variable');
+}
 
 // Define environment variables for TypeScript
 interface ImportMetaEnv {
@@ -10,6 +34,7 @@ interface ImportMetaEnv {
   readonly VITE_SUPABASE_ANON_KEY: string;
   readonly VITE_OPENROUTER_API_KEY: string;
   readonly VITE_DEFAULT_CONTENT_MODEL: string;
+  readonly VITE_PLUGIN_PWA_DISABLED?: string;
 }
 
 interface ImportMeta {
@@ -26,30 +51,33 @@ export default defineConfig({
       gzipSize: true, // Show gzip size
       brotliSize: true, // Show brotli size
     }),
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'magicmuse-icon.svg'],
-      manifest: {
-        name: 'MagicMuse',
-        short_name: 'MagicMuse',
-        description: 'AI-Powered Content Generation Platform',
-        theme_color: '#4f46e5',
-        icons: [
-          {
-            src: '/favicon.ico',
-            sizes: '64x64',
-            type: 'image/x-icon'
-          }
-        ]
-      },
-      workbox: {
-        // Exclude stats.html from precaching
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        globIgnores: ['dist/stats.html', '**/stats.html'],
-        // Increase max file size for precaching (default is 2MB)
-        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MiB to be safe
-      }
-    }),
+    // Only include PWA plugin if not explicitly disabled
+    ...(!isPwaDisabled ? [
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.ico', 'magicmuse-icon.svg'],
+        manifest: {
+          name: 'MagicMuse',
+          short_name: 'MagicMuse',
+          description: 'AI-Powered Content Generation Platform',
+          theme_color: '#4f46e5',
+          icons: [
+            {
+              src: '/favicon.ico',
+              sizes: '64x64',
+              type: 'image/x-icon'
+            }
+          ]
+        },
+        workbox: {
+          // Exclude stats.html from precaching
+          globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+          globIgnores: ['dist/stats.html', '**/stats.html'],
+          // Increase max file size for precaching (default is 2MB)
+          maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MiB to be safe
+        }
+      })
+    ] : []),
   ],
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-is'],
