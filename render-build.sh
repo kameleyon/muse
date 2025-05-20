@@ -5,10 +5,10 @@ set -e
 
 # Install dependencies
 echo "Installing dependencies..."
-yarn install
+npm install
 
 # Build the application
 echo "Building the application..."
-yarn build
+npm run build
 
 echo "Build completed successfully!"

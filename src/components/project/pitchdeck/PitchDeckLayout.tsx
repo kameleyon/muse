@@ -52,6 +52,7 @@ import { addToast } from '@/store/slices/uiSlice';
 import { useDispatch } from 'react-redux';
 import '@/styles/ProjectArea.css'; // Keep styles if they apply broadly
 import '@/styles/ProjectSetup.css'; // Keep styles if they apply broadly
+import '@/styles/blog.css';
 
 // Define props interface for PitchDeckLayout
 interface PitchDeckLayoutProps {
