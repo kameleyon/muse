@@ -19,6 +19,10 @@
   - [Troubleshooting Authentication](#troubleshooting-authentication)
 - [Design & Styling](#design--styling)
 - [Build & Deployment](#build--deployment)
+- [Book Generation Feature](#book-generation-feature)
+  - [Key Capabilities](#key-capabilities)
+  - [Book Structure Example](#book-structure-example)
+  - [Advanced Error Handling](#advanced-error-handling)
 - [Contributing](#contributing)
 - [License](#license)
 - [Contact](#contact)
@@ -41,6 +45,7 @@ Based on the project structure, MagicMuse.io includes or aims to include the fol
 -   **Dashboard**: Central hub displaying stats, recent activity, quick actions, and usage metrics.
 -   **Project Creation & Management**: Functionality to organize work into projects.
 -   **AI Chat Interface**: Interactive chat feature, likely for AI assistance or interaction.
+-   **Book Generation & Editing**: Advanced book creation with structured chapters and parts, supporting comprehensive book outlines with 30+ chapters.
 -   **Settings & Profile Management**: User-configurable options for appearance (dark/light mode), AI ethics, chat history, etc.
 -   **Onboarding**: Guided setup or introduction for new users.
 -   **Billing & Plan Management**: Integration for handling subscriptions or usage tiers.
@@ -219,6 +224,26 @@ Ensure your Supabase project is configured correctly:
 3.  **Access the Application:**
     Open your browser and navigate to `http://localhost:5173` (or the port specified by Vite).
 
+### Using the Book Generation Feature
+
+1. **Create a New Book**:
+   - Navigate to the Book Library section
+   - Click on "Create New Book"
+   - Enter a topic and select a book type
+   - The AI will generate market research and an advanced structure with parts and chapters
+
+2. **Edit Book Content**:
+   - Open a book from the Book Library
+   - The sidebar displays the full structure with parts and chapters
+   - Select a chapter to edit or generate
+   - Use the "Generate Chapter" button to create content
+   - Use the "Revise" feature to refine AI-generated content
+
+3. **Preview & Export**:
+   - Click "Preview Book" to see the full structure and content
+   - Use the Download button to export the book as markdown
+   - View chapter metrics like word count and status
+
 ## Authentication System
 
 MagicMuse.io utilizes Supabase Auth for a secure and robust authentication system:
@@ -268,6 +293,42 @@ The application employs a modern styling approach:
 4.  Push to the branch (`git push origin feature/your-feature-name`).
 5.  Open a Pull Request against the main branch.
 
+## Book Generation Feature
+
+MagicMuse.io includes an advanced book generation system that helps authors create comprehensive book outlines and content:
+
+### Key Capabilities:
+
+- **Structured Book Outlines**: Generate professional book structures with parts, chapters, and special sections (prologue, introduction, conclusion).
+- **Comprehensive Content**: Support for 30+ chapters organized into logical parts for in-depth coverage of topics.
+- **Market Research Integration**: Automatic market analysis to target the right audience and position the book effectively.
+- **Visual Organization**: Clean, hierarchical display of book structure with parts and chapters in the editor and preview.
+- **Metadata Support**: Each chapter includes metadata like estimated word count, key topics, and description.
+- **Professional Formatting**: Exports well-structured markdown with proper organization of content.
+- **AI-Generated Content**: Generate chapter content that follows the structure and maintains consistency throughout the book.
+- **Content Revision**: Built-in tools to revise and refine AI-generated content.
+
+### Book Structure Example:
+
+The book generation system supports sophisticated structures similar to professionally published books, including:
+- Market positioning and unique value proposition
+- Special sections (prologue, introduction, conclusion)
+- Multiple parts organizing related chapters
+- Chapter descriptions and metadata
+- Estimated word counts
+
+This enables authors to create comprehensive books with professional organization and structure.
+
+### Advanced Error Handling:
+
+The book generation system includes sophisticated error handling to ensure reliability:
+
+- **Enhanced JSON Parsing**: Multiple fallback mechanisms to handle various AI response formats
+- **Response Cleaning**: Automatic fixing of common JSON issues (unquoted keys, trailing commas, etc.)
+- **Fallback Structure Generation**: If JSON parsing fails, the system can extract structure information from text responses
+- **Default Structure Creation**: Ensures a minimum of 30-32 chapters across 8 logical parts even in worst-case scenarios
+- **Robust Validation**: Extensive validation and normalization of structure data throughout the process
+
 ## License
 
 This project is proprietary and confidential. All rights reserved.
@@ -279,3 +340,12 @@ For questions or support, please contact [support@magicmuse.io](mailto:support@m
 ---
 
 Built with ❤️ by the MagicMuse team
+
+## Recent Updates
+
+### May 2025
+- **Enhanced Book Generation**: Updated book generation system to support professional book structures with 30+ chapters organized into logical parts
+- **Improved UI for Book Editor**: Added support for displaying parts, special sections, and chapter metadata
+- **Robust JSON Parsing**: Enhanced error handling for AI responses to ensure reliable book structure generation
+- **Fallback Mechanisms**: Added intelligent fallback structure generation for improved reliability
+- **Professional Book Format**: Added support for market positioning, unique value proposition, prologue, introduction, and conclusion
