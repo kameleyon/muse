@@ -9,6 +9,7 @@ npm install
 
 # Build the application
 echo "Building the application..."
-npm run build
+# Use npx directly to ensure we're using the right vite
+npx tsc --noEmit && npx vite build
 
-echo "Build completed successfully!"
+echo "✅ Build completed successfully!"

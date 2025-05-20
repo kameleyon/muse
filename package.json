@@ -7,7 +7,7 @@
         "dev": "vite",
         "dev:server": "cd server && npm run dev",
         "dev:all": "concurrently \"npm run dev\" \"npm run dev:server\"",
-        "build": "npx tsc --noEmit && ./node_modules/.bin/vite build",
+    "build": "npx tsc --noEmit && npx vite build && echo '✅ Build completed'",
         "build:server": "cd server && npm run build",
         "build:all": "npm install && npm run build && npm run build:server",
         "build:no-pwa": "VITE_PLUGIN_PWA_DISABLED=true npm run build",
