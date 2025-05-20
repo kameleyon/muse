@@ -10,7 +10,7 @@ services:
         destination: /index.html
     envVars:
       - key: NODE_VERSION
-        value: 18
+        value: 20
       - key: NPM_CONFIG_PRODUCTION
         value: false
       - key: CI
