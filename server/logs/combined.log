@@ -2333,3 +2333,11 @@
 2025-05-20 10:18:17 [info]: OpenRouter request successful. Tokens used: 1598
 2025-05-20 10:18:17 [info]: Making OpenRouter request to model: openai/gpt-4o
 2025-05-20 10:18:56 [info]: OpenRouter request successful. Tokens used: 4716
+2025-05-20 18:30:07 [info]: Request body: {"projectName":"AfroWiki","description":"","privacy":"private","tags":[],"teamMembers":[],"pitchDeckTypeId":"investment","projectType":"investment"}
+2025-05-20 18:30:07 [info]: User ID from request: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-05-20 18:30:07 [info]: Creating project "AfroWiki" (Type: investment) for user 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-05-20 18:30:07 [info]: Inserting data: {"user_id":"3d3ba6f6-a232-4bed-827a-eda37ea1539d","name":"AfroWiki","project_type":"investment","description":"","privacy":"private","tags":[],"team_members":[],"pitch_deck_type_id":"investment"}
+2025-05-20 18:30:07 [info]: Inserting project with payload: {"user_id":"3d3ba6f6-a232-4bed-827a-eda37ea1539d","name":"AfroWiki","description":"","privacy":"private","tags":[],"team_members":[],"pitch_deck_type_id":"investment","project_type":"investment","setup_details":{"project_type":"investment"}}
+2025-05-20 18:30:07 [error]: Supabase error creating project: new row violates row-level security policy for table "projects"
+2025-05-20 18:30:07 [warn]: Falling back to mock project due to error: Error: Supabase error: new row violates row-level security policy for table "projects"
+2025-05-20 18:30:07 [info]: Created mock project with ID: proj_1747780207934
