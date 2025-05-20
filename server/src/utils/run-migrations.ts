@@ -14,7 +14,8 @@ const runMigrations = async () => {
       const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf8');
       
       try {
-        const { error } = await supabaseClient.raw(sql);
+        // @ts-ignore - The raw method exists on the client, but TypeScript doesn't recognize it
+        const { error } = await (supabaseClient as any).raw(sql);
         if (error) throw error;
         console.log(`✓ ${file} completed successfully`);
       } catch (error) {

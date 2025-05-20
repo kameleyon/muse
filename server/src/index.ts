@@ -27,7 +27,7 @@ import bookRoutes from './routes/book'; // Import book routes
 import bookAIRoutes from './routes/bookAI'; // Import book AI routes
 
 const app = express();
-const PORT = config.port || 5000;
+const PORT = 9998; // Fixed port to avoid conflicts
 
 // Middleware
 app.use(helmet()); // Set security HTTP headers

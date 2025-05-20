@@ -8,7 +8,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const config = {
     nodeEnv: process.env.NODE_ENV || 'development',
-    port: process.env.PORT ? parseInt(process.env.PORT, 10) : 9999,
+    port: process.env.PORT ? parseInt(process.env.PORT, 10) : 9998, // Temporarily changed from 9999
     // Database (Supabase)
     supabase: {
         url: process.env.SUPABASE_URL,

@@ -142,14 +142,77 @@ export const deleteBook = async (req: Request, res: Response) => {
 export const createChapters = async (req: Request, res: Response) => {
   try {
     const { bookId } = req.params;
-    const { chapters } = req.body;
+    const { chapters, structure } = req.body;
 
-    const chapterData = chapters.map((chapter: any) => ({
+    // Convert the structure into a flat list of chapters if using the new format with parts
+    let flatChapters = chapters;
+    
+    if (structure?.parts && !flatChapters) {
+      flatChapters = [];
+      
+      // Add prologue/introduction if present
+      if (structure.prologue || structure.introduction) {
+        flatChapters.push({
+          number: 0,
+          title: structure.prologue ? 'Prologue' : 'Introduction',
+          description: structure.prologue || structure.introduction || '',
+          estimatedWords: 2000
+        });
+      }
+      
+      // Add all chapters from parts
+      let chapterCounter = 1;
+      for (const part of structure.parts) {
+        console.log(`Processing part: ${part.partTitle} with ${part.chapters?.length || 0} chapters`);
+        
+        // Some structures might not have the expected format, check if chapters exist
+        if (part.chapters && Array.isArray(part.chapters)) {
+          for (const chapter of part.chapters) {
+            // Some API responses might use sequential numbering rather than the chapter.number field
+            // Ensure we have a valid number for each chapter
+            const chapterNumber = chapter.number || chapterCounter++;
+            
+            flatChapters.push({
+              number: chapterNumber,
+              title: chapter.title,
+              description: chapter.description || '',
+              estimatedWords: chapter.estimatedWords || 3000,
+              keyTopics: chapter.keyTopics || []
+            });
+          }
+        } else {
+          console.error(`Invalid part structure: ${JSON.stringify(part)}`);
+        }
+      }
+      
+      // Add conclusion if present
+      if (structure.conclusion) {
+        flatChapters.push({
+          number: Math.max(...flatChapters.map((c: any) => c.number)) + 1,
+          title: 'Conclusion',
+          description: structure.conclusion,
+          estimatedWords: 2000
+        });
+      }
+      
+      console.log(`Created ${flatChapters.length} chapters from structure`);
+    }
+    
+    if (!flatChapters || flatChapters.length === 0) {
+      throw new Error('No chapters provided');
+    }
+
+    const chapterData = flatChapters.map((chapter: any) => ({
       book_id: bookId,
       number: chapter.number,
       title: chapter.title,
       content: '',
-      status: 'draft'
+      status: 'draft',
+      metadata: {
+        description: chapter.description,
+        estimatedWords: chapter.estimatedWords,
+        keyTopics: chapter.keyTopics || []
+      }
     }));
 
     const { error } = await supabaseClient

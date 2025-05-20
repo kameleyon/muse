@@ -27,7 +27,7 @@ const projectRoutes_1 = __importDefault(require("./routes/projectRoutes")); // I
 const book_1 = __importDefault(require("./routes/book")); // Import book routes
 const bookAI_1 = __importDefault(require("./routes/bookAI")); // Import book AI routes
 const app = (0, express_1.default)();
-const PORT = config_1.default.port || 5000;
+const PORT = 9998; // Fixed port to avoid conflicts
 // Middleware
 app.use((0, helmet_1.default)()); // Set security HTTP headers
 app.use(express_1.default.json({ limit: '50mb' })); // Parse JSON request body
