@@ -172,50 +172,149 @@ const BookReviewPage: React.FC = () => {
                 <p className="text-neutral-medium mt-1">{localStructure.uniqueValue}</p>
               </div>
 
-              <div>
-                <strong className="text-neutral-dark mb-3 block">Chapters:</strong>
-                <div className="space-y-3">
-                  {localStructure.chapters.map((chapter: any, index: number) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      {editingSection === `chapter-${index}` ? (
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="text"
-                            value={chapter.title}
-                            onChange={(e) => handleEditChapter(index, e.target.value)}
-                            className="flex-1 px-3 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-primary/50"
-                          />
-                          <button
-                            onClick={() => setEditingSection(null)}
-                            className="p-1 text-primary hover:text-primary-hover"
-                          >
-                            <Check className="w-5 h-5" />
-                          </button>
+              <div className="space-y-6">
+                {/* Front matter sections if they exist */}
+                {localStructure.acknowledgement && (
+                  <div className="mb-4">
+                    <strong className="text-neutral-dark mb-2 block">Acknowledgement:</strong>
+                    <p className="text-neutral-medium">{localStructure.acknowledgement}</p>
+                  </div>
+                )}
+
+                {localStructure.prologue && (
+                  <div className="mb-4">
+                    <strong className="text-neutral-dark mb-2 block">Prologue:</strong>
+                    <p className="text-neutral-medium">{localStructure.prologue}</p>
+                  </div>
+                )}
+
+                {localStructure.introduction && (
+                  <div className="mb-4">
+                    <strong className="text-neutral-dark mb-2 block">Introduction:</strong>
+                    <p className="text-neutral-medium">{localStructure.introduction}</p>
+                  </div>
+                )}
+
+                {/* Parts and their chapters */}
+                {localStructure.parts && localStructure.parts.length > 0 && (
+                  <div className="space-y-8">
+                    {localStructure.parts.map((part: any, partIndex: number) => (
+                        <div key={partIndex} className="border-t border-neutral-light pt-4">
+                        <h3 className="font-heading text-lg font-semibold text-secondary mb-4">
+                          {part.title}
+                        </h3>
+                        
+                        <div className="space-y-6 pl-4">
+                          {part.chapters && part.chapters.map((chapter: any, chapterIndex: number) => (
+                            <div key={chapterIndex} className="border-b border-neutral-light pb-6 last:border-0 last:pb-0">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-secondary text-lg">
+                                    {editingSection === `part-${partIndex}-chapter-${chapterIndex}` ? (
+                                      <div className="flex items-center space-x-2">
+                                        <input
+                                          type="text"
+                                          value={chapter.title}
+                                          onChange={(e) => {
+                                            const updatedParts = [...localStructure.parts];
+                                            updatedParts[partIndex].chapters[chapterIndex].title = e.target.value;
+                                            setLocalStructure({ ...localStructure, parts: updatedParts });
+                                          }}
+                                          className="flex-1 px-3 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                        />
+                                        <button
+                                          onClick={() => setEditingSection(null)}
+                                          className="p-1 text-primary hover:text-primary-hover"
+                                        >
+                                          <Check className="w-5 h-5" />
+                                        </button>
+                                      </div>
+                                    ) : (
+                                  <div className="flex items-center">
+                                    <div>
+                                      <span>Chapter {chapter.number}: {chapter.title}</span>
+                                      <button
+                                        onClick={() => setEditingSection(`part-${partIndex}-chapter-${chapterIndex}`)}
+                                        className="p-1 text-neutral-medium hover:text-primary ml-2"
+                                      >
+                                        <Edit className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                    )}
+                                  </h4>
+                                  <p className="text-neutral-medium mt-2">
+                                    {chapter.description}
+                                  </p>
+                                  <p className="text-xs text-neutral-medium mt-3">
+                                    ~{chapter.estimatedWords || 0} words
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      ) : (
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className="font-medium text-neutral-dark">
-                              Chapter {chapter.number}: {chapter.title}
-                            </h4>
-                            <p className="text-sm text-neutral-medium mt-1">
-                              {chapter.description}
-                            </p>
-                            <p className="text-xs text-neutral-medium mt-2">
-                              ~{chapter.estimatedWords} words
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => setEditingSection(`chapter-${index}`)}
-                            className="p-1 text-neutral-medium hover:text-primary ml-2"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Standalone chapters (if not organized in parts) */}
+                {localStructure.chapters && localStructure.chapters.length > 0 && (
+                  <div>
+                    <strong className="text-neutral-dark mb-3 block">Chapters:</strong>
+                    <div className="space-y-3">
+                      {localStructure.chapters.map((chapter: any, index: number) => (
+                        <div key={index} className="border rounded-lg p-4">
+                          {editingSection === `chapter-${index}` ? (
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                value={chapter.title}
+                                onChange={(e) => handleEditChapter(index, e.target.value)}
+                                className="flex-1 px-3 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-primary/50"
+                              />
+                              <button
+                                onClick={() => setEditingSection(null)}
+                                className="p-1 text-primary hover:text-primary-hover"
+                              >
+                                <Check className="w-5 h-5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <h4 className="font-medium text-neutral-dark">
+                                  Chapter {chapter.number}: {chapter.title}
+                                </h4>
+                                <p className="text-sm text-neutral-medium mt-1">
+                                  {chapter.description}
+                                </p>
+                                <p className="text-xs text-neutral-medium mt-2">
+                                  ~{chapter.estimatedWords} words
+                                </p>
+                              </div>
+                              <button
+                                onClick={() => setEditingSection(`chapter-${index}`)}
+                                className="p-1 text-neutral-medium hover:text-primary ml-2"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                            </div>
+                          )}
                         </div>
-                      )}
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
+
+                {/* Conclusion */}
+                {localStructure.conclusion && (
+                  <div className="mt-4">
+                    <strong className="text-neutral-dark mb-2 block">Conclusion:</strong>
+                    <p className="text-neutral-medium">{localStructure.conclusion}</p>
+                  </div>
+                )}
               </div>
 
               <div className="mt-6 pt-6 border-t">

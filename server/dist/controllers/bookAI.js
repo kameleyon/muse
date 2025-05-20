@@ -109,24 +109,62 @@ function cleanJsonResponse(response) {
                     });
                 }
             }
-            // Create a fallback structure
+            // Create a fallback structure with at least 32 chapters across 8 parts
+            let fallbackParts = [];
+            if (parts.length > 0) {
+                // We have extracted some parts, use them
+                fallbackParts = parts;
+                // Check if we have enough chapters (at least 30)
+                const totalChapters = parts.reduce((total, part) => total + part.chapters.length, 0);
+                if (totalChapters < 30) {
+                    // Add more parts if needed
+                    const additionalPartsNeeded = Math.ceil((30 - totalChapters) / 4);
+                    for (let i = 0; i < additionalPartsNeeded; i++) {
+                        const partNumber = parts.length + i + 1;
+                        fallbackParts.push({
+                            partNumber,
+                            partTitle: `ADDITIONAL CONTENT PART ${partNumber}`,
+                            chapters: Array.from({ length: 4 }, (_, j) => ({
+                                number: totalChapters + (i * 4) + j + 1,
+                                title: `Additional Chapter ${j + 1}`,
+                                description: "Auto-generated chapter for comprehensive coverage",
+                                estimatedWords: 3000
+                            }))
+                        });
+                    }
+                }
+            }
+            else {
+                // Create 8 parts with 4 chapters each
+                const partTitles = [
+                    "FOUNDATIONS AND CORE CONCEPTS",
+                    "ESSENTIAL STRATEGIES",
+                    "PRACTICAL TECHNIQUES",
+                    "ADVANCED APPLICATIONS",
+                    "CASE STUDIES AND EXAMPLES",
+                    "IMPLEMENTATION AND EXECUTION",
+                    "OVERCOMING CHALLENGES",
+                    "MASTERY AND FUTURE DIRECTIONS"
+                ];
+                fallbackParts = partTitles.map((partTitle, partIndex) => ({
+                    partNumber: partIndex + 1,
+                    partTitle,
+                    chapters: Array.from({ length: 4 }, (_, j) => ({
+                        number: (partIndex * 4) + j + 1,
+                        title: `${partTitle.split(' ')[0]} Chapter ${j + 1}`,
+                        description: `Auto-generated chapter covering ${partTitle.toLowerCase()}`,
+                        estimatedWords: 3000
+                    }))
+                }));
+            }
             const fallbackStructure = {
                 title,
                 subtitle,
-                parts: parts.length > 0 ? parts : [
-                    {
-                        partNumber: 1,
-                        partTitle: "MAIN CONTENT",
-                        chapters: Array.from({ length: 12 }, (_, i) => ({
-                            number: i + 1,
-                            title: `Chapter ${i + 1}`,
-                            description: "Auto-generated chapter",
-                            estimatedWords: 3000
-                        }))
-                    }
-                ],
-                introduction: "Introduction to the topic",
-                conclusion: "Concluding thoughts on the topic"
+                parts: fallbackParts,
+                introduction: "Introduction to the topic - providing essential context and overview",
+                conclusion: "Concluding thoughts on the topic - integrating key insights and future directions",
+                marketPosition: "Comprehensive guide for practitioners and enthusiasts alike",
+                uniqueValue: "Combines theoretical foundations with practical applications in an accessible format"
             };
             console.log("Created fallback structure with parts:", fallbackStructure.parts.length);
             return fallbackStructure;

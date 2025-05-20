@@ -183,9 +183,7 @@ const BookEditorPage: React.FC = () => {
             <h2 className="font-heading text-lg font-semibold text-secondary">
               {book.title}
             </h2>
-            <p className="text-sm text-neutral-medium mt-1">
-              {book.topic}
-            </p>
+            
             <button
               onClick={() => navigate(`/book/${bookId}/preview`)}
               className="mt-3 w-full px-3 py-2 rounded-lg border border-primary text-primary hover:bg-primary/10 transition-colors flex items-center justify-center"
@@ -197,28 +195,131 @@ const BookEditorPage: React.FC = () => {
           
           <div className="p-4">
             <h3 className="text-sm font-medium text-neutral-dark mb-3">
-              Chapters
+              Table of Contents
             </h3>
             <ul className="space-y-2">
-              {chapters.map((chapter) => (
-                <li key={chapter.id}>
-                  <button
-                    onClick={() => setSelectedChapter(chapter)}
-                    className={cn(
-                      "w-full text-left px-3 py-2 rounded-lg transition-colors",
-                      "flex items-center justify-between",
-                      selectedChapter?.id === chapter.id
-                        ? "bg-primary/10 text-primary"
-                        : "hover:bg-neutral-light/50"
+              {/* Group chapters by type/part */}
+              {(() => {
+                // Setup part tracking
+                const parts: Record<string, any> = {};
+                let specialChapters: Chapter[] = [];
+                let regularChapters: Chapter[] = [];
+                
+                // Find if we have introduction/prologue (number 0)
+                const introChapter = chapters.find(ch => ch.number === 0);
+                if (introChapter) {
+                  specialChapters.push(introChapter);
+                }
+                
+                // Find if we have conclusion (highest number)
+                if (chapters.length > 0) {
+                  const maxNumberChapter = chapters.reduce((max, ch) => 
+                    ch.number > max.number ? ch : max, chapters[0]);
+                  
+                  if (maxNumberChapter.title.toLowerCase() === 'conclusion' && maxNumberChapter.number > 0) {
+                    const conclusionChapter = chapters.find(ch => ch.id === maxNumberChapter.id);
+                    if (conclusionChapter && conclusionChapter !== introChapter) {
+                      specialChapters.push(conclusionChapter);
+                    }
+                  }
+                }
+                
+                // Group remaining chapters by part if available
+                if (book?.structure?.parts) {
+                  for (const part of book.structure.parts) {
+                    parts[part.partTitle] = chapters.filter(ch => {
+                      const chapterNumbers = part.chapters.map(c => c.number);
+                      return chapterNumbers.includes(ch.number) && 
+                             ch.number !== 0 && 
+                             !specialChapters.some(sc => sc.id === ch.id);
+                    });
+                  }
+                } else {
+                  // If no parts, collect all regular chapters
+                  regularChapters = chapters.filter(ch => 
+                    ch.number !== 0 && 
+                    !specialChapters.some(sc => sc.id === ch.id)
+                  );
+                }
+                
+                return (
+                  <>
+                    {/* Render special chapters first */}
+                    {specialChapters.map((chapter) => (
+                      <li key={chapter.id}>
+                        <button
+                          onClick={() => setSelectedChapter(chapter)}
+                          className={cn(
+                            "w-full text-left px-3 py-2 rounded-lg transition-colors",
+                            "flex items-center justify-between font-medium",
+                            selectedChapter?.id === chapter.id
+                              ? "bg-primary/10 text-primary"
+                              : "hover:bg-neutral-light/50 text-secondary"
+                          )}
+                        >
+                          <span className="text-sm">
+                            {chapter.title}
+                          </span>
+                          {getStatusIcon(chapter.status)}
+                        </button>
+                      </li>
+                    ))}
+                    
+                    {/* Render chapters by part */}
+                    {book?.structure?.parts ? (
+                      Object.entries(parts).map(([partTitle, partChapters]: [string, Chapter[]]) => (
+                        <li key={partTitle} className="mt-4">
+                          <h4 className="text-xs font-medium text-neutral-medium uppercase mb-2 px-2">
+                            {partTitle}
+                          </h4>
+                          <ul className="space-y-1">
+                            {(partChapters as Chapter[]).map((chapter) => (
+                              <li key={chapter.id}>
+                                <button
+                                  onClick={() => setSelectedChapter(chapter)}
+                                  className={cn(
+                                    "w-full text-left px-3 py-2 rounded-lg transition-colors",
+                                    "flex items-center justify-between",
+                                    selectedChapter?.id === chapter.id
+                                      ? "bg-primary/10 text-primary"
+                                      : "hover:bg-neutral-light/50"
+                                  )}
+                                >
+                                  <span className="text-sm">
+                                    {chapter.number}. {chapter.title}
+                                  </span>
+                                  {getStatusIcon(chapter.status)}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </li>
+                      ))
+                    ) : (
+                      // Render regular chapters if no parts
+                      regularChapters.map((chapter) => (
+                        <li key={chapter.id}>
+                          <button
+                            onClick={() => setSelectedChapter(chapter)}
+                            className={cn(
+                              "w-full text-left px-3 py-2 rounded-lg transition-colors",
+                              "flex items-center justify-between",
+                              selectedChapter?.id === chapter.id
+                                ? "bg-primary/10 text-primary"
+                                : "hover:bg-neutral-light/50"
+                            )}
+                          >
+                            <span className="text-sm">
+                              {chapter.number}. {chapter.title}
+                            </span>
+                            {getStatusIcon(chapter.status)}
+                          </button>
+                        </li>
+                      ))
                     )}
-                  >
-                    <span className="text-sm">
-                      {chapter.number}. {chapter.title}
-                    </span>
-                    {getStatusIcon(chapter.status)}
-                  </button>
-                </li>
-              ))}
+                  </>
+                );
+              })()}
             </ul>
           </div>
         </div>
@@ -232,16 +333,36 @@ const BookEditorPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h1 className="text-xl font-heading font-semibold text-secondary">
-                      Chapter {selectedChapter.number}: {selectedChapter.title}
+                      {selectedChapter.number === 0 
+                        ? selectedChapter.title 
+                        : `Chapter ${selectedChapter.number}: ${selectedChapter.title}`}
                     </h1>
                     <div className="flex items-center mt-2 space-x-4">
                       <span className="text-sm text-neutral-medium">
-                        {selectedChapter.status}
+                        Status: {selectedChapter.status}
                       </span>
                       <span className="text-sm text-neutral-medium">
-                        {content.split(' ').filter(w => w).length} words
+                        Words: {content.split(' ').filter(w => w).length}
+                        {selectedChapter.metadata?.estimatedWords && 
+                          ` / target ${selectedChapter.metadata.estimatedWords}`}
                       </span>
                     </div>
+                    {selectedChapter.metadata?.description && (
+                      <div className="mt-2">
+                        <p className="text-sm italic text-neutral-medium bg-neutral-light/30 p-2 rounded">
+                          {selectedChapter.metadata.description}
+                        </p>
+                      </div>
+                    )}
+                    {selectedChapter.metadata?.keyTopics && selectedChapter.metadata.keyTopics.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {selectedChapter.metadata.keyTopics.map((topic, index) => (
+                          <span key={index} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                            {topic}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   
                   <div className="flex items-center space-x-3">

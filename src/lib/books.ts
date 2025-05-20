@@ -4,7 +4,7 @@ import type { Book, Chapter, Upload } from '../types/books'
 import { openRouter } from './openrouter'
 
 export const bookService = {
-  baseUrl: import.meta.env.VITE_BACKEND_URL || 'http://localhost:9999',
+  baseUrl: import.meta.env.VITE_BACKEND_URL || 'http://localhost:9998', // Temporarily changed from 9999
 
   // Create a new book with market research and structure
   async createBook(
@@ -13,55 +13,178 @@ export const bookService = {
     resources: string[] = [],
     bookType: string = 'self_improvement'
   ): Promise<{ book: Book, marketResearch: any, structure: any }> {
-    // Generate market research using backend
-    const marketResearchResponse = await axios.post(
-      `${this.baseUrl}/api/book-ai/market-research`,
-      { topic, references: resources },
-      {
-        headers: {
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+    try {
+      // Generate market research using backend
+      console.log('Generating market research for topic:', topic);
+      const marketResearchResponse = await axios.post(
+        `${this.baseUrl}/api/book-ai/market-research`,
+        { topic, references: resources },
+        {
+          headers: {
+            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+          }
+        }
+      )
+      const { marketResearch } = marketResearchResponse.data
+      console.log('Market research generated');
+
+      // Generate book structure using backend
+      console.log('Generating book structure...');
+      const structureResponse = await axios.post(
+        `${this.baseUrl}/api/book-ai/generate-structure`,
+        { topic, marketResearch, references: resources },
+        {
+          headers: {
+            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+          }
+        }
+      )
+      const { structure } = structureResponse.data
+      console.log('Book structure generated');
+      
+      // Validate structure for debugging
+      if (structure.parts) {
+        console.log(`Found ${structure.parts.length} parts in the book structure`);
+        if (!Array.isArray(structure.parts)) {
+          console.error('structure.parts is not an array!');
+        } else {
+          structure.parts.forEach((part: any, i: number) => {
+            console.log(`Part ${i+1}: ${part.partTitle || 'Unnamed'}, Chapters: ${part.chapters?.length || 0}`);
+            if (!part.chapters || !Array.isArray(part.chapters)) {
+              console.error(`Part ${i+1} has invalid chapters property:`, part.chapters);
+            }
+          });
+        }
+      } else {
+        console.log('No parts structure found, using flat chapters list');
+      }
+
+      // Create book in database
+      console.log('Creating book in database...');
+      const { data: book, error: bookError } = await supabase
+        .from('books')
+        .insert({
+          user_id: userId,
+          title: structure.title || topic,
+          topic,
+          status: 'draft',
+          book_type: bookType,
+          market_research: marketResearch,
+          structure
+        })
+        .select()
+        .single()
+
+      if (bookError) throw bookError
+      console.log('Book created in database with ID:', book.id);
+
+      // Prepare chapters list based on structure format
+      let chaptersList = [];
+      
+      // Add prologue or introduction if present
+      if (structure.prologue || structure.introduction) {
+        console.log('Adding prologue/introduction chapter');
+        chaptersList.push({
+          number: 0,
+          title: structure.prologue ? 'Prologue' : 'Introduction',
+          description: structure.prologue || structure.introduction || '',
+          estimatedWords: 2000
+        });
+      }
+      
+      // Process chapters either from parts or flat structure
+      if (structure.parts && Array.isArray(structure.parts) && structure.parts.length > 0) {
+        // Use sequential numbering for chapters
+        let chapterNumber = 1;
+        
+        // Process each part
+        for (const part of structure.parts) {
+          if (!part || !part.partTitle) {
+            console.warn('Found invalid part in structure:', part);
+            continue;
+          }
+          
+          console.log(`Processing part: ${part.partTitle}`);
+          
+          // Handle case where chapters might be missing or invalid
+          if (!part.chapters || !Array.isArray(part.chapters)) {
+            console.warn(`Part "${part.partTitle}" has no valid chapters array`);
+            continue;
+          }
+          
+          // Process each chapter in this part
+          for (const chapter of part.chapters) {
+            if (!chapter || !chapter.title) {
+              console.warn('Found invalid chapter in part:', chapter);
+              continue;
+            }
+            
+            // Use chapter's number if available, otherwise assign sequential number
+            const num = typeof chapter.number === 'number' ? chapter.number : chapterNumber++;
+            
+            chaptersList.push({
+              number: num,
+              title: chapter.title,
+              description: chapter.description || '',
+              estimatedWords: chapter.estimatedWords || 3000,
+              keyTopics: chapter.keyTopics || []
+            });
+          }
+        }
+      } 
+      // Fallback to flat chapters list if no parts are available
+      else if (structure.chapters && Array.isArray(structure.chapters) && structure.chapters.length > 0) {
+        console.log(`Using flat chapters structure with ${structure.chapters.length} chapters`);
+        let chapterNumber = 1;
+        
+        for (const chapter of structure.chapters) {
+          if (!chapter || !chapter.title) {
+            console.warn('Found invalid chapter:', chapter);
+            continue;
+          }
+          
+          // Use chapter's number if available, otherwise assign sequential number
+          const num = typeof chapter.number === 'number' ? chapter.number : chapterNumber++;
+          
+          chaptersList.push({
+            number: num,
+            title: chapter.title,
+            description: chapter.description || '',
+            estimatedWords: chapter.estimatedWords || 3000,
+            keyTopics: chapter.keyTopics || []
+          });
         }
       }
-    )
-    const { marketResearch } = marketResearchResponse.data
-    console.log('Market research generated:', marketResearch)
-
-    // Generate book structure using backend
-    const structureResponse = await axios.post(
-      `${this.baseUrl}/api/book-ai/generate-structure`,
-      { topic, marketResearch, references: resources },
-      {
-        headers: {
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-        }
+      
+      // Add conclusion if present
+      if (structure.conclusion) {
+        console.log('Adding conclusion chapter');
+        const maxChapterNum = chaptersList.length > 0 ? 
+          Math.max(...chaptersList.map((c: any) => c.number || 0)) : 0;
+        
+        chaptersList.push({
+          number: maxChapterNum + 1,
+          title: 'Conclusion',
+          description: structure.conclusion,
+          estimatedWords: 2000
+        });
       }
-    )
-    const { structure } = structureResponse.data
-    console.log('Book structure generated:', structure)
-
-    // Create book in database
-    const { data: book, error: bookError } = await supabase
-      .from('books')
-      .insert({
-        user_id: userId,
-        title: structure.title || topic,
-        topic,
-        status: 'draft',
-        book_type: bookType,
-        market_research: marketResearch,
-        structure
-      })
-      .select()
-      .single()
-
-    if (bookError) throw bookError
-
-    // Create chapters
-    if (structure.chapters?.length > 0) {
-      await this.createChapters(book.id, structure.chapters)
+      
+      console.log(`Prepared ${chaptersList.length} chapters for creation`);
+      
+      // Create chapters if we have any
+      if (chaptersList.length > 0) {
+        console.log(`Creating ${chaptersList.length} chapters in database...`);
+        await this.createChapters(book.id, chaptersList);
+      } else {
+        console.warn('No chapters were prepared for creation!');
+      }
+      
+      return { book, marketResearch, structure };
+    } catch (error) {
+      console.error('Error in createBook:', error);
+      throw error;
     }
-
-    return { book, marketResearch, structure }
   },
 
   // Get all books for a user
@@ -152,7 +275,12 @@ export const bookService = {
       number: chapter.number,
       title: chapter.title,
       content: '',
-      status: 'draft'
+      status: 'draft',
+      metadata: {
+        description: chapter.description,
+        estimatedWords: chapter.estimatedWords,
+        keyTopics: chapter.keyTopics || []
+      }
     }))
 
     const { error } = await supabase

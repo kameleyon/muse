@@ -79,14 +79,29 @@ export interface MarketResearch {
 export interface BookStructure {
   title: string
   subtitle: string
-  chapters: Array<{
+  chapters?: Array<{
     number: number
     title: string
     description: string
     estimatedWords?: number
     wordCount?: number
     keyPoints?: string[]
+    keyTopics?: string[]
     purpose?: string
+  }>
+  parts?: Array<{
+    partNumber: number
+    partTitle: string
+    chapters: Array<{
+      number: number
+      title: string
+      description: string
+      estimatedWords?: number
+      wordCount?: number
+      keyPoints?: string[]
+      keyTopics?: string[]
+      purpose?: string
+    }>
   }>
   totalChapters?: number
   totalWords?: number
@@ -95,4 +110,14 @@ export interface BookStructure {
   style?: string
   tone?: string
   marketPosition?: string
+  uniqueValue?: string
+  acknowledgement?: string
+  prologue?: string
+  introduction?: string
+  conclusion?: string
+  colorScheme?: {
+    primary: string
+    secondary: string
+    accent: string
+  }
 }

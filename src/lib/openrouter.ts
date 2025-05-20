@@ -15,15 +15,22 @@ class OpenRouterAPI {
   private baseUrl: string
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_API_KEY
-    this.baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:9999'
+    this.apiKey = import.meta.env.VITE_OPENROUTER_API_KEY || import.meta.env.VITE_API_KEY
+    this.baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:9999' || 'http://localhost:9998'
     
     if (!this.apiKey) {
-      throw new Error('API key not found in environment variables')
+      console.warn('API key not found in environment variables, some features may not work')
+    }
+  }
+
+  private checkApiKey() {
+    if (!this.apiKey) {
+      throw new Error('API key not found. Please add VITE_OPENROUTER_API_KEY to your environment variables.')
     }
   }
 
   async generateCompletion(request: OpenRouterRequest): Promise<string> {
+    this.checkApiKey();
     try {
       const response = await fetch(`${this.baseUrl}/api/book-ai/generate`, {
         method: 'POST',
@@ -54,6 +61,7 @@ class OpenRouterAPI {
   }
 
   async conductMarketResearch(topic: string, resources: string[] = []): Promise<any> {
+    this.checkApiKey();
     const systemPrompt = `You are an expert market researcher specializing in book publishing. Analyze the given topic and provide comprehensive market research to guide the book creation process.`
     
     const userPrompt = `Topic: ${topic}
@@ -103,7 +111,7 @@ You must respond with ONLY valid JSON in this exact format:
       { role: 'user', content: userPrompt }
     ]
 
-    const model = 'openai/gpt-4o-mini'
+    const model = import.meta.env.VITE_MARKET_RESEARCH_MODEL || 'openai/gpt-4o-mini'
     
     const response = await this.generateCompletion({
       model,
@@ -125,11 +133,10 @@ You must respond with ONLY valid JSON in this exact format:
   }
 
   async generateBookStructure(topic: string, marketResearch: any, resources: string[] = []): Promise<any> {
-    const systemPrompt = `You are an expert book writer. Based on the market research provided, create a comprehensive book structure that will appeal to the target audience and fill identified market gaps.`
+    this.checkApiKey();
     
-    const userPrompt = `Topic: ${topic}
-${resources.length > 0 ? `\nReference materials provided: ${resources.join(', ')}` : ''}
-
+    // Create additional info from market research
+    const additionalInfo = `
 Market Research Findings:
 - Target Audience: ${marketResearch.targetAudience.demographics}
 - Audience Pain Points: ${marketResearch.targetAudience.painPoints.join(', ')}
@@ -137,52 +144,81 @@ Market Research Findings:
 - Market Gaps: ${marketResearch.marketAnalysis.gaps.join(', ')}
 - Recommended Tone: ${marketResearch.recommendations.tone}
 - Recommended Style: ${marketResearch.recommendations.style}
+${resources.length > 0 ? `\nReference materials: ${resources.join(', ')}` : ''}`;
 
-Based on this market research, create a book structure that:
-1. Addresses all identified pain points
-2. Fulfills the audience's desires
-3. Fills the market gaps
-4. Uses the recommended tone and style
-5. Is structured for maximum engagement with the target audience
+    const targetAudience = marketResearch.targetAudience.demographics;
 
-You must respond with ONLY valid JSON in this exact format:
+    const systemPrompt = `You are an expert book outline creator. Create a detailed table of contents for a book about the given topic.
+Include chapter titles and brief descriptions. Structure the outline in a clear, hierarchical format.
+Consider the target audience and their needs. Be comprehensive but focused.`;
+
+    const userPrompt = `Create a detailed table of contents for a book about: ${topic}
+${additionalInfo ? `
+Additional details: ${additionalInfo}` : ''}
+
+Target audience: ${targetAudience}
+
+You have complete creative freedom to structure the book in the most effective way for this topic. Create a rich, detailed outline that would be compelling and valuable to the target audience. Feel free to organize it with parts, sections, chapters, appendices, etc. as appropriate.
+
+Format a comprehensive and detailed outline showing a vast and deep mastery of the ${topic} with Distinct Parts or sections including their clear chapter titles and brief descriptions.
+Use markdown formatting with # for main sections and ## for subsections,
+
+Your response must be valid JSON and include at minimum these fields:
 {
   "title": "Suggested book title",
   "subtitle": "Compelling subtitle",
   "audience": "refined target audience description",
-  "style": "specific writing style based on research",
-  "tone": "specific tone based on research",
+  "style": "${marketResearch.recommendations.style}",
+  "tone": "${marketResearch.recommendations.tone}",
   "marketPosition": "how to position this book in the market",
   "uniqueValue": "what makes this book different",
+  "acknowledgement": "Optional acknowledgement text",
+  "prologue": "Optional prologue text",
+  "introduction": "Introduction text with markdown formatting",
+  "conclusion": "Conclusion text with markdown formatting",
+  "parts": [
+    {
+      "title": "Part I: PART TITLE",
+      "chapters": [
+        {
+          "number": 1,
+          "title": "Chapter title",
+          "description": "Brief description of chapter content",
+          "estimatedWords": 2000,
+          "keyTopics": ["topic1", "topic2"]
+        }
+      ]
+    }
+  ],
   "chapters": [
     {
       "number": 1,
-      "title": "Chapter Title",
-      "description": "Brief description addressing specific pain points/desires",
-      "estimatedWords": 3000,
+      "title": "Chapter title",
+      "description": "Brief description of chapter content",
+      "estimatedWords": 2000,
       "keyTopics": ["topic1", "topic2"]
     }
   ],
-  "totalWords": 50000,
-  "colorScheme": {
-    "primary": "${marketResearch.recommendations.colors.primary}",
-    "secondary": "${marketResearch.recommendations.colors.secondary}",
-    "accent": "${marketResearch.recommendations.colors.accent}"
-  }
-}`
+  "totalWords": 120000
+}
+
+Be creative with the structure but ensure the "chapters" array always exists. Each chapter should have at minimum a number, title, description, and estimatedWords. You can add additional fields to chapters or add other structural elements to the book as needed.
+
+Create a natural flow from beginning to end, with a clear introduction and conclusion. Make the descriptions informative and engaging.
+`
 
     const messages: OpenRouterMessage[] = [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt }
     ]
 
-    const model = 'openai/gpt-4o'
+    const model = import.meta.env.VITE_BOOK_STRUCTURE_MODEL || 'anthropic/claude-3.5-sonnet'
     
     const response = await this.generateCompletion({
       model,
       messages,
       temperature: 0.7,
-      max_tokens: 4000
+      max_tokens: 124000
     })
 
     try {
@@ -193,60 +229,8 @@ You must respond with ONLY valid JSON in this exact format:
       return JSON.parse(response)
     } catch (e) {
       console.error('Failed to parse AI response:', response)
+    
       
-      // If parsing fails, create a basic structure
-      return {
-        title: `The Complete Guide to ${topic}`,
-        subtitle: "Transform Your Life Through Proven Strategies",
-        audience: "General readers interested in " + topic,
-        style: "Clear and engaging",
-        tone: "Conversational and supportive",
-        marketPosition: "A comprehensive guide to " + topic,
-        uniqueValue: "Practical, actionable advice with real-world examples",
-        chapters: [
-          {
-            number: 1,
-            title: "Introduction to " + topic,
-            description: "An overview of the topic and what readers will learn",
-            estimatedWords: 3000,
-            keyTopics: ["overview", "importance", "what to expect"]
-          },
-          {
-            number: 2,
-            title: "Getting Started",
-            description: "Basic concepts and foundations",
-            estimatedWords: 4000,
-            keyTopics: ["fundamentals", "first steps", "common misconceptions"]
-          },
-          {
-            number: 3,
-            title: "Advanced Concepts",
-            description: "Deeper exploration of the topic",
-            estimatedWords: 5000,
-            keyTopics: ["advanced techniques", "case studies", "research findings"]
-          },
-          {
-            number: 4,
-            title: "Practical Applications",
-            description: "Real-world examples and use cases",
-            estimatedWords: 4000,
-            keyTopics: ["real examples", "implementation", "success stories"]
-          },
-          {
-            number: 5,
-            title: "Conclusion and Next Steps",
-            description: "Summary and future directions",
-            estimatedWords: 3000,
-            keyTopics: ["summary", "action plan", "resources"]
-          }
-        ],
-        totalWords: 19000,
-        colorScheme: {
-          primary: marketResearch.recommendations.colors.primary || '#3B82F6',
-          secondary: marketResearch.recommendations.colors.secondary || '#1E293B',
-          accent: marketResearch.recommendations.colors.accent || '#F59E0B'
-        }
-      }
     }
   }
 
@@ -268,6 +252,8 @@ You must respond with ONLY valid JSON in this exact format:
       estimatedWords: number
     }
   ): Promise<string> {
+    this.checkApiKey();
+    
     const systemPrompt = `You are an expert book writer specializing in creating content that resonates with specific target audiences. Write in the exact tone and style specified, addressing the audience's pain points and desires.`
     
     const userPrompt = `Book Title: ${bookContext.title}
@@ -307,7 +293,7 @@ Write this chapter following these guidelines:
       { role: 'user', content: userPrompt }
     ]
 
-    const model = 'anthropic/claude-3.5-sonnet'
+    const model = import.meta.env.VITE_CONTENT_GENERATOR_MODEL || 'anthropic/claude-3.5-sonnet'
     
     let temperature = 0.7
     if (bookContext.tone?.toLowerCase().includes('creative') || 
@@ -332,6 +318,8 @@ Write this chapter following these guidelines:
     originalContent: string,
     revisionInstructions: string
   ): Promise<string> {
+    this.checkApiKey();
+    
     const systemPrompt = `You are an expert editor. Revise the provided content according to the given instructions while maintaining the overall structure and key points.`
     
     const userPrompt = `Original content:

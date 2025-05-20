@@ -2328,3 +2328,8 @@
 2025-05-20 10:12:16 [info]: Server running in development mode on port 9998
 2025-05-20 10:12:30 [info]: Server running in development mode on port 9998
 2025-05-20 10:12:44 [info]: Server running in development mode on port 9998
+2025-05-20 10:13:16 [info]: Server running in development mode on port 9998
+2025-05-20 10:18:06 [info]: Making OpenRouter request to model: openai/gpt-4o-mini
+2025-05-20 10:18:17 [info]: OpenRouter request successful. Tokens used: 1598
+2025-05-20 10:18:17 [info]: Making OpenRouter request to model: openai/gpt-4o
+2025-05-20 10:18:56 [info]: OpenRouter request successful. Tokens used: 4716
