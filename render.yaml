@@ -21,3 +21,21 @@ services:
         value: false
       - key: VITE_PLUGIN_PWA_DISABLED
         value: "true"
+      # Define default values for required environment variables
+      - key: VITE_BACKEND_URL
+        value: "https://api.magicmuse.io"
+      - key: VITE_API_BASE_URL
+        value: "https://api.magicmuse.io/api"
+      - key: VITE_SITE_URL
+        value: "https://magicmuse.io"
+      - key: VITE_APP_NAME
+        value: "MagicMuse"
+      # Default model settings (these will be overridden by actual environment variables in Render dashboard)
+      - key: VITE_DEFAULT_CHAT_MODEL
+        value: "anthropic/claude-3-sonnet-20240229" 
+      - key: VITE_MARKET_RESEARCH_MODEL
+        value: "anthropic/claude-3-sonnet-20240229"
+      - key: VITE_BOOK_STRUCTURE_MODEL
+        value: "anthropic/claude-3-opus-20240229"
+      - key: VITE_CONTENT_GENERATOR_MODEL
+        value: "anthropic/claude-3-opus-20240229"

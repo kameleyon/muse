@@ -162,25 +162,38 @@ The project is organized as a monorepo containing the main frontend application,
     ```bash
     cp .env.example .env
     ```
-    *Note: The previous README mentioned `.env.development`, `.env.staging`, `.env.production`. Vite typically uses `.env`, `.env.development`, `.env.production`. Adjust filenames based on your team's convention and Vite's documentation.*
+    *Note: Vite uses `.env`, `.env.development`, `.env.production`. In general, use `.env` for local development.*
 
 2.  **Populate Variables:**
-    Edit the `.env` file (or appropriate file for your environment) and add your credentials:
+    Edit the `.env` file (or appropriate file for your environment) and add your credentials. The application requires several environment variables to build and run correctly. Here's a minimal set:
     ```env
-    # Supabase
-    VITE_SUPABASE_URL=your_supabase_project_url
-    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+    # Supabase Configuration
+    VITE_SUPABASE_URL=your-supabase-url
+    VITE_SUPABASE_ANON_KEY=your-anon-key
 
-    # OpenRouter AI
-    VITE_OPENROUTER_API_KEY=your_openrouter_api_key
-    # Note: Consider if the API key should only be on the backend for security.
-    # If used server-side only, define it without VITE_ prefix for the server environment.
+    # OpenRouter API Configuration
+    VITE_OPENROUTER_API_KEY=your-openrouter-key
+    
+    # Default AI Model Configuration
+    VITE_DEFAULT_CONTENT_MODEL=google/gemini-2.5-pro-exp-03-25:free
+    VITE_DEFAULT_RESEARCH_MODEL=openai/gpt-4o-search-preview
+    VITE_DEFAULT_CHAT_MODEL=anthropic/claude-3-sonnet-20240229
+    VITE_MARKET_RESEARCH_MODEL=anthropic/claude-3-sonnet-20240229
+    VITE_BOOK_STRUCTURE_MODEL=anthropic/claude-3-opus-20240229
+    VITE_CONTENT_GENERATOR_MODEL=anthropic/claude-3-opus-20240229
 
-    # Application URL (for redirects, etc.)
-    VITE_APP_URL=http://localhost:5173 # Adjust port if needed
+    # URLs and application settings
+    VITE_BACKEND_URL=http://localhost:9998
+    VITE_API_BASE_URL=http://localhost:9998/api
+    VITE_SITE_URL=http://localhost:5173
+    VITE_APP_NAME=MagicMuse
 
-    # Add any other required variables for backend or frontend
+    # Feature flags
+    VITE_PLUGIN_PWA_DISABLED=true
     ```
+
+3.  **Required Variables:**
+    Please ensure all the environment variables in `.env.example` are set properly. Missing environment variables will cause TypeScript compilation errors during build. See `docs/pwa-disable-feature.md` for a complete list of required environment variables and their descriptions.
 
 ### Supabase Setup
 
@@ -354,3 +367,6 @@ Built with ❤️ by the MagicMuse team
 - **PWA Configuration**: Added ability to disable PWA functionality via environment variables to troubleshoot deployment issues
 - **Build System Improvements**: Enhanced Render deployment configuration for better reliability on the Render platform
 - **Service Worker Management**: Added better control over service worker registration for production deployments
+- **TypeScript Definitions**: Fixed TypeScript environment variable definitions to ensure smooth builds
+- **Environment Variable Documentation**: Added comprehensive documentation for all required environment variables
+- **Render Deployment Fixes**: Updated configuration to ensure successful deployment on Render platform

@@ -1,7 +1,10 @@
 // Register service worker for PWA functionality
 
 // Check if PWA is disabled via environment variable
-const isPwaDisabled = import.meta.env.VITE_PLUGIN_PWA_DISABLED === 'true';
+// Using a safer check that won't throw an error if import.meta.env is undefined
+const isPwaDisabled = typeof import.meta !== 'undefined' && 
+                     import.meta.env && 
+                     import.meta.env.VITE_PLUGIN_PWA_DISABLED === 'true';
 
 if ('serviceWorker' in navigator && !isPwaDisabled) {
   window.addEventListener('load', () => {
