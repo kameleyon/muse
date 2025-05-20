@@ -1,49 +1,33 @@
-#!/usr/bin/env bash
+#!/bin/bash
+
 # Exit on error
-set -o errexit
+set -e
 
-# Print each command for debugging
-set -o xtrace
-
-# Set environment variables to skip husky installation
-export CI=true
-export HUSKY=0
-export NODE_ENV=production
-
-# Clear node_modules and lockfile to ensure a clean install
-echo "Removing node_modules and lockfile for clean install"
-rm -rf node_modules package-lock.json
-
-# Do a clean npm install
+# Install dependencies
 echo "Installing dependencies..."
-npm install --no-audit
+npm install
 
-# Explicitly ensure vite-plugin-pwa is installed
-echo "Explicitly installing vite-plugin-pwa..."
-npm install vite-plugin-pwa@0.14.7 --save --no-audit
-
-# Use the configured PWA disabled flag from render.yaml or default to "false" if not set
-if [ -z "$VITE_PLUGIN_PWA_DISABLED" ]; then
-  echo "VITE_PLUGIN_PWA_DISABLED not set, defaulting to false"
-  export VITE_PLUGIN_PWA_DISABLED=false
+# Install platform-specific esbuild package for the current platform
+echo "Installing platform-specific esbuild package..."
+if [[ "$RENDER" == "true" ]]; then
+  # On Render (Linux)
+  npm install @esbuild/linux-x64
 else
-  echo "VITE_PLUGIN_PWA_DISABLED is set to $VITE_PLUGIN_PWA_DISABLED"
+  # Detect platform and install appropriate package
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    npm install @esbuild/darwin-x64 @esbuild/darwin-arm64
+  elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    # Linux
+    npm install @esbuild/linux-x64
+  elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
+    # Windows
+    npm install @esbuild/win32-x64
+  fi
 fi
 
-# Verify vite-plugin-pwa installation
-if [ -d "node_modules/vite-plugin-pwa" ]; then
-  echo "vite-plugin-pwa is installed successfully"
-else
-  echo "WARN: vite-plugin-pwa installation may have failed"
-fi
+# Build the application
+echo "Building the application..."
+npm run build
 
-# List installed packages for debugging
-echo "Listing installed packages:"
-npm list vite-plugin-pwa
-
-# Build the application using the installed version
-echo "Building application..."
-npx tsc --noEmit && npx vite build
-
-# Output success message
-echo "Build completed successfully"
+echo "Build completed successfully!"

@@ -15,8 +15,8 @@ class OpenRouterAPI {
   private baseUrl: string
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_OPENROUTER_API_KEY || import.meta.env.VITE_API_KEY
-    this.baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:9999' || 'http://localhost:9998'
+    this.apiKey = import.meta.env.VITE_OPENROUTER_API_KEY || import.meta.env.VITE_API_KEY || ''
+    this.baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:9999'
     
     if (!this.apiKey) {
       console.warn('API key not found in environment variables, some features may not work')
@@ -146,7 +146,7 @@ Market Research Findings:
 - Recommended Style: ${marketResearch.recommendations.style}
 ${resources.length > 0 ? `\nReference materials: ${resources.join(', ')}` : ''}`;
 
-    const targetAudience = marketResearch.targetAudience.demographics;
+    const targetAudience = marketResearch.targetAudience.demographics || '';
 
     const systemPrompt = `You are an expert book outline creator. Create a detailed table of contents for a book about the given topic.
 Include chapter titles and brief descriptions. Structure the outline in a clear, hierarchical format.
