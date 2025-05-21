@@ -67,11 +67,11 @@ const EnvironmentIndustryStep: React.FC<EnvironmentIndustryStepProps> = ({ onNex
           </label>
           <select
             id="industry-select"
-            value={selectedIndustry || ''}
+            value={selectedIndustry || 'select'}
             onChange={handleIndustryChange}
             className="industry-select"
           >
-            <option value="" disabled>Select an industry</option>
+            <option value="select" disabled>Select an industry</option>
             {industries.map(ind => (
               <option key={ind} value={ind}>{ind}</option>
             ))}

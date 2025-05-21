@@ -72,8 +72,8 @@ const navigation: NavigationItem[] = [
     ),
   },
   {
-    name: 'Content Library',
-    path: '/projects',
+    name: 'My Projects',
+    path: '/book-library',
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"

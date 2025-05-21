@@ -198,7 +198,7 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
             {/* --- End Updated Button --- */}
 
             {/* View All Button - Assuming it links somewhere */}
-            <Link to="/projects">
+            <Link to="/book-library">
               <Button variant="outline" leftIcon={
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

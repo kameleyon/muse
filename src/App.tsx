@@ -87,17 +87,17 @@ const routeConfig = [
   },
   {
     path: '/book/:bookId/review',
-    element: lazy(() => import('./pages/book/BookReviewPage')),
+    element: lazy(() => import('./components/project/bookselfimp/BookReviewPage')),
     auth: true
   },
   {
     path: '/book/:bookId/edit',
-    element: lazy(() => import('./pages/book/BookEditorPage')),
+    element: lazy(() => import('./components/project/bookselfimp/BookEditorPage')),
     auth: true
   },
   {
     path: '/book/:bookId/preview',
-    element: lazy(() => import('./pages/book/BookPreviewPage')),
+    element: lazy(() => import('./components/project/bookselfimp/BookPreviewPage')),
     auth: true
   },
   {
@@ -110,10 +110,11 @@ const routeConfig = [
 
 // Redirects for legacy routes
 const redirects = [
-  { from: '/library', to: '/projects' },
+  { from: '/library', to: '/book-library' },
+  { from: '/projects', to: '/book-library' },
   { from: '/app', to: '/dashboard' },
   { from: '/app/generator', to: '/generator' },
-  { from: '/app/library', to: '/projects' },
+  { from: '/app/library', to: '/book-library' },
   { from: '/app/profile', to: '/profile' },
   { from: '/app/profile/*', to: '/profile/*' }
 ];

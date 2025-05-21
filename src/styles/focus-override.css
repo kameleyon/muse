@@ -46,6 +46,6 @@ button[class*="primary"],
 [type="submit"],
 .save-button,
 button[style*="background-color: #ae5630"] {
-  color: #EDEAE2 !important;
-  text-color: #EDEAE2 !important;
+  
+  text-color: #EDEAE2;
 }

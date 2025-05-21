@@ -132,7 +132,7 @@ const DashboardMVP: React.FC = () => {
               <div className="card-header">
                 <div className="flex justify-between items-center">
                   <h2 className="h2">Recent Files</h2>
-                  <Link to="/projects" className="text-primary hover:text-[#9d4e2c] text-sm">
+                  <Link to="/book-library" className="text-primary hover:text-[#9d4e2c] text-sm">
                     View all →
                   </Link>
                 </div>
@@ -161,11 +161,11 @@ const DashboardMVP: React.FC = () => {
             <div className="quick-actions">
               <div className="action-card">
                 <h3 className="h3 mb-2">Ready to create?</h3>
-                <p className="mb-4">Start a new project or use our AI to generate content</p>
-                <Link to="/generator">
+                <p className="mb-4">Start a new book or use our AI to generate content</p>
+                <Link to="/new-book">
                   <Button className="btn btn-primary">
                     <Plus size={20} className="mr-2" />
-                    Create New Content
+                    Create New Book
                   </Button>
                 </Link>
               </div>

@@ -99,14 +99,14 @@ const ContentOptimizationPanel: React.FC = () => {
           </div>
           
           <Select
-            value={selectedType || ''}
-            onValueChange={(value) => setSelectedType(value || null)}
+            value={selectedType || 'all'}
+            onValueChange={(value) => setSelectedType(value === 'all' ? null : value)}
           >
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Types</SelectItem>
+              <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="update">Updates</SelectItem>
               <SelectItem value="expand">Expansions</SelectItem>
               <SelectItem value="repurpose">Repurposing</SelectItem>

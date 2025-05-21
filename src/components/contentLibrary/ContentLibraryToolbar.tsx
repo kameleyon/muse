@@ -13,7 +13,7 @@ import { setContentFilters } from '@/store/slices/contentSlice'; // Import Redux
 
 // Filter options (can be moved to a data file)
 const contentTypeFilters = [
-  { value: '', label: 'All Types' },
+  { value: 'all', label: 'All Types' },  // Changed from empty string to 'all'
   { value: 'blog', label: 'Blog Posts' },
   { value: 'marketing', label: 'Marketing Copy' },
   { value: 'creative', label: 'Creative Writing' },
@@ -22,7 +22,7 @@ const contentTypeFilters = [
 ];
 
 const dateFilters = [
-  { value: '', label: 'All Time' },
+  { value: 'all', label: 'All Time' },  // Changed from empty string to 'all'
   { value: 'today', label: 'Today' },
   { value: 'yesterday', label: 'Yesterday' },
   { value: 'week', label: 'This Week' },
@@ -38,12 +38,12 @@ interface ContentLibraryToolbarProps {
 
 const ContentLibraryToolbar: React.FC<ContentLibraryToolbarProps> = ({
   initialSearch = '',
-  initialType = '',
+  initialType = 'all', // Default to 'all' instead of empty string
 }) => {
   const dispatch = useDispatch();
   const [searchInput, setSearchInput] = useState(initialSearch);
   const [typeFilter, setTypeFilter] = useState(initialType);
-  const [dateFilter, setDateFilter] = useState(''); // Local state for date filter
+  const [dateFilter, setDateFilter] = useState('all'); // Local state for date filter, default to 'all'
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
@@ -52,7 +52,7 @@ const ContentLibraryToolbar: React.FC<ContentLibraryToolbarProps> = ({
   const applyFilters = () => {
     dispatch(
       setContentFilters({
-        type: typeFilter || null, // Send null if 'All Types' is selected
+        type: typeFilter === 'all' ? null : typeFilter, // Send null if 'All Types' is selected
         search: searchInput,
         // Add date filter later
       })
@@ -70,7 +70,7 @@ const ContentLibraryToolbar: React.FC<ContentLibraryToolbarProps> = ({
     setTypeFilter(newType);
     dispatch(
       setContentFilters({
-        type: newType || null,
+        type: newType === 'all' ? null : newType, // Send null if 'All Types' is selected
         search: searchInput, // Keep current search term
       })
     );

@@ -7,6 +7,9 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../store/store'
 import { bookService } from '../lib/books'
 import type { Book as BookType } from '../types/books'
+import '@/styles/ProjectArea.css';
+import '@/styles/ProjectSetup.css';
+import '@/styles/blog.css';
 
 const NewBookPage: React.FC = () => {
   console.log('NewBookPage component rendered')
@@ -121,19 +124,25 @@ const NewBookPage: React.FC = () => {
 
   const samplePrompts = [
     "How to Build Mental Resilience",
-    "Mastering Productivity and Time Management",
     "Emotional Intelligence for Success",
+    "The Art of Effective Communication",
     "Breaking Bad Habits and Building Good Ones",
-    "The Art of Effective Communication"
+    "Mastering Productivity and Time Management"
   ]
 
   return (
     <div className="flex gap-8">
+      
+
       {/* Main Content */}
-      <div className="flex-1 max-w-3xl">
-        <h1 className="text-3xl font-heading font-semibold text-secondary mb-8">
-          Create a Self-Improvement Book
-        </h1>
+      <div className="flex-1 w-full">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold font-heading mb-2">Self Improvement Book</h1>
+        <p className="text-neutral-medium max-w-3xl">
+            Create a Self-Improvement Book.
+        </p>
+      </div>
+        
 
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
@@ -143,7 +152,10 @@ const NewBookPage: React.FC = () => {
         )}
 
         {/* Topic Input */}
-        <div className="bg-white rounded-lg p-8 shadow-sm mb-6">
+        <div className="bg-white rounded-2xl px-8 pb-8 shadow-sm mb-8">
+        <h1 className=" card-header text-2xl font-heading font-semibold text-stone mb-8">
+          More about your book
+        </h1>
           <label className="block text-lg font-medium text-secondary mb-4">
             What's your book about?
           </label>
@@ -152,7 +164,7 @@ const NewBookPage: React.FC = () => {
             onChange={(e) => setTopic(e.target.value)}
             placeholder="Enter your self-improvement book topic or idea..."
             className={cn(
-              "w-full p-4 border border-neutral-light rounded-lg",
+              "w-full p-4 border border-neutral-light rounded-xl",
               "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
               "min-h-[150px] resize-y"
             )}
@@ -167,9 +179,9 @@ const NewBookPage: React.FC = () => {
                   key={index}
                   onClick={() => setTopic(prompt)}
                   className={cn(
-                    "px-3 py-1 text-sm rounded-full",
-                    "bg-neutral-light text-neutral-dark",
-                    "hover:bg-primary/10 hover:text-primary transition-colors"
+                    "px-3 py-1 text-xs rounded-full ",
+                    "bg-secondary/50 text-secondary",
+                    "hover:bg-primary hover:text-primary transition-colors"
                   )}
                 >
                   {prompt}
@@ -306,8 +318,8 @@ const NewBookPage: React.FC = () => {
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h3 className="font-medium text-gray-900 line-clamp-1">{book.title}</h3>
-                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">{book.topic}</p>
+                        <p className="font-medium text-stone text-xl line-clamp-1">{book.title}</p>
+                        <p className="text-sm text-stone mt-1 line-clamp-2">{book.topic}</p>
                       </div>
                       {getBookStatusIcon(book.status)}
                     </div>

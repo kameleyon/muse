@@ -156,7 +156,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   const navigationItems = [
     { path: '/dashboard', label: 'Home', icon: <Home size={20} color="#3d3d3a" /> },
-    { path: '/projects', label: 'My Projects', icon: <FolderOpen size={20} color="#3d3d3a" /> },
+    { path: '/book-library', label: 'My Projects', icon: <FolderOpen size={20} color="#3d3d3a" /> },
     //{ path: '/templates', label: 'Templates', icon: <FileText size={20} color="#3d3d3a" /> },
     //{ path: '/bookmarks', label: 'Bookmarks', icon: <Bookmark size={20} color="#3d3d3a" /> },
    // { path: '/team', label: 'Team', icon: <Users size={20} color="#3d3d3a" /> },

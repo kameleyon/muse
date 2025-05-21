@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 
 import { ChevronLeft, Check, Edit, Palette, Target, FileText } from 'lucide-react'
-import { cn } from '../../lib/utils'
+import { cn } from '../../../lib/utils'
 
 const BookReviewPage: React.FC = () => {
   const { bookId } = useParams<{ bookId: string }>()

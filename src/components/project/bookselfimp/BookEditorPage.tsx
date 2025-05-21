@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import DashboardLayout from '../../components/layout/DashboardLayout'
+import DashboardLayout from '../../layout/DashboardLayout'
 import { 
   ChevronLeft, 
   Save, 
@@ -12,10 +12,10 @@ import {
   AlertCircle,
   Eye
 } from 'lucide-react'
-import { cn } from '../../lib/utils'
-import { bookService } from '../../lib/books'
-import MarkdownEditor from '../../components/MarkdownEditor'
-import type { Book, Chapter } from '../../types/books'
+import { cn } from '../../../lib/utils'
+import { bookService } from '../../../lib/books'
+import MarkdownEditor from '../../MarkdownEditor'
+import type { Book, Chapter } from '../../../types/books'
 
 const BookEditorPage: React.FC = () => {
   const { bookId } = useParams<{ bookId: string }>()
