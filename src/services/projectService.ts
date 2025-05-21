@@ -65,9 +65,10 @@ const getAuthToken = async (): Promise<string | null> => {
  * @returns The created project data or null if an error occurred.
  */
 export const createProjectAPI = async (projectData: ProjectData): Promise<Project | null> => {
-  // Use relative API URL to work with any port the server is running on
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api'; // Use relative path for same-origin requests
-  const url = `${apiBaseUrl}/projects`;
+  // Since the proxy is not removing /api any longer, we need to use /api/projects 
+  const apiBaseUrl = '/api/projects';
+  const url = `${apiBaseUrl}`;
+  console.log(`Using API URL: ${url}`);
   const token = await getAuthToken(); // Get auth token asynchronously
 
   const headers: HeadersInit = {
@@ -88,7 +89,7 @@ export const createProjectAPI = async (projectData: ProjectData): Promise<Projec
         tags: projectData.tags,
         teamMembers: projectData.teamMembers,
         pitchDeckTypeId: projectData.pitchDeckTypeId,
-        projectType: projectData.pitchDeckTypeId || 'pitch_deck' // This is required by the server
+        projectType: projectData.pitchDeckTypeId || 'pitch_deck' // This is required by the server and gets mapped to 'type' column
       };
       
       console.log(`Converted for Supabase:`, supabaseData);
@@ -112,26 +113,11 @@ export const createProjectAPI = async (projectData: ProjectData): Promise<Projec
         console.error("Server returned empty response");
         store.dispatch(
           addToast({
-            type: 'warning',
-            message: `Server communication issue - continuing with local data`
+            type: 'error',
+            message: `Server returned empty response - please check server logs`
           })
         );
-        
-        // For production, create a mock project object to allow the app to continue
-        console.log("Creating mock project object for empty response");
-        return {
-          id: `mock_${Date.now()}`,
-          user_id: "current_user",
-          name: projectData.projectName,
-          description: projectData.description || null,
-          privacy: projectData.privacy || "private",
-          tags: projectData.tags || null,
-          team_members: projectData.teamMembers || null,
-          pitch_deck_type_id: projectData.pitchDeckTypeId || null,
-          type: projectData.pitchDeckTypeId || "pitch_deck", // Add the type field
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
+        return null;
       }
       
       // Try to parse as JSON even if content-type is not application/json
@@ -147,23 +133,13 @@ export const createProjectAPI = async (projectData: ProjectData): Promise<Projec
           })
         );
         
-        // For production, create a mock project object to allow the app to continue
-        if (response.ok) {
-          console.log("Creating mock project object for non-JSON response");
-          return {
-            id: `mock_${Date.now()}`,
-            user_id: "current_user",
-            name: projectData.projectName,
-            description: projectData.description || null,
-            privacy: projectData.privacy || "private",
-            tags: projectData.tags || null,
-            team_members: projectData.teamMembers || null,
-            pitch_deck_type_id: projectData.pitchDeckTypeId || null,
-            type: projectData.pitchDeckTypeId || "pitch_deck", // Add the type field
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-        }
+        // Return error for non-JSON response
+        store.dispatch(
+          addToast({
+            type: 'error',
+            message: `Server returned non-JSON response - please check server configuration`
+          })
+        );
         return null;
       }
     } catch (error) {
@@ -188,40 +164,11 @@ export const createProjectAPI = async (projectData: ProjectData): Promise<Projec
         
       console.error("Error creating project:", responseData);
       
-      // Check if the error relates to project name requirements
-      const nameRelatedError = errorMessage.toLowerCase().includes('name') || 
-                               errorMessage.toLowerCase().includes('project');
-      
-      if (nameRelatedError && projectData.projectName) {
-        // If error is name-related but we do have a name, create a mock project to let the user continue
-        store.dispatch(
-          addToast({ 
-            type: 'warning', 
-            message: 'Using offline mode due to server issues. Your work will be saved locally.' 
-          })
-        );
-        
-        console.log("Creating mock project to bypass server validation issues");
-        return {
-          id: `mock_${Date.now()}`,
-          user_id: "current_user",
-          name: projectData.projectName,
-          description: projectData.description || null,
-          privacy: projectData.privacy || "private",
-          tags: projectData.tags || null,
-          team_members: projectData.teamMembers || null,
-          pitch_deck_type_id: projectData.pitchDeckTypeId || null,
-          type: projectData.pitchDeckTypeId || "pitch_deck", // Add the type field
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-      } else {
-        // For other errors, show the error message
-        store.dispatch(
-          addToast({ type: 'error', message: errorMessage })
-        );
-        return null;
-      }
+      // Show error message for all error cases
+      store.dispatch(
+        addToast({ type: 'error', message: errorMessage })
+      );
+      return null;
     }
   } catch (error: any) {
     console.error("Network or unexpected error creating project:", error);
@@ -240,7 +187,7 @@ export const createProjectAPI = async (projectData: ProjectData): Promise<Projec
  */
 export const uploadProjectFile = async (projectId: string, file: File): Promise<UploadFileResponse | null> => {
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api'; // Use relative path for same-origin requests
-    const url = `${apiBaseUrl}/projects/${projectId}/upload`; // Define upload endpoint
+    const url = `${apiBaseUrl}/${projectId}/upload`; // Define upload endpoint
     const token = await getAuthToken(); // Get auth token asynchronously
 
     const formData = new FormData();
@@ -289,8 +236,8 @@ export const uploadProjectFile = async (projectId: string, file: File): Promise<
  * @returns The project data or null if an error occurred.
  */
 export const getProjectAPI = async (projectId: string): Promise<Project | null> => {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api'; // Use relative path for same-origin requests
-  const url = `${apiBaseUrl}/projects/${projectId}`;
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api/projects'; // Use relative path for same-origin requests
+  const url = `${apiBaseUrl}/${projectId}`;
   const token = await getAuthToken(); // Get auth token asynchronously
 
   const headers: HeadersInit = {
@@ -333,8 +280,8 @@ export const getProjectAPI = async (projectId: string): Promise<Project | null> 
  * @returns The updated project data or null if an error occurred.
  */
 export const updateProjectAPI = async (projectId: string, projectData: Partial<ProjectData>): Promise<Project | null> => {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api'; // Use relative path for same-origin requests
-  const url = `${apiBaseUrl}/projects/${projectId}`;
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api/projects'; // Use relative path for same-origin requests
+  const url = `${apiBaseUrl}/${projectId}`;
   const token = await getAuthToken(); // Get auth token asynchronously
 
   const headers: HeadersInit = {
@@ -380,8 +327,8 @@ export const updateProjectAPI = async (projectId: string, projectData: Partial<P
  * @returns True if deletion was successful, false otherwise.
  */
 export const deleteProjectAPI = async (projectId: string): Promise<boolean> => {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api'; // Use relative path for same-origin requests
-  const url = `${apiBaseUrl}/projects/${projectId}`;
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api/projects'; // Use relative path for same-origin requests
+  const url = `${apiBaseUrl}/${projectId}`;
   const token = await getAuthToken(); // Get auth token asynchronously
 
   const headers: HeadersInit = {};
@@ -429,7 +376,7 @@ export const getAllProjectsAPI = async (options: {
   sortOrder?: 'asc' | 'desc';
   pitchDeckTypeId?: string;
 } = {}): Promise<{projects: Project[], meta: any} | null> => {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api'; // Use relative path for same-origin requests
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api/projects'; // Use relative path for same-origin requests
   
   // Build query string from options
   const queryParams = new URLSearchParams();
@@ -439,7 +386,7 @@ export const getAllProjectsAPI = async (options: {
   if (options.sortOrder) queryParams.append('sortOrder', options.sortOrder);
   if (options.pitchDeckTypeId) queryParams.append('pitchDeckTypeId', options.pitchDeckTypeId);
   
-  const url = `${apiBaseUrl}/projects${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+  const url = `${apiBaseUrl}${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
   const token = await getAuthToken(); // Get auth token asynchronously
 
   const headers: HeadersInit = {

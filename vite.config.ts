@@ -88,7 +88,15 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:9998',
         changeOrigin: true,
-        secure: false
+        secure: false,
+        // Do not rewrite the path as we need to keep the /api prefix
+        // rewrite: (path) => path.replace(/^\/api/, ''),
+        onProxyReq: (proxyReq) => {
+          console.log('Proxying request:', proxyReq.path);
+        },
+        onError: (err, req, res) => {
+          console.error('Proxy error:', err);
+        }
       }
     }
   },

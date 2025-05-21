@@ -176,3 +176,15 @@
 2025-04-10 00:02:28 [error]: Supabase error creating project: Could not find the 'project_name' column of 'projects' in the schema cache
 2025-04-10 12:38:28 [error]: Supabase error creating project: null value in column "project_type" of relation "projects" violates not-null constraint
 2025-05-20 18:30:07 [error]: Supabase error creating project: new row violates row-level security policy for table "projects"
+2025-05-20 23:35:28 [error]: Supabase error creating project: new row violates row-level security policy for table "projects"
+2025-05-21 00:30:38 [error]: Auth verification error: Auth session missing!
+2025-05-21 00:30:38 [error]: Supabase admin client error: null value in column "project_type" of relation "projects" violates not-null constraint
+2025-05-21 00:30:38 [error]: Error details: {"code":"23502","details":"Failing row contains (594cdf47-e464-434e-85d7-e3fafaa0444d, 3d3ba6f6-a232-4bed-827a-eda37ea1539d, InstaSmart, null, 2025-05-21 04:30:38.407752+00, 2025-05-21 04:30:38.407752+00, draft, null, {}, {}, {\"project_type\": \"investment\"}, f, null, null, Hi, build me a web app that can generate content for creative, f..., {}, {}, investment, private, 2025-05-21 04:30:38.407752+00, 2025-05-21 04:30:38.407752+00, investment).","hint":null,"message":"null value in column \"project_type\" of relation \"projects\" violates not-null constraint"}
+2025-05-21 00:45:47 [error]: Failed to create migrations table: Could not find the function public.pgexec(command) in the schema cache
+2025-05-21 00:45:47 [error]: Migration process failed: Could not find the function public.pgexec(command) in the schema cache
+2025-05-21 00:46:40 [error]: Failed to create migrations table: Could not find the function public.pgexec(command) in the schema cache
+2025-05-21 00:46:40 [error]: Migration process failed: Could not find the function public.pgexec(command) in the schema cache
+2025-05-21 00:55:12 [error]: Auth verification error: Auth session missing!
+2025-05-21 00:55:12 [error]: Supabase admin client error: null value in column "project_type" of relation "projects" violates not-null constraint
+2025-05-21 00:55:12 [error]: Error details: {"code":"23502","details":"Failing row contains (89635e0e-16e4-4466-8b73-285ba97e11b7, 3d3ba6f6-a232-4bed-827a-eda37ea1539d, MinionGen, null, 2025-05-21 04:55:12.873893+00, 2025-05-21 04:55:12.873893+00, draft, null, {}, {}, {\"project_type\": \"investment\"}, f, null, null, I want to write a book titled \"The 52 Keys for Wealth Creation: ..., {}, {}, investment, private, 2025-05-21 04:55:12.873893+00, 2025-05-21 04:55:12.873893+00, investment).","hint":null,"message":"null value in column \"project_type\" of relation \"projects\" violates not-null constraint"}
+2025-05-21 00:55:12 [error]: Database error creating project: [object Object]

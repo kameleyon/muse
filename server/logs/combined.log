@@ -2341,3 +2341,260 @@
 2025-05-20 18:30:07 [error]: Supabase error creating project: new row violates row-level security policy for table "projects"
 2025-05-20 18:30:07 [warn]: Falling back to mock project due to error: Error: Supabase error: new row violates row-level security policy for table "projects"
 2025-05-20 18:30:07 [info]: Created mock project with ID: proj_1747780207934
+2025-05-20 19:21:50 [info]: Server running in development mode on port 9998
+2025-05-20 20:19:23 [info]: Making OpenRouter request to model: openai/gpt-4o-mini
+2025-05-20 20:19:32 [info]: OpenRouter request successful. Tokens used: 833
+2025-05-20 20:19:32 [info]: Making OpenRouter request to model: openai/gpt-4o
+2025-05-20 20:20:00 [info]: OpenRouter request successful. Tokens used: 3871
+2025-05-20 23:35:27 [info]: Request body: {"projectName":"MinionGen","description":"I want to write a book titled \"The 52 Keys for Wealth Creation: How to Play the Hand You're Dealt\" that explores cardology (not cartomancy) as a practical system for financial success. I'll cover how the 52 playing cards can be used beyond divination to manifest wealth through daily, weekly, and monthly card energies. The book will explain how to leverage birth chart cards, displaced cards, and card-astrology connections to time financial decisions perfectly. I want to address career compatibility, business selection, launch timing, naming strategies, and branding elements (including colors) that align with specific cards. The content should help readers identify businesses they'll both enjoy and succeed in financially, provide turnaround strategies for struggling ventures, detail customer attraction methods, highlight days to avoid certain activities, and demonstrate how cardology can be a reliable financial planning tool. This comprehensive guide should position cardology as a strategic planning tool rather than mere divination, with concrete examples of how to manifest prosperity by \"playing the hand you're dealt.\"\n\nHere is a few point that I wish to  covet but not limited to this \n\nFoundational Framework:\nExplain what Cardology is and how it differs from cartomancy and traditional divination.\nIntroduce the 52-card deck as a blueprint for the year, the soul, and the energetic matrix of time.\nBreak down how each person has 13 birth cards (life spread), and how that chart influences their destiny.\n\nCareer & Business Alignment:\nHow to decode your best career paths based on your Birth Card, Planetary Ruling Card, and Karma Cards.\nHow to identify your natural money-making energy and how it flows through your spread.\nWhat industries and business types suit each card — and which to avoid.\nHow to use your displacement card and yearly spread to track the best time to shift careers, take risks, or go all-in.\n\nBusiness Creation & Branding:\nHow to choose a business name based on the card value of the name.\nHow to align your brand colors, visuals, and voice to your Birth Card or business card.\nThe meaning and impact of the business birth card (launch date).\nHow to turn a struggling business around by understanding its energetic signature.\nUsing the weekly, monthly, and seasonal spreads to guide marketing, visibility, and launches.\n\nReal-Time Application:\nHow to use the Card of the Day, Card of the Week, and Card of the Month to sync action with energy.\nHow to integrate astrology and current transits to find the best timing for big moves.\nCase studies or examples of real people using Cardology to manifest financial growth.\n\nAbundance Activation:\nWhich cards are strongest for wealth, influence, visibility, and leadership, and how to activate their energy.\nHow to create a wealth manifestation practice using your cards.\nHow to align personal and business card cycles for maximum abundance flow.\n\nPsychological & Energetic Reprogramming:\nHow Cardology helps you understand karmic money patterns, self-worth blocks, or past-life business trauma.\nUsing cards as a daily mindset guide to rewire beliefs around success and value.\n\nTiming & Strategy:\nHow to know when to launch, when to pause, and when to pivot.\nWhat days or planetary periods are best for meetings, offers, networking, or scaling.\nThe power of vertical and reverse spreads for understanding long-term growth cycles.\n\nEthical & Practical Integration:\nHow to use Cardology as a compass without becoming overly dependent.\nBlending logic and intuition in business decision-making.\nEncouraging the reader to be empowered, sovereign, and confident with the wisdom.\n","privacy":"private","tags":[],"teamMembers":[],"pitchDeckTypeId":"investment","projectType":"investment"}
+2025-05-20 23:35:27 [info]: User ID from request: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-05-20 23:35:27 [info]: Creating project "MinionGen" (Type: investment) for user 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-05-20 23:35:27 [info]: Inserting data: {"user_id":"3d3ba6f6-a232-4bed-827a-eda37ea1539d","name":"MinionGen","project_type":"investment","description":"I want to write a book titled \"The 52 Keys for Wealth Creation: How to Play the Hand You're Dealt\" that explores cardology (not cartomancy) as a practical system for financial success. I'll cover how the 52 playing cards can be used beyond divination to manifest wealth through daily, weekly, and monthly card energies. The book will explain how to leverage birth chart cards, displaced cards, and card-astrology connections to time financial decisions perfectly. I want to address career compatibility, business selection, launch timing, naming strategies, and branding elements (including colors) that align with specific cards. The content should help readers identify businesses they'll both enjoy and succeed in financially, provide turnaround strategies for struggling ventures, detail customer attraction methods, highlight days to avoid certain activities, and demonstrate how cardology can be a reliable financial planning tool. This comprehensive guide should position cardology as a strategic planning tool rather than mere divination, with concrete examples of how to manifest prosperity by \"playing the hand you're dealt.\"\n\nHere is a few point that I wish to  covet but not limited to this \n\nFoundational Framework:\nExplain what Cardology is and how it differs from cartomancy and traditional divination.\nIntroduce the 52-card deck as a blueprint for the year, the soul, and the energetic matrix of time.\nBreak down how each person has 13 birth cards (life spread), and how that chart influences their destiny.\n\nCareer & Business Alignment:\nHow to decode your best career paths based on your Birth Card, Planetary Ruling Card, and Karma Cards.\nHow to identify your natural money-making energy and how it flows through your spread.\nWhat industries and business types suit each card — and which to avoid.\nHow to use your displacement card and yearly spread to track the best time to shift careers, take risks, or go all-in.\n\nBusiness Creation & Branding:\nHow to choose a business name based on the card value of the name.\nHow to align your brand colors, visuals, and voice to your Birth Card or business card.\nThe meaning and impact of the business birth card (launch date).\nHow to turn a struggling business around by understanding its energetic signature.\nUsing the weekly, monthly, and seasonal spreads to guide marketing, visibility, and launches.\n\nReal-Time Application:\nHow to use the Card of the Day, Card of the Week, and Card of the Month to sync action with energy.\nHow to integrate astrology and current transits to find the best timing for big moves.\nCase studies or examples of real people using Cardology to manifest financial growth.\n\nAbundance Activation:\nWhich cards are strongest for wealth, influence, visibility, and leadership, and how to activate their energy.\nHow to create a wealth manifestation practice using your cards.\nHow to align personal and business card cycles for maximum abundance flow.\n\nPsychological & Energetic Reprogramming:\nHow Cardology helps you understand karmic money patterns, self-worth blocks, or past-life business trauma.\nUsing cards as a daily mindset guide to rewire beliefs around success and value.\n\nTiming & Strategy:\nHow to know when to launch, when to pause, and when to pivot.\nWhat days or planetary periods are best for meetings, offers, networking, or scaling.\nThe power of vertical and reverse spreads for understanding long-term growth cycles.\n\nEthical & Practical Integration:\nHow to use Cardology as a compass without becoming overly dependent.\nBlending logic and intuition in business decision-making.\nEncouraging the reader to be empowered, sovereign, and confident with the wisdom.\n","privacy":"private","tags":[],"team_members":[],"pitch_deck_type_id":"investment"}
+2025-05-20 23:35:27 [info]: Inserting project with payload: {"user_id":"3d3ba6f6-a232-4bed-827a-eda37ea1539d","name":"MinionGen","description":"I want to write a book titled \"The 52 Keys for Wealth Creation: How to Play the Hand You're Dealt\" that explores cardology (not cartomancy) as a practical system for financial success. I'll cover how the 52 playing cards can be used beyond divination to manifest wealth through daily, weekly, and monthly card energies. The book will explain how to leverage birth chart cards, displaced cards, and card-astrology connections to time financial decisions perfectly. I want to address career compatibility, business selection, launch timing, naming strategies, and branding elements (including colors) that align with specific cards. The content should help readers identify businesses they'll both enjoy and succeed in financially, provide turnaround strategies for struggling ventures, detail customer attraction methods, highlight days to avoid certain activities, and demonstrate how cardology can be a reliable financial planning tool. This comprehensive guide should position cardology as a strategic planning tool rather than mere divination, with concrete examples of how to manifest prosperity by \"playing the hand you're dealt.\"\n\nHere is a few point that I wish to  covet but not limited to this \n\nFoundational Framework:\nExplain what Cardology is and how it differs from cartomancy and traditional divination.\nIntroduce the 52-card deck as a blueprint for the year, the soul, and the energetic matrix of time.\nBreak down how each person has 13 birth cards (life spread), and how that chart influences their destiny.\n\nCareer & Business Alignment:\nHow to decode your best career paths based on your Birth Card, Planetary Ruling Card, and Karma Cards.\nHow to identify your natural money-making energy and how it flows through your spread.\nWhat industries and business types suit each card — and which to avoid.\nHow to use your displacement card and yearly spread to track the best time to shift careers, take risks, or go all-in.\n\nBusiness Creation & Branding:\nHow to choose a business name based on the card value of the name.\nHow to align your brand colors, visuals, and voice to your Birth Card or business card.\nThe meaning and impact of the business birth card (launch date).\nHow to turn a struggling business around by understanding its energetic signature.\nUsing the weekly, monthly, and seasonal spreads to guide marketing, visibility, and launches.\n\nReal-Time Application:\nHow to use the Card of the Day, Card of the Week, and Card of the Month to sync action with energy.\nHow to integrate astrology and current transits to find the best timing for big moves.\nCase studies or examples of real people using Cardology to manifest financial growth.\n\nAbundance Activation:\nWhich cards are strongest for wealth, influence, visibility, and leadership, and how to activate their energy.\nHow to create a wealth manifestation practice using your cards.\nHow to align personal and business card cycles for maximum abundance flow.\n\nPsychological & Energetic Reprogramming:\nHow Cardology helps you understand karmic money patterns, self-worth blocks, or past-life business trauma.\nUsing cards as a daily mindset guide to rewire beliefs around success and value.\n\nTiming & Strategy:\nHow to know when to launch, when to pause, and when to pivot.\nWhat days or planetary periods are best for meetings, offers, networking, or scaling.\nThe power of vertical and reverse spreads for understanding long-term growth cycles.\n\nEthical & Practical Integration:\nHow to use Cardology as a compass without becoming overly dependent.\nBlending logic and intuition in business decision-making.\nEncouraging the reader to be empowered, sovereign, and confident with the wisdom.\n","privacy":"private","tags":[],"team_members":[],"pitch_deck_type_id":"investment","project_type":"investment","setup_details":{"project_type":"investment"}}
+2025-05-20 23:35:28 [error]: Supabase error creating project: new row violates row-level security policy for table "projects"
+2025-05-20 23:35:28 [warn]: Falling back to mock project due to error: Error: Supabase error: new row violates row-level security policy for table "projects"
+2025-05-20 23:35:28 [info]: Created mock project with ID: proj_1747798528151
+2025-05-20 23:50:47 [info]: Server running in development mode on port 9998
+2025-05-20 23:51:06 [info]: Server running in development mode on port 9998
+2025-05-20 23:51:14 [info]: Server running in development mode on port 9998
+2025-05-20 23:51:22 [info]: Server running in development mode on port 9998
+2025-05-20 23:51:58 [info]: Server running in development mode on port 9998
+2025-05-20 23:52:13 [info]: Server running in development mode on port 9998
+2025-05-20 23:52:24 [info]: Server running in development mode on port 9998
+2025-05-20 23:54:47 [info]: Server running in development mode on port 9998
+2025-05-20 23:56:20 [warn]: API Error: 404 - Not Found - /projects
+2025-05-21 00:01:30 [warn]: API Error: 404 - Not Found - /projects
+2025-05-21 00:04:18 [info]: Server running in development mode on port 9998
+2025-05-21 00:19:54 [warn]: API Error: 404 - Not Found - /
+2025-05-21 00:21:04 [warn]: API Error: 404 - Not Found - /
+2025-05-21 00:29:18 [info]: Server running in development mode on port 9998
+2025-05-21 00:30:38 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-05-21 00:30:38 [info]: Request body: {"projectName":"InstaSmart","description":"Hi, build me a web app that can generate content for creative, fiction books use node js, react, and openrouter with qwen 3 235B as llm make it pink fushia and white","privacy":"private","tags":[],"teamMembers":[],"pitchDeckTypeId":"investment","projectType":"investment"}
+2025-05-21 00:30:38 [info]: User ID from request: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-05-21 00:30:38 [error]: Auth verification error: Auth session missing!
+2025-05-21 00:30:38 [info]: Creating project "InstaSmart" (Type: investment) for user 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-05-21 00:30:38 [info]: Inserting data: {"user_id":"3d3ba6f6-a232-4bed-827a-eda37ea1539d","name":"InstaSmart","type":"investment","description":"Hi, build me a web app that can generate content for creative, fiction books use node js, react, and openrouter with qwen 3 235B as llm make it pink fushia and white","privacy":"private","tags":[],"team_members":[],"pitch_deck_type_id":"investment"}
+2025-05-21 00:30:38 [info]: Inserting project with payload: {"user_id":"3d3ba6f6-a232-4bed-827a-eda37ea1539d","name":"InstaSmart","type":"investment","description":"Hi, build me a web app that can generate content for creative, fiction books use node js, react, and openrouter with qwen 3 235B as llm make it pink fushia and white","privacy":"private","tags":[],"team_members":[],"pitch_deck_type_id":"investment","setup_details":{"project_type":"investment"}}
+2025-05-21 00:30:38 [info]: Using admin client to create project with service role token
+2025-05-21 00:30:38 [error]: Supabase admin client error: null value in column "project_type" of relation "projects" violates not-null constraint
+2025-05-21 00:30:38 [error]: Error details: {"code":"23502","details":"Failing row contains (594cdf47-e464-434e-85d7-e3fafaa0444d, 3d3ba6f6-a232-4bed-827a-eda37ea1539d, InstaSmart, null, 2025-05-21 04:30:38.407752+00, 2025-05-21 04:30:38.407752+00, draft, null, {}, {}, {\"project_type\": \"investment\"}, f, null, null, Hi, build me a web app that can generate content for creative, f..., {}, {}, investment, private, 2025-05-21 04:30:38.407752+00, 2025-05-21 04:30:38.407752+00, investment).","hint":null,"message":"null value in column \"project_type\" of relation \"projects\" violates not-null constraint"}
+2025-05-21 00:30:38 [warn]: Falling back to mock project due to error: [object Object]
+2025-05-21 00:30:38 [info]: Created mock project with ID: proj_1747801838419
+2025-05-21 00:43:11 [info]: Server running in development mode on port 9998
+2025-05-21 00:44:17 [info]: Server running in development mode on port 9998
+2025-05-21 00:44:26 [info]: Checking Supabase connection...
+2025-05-21 00:44:26 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-21 00:44:26 [info]: Supabase connection successful
+2025-05-21 00:44:26 [info]: Server running in development mode on port 9998
+2025-05-21 00:44:33 [info]: Checking Supabase connection...
+2025-05-21 00:44:33 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-21 00:44:34 [info]: Supabase connection successful
+2025-05-21 00:44:34 [info]: Server running in development mode on port 9998
+2025-05-21 00:45:31 [info]: Checking Supabase connection...
+2025-05-21 00:45:31 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-21 00:45:31 [info]: Supabase connection successful
+2025-05-21 00:45:31 [info]: Server running in development mode on port 9998
+2025-05-21 00:45:47 [info]: Checking Supabase connection...
+2025-05-21 00:45:47 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-21 00:45:47 [info]: Supabase connection successful. Projects table exists.
+2025-05-21 00:45:47 [info]: Running migrations to ensure schema is up to date...
+2025-05-21 00:45:47 [info]: Running database migrations...
+2025-05-21 00:45:47 [info]: Found 10 migration files to run
+2025-05-21 00:45:47 [error]: Failed to create migrations table: Could not find the function public.pgexec(command) in the schema cache
+2025-05-21 00:45:47 [error]: Migration process failed: Could not find the function public.pgexec(command) in the schema cache
+2025-05-21 00:45:47 [info]: Server running in development mode on port 9998
+2025-05-21 00:46:40 [info]: Checking Supabase connection...
+2025-05-21 00:46:40 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-21 00:46:40 [info]: Supabase connection successful. Projects table exists.
+2025-05-21 00:46:40 [info]: Running migrations to ensure schema is up to date...
+2025-05-21 00:46:40 [info]: Running database migrations...
+2025-05-21 00:46:40 [info]: Found 10 migration files to run
+2025-05-21 00:46:40 [error]: Failed to create migrations table: Could not find the function public.pgexec(command) in the schema cache
+2025-05-21 00:46:40 [error]: Migration process failed: Could not find the function public.pgexec(command) in the schema cache
+2025-05-21 00:46:40 [info]: Server running in development mode on port 9998
+2025-05-21 00:52:46 [info]: Checking Supabase connection...
+2025-05-21 00:52:46 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-21 00:52:46 [info]: Supabase connection successful. Projects table exists.
+2025-05-21 00:52:46 [info]: Running migrations to ensure schema is up to date...
+2025-05-21 00:52:46 [info]: Running database migrations...
+2025-05-21 00:52:46 [info]: Projects table exists, proceed with other migrations
+2025-05-21 00:52:46 [info]: Found 10 migration files to run
+2025-05-21 00:52:46 [info]: Migrations table does not exist, creating it...
+2025-05-21 00:52:46 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:52:46 [info]: Will attempt to continue with migrations
+2025-05-21 00:52:46 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-21 00:52:46 [info]: Will process all migration files
+2025-05-21 00:52:46 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-21 00:52:46 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:52:46 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-21 00:52:46 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-21 00:52:46 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:52:46 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-21 00:52:46 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-21 00:52:47 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:52:47 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-21 00:52:47 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-21 00:52:47 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:52:47 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-21 00:52:47 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-21 00:52:47 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:52:47 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-21 00:52:47 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-21 00:52:47 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:52:47 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-21 00:52:47 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-21 00:52:47 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:52:47 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-21 00:52:47 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-21 00:52:47 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:52:47 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-21 00:52:47 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-21 00:52:47 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:52:47 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-21 00:52:47 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-21 00:52:47 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:52:47 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-21 00:52:47 [info]: Projects table is now accessible - migrations successful!
+2025-05-21 00:52:47 [info]: Server running in development mode on port 9998
+2025-05-21 00:53:05 [info]: Checking Supabase connection...
+2025-05-21 00:53:05 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-21 00:53:05 [info]: Supabase connection successful. Projects table exists.
+2025-05-21 00:53:05 [info]: Running migrations to ensure schema is up to date...
+2025-05-21 00:53:05 [info]: Running database migrations...
+2025-05-21 00:53:05 [info]: Projects table exists, proceed with other migrations
+2025-05-21 00:53:05 [info]: Found 10 migration files to run
+2025-05-21 00:53:06 [info]: Migrations table does not exist, creating it...
+2025-05-21 00:53:06 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:53:06 [info]: Will attempt to continue with migrations
+2025-05-21 00:53:06 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-21 00:53:06 [info]: Will process all migration files
+2025-05-21 00:53:06 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-21 00:53:06 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:53:06 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-21 00:53:06 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-21 00:53:06 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:53:06 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-21 00:53:06 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-21 00:53:06 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:53:06 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-21 00:53:06 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-21 00:53:06 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:53:06 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-21 00:53:06 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-21 00:53:06 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:53:06 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-21 00:53:06 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-21 00:53:06 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:53:06 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-21 00:53:06 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-21 00:53:06 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:53:06 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-21 00:53:06 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-21 00:53:06 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:53:06 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-21 00:53:06 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-21 00:53:06 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:53:06 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-21 00:53:06 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-21 00:53:06 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:53:06 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-21 00:53:06 [info]: Projects table is now accessible - migrations successful!
+2025-05-21 00:54:03 [info]: Checking Supabase connection...
+2025-05-21 00:54:03 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-21 00:54:03 [info]: Supabase connection successful. Projects table exists.
+2025-05-21 00:54:03 [info]: Running migrations to ensure schema is up to date...
+2025-05-21 00:54:03 [info]: Running database migrations...
+2025-05-21 00:54:03 [info]: Projects table exists, proceed with other migrations
+2025-05-21 00:54:03 [info]: Found 10 migration files to run
+2025-05-21 00:54:03 [info]: Migrations table does not exist, creating it...
+2025-05-21 00:54:03 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:54:03 [info]: Will attempt to continue with migrations
+2025-05-21 00:54:03 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-21 00:54:03 [info]: Will process all migration files
+2025-05-21 00:54:03 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-21 00:54:04 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:54:04 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-21 00:54:04 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-21 00:54:04 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:54:04 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-21 00:54:04 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-21 00:54:04 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:54:04 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-21 00:54:04 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-21 00:54:04 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:54:04 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-21 00:54:04 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-21 00:54:04 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:54:04 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-21 00:54:04 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-21 00:54:04 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:54:04 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-21 00:54:04 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-21 00:54:04 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:54:04 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-21 00:54:04 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-21 00:54:04 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:54:04 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-21 00:54:04 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-21 00:54:04 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:54:04 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-21 00:54:04 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-21 00:54:04 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:54:04 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-21 00:54:04 [info]: Projects table is now accessible - migrations successful!
+2025-05-21 00:54:04 [info]: Server running in development mode on port 9998
+2025-05-21 00:55:12 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-05-21 00:55:12 [info]: Request body: {"projectName":"MinionGen","description":"I want to write a book titled \"The 52 Keys for Wealth Creation: How to Play the Hand You're Dealt\" that explores cardology (not cartomancy) as a practical system for financial success. I'll cover how the 52 playing cards can be used beyond divination to manifest wealth through daily, weekly, and monthly card energies. The book will explain how to leverage birth chart cards, displaced cards, and card-astrology connections to time financial decisions perfectly. I want to address career compatibility, business selection, launch timing, naming strategies, and branding elements (including colors) that align with specific cards. The content should help readers identify businesses they'll both enjoy and succeed in financially, provide turnaround strategies for struggling ventures, detail customer attraction methods, highlight days to avoid certain activities, and demonstrate how cardology can be a reliable financial planning tool. This comprehensive guide should position cardology as a strategic planning tool rather than mere divination, with concrete examples of how to manifest prosperity by \"playing the hand you're dealt.\"","privacy":"private","tags":[],"teamMembers":[],"pitchDeckTypeId":"investment","projectType":"investment"}
+2025-05-21 00:55:12 [info]: User ID from request: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-05-21 00:55:12 [error]: Auth verification error: Auth session missing!
+2025-05-21 00:55:12 [info]: Creating project "MinionGen" (Type: investment) for user 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-05-21 00:55:12 [info]: Inserting data: {"user_id":"3d3ba6f6-a232-4bed-827a-eda37ea1539d","name":"MinionGen","type":"investment","description":"I want to write a book titled \"The 52 Keys for Wealth Creation: How to Play the Hand You're Dealt\" that explores cardology (not cartomancy) as a practical system for financial success. I'll cover how the 52 playing cards can be used beyond divination to manifest wealth through daily, weekly, and monthly card energies. The book will explain how to leverage birth chart cards, displaced cards, and card-astrology connections to time financial decisions perfectly. I want to address career compatibility, business selection, launch timing, naming strategies, and branding elements (including colors) that align with specific cards. The content should help readers identify businesses they'll both enjoy and succeed in financially, provide turnaround strategies for struggling ventures, detail customer attraction methods, highlight days to avoid certain activities, and demonstrate how cardology can be a reliable financial planning tool. This comprehensive guide should position cardology as a strategic planning tool rather than mere divination, with concrete examples of how to manifest prosperity by \"playing the hand you're dealt.\"","privacy":"private","tags":[],"team_members":[],"pitch_deck_type_id":"investment"}
+2025-05-21 00:55:12 [info]: Inserting project with payload: {"user_id":"3d3ba6f6-a232-4bed-827a-eda37ea1539d","name":"MinionGen","type":"investment","description":"I want to write a book titled \"The 52 Keys for Wealth Creation: How to Play the Hand You're Dealt\" that explores cardology (not cartomancy) as a practical system for financial success. I'll cover how the 52 playing cards can be used beyond divination to manifest wealth through daily, weekly, and monthly card energies. The book will explain how to leverage birth chart cards, displaced cards, and card-astrology connections to time financial decisions perfectly. I want to address career compatibility, business selection, launch timing, naming strategies, and branding elements (including colors) that align with specific cards. The content should help readers identify businesses they'll both enjoy and succeed in financially, provide turnaround strategies for struggling ventures, detail customer attraction methods, highlight days to avoid certain activities, and demonstrate how cardology can be a reliable financial planning tool. This comprehensive guide should position cardology as a strategic planning tool rather than mere divination, with concrete examples of how to manifest prosperity by \"playing the hand you're dealt.\"","privacy":"private","tags":[],"team_members":[],"pitch_deck_type_id":"investment","setup_details":{"project_type":"investment"}}
+2025-05-21 00:55:12 [info]: Using admin client to create project with service role token
+2025-05-21 00:55:12 [error]: Supabase admin client error: null value in column "project_type" of relation "projects" violates not-null constraint
+2025-05-21 00:55:12 [error]: Error details: {"code":"23502","details":"Failing row contains (89635e0e-16e4-4466-8b73-285ba97e11b7, 3d3ba6f6-a232-4bed-827a-eda37ea1539d, MinionGen, null, 2025-05-21 04:55:12.873893+00, 2025-05-21 04:55:12.873893+00, draft, null, {}, {}, {\"project_type\": \"investment\"}, f, null, null, I want to write a book titled \"The 52 Keys for Wealth Creation: ..., {}, {}, investment, private, 2025-05-21 04:55:12.873893+00, 2025-05-21 04:55:12.873893+00, investment).","hint":null,"message":"null value in column \"project_type\" of relation \"projects\" violates not-null constraint"}
+2025-05-21 00:55:12 [error]: Database error creating project: [object Object]
+2025-05-21 00:57:10 [info]: Checking Supabase connection...
+2025-05-21 00:57:10 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-21 00:57:10 [info]: Supabase connection successful. Projects table exists.
+2025-05-21 00:57:10 [info]: Running migrations to ensure schema is up to date...
+2025-05-21 00:57:10 [info]: Running database migrations...
+2025-05-21 00:57:10 [info]: Projects table exists, proceed with other migrations
+2025-05-21 00:57:11 [info]: Found 10 migration files to run
+2025-05-21 00:57:11 [info]: Migrations table does not exist, creating it...
+2025-05-21 00:57:11 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:57:11 [info]: Will attempt to continue with migrations
+2025-05-21 00:57:11 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-21 00:57:11 [info]: Will process all migration files
+2025-05-21 00:57:11 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-21 00:57:11 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:57:11 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-21 00:57:11 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-21 00:57:11 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:57:11 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-21 00:57:11 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-21 00:57:11 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:57:11 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-21 00:57:11 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-21 00:57:11 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:57:11 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-21 00:57:11 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-21 00:57:11 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:57:11 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-21 00:57:11 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-21 00:57:11 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:57:11 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-21 00:57:11 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-21 00:57:11 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:57:11 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-21 00:57:11 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-21 00:57:11 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:57:11 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-21 00:57:11 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-21 00:57:11 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:57:11 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-21 00:57:11 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-21 00:57:11 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-21 00:57:11 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-21 00:57:11 [info]: Projects table is now accessible - migrations successful!
+2025-05-21 00:57:11 [info]: Server running in development mode on port 9998

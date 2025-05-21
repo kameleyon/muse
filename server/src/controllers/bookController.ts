@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { supabaseClient } from '../services/supabase';
 
-export const createBook = async (req: Request, res: Response) => {
+export const createBook = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { topic, userId, resources = [], bookType = 'self_improvement' } = req.body;
 
@@ -27,7 +27,7 @@ export const createBook = async (req: Request, res: Response) => {
   }
 };
 
-export const getUserBooks = async (req: Request, res: Response) => {
+export const getUserBooks = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { userId } = req.params;
     const { bookType } = req.query;
@@ -53,7 +53,7 @@ export const getUserBooks = async (req: Request, res: Response) => {
   }
 };
 
-export const getBook = async (req: Request, res: Response) => {
+export const getBook = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { bookId } = req.params;
 
@@ -80,7 +80,7 @@ export const getBook = async (req: Request, res: Response) => {
   }
 };
 
-export const updateBook = async (req: Request, res: Response) => {
+export const updateBook = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { bookId } = req.params;
     const updates = req.body;
@@ -104,7 +104,7 @@ export const updateBook = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteBook = async (req: Request, res: Response) => {
+export const deleteBook = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { bookId } = req.params;
 
@@ -139,7 +139,7 @@ export const deleteBook = async (req: Request, res: Response) => {
   }
 };
 
-export const createChapters = async (req: Request, res: Response) => {
+export const createChapters = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { bookId } = req.params;
     const { chapters, structure } = req.body;
@@ -228,7 +228,7 @@ export const createChapters = async (req: Request, res: Response) => {
   }
 };
 
-export const updateChapter = async (req: Request, res: Response) => {
+export const updateChapter = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { chapterId } = req.params;
     const updates = req.body;
@@ -259,7 +259,7 @@ export const updateChapter = async (req: Request, res: Response) => {
   }
 };
 
-export const getChapter = async (req: Request, res: Response) => {
+export const getChapter = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { chapterId } = req.params;
 

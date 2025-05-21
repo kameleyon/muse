@@ -24,6 +24,10 @@ exports.supabaseClient = (0, supabase_js_1.createClient)(config_1.default.supaba
 // Create a service role client (for admin operations)
 exports.supabaseAdmin = (0, supabase_js_1.createClient)(config_1.default.supabase.url, config_1.default.supabase.serviceKey, {
     db: { schema: 'public' }, // Explicitly set schema
+    auth: {
+        autoRefreshToken: false,
+        persistSession: false
+    }
 });
 // Initialize database tables
 const initializeDatabase = async () => {

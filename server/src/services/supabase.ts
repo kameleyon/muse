@@ -28,6 +28,10 @@ export const supabaseAdmin = createClient(
   config.supabase.serviceKey,
   {
     db: { schema: 'public' }, // Explicitly set schema
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
   }
 );
 

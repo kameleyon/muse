@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getChapter = exports.updateChapter = exports.createChapters = exports.deleteBook = exports.updateBook = exports.getBook = exports.getUserBooks = exports.createBook = void 0;
 const supabase_1 = require("../services/supabase");
-const createBook = async (req, res) => {
+const createBook = async (req, res, next) => {
     try {
         const { topic, userId, resources = [], bookType = 'self_improvement' } = req.body;
         // Create book in database
@@ -27,7 +27,7 @@ const createBook = async (req, res) => {
     }
 };
 exports.createBook = createBook;
-const getUserBooks = async (req, res) => {
+const getUserBooks = async (req, res, next) => {
     try {
         const { userId } = req.params;
         const { bookType } = req.query;
@@ -50,7 +50,7 @@ const getUserBooks = async (req, res) => {
     }
 };
 exports.getUserBooks = getUserBooks;
-const getBook = async (req, res) => {
+const getBook = async (req, res, next) => {
     try {
         const { bookId } = req.params;
         const { data: book, error: bookError } = await supabase_1.supabaseClient
@@ -75,7 +75,7 @@ const getBook = async (req, res) => {
     }
 };
 exports.getBook = getBook;
-const updateBook = async (req, res) => {
+const updateBook = async (req, res, next) => {
     try {
         const { bookId } = req.params;
         const updates = req.body;
@@ -98,7 +98,7 @@ const updateBook = async (req, res) => {
     }
 };
 exports.updateBook = updateBook;
-const deleteBook = async (req, res) => {
+const deleteBook = async (req, res, next) => {
     try {
         const { bookId } = req.params;
         // Delete chapters first
@@ -130,7 +130,7 @@ const deleteBook = async (req, res) => {
     }
 };
 exports.deleteBook = deleteBook;
-const createChapters = async (req, res) => {
+const createChapters = async (req, res, next) => {
     try {
         const { bookId } = req.params;
         const { chapters, structure } = req.body;
@@ -209,7 +209,7 @@ const createChapters = async (req, res) => {
     }
 };
 exports.createChapters = createChapters;
-const updateChapter = async (req, res) => {
+const updateChapter = async (req, res, next) => {
     try {
         const { chapterId } = req.params;
         const updates = req.body;
@@ -238,7 +238,7 @@ const updateChapter = async (req, res) => {
     }
 };
 exports.updateChapter = updateChapter;
-const getChapter = async (req, res) => {
+const getChapter = async (req, res, next) => {
     try {
         const { chapterId } = req.params;
         const { data, error } = await supabase_1.supabaseClient

@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { supabaseClient } from '../services/supabase';
 import multer from 'multer';
 import path from 'path';
@@ -31,7 +31,7 @@ const upload = multer({
 
 export const uploadMiddleware = upload.single('file');
 
-export const uploadBookReference = async (req: Request, res: Response) => {
+export const uploadBookReference = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { bookId } = req.params;
     const { userId } = req.body;
@@ -89,7 +89,7 @@ export const uploadBookReference = async (req: Request, res: Response) => {
   }
 };
 
-export const getBookUploads = async (req: Request, res: Response) => {
+export const getBookUploads = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { bookId } = req.params;
 
@@ -108,7 +108,7 @@ export const getBookUploads = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteUpload = async (req: Request, res: Response) => {
+export const deleteUpload = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { uploadId } = req.params;
 
@@ -147,7 +147,7 @@ export const deleteUpload = async (req: Request, res: Response) => {
   }
 };
 
-export const getDownloadUrl = async (req: Request, res: Response) => {
+export const getDownloadUrl = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { uploadId } = req.params;
 

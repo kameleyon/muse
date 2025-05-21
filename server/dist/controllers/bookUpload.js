@@ -32,7 +32,7 @@ const upload = (0, multer_1.default)({
     }
 });
 exports.uploadMiddleware = upload.single('file');
-const uploadBookReference = async (req, res) => {
+const uploadBookReference = async (req, res, next) => {
     try {
         const { bookId } = req.params;
         const { userId } = req.body;
@@ -85,7 +85,7 @@ const uploadBookReference = async (req, res) => {
     }
 };
 exports.uploadBookReference = uploadBookReference;
-const getBookUploads = async (req, res) => {
+const getBookUploads = async (req, res, next) => {
     try {
         const { bookId } = req.params;
         const { data, error } = await supabase_1.supabaseClient
@@ -103,7 +103,7 @@ const getBookUploads = async (req, res) => {
     }
 };
 exports.getBookUploads = getBookUploads;
-const deleteUpload = async (req, res) => {
+const deleteUpload = async (req, res, next) => {
     try {
         const { uploadId } = req.params;
         // Get upload details first
@@ -138,7 +138,7 @@ const deleteUpload = async (req, res) => {
     }
 };
 exports.deleteUpload = deleteUpload;
-const getDownloadUrl = async (req, res) => {
+const getDownloadUrl = async (req, res, next) => {
     try {
         const { uploadId } = req.params;
         // Get upload details
