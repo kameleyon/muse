@@ -173,6 +173,21 @@ const BookReviewPage: React.FC = () => {
               </div>
 
               <div className="space-y-6">
+                {/* Cover Page Details */}
+                {localStructure.coverPageDetails && (
+                  <div className="mb-6 pb-6 border-b border-neutral-light">
+                    <h3 className="font-heading text-xl font-semibold text-secondary mb-1">
+                      {localStructure.coverPageDetails.title}
+                    </h3>
+                    <p className="text-neutral-medium text-lg mb-2">
+                      {localStructure.coverPageDetails.subtitle}
+                    </p>
+                    <p className="text-neutral-dark">
+                      By: {localStructure.coverPageDetails.authorName}
+                    </p>
+                  </div>
+                )}
+
                 {/* Front matter sections if they exist */}
                 {localStructure.acknowledgement && (
                   <div className="mb-4">
@@ -246,8 +261,18 @@ const BookReviewPage: React.FC = () => {
                                   <p className="text-neutral-medium mt-2">
                                     {chapter.description}
                                   </p>
+                                  {(chapter.keyPoints || (chapter.metadata && chapter.metadata.keyTopics)) && (
+                                    <div className="mt-3">
+                                      <strong className="text-xs text-neutral-dark block mb-1">Key Points:</strong>
+                                      <ul className="list-disc list-inside text-xs text-neutral-medium space-y-0.5">
+                                        {(chapter.keyPoints || chapter.metadata.keyTopics).map((point: string, i: number) => (
+                                          <li key={i}>{point}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
                                   <p className="text-xs text-neutral-medium mt-3">
-                                    ~{chapter.estimatedWords || 0} words
+                                    ~{chapter.estimatedWords || (chapter.metadata && chapter.metadata.estimatedWords) || 0} words
                                   </p>
                                 </div>
                               </div>
@@ -290,8 +315,18 @@ const BookReviewPage: React.FC = () => {
                                 <p className="text-sm text-neutral-medium mt-1">
                                   {chapter.description}
                                 </p>
+                                {(chapter.keyPoints || (chapter.metadata && chapter.metadata.keyTopics)) && (
+                                  <div className="mt-2">
+                                    <strong className="text-xs text-neutral-dark block mb-0.5">Key Points:</strong>
+                                    <ul className="list-disc list-inside text-xs text-neutral-medium space-y-0.5">
+                                      {(chapter.keyPoints || chapter.metadata.keyTopics).map((point: string, i: number) => (
+                                        <li key={i}>{point}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
                                 <p className="text-xs text-neutral-medium mt-2">
-                                  ~{chapter.estimatedWords} words
+                                  ~{chapter.estimatedWords || (chapter.metadata && chapter.metadata.estimatedWords) || 0} words
                                 </p>
                               </div>
                               <button
@@ -313,6 +348,22 @@ const BookReviewPage: React.FC = () => {
                   <div className="mt-4">
                     <strong className="text-neutral-dark mb-2 block">Conclusion:</strong>
                     <p className="text-neutral-medium">{localStructure.conclusion}</p>
+                  </div>
+                )}
+
+                {/* Appendix */}
+                {localStructure.appendix && (
+                  <div className="mt-4 pt-4 border-t border-neutral-light">
+                    <strong className="text-neutral-dark mb-2 block">Appendix:</strong>
+                    <p className="text-neutral-medium">{localStructure.appendix}</p>
+                  </div>
+                )}
+
+                {/* References */}
+                {localStructure.references && (
+                  <div className="mt-4 pt-4 border-t border-neutral-light">
+                    <strong className="text-neutral-dark mb-2 block">References:</strong>
+                    <p className="text-neutral-medium">{localStructure.references}</p>
                   </div>
                 )}
               </div>

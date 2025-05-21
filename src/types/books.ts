@@ -115,6 +115,13 @@ export interface BookStructure {
   prologue?: string
   introduction?: string
   conclusion?: string
+  appendix?: string
+  references?: string
+  coverPageDetails?: {
+    title: string
+    subtitle: string
+    authorName: string
+  }
   colorScheme?: {
     primary: string
     secondary: string
