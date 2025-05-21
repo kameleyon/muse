@@ -1,15 +1,54 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { Button } from '@/components/ui/Button';
 import { 
   FileText, FolderOpen, Zap, Plus, TrendingUp, 
-  Lightbulb, Activity, AlertCircle, CheckCircle 
+  Lightbulb, Activity, AlertCircle, CheckCircle,
+  BookOpen, Presentation
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
+import { supabase } from '@/services/supabase';
+import { bookService } from '@/lib/books';
 //import MainLayout from '@/components/layout/MainLayout';
 import '@/styles/dashboard/dashboard.css';
+
+// Book interface
+interface Book {
+  id: string;
+  user_id: string;
+  title: string;
+  topic: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  chapters?: any[];
+}
+
+// Project interface
+interface Project {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  type: string | null;
+  project_type: string;
+  privacy: string;
+  created_at: string;
+  updated_at: string;
+  status?: string;
+}
+
+// RecentItem - combines both book and project data
+interface RecentItem {
+  id: string;
+  name: string;
+  type: 'book' | 'project';
+  typeName: string;
+  lastModified: Date;
+  description?: string | null;
+}
 
 // Smart Notification type
 interface SmartNotification {
@@ -32,21 +71,100 @@ interface QuickStat {
 
 const DashboardMVP: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [books, setBooks] = useState<Book[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [recentItems, setRecentItems] = useState<RecentItem[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  // Sample data for MVP
-  const recentFiles = [
-    { id: '1', name: 'Marketing Strategy Q1', type: 'document', lastModified: new Date(), size: '2.3 MB' },
-    { id: '2', name: 'Product Launch Plan', type: 'pitch', lastModified: new Date(Date.now() - 86400000), size: '1.5 MB' },
-    { id: '3', name: 'User Research Report', type: 'document', lastModified: new Date(Date.now() - 172800000), size: '4.1 MB' },
-    { id: '4', name: 'Blog Post: AI Trends', type: 'blog', lastModified: new Date(Date.now() - 259200000), size: '856 KB' },
-    { id: '5', name: 'Sales Presentation', type: 'pitch', lastModified: new Date(Date.now() - 345600000), size: '3.2 MB' },
-  ];
+  // Load books and projects data
+  useEffect(() => {
+    if (user) {
+      const loadData = async () => {
+        setLoading(true);
+        try {
+          // Load books
+          const userBooks = await bookService.getUserBooks(user.id, 'self_improvement');
+          setBooks(userBooks);
+          
+          // Load projects
+          const { data: userProjects, error: projectsError } = await supabase
+            .from('projects')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('updated_at', { ascending: false });
+          
+          if (projectsError) {
+            throw new Error(projectsError.message);
+          }
+          
+          setProjects(userProjects || []);
+          
+          // Combine books and projects for recent items
+          const bookItems: RecentItem[] = userBooks.map(book => ({
+            id: book.id,
+            name: book.title || book.topic,
+            type: 'book',
+            typeName: 'Book',
+            lastModified: new Date(book.updated_at),
+            description: book.topic
+          }));
+          
+          const projectItems: RecentItem[] = (userProjects || []).map(project => ({
+            id: project.id,
+            name: project.name,
+            type: 'project',
+            typeName: project.project_type || project.type || 'Project',
+            lastModified: new Date(project.updated_at),
+            description: project.description
+          }));
+          
+          // Combine and sort by most recent first
+          const combinedItems = [...bookItems, ...projectItems].sort((a, b) => 
+            b.lastModified.getTime() - a.lastModified.getTime()
+          );
+          
+          // Take only the 5 most recent items
+          setRecentItems(combinedItems.slice(0, 5));
+          
+        } catch (err: any) {
+          console.error('Error loading dashboard data:', err);
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      loadData();
+    }
+  }, [user]);
 
+  // Calculate quick stats based on real data
   const quickStats: QuickStat[] = [
-    { label: 'Total Projects', value: 12, trend: 'up', icon: <FolderOpen className="stat-icon" /> },
-    { label: 'AI Credits Used', value: '2,450', trend: 'stable', icon: <Zap className="stat-icon" /> },
-    { label: 'Content Created', value: '34', trend: 'up', icon: <FileText className="stat-icon" /> },
-    { label: 'Success Rate', value: '94%', trend: 'up', icon: <TrendingUp className="stat-icon" /> },
+    { 
+      label: 'Total Projects', 
+      value: projects.length, 
+      trend: 'up', 
+      icon: <FolderOpen className="stat-icon" /> 
+    },
+    { 
+      label: 'Books Created', 
+      value: books.length, 
+      trend: 'up', 
+      icon: <BookOpen className="stat-icon" /> 
+    },
+    { 
+      label: 'Content Items', 
+      value: books.length + projects.length, 
+      trend: 'up', 
+      icon: <FileText className="stat-icon" /> 
+    },
+    { 
+      label: 'Success Rate', 
+      value: '100%', 
+      trend: 'up', 
+      icon: <TrendingUp className="stat-icon" /> 
+    },
   ];
 
   const smartNotifications: SmartNotification[] = [
@@ -139,18 +257,45 @@ const DashboardMVP: React.FC = () => {
               </div>
               <div className="card-content">
                 <div className="recent-files">
-                  {recentFiles.map((file) => (
-                    <div key={file.id} className="file-card">
+                  {loading ? (
+                    <div className="p-8 text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                      <p className="mt-2 text-neutral-medium">Loading your content...</p>
+                    </div>
+                  ) : error ? (
+                    <div className="p-4 bg-red-50 rounded-lg">
+                      <p className="text-red-600 text-sm">Error loading content: {error}</p>
+                    </div>
+                  ) : recentItems.length === 0 ? (
+                    <div className="p-8 text-center">
+                      <p className="text-neutral-medium">No content yet. Start by creating a book or project!</p>
+                    </div>
+                  ) : recentItems.map((item) => (
+                    <div key={item.id} className="file-card">
                       <div className="flex items-center space-x-3 mb-3">
-                        <FileText size={20} className="text-[#3d3d3a]" />
+                        {item.type === 'book' ? (
+                          <BookOpen size={20} className="text-[#3d3d3a]" />
+                        ) : (
+                          <Presentation size={20} className="text-[#3d3d3a]" />
+                        )}
                         <div className="flex-1">
-                          <p className="font-medium text-[#232321]">{file.name}</p>
+                          <p className="font-medium text-[#232321]">{item.name}</p>
                           <p className="text-sm text-secondary">
-                            {formatDistanceToNow(file.lastModified)} ago • {file.size}
+                            {formatDistanceToNow(item.lastModified)} ago • {item.typeName}
                           </p>
+                          {item.description && (
+                            <p className="text-xs text-neutral-medium mt-1 line-clamp-1">{item.description}</p>
+                          )}
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm" className="btn btn-outline w-full">Open</Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="btn btn-outline w-full"
+                        onClick={() => window.location.href = item.type === 'book' ? `/book/${item.id}/edit` : `/project/${item.id}`}
+                      >
+                        Open
+                      </Button>
                     </div>
                   ))}
                 </div>

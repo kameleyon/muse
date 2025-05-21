@@ -188,3 +188,4 @@
 2025-05-21 00:55:12 [error]: Supabase admin client error: null value in column "project_type" of relation "projects" violates not-null constraint
 2025-05-21 00:55:12 [error]: Error details: {"code":"23502","details":"Failing row contains (89635e0e-16e4-4466-8b73-285ba97e11b7, 3d3ba6f6-a232-4bed-827a-eda37ea1539d, MinionGen, null, 2025-05-21 04:55:12.873893+00, 2025-05-21 04:55:12.873893+00, draft, null, {}, {}, {\"project_type\": \"investment\"}, f, null, null, I want to write a book titled \"The 52 Keys for Wealth Creation: ..., {}, {}, investment, private, 2025-05-21 04:55:12.873893+00, 2025-05-21 04:55:12.873893+00, investment).","hint":null,"message":"null value in column \"project_type\" of relation \"projects\" violates not-null constraint"}
 2025-05-21 00:55:12 [error]: Database error creating project: [object Object]
+2025-05-21 00:58:55 [error]: Auth verification error: Auth session missing!
