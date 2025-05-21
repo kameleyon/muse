@@ -11,6 +11,7 @@ interface OpenRouterRequestParams {
   frequency_penalty?: number;
   presence_penalty?: number;
   stop?: string[];
+  messages?: Array<{role: string; content: string}>;
 }
 
 interface OpenRouterResponse {
@@ -34,14 +35,17 @@ interface OpenRouterResponse {
 
 export const executeOpenRouterRequest = async (params: OpenRouterRequestParams): Promise<OpenRouterResponse> => {
   try {
+    // Ensure we have messages to send to the API
+    const messages = params.messages || [
+      {
+        role: 'user',
+        content: params.prompt,
+      },
+    ];
+    
     const requestData = {
       model: params.model,
-      messages: [
-        {
-          role: 'user',
-          content: params.prompt,
-        },
-      ],
+      messages,
       max_tokens: params.max_tokens || 1000,
       temperature: params.temperature || 0.7,
       top_p: params.top_p || 1,

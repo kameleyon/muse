@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import DashboardLayout from '../../layout/DashboardLayout'
 import { 
   ChevronLeft, 
   Save, 
@@ -34,7 +33,11 @@ const BookEditorPage: React.FC = () => {
 
   useEffect(() => {
     if (bookId) {
-      loadBook()
+      // Clear any potential stale chapter state before loading
+      setSelectedChapter(null);
+      setContent('');
+      setError('');
+      loadBook();
     }
   }, [bookId])
 
@@ -47,15 +50,26 @@ const BookEditorPage: React.FC = () => {
   const loadBook = async () => {
     try {
       setLoading(true)
-      const bookData = await bookService.getBook(bookId!)
-      setBook(bookData)
-      setChapters(bookData.chapters)
+      console.log(`Loading book: ${bookId}`);
       
-      // Select first chapter by default
-      if (bookData.chapters.length > 0) {
+      const bookData = await bookService.getBook(bookId!)
+      console.log(`Loaded book with ${bookData.chapters?.length || 0} chapters`);
+      
+      setBook(bookData)
+      
+      if (bookData.chapters && bookData.chapters.length > 0) {
+        console.log(`Book has chapters: ${bookData.chapters.map(ch => ch.id).join(', ')}`);
+        setChapters(bookData.chapters)
+        
+        // Select first chapter by default
         setSelectedChapter(bookData.chapters[0])
+        console.log(`Selected first chapter: ${bookData.chapters[0].title} (ID: ${bookData.chapters[0].id})`);
+      } else {
+        console.warn('Book has no chapters after loading!');
+        setError('This book has no chapters. Please try creating a new book.');
       }
     } catch (err: any) {
+      console.error('Error loading book:', err);
       setError(err.message || 'Failed to load book')
     } finally {
       setLoading(false)
@@ -69,18 +83,59 @@ const BookEditorPage: React.FC = () => {
     setError('')
     
     try {
-      const updatedChapter = await bookService.generateChapter(selectedChapter.id)
-      setContent(updatedChapter.content)
+      console.log(`Generating chapter with ID: ${selectedChapter.id}`);
       
-      // Update chapter in state
-      setChapters(chapters.map(ch => 
-        ch.id === updatedChapter.id ? updatedChapter : ch
-      ))
-      setSelectedChapter(updatedChapter)
+      // Verify chapter exists before trying to generate content
+      if (!selectedChapter.id) {
+        throw new Error('Selected chapter has no ID');
+      }
+      
+      try {
+        const updatedChapter = await bookService.generateChapter(selectedChapter.id)
+        setContent(updatedChapter.content)
+        
+        // Update chapter in state
+        setChapters(chapters.map(ch => 
+          ch.id === updatedChapter.id ? updatedChapter : ch
+        ))
+        setSelectedChapter(updatedChapter)
+      } catch (firstError: any) {
+        // Handle the case where the chapter wasn't found
+        if (firstError.message?.includes('Chapter not found')) {
+          console.warn('Chapter not found, attempting to reload book and recreate chapters...');
+          setError('Chapter not found in database. Attempting to recover...');
+          
+          // Reload the book to refresh chapters
+          await loadBook();
+          
+          if (chapters.length > 0) {
+            // Try again with the reloaded chapter
+            // The server logs show we're consistently trying to use specific IDs that don't exist
+            // We need to use the actual chapter from the database
+            console.log('Trying to find chapter with matching number:', selectedChapter.number);
+            const freshChapter = chapters.find(ch => ch.number === selectedChapter.number) || chapters[0];
+            console.log('Found fresh chapter with ID:', freshChapter?.id);
+            setSelectedChapter(freshChapter);
+            
+            const updatedChapter = await bookService.generateChapter(freshChapter.id);
+            setContent(updatedChapter.content);
+            
+            setChapters(chapters.map(ch => 
+              ch.id === updatedChapter.id ? updatedChapter : ch
+            ));
+            setSelectedChapter(updatedChapter);
+          } else {
+            throw new Error('No chapters found after reloading. Please try creating a new book.');
+          }
+        } else {
+          throw firstError;
+        }
+      }
     } catch (err: any) {
-      setError(err.message || 'Failed to generate chapter')
+      console.error('Error generating chapter:', err);
+      setError(err.message || 'Failed to generate chapter');
     } finally {
-      setGenerating(false)
+      setGenerating(false);
     }
   }
 
@@ -161,7 +216,14 @@ const BookEditorPage: React.FC = () => {
       
         <div className="text-center py-12">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <p className="text-xl text-neutral-dark">Book not found</p>
+          <p className="text-xl text-neutral-dark mb-4">Book not found</p>
+          <p className="text-md text-neutral-medium mb-6">The book may have been deleted or there's an issue with the database.</p>
+          <button 
+            onClick={() => navigate('/new-book')} 
+            className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+          >
+            Create New Book
+          </button>
         </div>
       
     )
