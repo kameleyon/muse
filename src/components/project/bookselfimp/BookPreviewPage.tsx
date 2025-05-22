@@ -15,6 +15,7 @@ const BookPreviewPage: React.FC = () => {
   
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pdfLoading, setPdfLoading] = useState(false);
   const [error, setError] = useState('');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [activeChapterId, setActiveChapterId] = useState<string | null>(null);
@@ -97,7 +98,8 @@ const BookPreviewPage: React.FC = () => {
 
   const downloadPdfFile = async () => {
     if (!book) return;
-    setLoading(true); // Optional: show a loading state
+    setPdfLoading(true); 
+    setError('');
 
     const doc = new jsPDF({
       orientation: 'p',
@@ -107,20 +109,34 @@ const BookPreviewPage: React.FC = () => {
     });
 
     const pageMargin = 20; // mm
+    const bottomMargin = 25; // Increased bottom margin
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const contentWidth = pageWidth - 2 * pageMargin;
-    // const contentHeight = pageHeight - 2 * pageMargin; // Usable height per page
+    const contentHeight = pageHeight - pageMargin - bottomMargin; // Usable height per page
 
     let currentY = pageMargin;
     let pageNumber = 1;
 
-    const addPageIfNeeded = (elementHeight: number) => {
-      if (currentY + elementHeight > pageHeight - pageMargin) {
+    const addPageIfNeeded = (elementHeight: number, forceNewPage = false) => {
+      if (forceNewPage || (currentY + elementHeight > contentHeight && currentY > pageMargin) ) { // Ensure not adding new page if currentY is still at top
         doc.addPage();
         pageNumber++;
         currentY = pageMargin;
-        addFooter();
+        addFooter(); // Add footer to the new page
+      } else if (currentY + elementHeight > contentHeight) { // Handles case where element itself is too tall for one page (rare for typical content blocks)
+        // This case might need more sophisticated splitting if elements are very large.
+        // For now, it will likely just overflow or be cut if not handled by html2canvas's own capabilities.
+        // A simple approach is to force a new page if it won't fit, even if currentY is at pageMargin.
+        if (currentY === pageMargin && elementHeight > contentHeight) {
+            // Element is too big for a single page, html2canvas will handle rendering it across its own canvas size
+            // but jsPDF will clip it. This is a limitation without more complex content splitting.
+        } else if (currentY > pageMargin) { // Only add new page if we've already written something
+            doc.addPage();
+            pageNumber++;
+            currentY = pageMargin;
+            addFooter();
+        }
       }
     };
     
@@ -130,22 +146,33 @@ const BookPreviewPage: React.FC = () => {
       const text = `Page ${pageNumber}`;
       const textWidth = doc.getStringUnitWidth(text) * doc.getFontSize() / doc.internal.scaleFactor;
       const x = (pageWidth - textWidth) / 2;
-      const y = pageHeight - 10; // 10mm from bottom
-      doc.text(text, x, y, { pageNumber: pageNumber } as any); // Hack to ensure it's on current page
+      const y = pageHeight - (bottomMargin / 2); // Center in the new bottom margin
+      doc.text(text, x, y); 
     };
 
 
-    const addHtmlContent = async (htmlString: string, isCoverPage = false) => {
+    const addHtmlContent = async (htmlString: string, options: { isCoverPage?: boolean, isPartTitle?: boolean, forceNewPage?: boolean } = {}) => {
+      const { isCoverPage = false, isPartTitle = false, forceNewPage = false } = options;
+      
+      if (forceNewPage && currentY > pageMargin) { // If forcing new page and not at the very start of a page
+        addPageIfNeeded(0, true); // Force new page
+      }
+
       const container = document.createElement('div');
       container.style.position = 'absolute';
       container.style.left = '-9999px'; // Off-screen
       container.style.width = `${contentWidth * (96 / 25.4)}px`; // Convert mm to px for canvas
-      container.style.padding = '10px'; // Some padding for rendering
+      container.style.padding = '10px'; 
       container.style.backgroundColor = 'white';
       container.innerHTML = htmlString;
       document.body.appendChild(container);
 
       // Apply specific styles for PDF rendering
+      // Ensure body/root element for html2canvas has a defined font for consistent text measurement
+      (container.firstChild as HTMLElement).style.fontFamily = "'Questrial', Arial, sans-serif"; 
+      (container.firstChild as HTMLElement).style.fontSize = "11pt";
+
+
       container.querySelectorAll('h1, h2, h3, .cover-title, .cover-subtitle, .cover-author').forEach(el => {
         (el as HTMLElement).style.fontFamily = "'Comfortaa', 'Helvetica Neue', Arial, sans-serif";
       });
@@ -153,25 +180,26 @@ const BookPreviewPage: React.FC = () => {
         (el as HTMLElement).style.fontFamily = "'Questrial', Arial, sans-serif";
       });
       
-      if (isCoverPage) {
-        const coverPageDiv = container.querySelector('.cover-page-content') as HTMLElement;
-        if (coverPageDiv) {
-            coverPageDiv.style.display = 'flex';
-            coverPageDiv.style.flexDirection = 'column';
-            coverPageDiv.style.justifyContent = 'center';
-            coverPageDiv.style.alignItems = 'center';
-            coverPageDiv.style.height = `${(pageHeight - 2 * pageMargin) * (96/25.4) * 0.8}px`; // 80% of content height
-            coverPageDiv.style.textAlign = 'center';
+      if (isCoverPage || isPartTitle) {
+        const contentDiv = container.firstChild as HTMLElement;
+        if (contentDiv) {
+            contentDiv.style.display = 'flex';
+            contentDiv.style.flexDirection = 'column';
+            contentDiv.style.justifyContent = 'center';
+            contentDiv.style.alignItems = 'center';
+            // Make it take up a good portion of the page height for centering
+            contentDiv.style.minHeight = `${contentHeight * (96/25.4) * 0.7}px`; 
+            contentDiv.style.textAlign = 'center';
         }
       }
 
 
       const canvas = await html2canvas(container, {
-        scale: 2, // Higher scale for better quality
+        scale: 2, 
         useCORS: true,
-        logging: false, // Reduce console noise
+        logging: false, 
         width: container.scrollWidth,
-        height: container.scrollHeight,
+        height: container.scrollHeight, // Capture full scroll height
         windowWidth: container.scrollWidth,
       });
       document.body.removeChild(container);
@@ -179,31 +207,34 @@ const BookPreviewPage: React.FC = () => {
       const imgData = canvas.toDataURL('image/png');
       const imgProps = doc.getImageProperties(imgData);
       const imgHeight = (imgProps.height * contentWidth) / imgProps.width;
+      
+      addPageIfNeeded(imgHeight, forceNewPage && currentY === pageMargin); // Pass forceNewPage only if at top of a new page already
 
-      addPageIfNeeded(imgHeight);
       doc.addImage(imgData, 'PNG', pageMargin, currentY, contentWidth, imgHeight, undefined, 'FAST');
-      currentY += imgHeight + 5; // Add some spacing
+      currentY += imgHeight + 8; // Increased spacing after elements
     };
     
+    addFooter(); // Add footer to the first page
+
     // --- Cover Page ---
     if (book.structure?.coverPageDetails) {
       let coverHtml = `<div class="cover-page-content" style="font-size: 12pt;">`;
-      coverHtml += `<div class="cover-title" style="font-size: 24pt; font-weight: bold; margin-bottom: 15px;">${book.structure.coverPageDetails.title || 'Untitled Book'}</div>`;
+      coverHtml += `<div class="cover-title" style="font-family: 'Comfortaa', sans-serif; font-size: 26pt; font-weight: bold; margin-bottom: 20px;">${book.structure.coverPageDetails.title || 'Untitled Book'}</div>`;
       if (book.structure.coverPageDetails.subtitle) {
-        coverHtml += `<div class="cover-subtitle" style="font-size: 18pt; margin-bottom: 10px;">${book.structure.coverPageDetails.subtitle}</div>`;
+        coverHtml += `<div class="cover-subtitle" style="font-family: 'Comfortaa', sans-serif; font-size: 20pt; margin-bottom: 15px;">${book.structure.coverPageDetails.subtitle}</div>`;
       }
       if (book.structure.coverPageDetails.authorName) {
-        coverHtml += `<div class="cover-author" style="font-size: 14pt; margin-top: 20px;">By ${book.structure.coverPageDetails.authorName}</div>`;
+        coverHtml += `<div class="cover-author" style="font-family: 'Comfortaa', sans-serif; font-size: 16pt; margin-top: 25px;">By ${book.structure.coverPageDetails.authorName}</div>`;
       }
       coverHtml += `</div>`;
-      await addHtmlContent(coverHtml, true);
-      currentY = pageHeight; // Force new page after cover
+      await addHtmlContent(coverHtml, { isCoverPage: true });
+      addPageIfNeeded(0, true); // Force new page after cover
     }
 
     // --- Table of Contents (Simplified) ---
-    let tocHtml = `<div style="font-size: 11pt;"> <h1 style="font-size: 18pt; text-align: center; margin-bottom: 15px;">Table of Contents</h1> <ul style="list-style: none; padding-left: 0;">`;
+    let tocHtml = `<div style="font-size: 11pt;"> <h1 style="font-family: 'Comfortaa', sans-serif; font-size: 20pt; text-align: center; margin-bottom: 20px;">Table of Contents</h1> <ul style="list-style: none; padding-left: 0;">`;
     const addTocEntry = (label: string, level: number = 0) => {
-      tocHtml += `<li style="margin-bottom: 5px; margin-left: ${level * 15}px;">${label}</li>`;
+      tocHtml += `<li style="margin-bottom: 7px; margin-left: ${level * 20}px; font-family: 'Questrial', sans-serif;">${label}</li>`;
     };
 
     if (book.structure?.acknowledgement) addTocEntry('Acknowledgement');
@@ -227,86 +258,110 @@ const BookPreviewPage: React.FC = () => {
     if (book.structure?.references) addTocEntry('References');
     tocHtml += `</ul></div>`;
     
-    if (tocHtml.includes('<li>')) { // Only add ToC if it has items
+    if (tocHtml.includes('<li>')) { 
         await addHtmlContent(tocHtml);
-        currentY = pageHeight; // Force new page after ToC
+        addPageIfNeeded(0, true); // Force new page after ToC
     }
     
     // --- Content Sections ---
-    const parseAndAddMarkdown = async (title: string | null, markdownContent: string | undefined | null, headingLevel: 'h1' | 'h2' | 'h3' = 'h1') => {
+    const parseAndAddMarkdown = async (
+      title: string | null, 
+      markdownContent: string | undefined | null, 
+      options: { headingLevel?: 'h1' | 'h2' | 'h3', forceNewPage?: boolean, isPartTitle?: boolean } = {}
+    ) => {
+      const { headingLevel = 'h1', forceNewPage = false, isPartTitle = false } = options;
       if (!markdownContent && !title) return;
+
+      if (forceNewPage && currentY > pageMargin) {
+         addPageIfNeeded(0, true);
+      }
       
-      let sectionHtml = `<div style="font-size: 11pt; line-height: 1.5;">`;
+      let sectionHtml = `<div style="font-size: 11pt; line-height: 1.6;">`; // Increased line-height
       if (title) {
-        const titleFontSize = headingLevel === 'h1' ? '16pt' : (headingLevel === 'h2' ? '14pt' : '12pt');
-        sectionHtml += `<${headingLevel} style="font-size: ${titleFontSize}; font-weight: bold; margin-bottom: 10px;">${title}</${headingLevel}>`;
+        const titleFontSize = headingLevel === 'h1' ? '18pt' : (headingLevel === 'h2' ? '16pt' : '14pt'); // Slightly larger titles
+        const titleMarginBottom = headingLevel === 'h1' ? '20px' : (headingLevel === 'h2' ? '15px' : '12px'); // Increased margin after title
+        
+        if (isPartTitle) {
+            sectionHtml += `<div style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: ${contentHeight * (96/25.4) * 0.6}px; text-align: center;">`;
+            sectionHtml += `<${headingLevel} style="font-family: 'Comfortaa', sans-serif; font-size: 22pt; font-weight: bold; margin-bottom: ${titleMarginBottom};">${title}</${headingLevel}>`;
+            sectionHtml += `</div>`;
+        } else {
+            sectionHtml += `<${headingLevel} style="font-family: 'Comfortaa', sans-serif; font-size: ${titleFontSize}; font-weight: bold; margin-bottom: ${titleMarginBottom};">${title}</${headingLevel}>`;
+        }
       }
       if (markdownContent) {
         try {
           const parsedHtml = await marked(markdownContent);
-          sectionHtml += typeof parsedHtml === 'string' ? parsedHtml : '';
+          // Wrap parsed HTML in a div to ensure consistent font if not already applied by marked
+          sectionHtml += `<div style="font-family: 'Questrial', sans-serif;">${typeof parsedHtml === 'string' ? parsedHtml : ''}</div>`;
         } catch (e) {
           console.error("Markdown parsing error:", e);
           sectionHtml += `<p><em>Error parsing content.</em></p>`;
         }
       }
       sectionHtml += `</div>`;
-      await addHtmlContent(sectionHtml);
+      await addHtmlContent(sectionHtml, { isPartTitle });
     };
 
-    if (book.structure?.acknowledgement) await parseAndAddMarkdown('Acknowledgement', book.structure.acknowledgement, 'h1');
-    if (book.structure?.prologue) await parseAndAddMarkdown('Prologue', book.structure.prologue, 'h1');
-    if (book.structure?.introduction) await parseAndAddMarkdown('Introduction', book.structure.introduction, 'h1');
+    const addChapterContent = async (chapterTitle: string, description: string | undefined | null, mainContent: string | undefined | null) => {
+      if (currentY > pageMargin) addPageIfNeeded(0, true); // Each chapter starts on a new page
+
+      let chapterHtml = `<div style="font-size: 11pt; line-height: 1.6;">`;
+      chapterHtml += `<h2 style="font-family: 'Comfortaa', sans-serif; font-size: 16pt; font-weight: bold; margin-bottom: 15px;">${chapterTitle}</h2>`;
+      if (description) {
+        chapterHtml += `<p style="font-family: 'Questrial', sans-serif; font-style: italic; margin-bottom: 15px;">${description}</p>`;
+      }
+      if (mainContent) {
+        try {
+          const parsed = await marked(mainContent);
+          chapterHtml += `<div style="font-family: 'Questrial', sans-serif;">${typeof parsed === 'string' ? parsed : ''}</div>`;
+        } catch (e) { chapterHtml += `<p><em>Error parsing chapter content.</em></p>`; }
+      } else {
+        chapterHtml += `<p><em>Content not available.</em></p>`;
+      }
+      chapterHtml += `</div>`;
+      await addHtmlContent(chapterHtml);
+    };
+
+
+    if (book.structure?.acknowledgement) await parseAndAddMarkdown('Acknowledgement', book.structure.acknowledgement, { headingLevel: 'h1', forceNewPage: true });
+    if (book.structure?.prologue) await parseAndAddMarkdown('Prologue', book.structure.prologue, { headingLevel: 'h1', forceNewPage: true });
+    if (book.structure?.introduction) await parseAndAddMarkdown('Introduction', book.structure.introduction, { headingLevel: 'h1', forceNewPage: true });
 
     if (book.structure?.parts && book.structure.parts.length > 0) {
       for (const part of book.structure.parts) {
-        await parseAndAddMarkdown(`Part ${part.partNumber}: ${part.partTitle}`, null, 'h1');
+        await parseAndAddMarkdown(`Part ${part.partNumber}: ${part.partTitle}`, null, { headingLevel: 'h1', forceNewPage: true, isPartTitle: true });
         for (const chapStruct of part.chapters) {
           const chapter = (book.chapters || []).find(c => c.number === chapStruct.number && c.title === chapStruct.title);
-          let chapterContent = `<div style="font-size: 11pt; line-height: 1.5;">`;
-          chapterContent += `<h2 style="font-size: 14pt; font-weight: bold; margin-bottom: 8px;">Chapter ${chapStruct.number}: ${chapStruct.title}</h2>`;
-          if (chapStruct.description) {
-            chapterContent += `<p style="font-style: italic; margin-bottom: 8px;">${chapStruct.description}</p>`;
-          }
-          if (chapter?.content) {
-            try {
-              const parsed = await marked(chapter.content);
-              chapterContent += typeof parsed === 'string' ? parsed : '';
-            } catch (e) { chapterContent += `<p><em>Error parsing chapter content.</em></p>`; }
-          } else {
-            chapterContent += `<p><em>Content not available.</em></p>`;
-          }
-          chapterContent += `</div>`;
-          await addHtmlContent(chapterContent);
+          await addChapterContent(
+            `Chapter ${chapStruct.number}: ${chapStruct.title}`,
+            chapStruct.description,
+            chapter?.content
+          );
         }
       }
     } else {
       const sortedChapters = [...(book.chapters || [])].sort((a,b) => a.number - b.number);
       for (const chapter of sortedChapters) {
-        let chapterContent = `<div style="font-size: 11pt; line-height: 1.5;">`;
-        chapterContent += `<h2 style="font-size: 14pt; font-weight: bold; margin-bottom: 8px;">Chapter ${chapter.number}: ${chapter.title}</h2>`;
-        if (chapter.metadata?.description) {
-          chapterContent += `<p style="font-style: italic; margin-bottom: 8px;">${chapter.metadata.description}</p>`;
-        }
-        if (chapter.content) {
-           try {
-              const parsed = await marked(chapter.content);
-              chapterContent += typeof parsed === 'string' ? parsed : '';
-            } catch (e) { chapterContent += `<p><em>Error parsing chapter content.</em></p>`; }
-        } else {
-          chapterContent += `<p><em>Content not available.</em></p>`;
-        }
-        chapterContent += `</div>`;
-        await addHtmlContent(chapterContent);
+         await addChapterContent(
+            `Chapter ${chapter.number}: ${chapter.title}`,
+            chapter.metadata?.description,
+            chapter.content
+          );
       }
     }
 
-    if (book.structure?.conclusion) await parseAndAddMarkdown('Conclusion', book.structure.conclusion, 'h1');
-    if (book.structure?.appendix) await parseAndAddMarkdown('Appendix', book.structure.appendix, 'h1');
-    if (book.structure?.references) await parseAndAddMarkdown('References', book.structure.references, 'h1');
+    if (book.structure?.conclusion) await parseAndAddMarkdown('Conclusion', book.structure.conclusion, { headingLevel: 'h1', forceNewPage: true });
+    if (book.structure?.appendix) await parseAndAddMarkdown('Appendix', book.structure.appendix, { headingLevel: 'h1', forceNewPage: true });
+    if (book.structure?.references) await parseAndAddMarkdown('References', book.structure.references, { headingLevel: 'h1', forceNewPage: true });
 
-    // Add footer to the last page
-    addFooter();
+    // Ensure footer is on the very last page if it wasn't added by addPageIfNeeded
+    const finalPageNumber = doc.internal.pages.length; // doc.internal.pages is 0-indexed array, length is the count
+    if (pageNumber === finalPageNumber && finalPageNumber > 0 && doc.internal.pages[finalPageNumber-1]) { 
+        doc.setPage(finalPageNumber); // setPage is 1-based
+        addFooter(); // Re-add footer to ensure it's there (jsPDF might overwrite with addImage)
+    }
+
 
     try {
       doc.save(`${book.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'book'}.pdf`);
@@ -314,7 +369,7 @@ const BookPreviewPage: React.FC = () => {
       console.error("Error saving PDF:", e);
       setError("Failed to save PDF. Check console for details.");
     } finally {
-      setLoading(false); // End loading state
+      setPdfLoading(false); 
     }
   };
 
@@ -398,12 +453,24 @@ const BookPreviewPage: React.FC = () => {
     }
   };
 
-  if (loading) {
+  // Initial page loading, distinct from PDF generation loading
+  if (loading && !pdfLoading) { 
     return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>;
   }
 
-  if (error || !book) {
+  if (error && !pdfLoading || (!book && !loading && !pdfLoading)) { // Show error if not related to PDF generation, or if book failed to load
     return <div className="text-center py-12"><p className="text-xl text-neutral-dark">Book not found or an error occurred.</p>{error && <p className="text-sm text-red-500 mt-2">{error}</p>}</div>;
+  }
+  
+  // If book is null and still loading the main page data, show main loader
+  if (!book && loading) {
+    return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>;
+  }
+
+  // If book is null after loading, it means it wasn't found or there was an error handled by the above.
+  // This check is to satisfy TypeScript further down, though the above should catch it.
+  if (!book) {
+    return <div className="text-center py-12"><p className="text-xl text-neutral-dark">Book data is not available.</p></div>;
   }
 
   const renderSectionContent = (content: string | undefined) => {
@@ -451,12 +518,19 @@ const BookPreviewPage: React.FC = () => {
             </button>
             <button
               onClick={downloadPdfFile}
-              className="px-4 py-2 rounded-lg bg-secondary text-white hover:bg-secondary-hover transition-colors flex items-center"
+              disabled={pdfLoading}
+              className="px-4 py-2 rounded-lg bg-secondary text-white hover:bg-secondary-hover transition-colors flex items-center disabled:opacity-50"
             >
-              <File className="w-4 h-4 mr-2" /> Download PDF
+              {pdfLoading ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+              ) : (
+                <File className="w-4 h-4 mr-2" />
+              )}
+              {pdfLoading ? 'Generating...' : 'Download PDF'}
             </button>
           </div>
         </div>
+        {error && pdfLoading && <p className="text-sm text-red-500 mt-2 text-right">{error}</p>} 
       </div>
 
       <div className="space-y-6 w-full ">
