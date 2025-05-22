@@ -253,14 +253,44 @@ const BookEditorPage: React.FC = () => {
   };
 
   const getStatusIcon = (status?: Chapter['status']) => {
+    let iconElement;
+    let statusText = status || 'draft'; // Default to 'draft' if status is undefined
+
     switch (status) {
-      case 'complete': return <Check className="w-4 h-4 text-green-600" />;
-      case 'in_progress': return <Clock className="w-4 h-4 text-yellow-600" />;
-      case 'generating': return <Sparkles className="w-4 h-4 text-blue-500 animate-pulse" />;
+      case 'complete': 
+        iconElement = <Check className="w-5 h-5 text-green-600" />; 
+        statusText = 'complete'; // MODIFIED: 'Complete' -> 'complete'
+        break;
+      case 'in_progress': 
+        iconElement = <Clock className="w-5 h-5 text-yellow-600" />; 
+        statusText = 'in_progress'; // MODIFIED: 'In Progress' -> 'in_progress'
+        break;
+      case 'generating': 
+        iconElement = <Sparkles className="w-5 h-5 text-blue-500 animate-pulse" />; 
+        statusText = 'generating'; // MODIFIED: 'Generating' -> 'generating'
+        break;
       case 'pending':
+        iconElement = <FileText className="w-5 h-5 text-gray-400" />; 
+        statusText = 'pending'; // MODIFIED: 'Pending' -> 'pending'
+        break;
       case 'draft':
-      default: return <FileText className="w-4 h-4 text-gray-400" />;
+      default: 
+        iconElement = <FileText className="w-5 h-5 text-gray-400" />; 
+        statusText = 'draft'; // MODIFIED: 'Draft' -> 'draft'
+        break;
     }
+    // To display a more user-friendly status on hover, we can map the internal status to a display string.
+    const displayStatusText = {
+      'complete': 'Complete',
+      'in_progress': 'In Progress',
+      'generating': 'Generating',
+      'pending': 'Pending',
+      'draft': 'Draft',
+      'generated': 'Generated', // Added for completeness if this status is used
+      'approved': 'Approved' // Added for completeness if this status is used
+    }[statusText] || statusText.charAt(0).toUpperCase() + statusText.slice(1); // Default to capitalized if not in map
+
+    return <span title={displayStatusText}>{iconElement}</span>;
   };
 
   const renderSidebarItems = () => {
@@ -339,11 +369,12 @@ const BookEditorPage: React.FC = () => {
                 disabled={isPartHeader} 
               >
                 <div className="flex items-center">
-                  {item.icon}
-                  <span>{item.title}</span>
+                  {/* MODIFIED: Conditionally render item.icon, excluding for 'chapter' type */}
+                  {item.type !== 'chapter' && item.icon} 
+                  <span className={cn(item.type !== 'chapter' ? "" : "ml-0")}>{item.title}</span> {/* Ensure title is not indented if icon is removed */}
                 </div>
                 <span className="text-xxs">
-                {item.type === 'chapter' && item.status && !isPartHeader && getStatusIcon(item.status)}</span>
+                {item.type === 'chapter' && !isPartHeader && getStatusIcon(item.status)}</span> {/* MODIFIED: Removed item.status check as getStatusIcon handles undefined */}
               </button>
             </li>
           );
