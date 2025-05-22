@@ -216,7 +216,7 @@ const BookReviewPage: React.FC = () => {
                     {localStructure.parts.map((part: any, partIndex: number) => (
                         <div key={partIndex} className="border-t border-neutral-light pt-4">
                         <h3 className="font-heading text-lg font-semibold text-secondary mb-4">
-                          {part.title}
+                          Part {part.partNumber}: {part.partTitle}
                         </h3>
                         
                         <div className="space-y-6 pl-4">
@@ -247,7 +247,7 @@ const BookReviewPage: React.FC = () => {
                                     ) : (
                                   <div className="flex items-center">
                                     <div>
-                                      <span>Chapter {chapter.number}: {chapter.title}</span>
+                                      <span>{chapter.title.toLowerCase().startsWith('chapter') ? '' : 'Chapter '}{chapter.number > 0 ? `${chapter.number}: ` : ''}{chapter.title}</span>
                                       <button
                                         onClick={() => setEditingSection(`part-${partIndex}-chapter-${chapterIndex}`)}
                                         className="p-1 text-neutral-medium hover:text-primary ml-2"
