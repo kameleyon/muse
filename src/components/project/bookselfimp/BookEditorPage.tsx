@@ -342,7 +342,8 @@ const BookEditorPage: React.FC = () => {
                   {item.icon}
                   <span>{item.title}</span>
                 </div>
-                {item.type === 'chapter' && item.status && !isPartHeader && getStatusIcon(item.status)}
+                <span className="text-xxs">
+                {item.type === 'chapter' && item.status && !isPartHeader && getStatusIcon(item.status)}</span>
               </button>
             </li>
           );
@@ -355,13 +356,13 @@ const BookEditorPage: React.FC = () => {
   if (!book) return <div className="text-center py-12"><AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" /><p className="text-xl text-neutral-dark mb-4">Book not found</p><button onClick={() => navigate('/new-book')} className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">Create New Book</button></div>;
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col">
       <div className="flex flex-1 overflow-hidden">
-        <div className="w-72 bg-white border-r border-neutral-light flex flex-col">
+        <div className="w-72 bg-white border-r border-neutral-light rounded-b-xl rounded-l-xl shadow-md flex flex-col">
           <div className="p-4 border-b border-neutral-light">
             <button
               onClick={() => navigate('/book-library')}
-              className="flex items-center text-sm text-neutral-medium hover:text-secondary mb-3"
+              className="flex items-center text-sm text-neutral-medium mt-4 hover:text-secondary mb-3"
             >
               <ChevronLeft className="w-4 h-4 mr-1" />
               Back to Library
@@ -378,7 +379,7 @@ const BookEditorPage: React.FC = () => {
             </button>
           </div>
           
-          <div className="flex-1 p-4 overflow-y-auto">
+          <div className="flex-1 px-4 py-6 overflow-y-auto min-h-full">
             <h3 className="text-xs font-semibold text-neutral-dark uppercase tracking-wider mb-3">
               Book Structure
             </h3>
@@ -389,12 +390,12 @@ const BookEditorPage: React.FC = () => {
         <div className="flex-1 flex flex-col bg-neutral-lightest overflow-hidden">
           {selectedSection ? (
             <>
-              <div className="bg-white border-b border-neutral-light p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h1 className="text-xl font-heading font-semibold text-secondary">
+              <div className="bg-white border-b border-neutral-light p-4  rounded-r-xl shadow-md">
+                <div className="flex flex-col"> {/* MODIFIED: items-center justify-between -> flex-col */}
+                  <div className="w-full"> {/* ADDED: w-full to make title/metadata block take full width */}
+                    <h1 className="text-xl font-heading font-semibold text-secondary mt-4">
                       {selectedSection.type === 'chapter' && selectedSection.number !== undefined
-                        ? `Chapter ${selectedSection.number}: ${selectedSection.title}`
+                        ? `Chapter ${selectedSection.number}: ${selectedSection.title.replace(/^\d+\.\s*/, '')}` // MODIFIED: Remove leading "N. " from title
                         : selectedSection.title}
                     </h1>
                     {selectedSection.type === 'chapter' && (
@@ -410,16 +411,16 @@ const BookEditorPage: React.FC = () => {
                           </span>
                         </div>
                         {selectedSection.metadata?.description && (
-                          <div className="mt-2">
-                            <p className="text-xs italic text-neutral-medium bg-neutral-light/40 p-2 rounded">
+                          <div className="mt-2 w-full"> {/* ADDED: w-full */}
+                            <p className="text-md italic text-neutral-medium bg-neutral-light/40 shadow-inner p-2 rounded-lg w-full"> {/* ADDED: w-full */}
                               {selectedSection.metadata.description}
                             </p>
                           </div>
                         )}
                         {selectedSection.metadata?.keyTopics && selectedSection.metadata.keyTopics.length > 0 && (
-                          <div className="mt-1.5 flex flex-wrap gap-1">
+                          <div className="mt-3 flex flex-wrap gap-1">
                             {selectedSection.metadata.keyTopics.map((topic, index) => (
-                              <span key={index} className="text-2xs bg-primary/10 text-primary px-1.5 py-0.5 rounded-sm">
+                              <span key={index} className="text-xs bg-primary/70 text-white px-1.5 py-0.5 rounded-md">
                                 {topic}
                               </span>
                             ))}
@@ -429,7 +430,7 @@ const BookEditorPage: React.FC = () => {
                     )}
                   </div>
                   
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 self-end mt-3"> {/* MODIFIED: Added self-end mt-3 */}
                     {(selectedSection.type === 'chapter' || selectedSection.type === 'appendix' || selectedSection.type === 'references') && !currentContent && (
                       <button
                         onClick={handleGenerateContent}
@@ -469,7 +470,7 @@ const BookEditorPage: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex-1 p-4 md:p-6 overflow-y-auto">
+              <div className="flex-1 p-4 md:p-6 overflow-y-auto h-auto bg-white ml-6 rounded-2xl border-2 border-neutral-light shadown-md shadow-primary mt-4">
                 <MarkdownEditor
                   value={currentContent}
                   onChange={setCurrentContent}

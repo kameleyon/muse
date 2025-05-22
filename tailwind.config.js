@@ -49,8 +49,8 @@ export default {
       fontFamily: {
         heading: ['Comfortaa', 'cursive'],
         body: ['Questrial', 'sans-serif'],
-        display: ['Montserrat', 'sans-serif'],
-        accent: ['Nunito Sans', 'sans-serif'],
+        display:  ['Comfortaa', 'cursive'],
+        accent:  ['Questrial', 'sans-serif'],
       },
       boxShadow: {
         'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
@@ -109,13 +109,26 @@ export default {
               textDecoration: 'none', // Optional: remove underline
             },
             'h1, h2, h3, h4, h5, h6': {
-              fontFamily: theme('fontFamily.heading').join(', '), // Heading font - Comfortaa
-              color: theme('colors.secondary.DEFAULT'), // Heading color - Nearly black
-              fontWeight: '600', // Adjust weight as needed
+              fontFamily: theme('fontFamily.display').join(', '), // Changed to Montserrat
+              color: theme('colors.secondary.DEFAULT'), 
+              fontWeight: '600', 
+              marginBottom: theme('spacing.6'), // Added some default bottom margin
+            },
+            h1: {
+              fontSize: theme('fontSize.xl'), // Increased font size for H1
+              fontWeight: '700', // Bolder H1
+              marginBottom: theme('spacing.6'),
+            },
+            h2: {
+              fontSize: theme('fontSize.xl'), // Large font size for H2
+              fontWeight: '700', // Bolder H2
+              marginTop: theme('spacing.6'), // Add some top margin for H2
+              marginBottom: theme('spacing.6'),
             },
             p: {
               fontFamily: theme('fontFamily.body').join(', '), // Body font - Questrial
               color: theme('colors.neutral.medium'), // Paragraph color - Dark olive
+              marginBottom: theme('spacing.6'),
             },
             strong: {
               color: theme('colors.secondary.DEFAULT'), // Bold text - Nearly black

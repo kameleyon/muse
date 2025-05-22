@@ -4,16 +4,7 @@ import { ChevronLeft, Download, Edit2, ChevronDown, ChevronRight } from 'lucide-
 import { cn } from '../../../lib/utils';
 import { bookService } from '../../../lib/books';
 import type { Book, Chapter, BookStructure } from '../../../types/books';
-
-// Placeholder for markdown utility - replace with actual library if available
-const markdownToHtml = (md: string | undefined): string => {
-  if (!md) return '';
-  // Basic conversion: replace newlines with <br> and wrap in <p>
-  // This is very rudimentary and not suitable for complex markdown.
-  return md.split('\n\n').map(paragraph => 
-    `<p>${paragraph.split('\n').join('<br>')}</p>`
-  ).join('');
-};
+import MarkdownEditor from '../../MarkdownEditor';
 
 const BookPreviewPage: React.FC = () => {
   const { bookId } = useParams<{ bookId: string }>();
@@ -142,13 +133,17 @@ const BookPreviewPage: React.FC = () => {
   }
 
   const renderSectionContent = (content: string | undefined) => {
-    if (!content) return <p className="italic text-neutral-500">No content available.</p>;
-    return <div className="prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none mt-2" dangerouslySetInnerHTML={{ __html: markdownToHtml(content) }} />;
+    if (!content) return <p className="italic text-secondary">No content available.</p>;
+    return (
+      <div className="text text-sm sm:text lg:text-md xl:text-lg  w-full mt-2">
+        <MarkdownEditor value={content} onChange={() => {}} readOnly={true} />
+      </div>
+    );
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4">
-      <div className="mb-8">
+    <div className="w-full bg-white rounded-2xl shadow-md py-8 px-6">
+      <div className="mb-8 px-6">
         <button
           onClick={() => navigate('/book-library')}
           className="flex items-center text-neutral-medium hover:text-secondary mb-4"
@@ -156,7 +151,7 @@ const BookPreviewPage: React.FC = () => {
           <ChevronLeft className="w-5 h-5 mr-1" />
           Back to Library
         </button>
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start ">
           <div>
             <h1 className="text-3xl font-heading font-semibold text-secondary">
               {book.title}
@@ -184,9 +179,9 @@ const BookPreviewPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 w-full ">
         {book.structure?.coverPageDetails && (
-          <div className="p-6 bg-white rounded-lg shadow-sm text-center border-2 border-primary/20">
+          <div className="p-6 bg-white rounded-lg shadow-sm text-center border-2 border-primary/70">
             <h1 className="text-4xl font-heading font-bold text-primary">{book.structure.coverPageDetails.title}</h1>
             {book.structure.coverPageDetails.subtitle && <p className="text-2xl text-neutral-dark mt-2">{book.structure.coverPageDetails.subtitle}</p>}
             {book.structure.coverPageDetails.authorName && <p className="text-lg text-neutral-medium mt-4">By {book.structure.coverPageDetails.authorName}</p>}
@@ -197,7 +192,7 @@ const BookPreviewPage: React.FC = () => {
           const content = book.structure?.[sectionKey as keyof BookStructure] as string | undefined;
           if (content) {
             return (
-              <div key={sectionKey} className="p-6 bg-white rounded-lg shadow-sm">
+              <div key={sectionKey} className="p-6">
                 <h2 className="text-2xl font-heading font-semibold text-secondary mb-3 capitalize">{sectionKey}</h2>
                 {renderSectionContent(content)}
               </div>
@@ -250,7 +245,7 @@ const BookPreviewPage: React.FC = () => {
                         Chapter {chapter.number}: {chapter.title}
                       </button>
                       {activeChapterId === chapter.id && (
-                        <div className="mt-2 pl-4">
+                        <div className="mt-2 pl-4 ">
                           {renderSectionContent(chapter.content)}
                         </div>
                       )}
