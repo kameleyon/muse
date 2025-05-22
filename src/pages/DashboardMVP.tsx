@@ -215,8 +215,8 @@ const DashboardMVP: React.FC = () => {
         {/* Quick Stats */}
         <div className="stats-section">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {quickStats.map((stat) => (
-              <div key={stat.label} className="stat-card">
+            {quickStats.map((stat, idx) => (
+              <div key={`stat-${stat.label}-${idx}`} className="stat-card">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-secondary">{stat.label}</p>
@@ -270,8 +270,8 @@ const DashboardMVP: React.FC = () => {
                     <div className="p-8 text-center">
                       <p className="text-neutral-medium">No content yet. Start by creating a book or project!</p>
                     </div>
-                  ) : recentItems.map((item) => (
-                    <div key={item.id} className="file-card">
+                  ) : recentItems.map((item, idx) => (
+                    <div key={`item-${item.id}-${idx}`} className="file-card">
                       <div className="flex items-center space-x-3 mb-3">
                         {item.type === 'book' ? (
                           <BookOpen size={20} className="text-[#3d3d3a]" />
@@ -325,8 +325,8 @@ const DashboardMVP: React.FC = () => {
                 <h2 className="h2">Notifications</h2>
               </div>
               <div className="activity-list">
-                {smartNotifications.map((notification) => (
-                  <div key={notification.id} className="activity-item">
+                {smartNotifications.map((notification, idx) => (
+                  <div key={`smart-notification-item-${notification.id}-${idx}`} className="activity-item">
                     <div className="activity-icon">
                       {notification.type === 'success' && <CheckCircle size={16} />}
                       {notification.type === 'warning' && <AlertCircle size={16} />}

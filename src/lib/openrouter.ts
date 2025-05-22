@@ -117,7 +117,7 @@ You must respond with ONLY valid JSON in this exact format:
       model,
       messages,
       temperature: 0.7,
-      max_tokens: 3000
+      max_tokens: 7000
     })
 
     try {
@@ -172,10 +172,10 @@ Your response must be valid JSON and include at minimum these fields:
   "tone": "${marketResearch.recommendations.tone}",
   "marketPosition": "how to position this book in the market",
   "uniqueValue": "what makes this book different",
-  "acknowledgement": "Optional acknowledgement text",
-  "prologue": "Optional prologue text",
-  "introduction": "Introduction text with markdown formatting",
-  "conclusion": "Conclusion text with markdown formatting",
+  "acknowledgement": "Optional acknowledgement text", "estimatedWords": 150,
+  "prologue": "Optional prologue text", "estimatedWords": 1500,
+  "introduction": "Introduction text with markdown formatting", "estimatedWords": 4500,
+  "conclusion": "Conclusion text with markdown formatting", "estimatedWords": 4500,
   "parts": [
     {
       "title": "Part I: PART TITLE",
@@ -184,7 +184,7 @@ Your response must be valid JSON and include at minimum these fields:
           "number": 1,
           "title": "Chapter title",
           "description": "Brief description of chapter content",
-          "estimatedWords": 2000,
+          "estimatedWords": 4000,
           "keyTopics": ["topic1", "topic2"]
         }
       ]
@@ -195,11 +195,12 @@ Your response must be valid JSON and include at minimum these fields:
       "number": 1,
       "title": "Chapter title",
       "description": "Brief description of chapter content",
-      "estimatedWords": 2000,
+      "estimatedWords": 4000,
       "keyTopics": ["topic1", "topic2"]
     }
   ],
-  "totalWords": 120000
+   "conclusion": "Conclusion text with markdown formatting", "estimatedWords": 4500,
+   "totalWords": 160000
 }
 
 Be creative with the structure but ensure the "chapters" array always exists. Each chapter should have at minimum a number, title, description, and estimatedWords. You can add additional fields to chapters or add other structural elements to the book as needed.
@@ -218,7 +219,7 @@ Create a natural flow from beginning to end, with a clear introduction and concl
       model,
       messages,
       temperature: 0.7,
-      max_tokens: 124000
+      max_tokens: 174000
     })
 
     try {
@@ -304,7 +305,7 @@ Write this chapter following these guidelines:
       temperature = 0.5
     }
     
-    const maxTokens = Math.min(Math.ceil(chapterInfo.estimatedWords * 1.5), 8000)
+    const maxTokens = Math.min(Math.ceil(chapterInfo.estimatedWords * 1.5), 18000)
     
     return await this.generateCompletion({
       model,
@@ -341,7 +342,7 @@ Please revise the content accordingly.`
       model,
       messages,
       temperature: 0.7,
-      max_tokens: 4000
+      max_tokens: 14000
     })
   }
 }

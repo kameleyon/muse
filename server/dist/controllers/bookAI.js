@@ -128,7 +128,7 @@ function cleanJsonResponse(response) {
                                 number: totalChapters + (i * 4) + j + 1,
                                 title: `Additional Chapter ${j + 1}`,
                                 description: "Auto-generated chapter for comprehensive coverage",
-                                estimatedWords: 3000
+                                estimatedWords: 4000
                             }))
                         });
                     }
@@ -153,7 +153,7 @@ function cleanJsonResponse(response) {
                         number: (partIndex * 4) + j + 1,
                         title: `${partTitle.split(' ')[0]} Chapter ${j + 1}`,
                         description: `Auto-generated chapter covering ${partTitle.toLowerCase()}`,
-                        estimatedWords: 3000
+                        estimatedWords: 4000
                     }))
                 }));
             }
@@ -224,7 +224,7 @@ You must respond with ONLY valid JSON in this exact format:
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
         ];
-        const model = 'openai/gpt-4o-mini';
+        const model = 'openai/gpt-4o-search-preview';
         const completion = await (0, openrouter_1.executeOpenRouterRequest)({
             model,
             prompt: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
@@ -254,8 +254,8 @@ CRITICAL JSON FORMAT REQUIREMENTS:
 6. DO NOT use single quotes for strings in your JSON
 
 CONTENT REQUIREMENTS:
-1. Create 30-32 total chapters organized into 7-8 parts
-2. Each part should contain 4-6 thematically related chapters
+1. Create 30 or more total chapters organized into 7-8 parts
+2. Each part should contain 4-7 thematically related chapters
 3. Each chapter should have a descriptive title and explanation
 4. Include a prologue, introduction, and conclusion
 5. Match the example format precisely
@@ -272,46 +272,7 @@ Market Research Findings:
 - Recommended Tone: ${marketResearch.recommendations.tone}
 - Recommended Style: ${marketResearch.recommendations.style}
 
-Create a book structure using this professional format:
-
-EXAMPLE FORMAT:
-Title: The 52 Keys for Wealth Creation
-Subtitle: How to Play the Hand You're Dealt: A Cardology System for Financial Mastery
-
-Market Position:
-The definitive guide bridging ancient cardology wisdom with modern financial strategy, positioned at the intersection of alternative spirituality and practical business development
-
-Unique Value:
-The first comprehensive system translating cardology from a divinatory practice into a strategic financial planning tool with concrete applications for career selection, business timing, and wealth manifestation
-
-Acknowledgement:
-To those who have preserved the ancient wisdom of cardology through generations, and to the seekers who understand that our greatest power lies in playing the unique hand we've been dealt.
-
-Prologue:
-The deck of 52 playing cards you've handled throughout your life holds far more than games of chance—it contains a sophisticated system for navigating your financial destiny. What if I told you that your birth date corresponds to specific cards that reveal your natural wealth-building abilities? What if business success could be timed according to cosmic cycles mapped within this ordinary deck? This isn't about predicting the future—it's about strategically aligning with energies that have always been available to you.
-
-Introduction:
-# Introduction: Beyond the Game of Chance
-In a world where financial success often seems like a game of chance, what if you discovered that you've been holding the keys to wealth creation in your hands all along? Not in the metaphorical sense, but literally—in the form of playing cards you've known since childhood. 
-
-[Introduction continues with 1-2 paragraphs explaining the premise]
-
-Part I: THE FOUNDATIONS OF CARDOLOGY FOR WEALTH CREATION
-Chapter 1: The Ancient System Hidden in Plain Sight
-Explores the origins and history of cardology, distinguishing it from cartomancy and other divinatory practices. Introduces the concept of the 52-card deck as a mathematical and energetic system that maps human experience and time cycles.
-~3500 words
-
-Chapter 2: Your Financial DNA: Understanding Birth Cards
-Explains how to calculate your birth cards and life spread using your birth date. Details the significance of your Birth Card, Planetary Ruling Card, and how these form the foundation of your financial blueprint.
-~4000 words
-
-[... More chapters organized in logical parts ...]
-
-Conclusion:
-# Conclusion: Mastering the Game
-As we conclude our journey through the 52 keys of wealth creation, I hope you now see that ordinary playing cards hold extraordinary potential as tools for financial mastery. Cardology isn't about mystical predictions or leaving your success to chance—it's about strategic alignment with the energetic patterns that have influenced human experience for centuries.
-
-[Conclusion continues with 1-2 paragraphs summarizing key takeaways]
+Create a book structure 
 
 Based on this market research, create a comprehensive book structure that:
 1. Addresses all identified pain points
@@ -319,8 +280,8 @@ Based on this market research, create a comprehensive book structure that:
 3. Fills the market gaps
 4. Uses the recommended tone and style
 5. Is structured for maximum engagement with the target audience
-6. Is organized into logical parts with related chapters grouped together (aim for 6-8 parts)
-7. Includes at least 30-32 total chapters (with 4-6 chapters per part)
+6. Is organized into logical parts with related chapters grouped together 
+7. Includes at least 30 or more total chapters (with 4-7 chapters per part)
 8. Includes word count estimates for each chapter
 9. Contains a compelling market position, unique value proposition, and prologue
 
@@ -346,13 +307,13 @@ You must respond with ONLY valid JSON in this exact format:
           "number": 1,
           "title": "Chapter Title",
           "description": "Brief description addressing specific pain points/desires",
-          "estimatedWords": 3000,
+          "estimatedWords": 4000,
           "keyTopics": ["topic1", "topic2"]
         }
       ]
     }
   ],
-  "totalWords": 50000,
+  "totalWords": 184000,
   "colorScheme": {
     "primary": "${marketResearch.recommendations.colors.primary}",
     "secondary": "${marketResearch.recommendations.colors.secondary}",
@@ -363,12 +324,12 @@ You must respond with ONLY valid JSON in this exact format:
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
         ];
-        const model = 'openai/gpt-4o'; // Switch back to GPT-4o as it produces more reliable JSON responses
+        const model = 'anthropic/claude-3.7-sonnet'; // Switch back to GPT-4o as it produces more reliable JSON responses
         const completion = await (0, openrouter_1.executeOpenRouterRequest)({
             model,
             prompt: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
             temperature: 0.7,
-            max_tokens: 8000 // Increased from 4000 to support more comprehensive structures
+            max_tokens: 18000 // Increased from 4000 to support more comprehensive structures
         });
         // Log the first 500 characters of the response for debugging
         const rawResponse = completion.choices[0].message.content;
@@ -476,7 +437,7 @@ Write this chapter following these guidelines:
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
         ];
-        const model = 'anthropic/claude-3.5-sonnet-20240620';
+        const model = 'qwen/qwen-plus';
         // Adjust temperature based on tone
         let temperature = 0.7;
         if (book.structure?.tone?.toLowerCase().includes('creative') ||
@@ -548,7 +509,7 @@ Please revise the content accordingly.`;
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
         ];
-        const model = 'anthropic/claude-3.5-sonnet-20240620';
+        const model = 'anthropic/claude-3.7-sonnet';
         const response2 = await (0, openrouter_1.executeOpenRouterRequest)({
             model,
             prompt: messages.map(m => `${m.role}: ${m.content}`).join('\n'),

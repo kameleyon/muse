@@ -142,7 +142,7 @@ function cleanJsonResponse(response: string): any {
                 number: totalChapters + (i * 4) + j + 1,
                 title: `Additional Chapter ${j + 1}`,
                 description: "Auto-generated chapter for comprehensive coverage",
-                estimatedWords: 3000
+                estimatedWords: 4000
               }))
             });
           }
@@ -269,6 +269,8 @@ export const generateBookStructure = async (req: Request, res: Response) => {
     const { topic, marketResearch, references = [] } = req.body;
 
     const systemPrompt = `You are an expert book outliner who creates JSON-structured book outlines. Your entire response MUST be valid, parseable JSON with no text before or after the JSON object. Based on the market research provided, create a comprehensive book structure.
+    Format a comprehensive and detailed outline showing a vast and deep mastery of the ${topic} with Distinct Parts or sections including their clear chapter titles and brief descriptions.
+Use markdown formatting with # for main sections and ## for subsections,
 
 CRITICAL JSON FORMAT REQUIREMENTS:
 1. Output ONLY well-formed, valid JSON that can be parsed directly with JSON.parse()
@@ -279,11 +281,16 @@ CRITICAL JSON FORMAT REQUIREMENTS:
 6. DO NOT use single quotes for strings in your JSON
 
 CONTENT REQUIREMENTS:
-1. Create 30-32 total chapters organized into 7-8 parts
-2. Each part should contain 4-6 thematically related chapters
-3. Each chapter should have a descriptive title and explanation
-4. Include a prologue, introduction, and conclusion
-5. Match the example format precisely
+1. Create a book structure with multiple parts. Each part should contain 4-7 thematically related chapters.
+2. The total estimated word count for the entire book should be between 160,000 and 184,000 words. Distribute this word count appropriately across chapters.
+3. Each chapter must have a creative and descriptive title, a detailed explanation/description of its content and purpose, an estimated word count, key topics to be covered, and 3-5 key points the reader should take away.
+4. Include a Prologue, Introduction, and Conclusion. These MUST be structured as full chapters within the 'parts' array.
+   - The Prologue and Introduction should be the initial chapters, logically grouped (e.g., in a "Part 0: Prelude" or similar).
+   - The Conclusion should be the final chapter, logically grouped (e.g., in a final "Part X: Final Thoughts").
+5. An 'acknowledgement' section should be a brief top-level string.
+6. Do NOT include 'appendix', 'references', or 'coverPageDetails' as part of the chapter flow in the 'parts' array; these are handled separately if needed.
+7. Be creative with part titles and chapter titles based on the topic and market research. Do not just use generic placeholders.
+8. Ensure the JSON format is strictly followed as per the example.
 
 CRITICAL: Your ENTIRE response must be ONLY the JSON object with no preceding or following text.`;
     
@@ -309,26 +316,63 @@ You must respond with ONLY valid JSON in this exact format:
   "tone": "specific tone based on research",
   "marketPosition": "how to position this book in the market",
   "uniqueValue": "what makes this book different",
-  "acknowledgement": "a brief acknowledgement section",
-  "prologue": "a compelling prologue that hooks the reader",
-  "introduction": "a detailed introduction with heading and 1-2 paragraphs explaining the premise",
-  "conclusion": "a meaningful conclusion with heading and 1-2 paragraphs summarizing key takeaways",
+  "acknowledgement": "A brief acknowledgement section content here. This should be concise.",
   "parts": [
     {
-      "partNumber": 1,
-      "partTitle": "PART TITLE IN ALL CAPS",
+      "partNumber": 0, // Or a suitable starting number for prelude/intro part
+      "partTitle": "Example: Setting the Stage", // AI should generate a creative title
       "chapters": [
         {
-          "number": 1,
-          "title": "Chapter Title",
-          "description": "Brief description addressing specific pain points/desires",
-          "estimatedWords": 3000,
-          "keyTopics": ["topic1", "topic2"]
+          "number": 0, // Can be 0 or 1 depending on how AI sequences
+          "title": "Prologue: A Glimpse into the Journey", // AI should generate a creative title
+          "description": "A compelling prologue that hooks the reader, introduces core mysteries or themes, and sets the tone for the book. This should be a full chapter.",
+          "estimatedWords": 2500, // Example, AI to determine based on overall structure
+          "keyPoints": ["Key hook or opening statement", "Sets the stage for the book's main theme", "Introduces a central question or conflict"],
+          "keyTopics": ["Prologue themes", "Initial narrative hook", "Foreshadowing"]
+        },
+        {
+          "number": 1, // Sequential numbering
+          "title": "Introduction: Understanding the Landscape", // AI should generate a creative title
+          "description": "A detailed introduction explaining the book's premise, scope, what the reader will gain, and a roadmap of the content. This should be a full chapter.",
+          "estimatedWords": 3500, // Example
+          "keyPoints": ["Main argument/thesis of the book", "Overview of book structure and flow", "What the reader will learn or achieve"],
+          "keyTopics": ["Introduction themes", "Core concepts overview", "Book's purpose and value proposition"]
+        }
+      ]
+    },
+    {
+      "partNumber": 1, // Or next sequential part number
+      "partTitle": "Example: Exploring Core Concepts", // AI should generate a creative title
+      "chapters": [
+        {
+          "number": 2, // Sequential numbering
+          "title": "Chapter X: Creative Title for First Main Chapter", // AI to generate
+          "description": "Detailed description of what this chapter covers, addressing specific pain points/desires of the target audience. Explain the chapter's purpose and how it fits into the part's theme.",
+          "estimatedWords": 5000, // Example
+          "keyPoints": ["Primary takeaway for this chapter", "Crucial concept explained clearly", "Actionable insight or application", "Connection to previous/next chapter"],
+          "keyTopics": ["Main subject of this chapter", "Sub-topic A explored", "Sub-topic B introduced"]
+        }
+        // ... AI to add 3-6 more chapters to this part ...
+      ]
+    }
+    // ... AI to add more parts, each with 4-7 chapters ...
+    ,
+    {
+      "partNumber": "N", // Example: Last part number
+      "partTitle": "Example: Synthesizing and Looking Ahead", // AI should generate a creative title
+      "chapters": [
+        {
+          "number": "M", // Example: Last chapter number
+          "title": "Conclusion: The Path Forward", // AI should generate a creative title
+          "description": "A meaningful conclusion that summarizes key takeaways, reiterates the book's core message, offers final thoughts, and potentially a call to action or future outlook. This should be a full chapter.",
+          "estimatedWords": 3000, // Example
+          "keyPoints": ["Summary of the book's main arguments/discoveries", "Final impactful message or insight", "Suggested next steps or reflections for the reader"],
+          "keyTopics": ["Recap of key themes", "Concluding insights", "Future implications or call to action"]
         }
       ]
     }
   ],
-  "totalWords": 120000,
+  "totalWords": 150000, // AI should calculate this based on chapter estimates, aiming for 160K-184k range
   "colorScheme": {
     "primary": "${marketResearch.recommendations.colors.primary}",
     "secondary": "${marketResearch.recommendations.colors.secondary}",
@@ -349,7 +393,7 @@ You must respond with ONLY valid JSON in this exact format:
       prompt,
       messages,
       temperature: 0.7,
-      max_tokens: 12000 
+      max_tokens: 16000 
     });
 
     // Log the first 500 characters of the response for debugging
