@@ -4909,3 +4909,7 @@
 2025-05-22 02:17:29 [info]: Server running in development mode on port 9998
 2025-05-22 02:19:24 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
 2025-05-22 02:19:24 [info]: Making OpenRouter request to model: openai/gpt-4o-search-preview
+2025-05-22 02:19:31 [info]: OpenRouter request successful. Tokens used: 1195
+2025-05-22 02:19:31 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-05-22 02:19:31 [info]: Making OpenRouter request to model: anthropic/claude-3.7-sonnet
+2025-05-22 02:23:57 [info]: OpenRouter request successful. Tokens used: 17174

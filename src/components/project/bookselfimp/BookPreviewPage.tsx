@@ -9,21 +9,6 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas'; // Ensure html2canvas is imported
 import { marked } from 'marked';
 
-// Helper function to add page numbers
-const addFooters = (doc: jsPDF, pageCount: number) => {
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFontSize(10);
-    doc.setTextColor(102, 102, 102); // #666
-    const text = `Page ${i}`;
-    const textWidth = doc.getStringUnitWidth(text) * doc.getFontSize() / doc.internal.scaleFactor;
-    const x = (doc.internal.pageSize.getWidth() - textWidth) / 2;
-    const y = doc.internal.pageSize.getHeight() - 10; // 10mm from bottom
-    doc.text(text, x, y);
-  }
-};
-
-
 const BookPreviewPage: React.FC = () => {
   const { bookId } = useParams<{ bookId: string }>();
   const navigate = useNavigate();
@@ -112,255 +97,224 @@ const BookPreviewPage: React.FC = () => {
 
   const downloadPdfFile = async () => {
     if (!book) return;
+    setLoading(true); // Optional: show a loading state
 
-    const currentChapters = book.chapters || [];
-    let htmlContent = `
-      <html>
-        <head>
-          <style>
-            @page { 
-              size: A4; 
-              margin: 20mm; 
-              @bottom-center {
-                content: "Page " counter(page);
-                font-size: 10pt;
-                color: #666;
-              }
-            }
-            body { font-family: 'Questrial', Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #333; }
-            .page-break { page-break-after: always; }
-            .cover-page { 
-              display: flex; 
-              flex-direction: column; 
-              justify-content: center; 
-              align-items: center; 
-              height: 90vh; /* Adjusted for better centering with margins */
-              text-align: center;
-              /* Ensure it doesn't cause an immediate break if empty */
-              min-height: 50vh; 
-            }
-            /* Apply Comfortaa to heading elements and specific classes */
-            h1, h2, h3, .cover-title, .cover-subtitle, .cover-author, .toc-title, .toc-part { 
-              font-family: 'Comfortaa', 'Helvetica Neue', Arial, sans-serif; 
-            }
-            /* Ensure only one body rule is active */
-            body { font-family: 'Questrial', Arial, sans-serif; font-size: 10pt; line-height: 1.4; color: #333; } /* Target: 10pt final */
-
-            .cover-title { font-size: 18pt; font-weight: bold; margin-bottom: 10px; } /* Target: 18pt final */
-            .cover-subtitle { font-size: 14pt; margin-bottom: 6px; } /* Target: 14pt final */
-            .cover-author { font-size: 11pt; margin-top: 12px; } /* Target: 11pt final */
-            h1 { font-size: 14pt; font-weight: bold; margin-bottom: 6px; } /* Section titles, Target: 14pt final */
-            h2 { font-size: 12pt; font-weight: bold; margin-bottom: 5px; } /* Chapter titles, Target: 12pt final */
-            h3 { font-size: 11pt; font-weight: bold; margin-bottom: 4px; } /* Sub-headings, Target: 11pt final */
-            p { margin-bottom: 6px; font-size: 10pt; } 
-            .toc-title { font-size: 14pt; font-weight: bold; text-align: center; margin-bottom: 10px; } /* Target: 14pt final */
-            .toc-list { list-style: none; padding-left: 0; }
-            .toc-list li { margin-bottom: 4px; font-size: 10pt; }
-            .toc-part { font-weight: bold; margin-top: 15px; }
-            .toc-chapter { margin-left: 20px; }
-            .content-section { margin-top: 20px; min-height: 1px; /* Ensure section is not completely collapsed */ }
-          </style>
-        </head>
-        <body>
-    `;
-
-    // Cover Page
-    let hasContentForPage = false;
-    if (book.structure?.coverPageDetails) {
-      htmlContent += `<div class="cover-page">`;
-      htmlContent += `<div class="cover-title">${book.structure.coverPageDetails.title || 'Untitled Book'}</div>`;
-      if (book.structure.coverPageDetails.subtitle) {
-        htmlContent += `<div class="cover-subtitle">${book.structure.coverPageDetails.subtitle}</div>`;
-      }
-      if (book.structure.coverPageDetails.authorName) {
-        htmlContent += `<div class="cover-author">By ${book.structure.coverPageDetails.authorName}</div>`;
-      }
-      htmlContent += `</div>`;
-      hasContentForPage = true;
-    }
-    if(hasContentForPage) htmlContent += `<div class="page-break"></div>`;
-    hasContentForPage = false;
-
-    // Table of Contents
-    let tocHtml = `<div class="toc-title">Table of Contents</div><ul class="toc-list">`;
-    if (book.structure?.acknowledgement) tocHtml += `<li>Acknowledgement</li>`;
-    if (book.structure?.prologue) tocHtml += `<li>Prologue</li>`;
-    if (book.structure?.introduction) tocHtml += `<li>Introduction</li>`;
-
-    if (book.structure?.parts && book.structure.parts.length > 0) {
-      book.structure.parts.forEach(part => {
-        tocHtml += `<li class="toc-part">${part.partTitle}</li>`;
-        part.chapters.forEach(chapStruct => {
-          tocHtml += `<li class="toc-chapter">Chapter ${chapStruct.number}: ${chapStruct.title}</li>`;
-        });
-      });
-    } else {
-      currentChapters.sort((a,b) => a.number - b.number).forEach(chapter => {
-        tocHtml += `<li class="toc-chapter">Chapter ${chapter.number}: ${chapter.title}</li>`;
-      });
-    }
-    if (book.structure?.conclusion) tocHtml += `<li>Conclusion</li>`;
-    if (book.structure?.appendix) tocHtml += `<li>Appendix</li>`;
-    if (book.structure?.references) tocHtml += `<li>References</li>`;
-    tocHtml += `</ul>`;
-    if (tocHtml.includes('<li>')) { // Only add ToC if it has items
-        htmlContent += tocHtml;
-        hasContentForPage = true;
-    }
-    if(hasContentForPage) htmlContent += `<div class="page-break"></div>`;
-    // Helper to safely parse markdown
-    const parseMarkdown = async (md: string | undefined | null): Promise<string> => {
-      if (!md) return '';
-      try {
-        const result = await marked(md);
-        return typeof result === 'string' ? result : ''; // Ensure it's a string
-      } catch (e) {
-        console.error("Markdown parsing error:", e);
-        return ''; // Return empty string on error
-      }
-    };
-
-    // Content Sections
-    const addSection = async (title: string, markdownInput: string | undefined | null, isPreRenderedHtml = false) => {
-      let sectionHtml = '';
-      if (isPreRenderedHtml && typeof markdownInput === 'string') {
-        sectionHtml = markdownInput;
-      } else if (typeof markdownInput === 'string') {
-        sectionHtml = await parseMarkdown(markdownInput);
-      }
-
-      if (title || (sectionHtml && sectionHtml.trim() !== '')) {
-        htmlContent += `<div class="content-section">`;
-        if (title && !isPreRenderedHtml) { // Title for regular sections that are not pre-rendered (like chapters)
-             htmlContent += `<h1>${title}</h1>`;
-        }
-        htmlContent += sectionHtml;
-        htmlContent += `</div>`;
-        htmlContent += `<div class="page-break"></div>`;
-        return true;
-      }
-      return false;
-    };
-    
-    await addSection('Acknowledgement', book.structure?.acknowledgement);
-    await addSection('Prologue', book.structure?.prologue);
-    await addSection('Introduction', book.structure?.introduction);
-
-    if (book.structure?.parts && book.structure.parts.length > 0) {
-      for (const part of book.structure.parts) {
-        await addSection(part.partTitle, null); // Part Title only
-        for (const chapStruct of part.chapters) {
-          const chapter = currentChapters.find(c => c.number === chapStruct.number);
-          if (chapter) {
-            let chapterHtml = `<h2>Chapter ${chapter.number}: ${chapter.title}</h2>`;
-            if (chapter.metadata?.description) chapterHtml += `<p><em>${chapter.metadata.description}</em></p>`;
-            chapterHtml += await parseMarkdown(chapter.content || '*Not written yet.*');
-            await addSection('', chapterHtml, true); // Pass pre-rendered HTML
-          }
-        }
-      }
-    } else {
-      const sortedChapters = [...currentChapters].sort((a,b) => a.number - b.number);
-      for (const chapter of sortedChapters) {
-        let chapterHtml = `<h2>Chapter ${chapter.number}: ${chapter.title}</h2>`;
-        if (chapter.metadata?.description) chapterHtml += `<p><em>${chapter.metadata.description}</em></p>`;
-        chapterHtml += await parseMarkdown(chapter.content || '*Not written yet.*');
-        await addSection('', chapterHtml, true); // Pass pre-rendered HTML
-      }
-    }
-
-    await addSection('Conclusion', book.structure?.conclusion);
-    await addSection('Appendix', book.structure?.appendix);
-    await addSection('References', book.structure?.references);
-    
-    // Remove last page break if it exists
-    if (htmlContent.endsWith(`<div class="page-break"></div>`)) {
-        htmlContent = htmlContent.substring(0, htmlContent.length - `<div class="page-break"></div>`.length);
-    }
-
-    htmlContent += `</body></html>`; // Close the main HTML structure
-
-    const pdfDoc = new jsPDF({
+    const doc = new jsPDF({
       orientation: 'p',
       unit: 'mm',
       format: 'a4',
       putOnlyUsedFonts: true,
     });
 
-    const pdfMargins = { top: 20, right: 20, bottom: 20, left: 20 };
-    const contentWidth = pdfDoc.internal.pageSize.getWidth() - pdfMargins.left - pdfMargins.right;
-    const contentHeight = pdfDoc.internal.pageSize.getHeight() - pdfMargins.top - pdfMargins.bottom;
+    const pageMargin = 20; // mm
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const contentWidth = pageWidth - 2 * pageMargin;
+    // const contentHeight = pageHeight - 2 * pageMargin; // Usable height per page
 
-    // Split the HTML content by our page break delimiter
-    // The delimiter itself will be consumed by split. We wrap content in a common root for html2canvas.
-    const htmlChunks = htmlContent.split('<div class="page-break"></div>');
+    let currentY = pageMargin;
+    let pageNumber = 1;
+
+    const addPageIfNeeded = (elementHeight: number) => {
+      if (currentY + elementHeight > pageHeight - pageMargin) {
+        doc.addPage();
+        pageNumber++;
+        currentY = pageMargin;
+        addFooter();
+      }
+    };
+    
+    const addFooter = () => {
+      doc.setFontSize(10);
+      doc.setTextColor(102, 102, 102); // #666
+      const text = `Page ${pageNumber}`;
+      const textWidth = doc.getStringUnitWidth(text) * doc.getFontSize() / doc.internal.scaleFactor;
+      const x = (pageWidth - textWidth) / 2;
+      const y = pageHeight - 10; // 10mm from bottom
+      doc.text(text, x, y, { pageNumber: pageNumber } as any); // Hack to ensure it's on current page
+    };
+
+
+    const addHtmlContent = async (htmlString: string, isCoverPage = false) => {
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px'; // Off-screen
+      container.style.width = `${contentWidth * (96 / 25.4)}px`; // Convert mm to px for canvas
+      container.style.padding = '10px'; // Some padding for rendering
+      container.style.backgroundColor = 'white';
+      container.innerHTML = htmlString;
+      document.body.appendChild(container);
+
+      // Apply specific styles for PDF rendering
+      container.querySelectorAll('h1, h2, h3, .cover-title, .cover-subtitle, .cover-author').forEach(el => {
+        (el as HTMLElement).style.fontFamily = "'Comfortaa', 'Helvetica Neue', Arial, sans-serif";
+      });
+      container.querySelectorAll('body, p, li').forEach(el => {
+        (el as HTMLElement).style.fontFamily = "'Questrial', Arial, sans-serif";
+      });
+      
+      if (isCoverPage) {
+        const coverPageDiv = container.querySelector('.cover-page-content') as HTMLElement;
+        if (coverPageDiv) {
+            coverPageDiv.style.display = 'flex';
+            coverPageDiv.style.flexDirection = 'column';
+            coverPageDiv.style.justifyContent = 'center';
+            coverPageDiv.style.alignItems = 'center';
+            coverPageDiv.style.height = `${(pageHeight - 2 * pageMargin) * (96/25.4) * 0.8}px`; // 80% of content height
+            coverPageDiv.style.textAlign = 'center';
+        }
+      }
+
+
+      const canvas = await html2canvas(container, {
+        scale: 2, // Higher scale for better quality
+        useCORS: true,
+        logging: false, // Reduce console noise
+        width: container.scrollWidth,
+        height: container.scrollHeight,
+        windowWidth: container.scrollWidth,
+      });
+      document.body.removeChild(container);
+
+      const imgData = canvas.toDataURL('image/png');
+      const imgProps = doc.getImageProperties(imgData);
+      const imgHeight = (imgProps.height * contentWidth) / imgProps.width;
+
+      addPageIfNeeded(imgHeight);
+      doc.addImage(imgData, 'PNG', pageMargin, currentY, contentWidth, imgHeight, undefined, 'FAST');
+      currentY += imgHeight + 5; // Add some spacing
+    };
+    
+    // --- Cover Page ---
+    if (book.structure?.coverPageDetails) {
+      let coverHtml = `<div class="cover-page-content" style="font-size: 12pt;">`;
+      coverHtml += `<div class="cover-title" style="font-size: 24pt; font-weight: bold; margin-bottom: 15px;">${book.structure.coverPageDetails.title || 'Untitled Book'}</div>`;
+      if (book.structure.coverPageDetails.subtitle) {
+        coverHtml += `<div class="cover-subtitle" style="font-size: 18pt; margin-bottom: 10px;">${book.structure.coverPageDetails.subtitle}</div>`;
+      }
+      if (book.structure.coverPageDetails.authorName) {
+        coverHtml += `<div class="cover-author" style="font-size: 14pt; margin-top: 20px;">By ${book.structure.coverPageDetails.authorName}</div>`;
+      }
+      coverHtml += `</div>`;
+      await addHtmlContent(coverHtml, true);
+      currentY = pageHeight; // Force new page after cover
+    }
+
+    // --- Table of Contents (Simplified) ---
+    let tocHtml = `<div style="font-size: 11pt;"> <h1 style="font-size: 18pt; text-align: center; margin-bottom: 15px;">Table of Contents</h1> <ul style="list-style: none; padding-left: 0;">`;
+    const addTocEntry = (label: string, level: number = 0) => {
+      tocHtml += `<li style="margin-bottom: 5px; margin-left: ${level * 15}px;">${label}</li>`;
+    };
+
+    if (book.structure?.acknowledgement) addTocEntry('Acknowledgement');
+    if (book.structure?.prologue) addTocEntry('Prologue');
+    if (book.structure?.introduction) addTocEntry('Introduction');
+
+    if (book.structure?.parts && book.structure.parts.length > 0) {
+      book.structure.parts.forEach(part => {
+        addTocEntry(`Part ${part.partNumber}: ${part.partTitle}`, 0);
+        part.chapters.forEach(chapStruct => {
+          addTocEntry(`Chapter ${chapStruct.number}: ${chapStruct.title}`, 1);
+        });
+      });
+    } else {
+      (book.chapters || []).sort((a,b) => a.number - b.number).forEach(chapter => {
+        addTocEntry(`Chapter ${chapter.number}: ${chapter.title}`, 0);
+      });
+    }
+    if (book.structure?.conclusion) addTocEntry('Conclusion');
+    if (book.structure?.appendix) addTocEntry('Appendix');
+    if (book.structure?.references) addTocEntry('References');
+    tocHtml += `</ul></div>`;
+    
+    if (tocHtml.includes('<li>')) { // Only add ToC if it has items
+        await addHtmlContent(tocHtml);
+        currentY = pageHeight; // Force new page after ToC
+    }
+    
+    // --- Content Sections ---
+    const parseAndAddMarkdown = async (title: string | null, markdownContent: string | undefined | null, headingLevel: 'h1' | 'h2' | 'h3' = 'h1') => {
+      if (!markdownContent && !title) return;
+      
+      let sectionHtml = `<div style="font-size: 11pt; line-height: 1.5;">`;
+      if (title) {
+        const titleFontSize = headingLevel === 'h1' ? '16pt' : (headingLevel === 'h2' ? '14pt' : '12pt');
+        sectionHtml += `<${headingLevel} style="font-size: ${titleFontSize}; font-weight: bold; margin-bottom: 10px;">${title}</${headingLevel}>`;
+      }
+      if (markdownContent) {
+        try {
+          const parsedHtml = await marked(markdownContent);
+          sectionHtml += typeof parsedHtml === 'string' ? parsedHtml : '';
+        } catch (e) {
+          console.error("Markdown parsing error:", e);
+          sectionHtml += `<p><em>Error parsing content.</em></p>`;
+        }
+      }
+      sectionHtml += `</div>`;
+      await addHtmlContent(sectionHtml);
+    };
+
+    if (book.structure?.acknowledgement) await parseAndAddMarkdown('Acknowledgement', book.structure.acknowledgement, 'h1');
+    if (book.structure?.prologue) await parseAndAddMarkdown('Prologue', book.structure.prologue, 'h1');
+    if (book.structure?.introduction) await parseAndAddMarkdown('Introduction', book.structure.introduction, 'h1');
+
+    if (book.structure?.parts && book.structure.parts.length > 0) {
+      for (const part of book.structure.parts) {
+        await parseAndAddMarkdown(`Part ${part.partNumber}: ${part.partTitle}`, null, 'h1');
+        for (const chapStruct of part.chapters) {
+          const chapter = (book.chapters || []).find(c => c.number === chapStruct.number && c.title === chapStruct.title);
+          let chapterContent = `<div style="font-size: 11pt; line-height: 1.5;">`;
+          chapterContent += `<h2 style="font-size: 14pt; font-weight: bold; margin-bottom: 8px;">Chapter ${chapStruct.number}: ${chapStruct.title}</h2>`;
+          if (chapStruct.description) {
+            chapterContent += `<p style="font-style: italic; margin-bottom: 8px;">${chapStruct.description}</p>`;
+          }
+          if (chapter?.content) {
+            try {
+              const parsed = await marked(chapter.content);
+              chapterContent += typeof parsed === 'string' ? parsed : '';
+            } catch (e) { chapterContent += `<p><em>Error parsing chapter content.</em></p>`; }
+          } else {
+            chapterContent += `<p><em>Content not available.</em></p>`;
+          }
+          chapterContent += `</div>`;
+          await addHtmlContent(chapterContent);
+        }
+      }
+    } else {
+      const sortedChapters = [...(book.chapters || [])].sort((a,b) => a.number - b.number);
+      for (const chapter of sortedChapters) {
+        let chapterContent = `<div style="font-size: 11pt; line-height: 1.5;">`;
+        chapterContent += `<h2 style="font-size: 14pt; font-weight: bold; margin-bottom: 8px;">Chapter ${chapter.number}: ${chapter.title}</h2>`;
+        if (chapter.metadata?.description) {
+          chapterContent += `<p style="font-style: italic; margin-bottom: 8px;">${chapter.metadata.description}</p>`;
+        }
+        if (chapter.content) {
+           try {
+              const parsed = await marked(chapter.content);
+              chapterContent += typeof parsed === 'string' ? parsed : '';
+            } catch (e) { chapterContent += `<p><em>Error parsing chapter content.</em></p>`; }
+        } else {
+          chapterContent += `<p><em>Content not available.</em></p>`;
+        }
+        chapterContent += `</div>`;
+        await addHtmlContent(chapterContent);
+      }
+    }
+
+    if (book.structure?.conclusion) await parseAndAddMarkdown('Conclusion', book.structure.conclusion, 'h1');
+    if (book.structure?.appendix) await parseAndAddMarkdown('Appendix', book.structure.appendix, 'h1');
+    if (book.structure?.references) await parseAndAddMarkdown('References', book.structure.references, 'h1');
+
+    // Add footer to the last page
+    addFooter();
 
     try {
-      const originalHeadContent = htmlContent.substring(htmlContent.indexOf('<head>') + '<head>'.length, htmlContent.indexOf('</head>'));
-
-      for (let i = 0; i < htmlChunks.length; i++) {
-        const chunkHtmlFragment = htmlChunks[i]; // This is a fragment of the original body's content
-        
-        // If a chunk is only whitespace (e.g. from multiple page-break divs), skip it.
-        // However, the first chunk (cover page) and ToC might be valid even if short.
-        // The split naturally removes the delimiter, so empty strings between delimiters are possible.
-        if (!chunkHtmlFragment.trim() && i > 0) { // Allow first chunk even if it seems empty (e.g. only a cover page with no text)
-            // A more robust check would be if chunkHtmlFragment results in no visible elements.
-            // For now, if it's not the first page and it's empty, we assume it's an accidental empty page from splitting.
-            console.warn(`Skipping potentially empty HTML chunk at index ${i}`);
-            continue;
-        }
-
-        // For each chunk, create a temporary container
-        const tempContainer = document.createElement('div');
-        tempContainer.style.position = 'absolute';
-        tempContainer.style.left = '-9999px';
-        tempContainer.style.top = '0';
-        tempContainer.style.width = '1024px'; // Fixed width for rendering consistency
-        tempContainer.style.padding = '0';
-        tempContainer.style.backgroundColor = 'white';
-        
-        // Each chunkHtmlFragment is part of the original body.
-        // We need to reconstruct a full HTML document for html2canvas for each chunk.
-        tempContainer.innerHTML = `<html><head>${originalHeadContent}</head><body>${chunkHtmlFragment}</body></html>`;
-        
-        document.body.appendChild(tempContainer);
-
-        const canvas = await html2canvas(tempContainer, {
-          scale: 2, // Use scale 2 for better image quality
-          useCORS: true,
-          logging: true,
-          width: tempContainer.scrollWidth,
-          height: tempContainer.scrollHeight,
-          windowWidth: tempContainer.scrollWidth,
-        });
-        
-        document.body.removeChild(tempContainer);
-
-        const imgData = canvas.toDataURL('image/png');
-        const imgProps = pdfDoc.getImageProperties(imgData);
-        const imgAspectRatio = imgProps.height / imgProps.width;
-        const pdfImageHeight = contentWidth * imgAspectRatio;
-
-        if (i > 0) {
-          pdfDoc.addPage();
-        }
-
-        // If pdfImageHeight is greater than contentHeight, it will be clipped by jsPDF.
-        // For simplicity now, we add it; true multi-page for a single oversized chunk is complex.
-        pdfDoc.addImage(imgData, 'PNG', pdfMargins.left, pdfMargins.top, contentWidth, pdfImageHeight, undefined, 'FAST');
-      }
-
-      const totalPages = pdfDoc.internal.pages.length; // Direct page count
-      if (totalPages > 0) {
-        addFooters(pdfDoc, totalPages);
-      }
-
-      pdfDoc.save(`${book.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'book'}.pdf`);
-
+      doc.save(`${book.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'book'}.pdf`);
     } catch (e) {
-      console.error("Error generating PDF with multi-canvas approach:", e);
-      setError("Failed to generate PDF. Check console for details.");
+      console.error("Error saving PDF:", e);
+      setError("Failed to save PDF. Check console for details.");
+    } finally {
+      setLoading(false); // End loading state
     }
   };
 
