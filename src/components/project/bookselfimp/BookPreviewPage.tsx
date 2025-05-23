@@ -216,7 +216,7 @@ const BookPreviewPage: React.FC = () => {
           font-size: 14pt;
           font-weight: bold;
           margin-top: 10px;
-          margin-bottom: 7px;
+          margin-bottom: 5px;
           color: var(--primary-color);
         }
         
@@ -228,6 +228,7 @@ const BookPreviewPage: React.FC = () => {
           font-style: italic;
           color: #666;
           margin-bottom: 20px;
+          margin-top: 5px
         }
         
         
