@@ -104,7 +104,7 @@ const BookPreviewPage: React.FC = () => {
       const htmlContent = generateBookHTML();
       
       const options = {
-        margin: 1,
+        margin: [1, 1, 1, 1], // Changed from single number to array [top, right, bottom, left]
         filename: `${book.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'book'}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
@@ -128,6 +128,8 @@ const BookPreviewPage: React.FC = () => {
   };
 
   const generateBookHTML = () => {
+    if (!book) return '';
+    
     let html = `
     <html>
     <head>
@@ -529,11 +531,11 @@ const BookPreviewPage: React.FC = () => {
         <div className="flex justify-between items-start ">
           <div>
             <h1 className="text-3xl font-heading font-semibold text-secondary">
-              {book.title}
+              {book!.title}
             </h1>
-            {book.structure?.subtitle && (
+            {book!.structure?.subtitle && (
               <p className="text-lg text-neutral-medium mt-2">
-                {book.structure.subtitle}
+                {book!.structure.subtitle}
               </p>
             )}
           </div>
@@ -568,39 +570,39 @@ const BookPreviewPage: React.FC = () => {
       </div>
 
       <div className="space-y-6 w-full ">
-        {book.structure?.coverPageDetails && (
+        {book!.structure?.coverPageDetails && (
           <div className="p-6 bg-white rounded-lg shadow-sm text-center border-2 border-primary/70">
-            <h1 className="text-4xl font-heading font-bold text-primary">{book.structure.coverPageDetails.title}</h1>
-            {book.structure.coverPageDetails.subtitle && <p className="text-2xl text-neutral-dark mt-2">{book.structure.coverPageDetails.subtitle}</p>}
-            {book.structure.coverPageDetails.authorName && <p className="text-lg text-neutral-medium mt-4">By {book.structure.coverPageDetails.authorName}</p>}
+            <h1 className="text-4xl font-heading font-bold text-primary">{book!.structure.coverPageDetails.title}</h1>
+            {book!.structure.coverPageDetails.subtitle && <p className="text-2xl text-neutral-dark mt-2">{book!.structure.coverPageDetails.subtitle}</p>}
+            {book!.structure.coverPageDetails.authorName && <p className="text-lg text-neutral-medium mt-4">By {book!.structure.coverPageDetails.authorName}</p>}
           </div>
         )}
 
         {/* Render Acknowledgement if it exists as a top-level string */}
-        {book.structure?.acknowledgement && (
+        {book!.structure?.acknowledgement && (
           <div className="p-6">
             <h2 className="text-2xl font-heading font-semibold text-secondary mb-3 capitalize">Acknowledgement</h2>
-            {renderSectionContent(book.structure.acknowledgement)}
+            {renderSectionContent(book!.structure.acknowledgement)}
           </div>
         )}
 
         {/* Render Prologue if it's a top-level string AND not already in parts */}
-        {book.structure?.prologue && !isSectionInParts('prologue') && (
+        {book!.structure?.prologue && !isSectionInParts('prologue') && (
           <div className="p-6">
             <h2 className="text-2xl font-heading font-semibold text-secondary mb-3 capitalize">Prologue</h2>
-            {renderSectionContent(book.structure.prologue)}
+            {renderSectionContent(book!.structure.prologue)}
           </div>
         )}
 
         {/* Render Introduction if it's a top-level string AND not already in parts */}
-        {book.structure?.introduction && !isSectionInParts('introduction') && (
+        {book!.structure?.introduction && !isSectionInParts('introduction') && (
           <div className="p-6">
             <h2 className="text-2xl font-heading font-semibold text-secondary mb-3 capitalize">Introduction</h2>
-            {renderSectionContent(book.structure.introduction)}
+            {renderSectionContent(book!.structure.introduction)}
           </div>
         )}
 
-        {book.structure?.parts?.map((part, partIndex) => (
+        {book!.structure?.parts?.map((part, partIndex) => (
           <div key={`part-${partIndex}`} className="p-6 bg-white rounded-lg shadow-sm">
             <button
               onClick={() => toggleSection(`part-${partIndex}`)}
@@ -666,7 +668,7 @@ const BookPreviewPage: React.FC = () => {
         ))}
         
         {/* Fallback for books without 'parts' structure but with chapters */}
-        {(!book.structure?.parts || book.structure.parts.length === 0) && allBookChapters.length > 0 && (
+        {(!book!.structure?.parts || book!.structure.parts.length === 0) && allBookChapters.length > 0 && (
            <div className="p-6 bg-white rounded-lg shadow-sm">
               <h2 className="text-2xl font-heading font-semibold text-secondary mb-3">Chapters</h2>
               <div className="space-y-4">
@@ -705,23 +707,23 @@ const BookPreviewPage: React.FC = () => {
         )}
 
         {/* Render Conclusion if it's a top-level string AND not already in parts */}
-        {book.structure?.conclusion && !isSectionInParts('conclusion') && (
+        {book!.structure?.conclusion && !isSectionInParts('conclusion') && (
           <div className="p-6 bg-white rounded-lg shadow-sm">
             <h2 className="text-2xl font-heading font-semibold text-secondary mb-3 capitalize">Conclusion</h2>
-            {renderSectionContent(book.structure.conclusion)}
+            {renderSectionContent(book!.structure.conclusion)}
           </div>
         )}
         {/* Render Appendix and References if they exist as top-level strings */}
-        {book.structure?.appendix && (
+        {book!.structure?.appendix && (
            <div className="p-6 bg-white rounded-lg shadow-sm">
              <h2 className="text-2xl font-heading font-semibold text-secondary mb-3 capitalize">Appendix</h2>
-             {renderSectionContent(book.structure.appendix)}
+             {renderSectionContent(book!.structure.appendix)}
            </div>
         )}
-        {book.structure?.references && (
+        {book!.structure?.references && (
            <div className="p-6 bg-white rounded-lg shadow-sm">
              <h2 className="text-2xl font-heading font-semibold text-secondary mb-3 capitalize">References</h2>
-             {renderSectionContent(book.structure.references)}
+             {renderSectionContent(book!.structure.references)}
            </div>
         )}
         
