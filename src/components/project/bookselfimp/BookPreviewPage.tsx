@@ -139,21 +139,18 @@ const BookPreviewPage: React.FC = () => {
         
         :root {
           --primary-color: #ae5630;
-          --primary-light: rgba(174, 86, 48, 0.2);
+          --primary-light: rgba(174, 86, 48, 0.20);
         }
         
         body {
           font-family: 'Questrial', Arial, sans-serif;
           font-size: 12pt;
-          line-height: 1.5;
+          line-height: 1.89;
           color: #333;
           margin: 20px;
           padding: 0;
         }
         
-        .page-break {
-          page-break-before: always;
-        }
         
         .cover-page {
           text-align: center;
@@ -184,12 +181,13 @@ const BookPreviewPage: React.FC = () => {
         
         h1 {
           font-family: 'Comfortaa', sans-serif;
-          font-size: 18pt;
+          font-size: 16pt;
           font-weight: bold;
           margin-top: 0;
-          margin-bottom: 20px;
+          line-height: 1.8;
           color: var(--primary-color);
-          page-break-before: always;
+          page-break-before: always !important;
+          
         }
         
         h1.prologue-title, h1.introduction-title {
@@ -197,31 +195,33 @@ const BookPreviewPage: React.FC = () => {
           text-align: center;
           margin-top: 200px;
           page-break-before: always !important;
-          page-break-after: always !important;
+          
         }
+
+      
         
         h2 {
           font-family: 'Comfortaa', sans-serif;
           font-size: 16pt;
           font-weight: bold;
           margin-top: 25px;
-          margin-bottom: 15px;
-          page-break-before: always;
+          margin-bottom: 12px;
+          
           color: #333;
-          line-height: 1.3;
+          line-height: 1.5;
         }
         
         h3 {
           font-family: 'Comfortaa', sans-serif;
           font-size: 14pt;
           font-weight: bold;
-          margin-top: 20px;
-          margin-bottom: 10px;
+          margin-top: 10px;
+          margin-bottom: 7px;
           color: var(--primary-color);
         }
         
         p {
-          margin-bottom: 12px;
+          margin-bottom: 16px;
         }
         
         .chapter-description {
@@ -230,14 +230,17 @@ const BookPreviewPage: React.FC = () => {
           margin-bottom: 20px;
         }
         
+        
+
+
         .part-title {
           font-family: 'Comfortaa', sans-serif;
           font-size: 20pt;
           font-weight: bold;
           text-align: center;
           margin-top: 200px;
-          page-break-before: always;
-          page-break-after: always;
+          page-break-before: always !important;
+          page-break-after: always !important;
           color: var(--primary-color);
         }
         
@@ -252,7 +255,7 @@ const BookPreviewPage: React.FC = () => {
         }
         
         .toc-item {
-          margin-bottom: 8px;
+          margin-bottom: 12px;
         }
         
         .toc-item.indent {
@@ -341,7 +344,7 @@ const BookPreviewPage: React.FC = () => {
         for (const chapStruct of part.chapters) {
           const chapter = (book.chapters || []).find(c => c.number === chapStruct.number && c.title === chapStruct.title);
           
-          html += `<h2>Chapter ${chapStruct.number}: ${chapStruct.title}</h2>`;
+          html += `<h1>Chapter ${chapStruct.number}: ${chapStruct.title}</h1>`;
           if (chapStruct.description) {
             html += `<p class="chapter-description">${chapStruct.description}</p>`;
           }
@@ -355,7 +358,7 @@ const BookPreviewPage: React.FC = () => {
     } else {
       const sortedChapters = [...(book.chapters || [])].sort((a,b) => a.number - b.number);
       for (const chapter of sortedChapters) {
-        html += `<h2>Chapter ${chapter.number}: ${chapter.title}</h2>`;
+        html += `<h1>Chapter ${chapter.number}: ${chapter.title}</h1>`;
         if (chapter.metadata?.description) {
           html += `<p class="chapter-description">${chapter.metadata.description}</p>`;
         }

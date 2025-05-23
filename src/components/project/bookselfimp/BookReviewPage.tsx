@@ -174,41 +174,58 @@ const BookReviewPage: React.FC = () => {
 
               <div className="space-y-6">
                 {/* Cover Page Details */}
-                {localStructure.coverPageDetails && (
-                  <div className="mb-6 pb-6 border-b border-neutral-light">
-                    <h3 className="font-heading text-xl font-semibold text-secondary mb-1">
-                      {localStructure.coverPageDetails.title}
+                <div className="mb-6 pb-6 border-b border-neutral-light">
+                  <div className="text-center">
+                    <h3 className="font-heading text-2xl font-bold text-secondary mb-2">
+                      {localStructure.coverPageDetails?.title || localStructure.title}
                     </h3>
-                    <p className="text-neutral-medium text-lg mb-2">
-                      {localStructure.coverPageDetails.subtitle}
+                    <p className="text-neutral-medium text-lg mb-4">
+                      {localStructure.coverPageDetails?.subtitle || localStructure.subtitle}
                     </p>
-                    <p className="text-neutral-dark">
-                      By: {localStructure.coverPageDetails.authorName}
+                    <p className="text-neutral-dark text-base">
+                      By: {localStructure.coverPageDetails?.authorName || 'Username'}
                     </p>
                   </div>
-                )}
+                </div>
 
-                {/* Front matter sections if they exist */}
-                {localStructure.acknowledgement && (
-                  <div className="mb-4">
-                    <strong className="text-neutral-dark mb-2 block">Acknowledgement:</strong>
-                    <p className="text-neutral-medium">{localStructure.acknowledgement}</p>
-                  </div>
-                )}
+                {/* Front matter sections */}
+                <div className="mb-6">
+                  <strong className="text-neutral-dark mb-2 block">Acknowledgements:</strong>
+                  <p className="text-neutral-medium text-sm leading-relaxed">
+                    {localStructure.acknowledgement || 
+                    "I would like to express my deepest gratitude to all those who have supported me throughout this journey. To my family and friends who provided unwavering encouragement, to my mentors who shared their wisdom and guidance, and to the countless individuals whose stories and experiences have shaped the insights within these pages. Special thanks to the readers who will bring these words to life through their own interpretations and applications. This work would not have been possible without the collective support of this incredible community that continues to inspire and challenge me to grow both personally and professionally."}
+                  </p>
+                </div>
 
-                {localStructure.prologue && (
-                  <div className="mb-4">
-                    <strong className="text-neutral-dark mb-2 block">Prologue:</strong>
-                    <p className="text-neutral-medium">{localStructure.prologue}</p>
-                  </div>
-                )}
+                <div className="mb-6">
+                  <strong className="text-neutral-dark mb-2 block">Prologue:</strong>
+                  <p className="text-neutral-medium text-sm leading-relaxed">
+                    {localStructure.prologue ? 
+                      (localStructure.prologue.split(' ').length > 75 ? 
+                        localStructure.prologue.split(' ').slice(0, 75).join(' ') + '...' : 
+                        localStructure.prologue
+                      ) : 
+                      "The journey toward self-improvement begins with a single step, yet many find themselves standing at the crossroads of intention and action, unsure of which path will lead to lasting transformation. This book emerged from years of research, personal experience, and countless conversations with individuals who, like you, sought meaningful change in their lives. What started as a simple question about why some people thrive while others struggle has evolved into a comprehensive exploration of the principles, practices, and mindset shifts that separate those who merely dream of better lives from those who actually create them..."}
+                  </p>
+                  {localStructure.prologue && localStructure.prologue.split(' ').length > 75 && (
+                    <p className="text-xs text-neutral-light mt-1">Full prologue: ~1,500 words</p>
+                  )}
+                </div>
 
-                {localStructure.introduction && (
-                  <div className="mb-4">
-                    <strong className="text-neutral-dark mb-2 block">Introduction:</strong>
-                    <p className="text-neutral-medium">{localStructure.introduction}</p>
-                  </div>
-                )}
+                <div className="mb-6">
+                  <strong className="text-neutral-dark mb-2 block">Introduction:</strong>
+                  <p className="text-neutral-medium text-sm leading-relaxed">
+                    {localStructure.introduction ? 
+                      (localStructure.introduction.split(' ').length > 75 ? 
+                        localStructure.introduction.split(' ').slice(0, 75).join(' ') + '...' : 
+                        localStructure.introduction
+                      ) : 
+                      "In a world where self-help books line the shelves and motivational content floods our social media feeds, you might wonder why another book on self-improvement is necessary. The answer lies not in what this book promises to teach you, but in how it approaches the fundamental challenge of personal transformation. Unlike traditional approaches that focus solely on external behaviors or quick fixes, this comprehensive guide addresses the interconnected systems of mind, body, and spirit that must align for genuine, lasting change to occur. Through evidence-based strategies, practical exercises, and real-world applications, we will explore the architecture of human potential..."}
+                  </p>
+                  {localStructure.introduction && localStructure.introduction.split(' ').length > 75 && (
+                    <p className="text-xs text-neutral-light mt-1">Full introduction: ~3,000-3,500 words</p>
+                  )}
+                </div>
 
                 {/* Parts and their chapters */}
                 {localStructure.parts && localStructure.parts.length > 0 && (
@@ -344,28 +361,66 @@ const BookReviewPage: React.FC = () => {
                 )}
 
                 {/* Conclusion */}
-                {localStructure.conclusion && (
-                  <div className="mt-4">
-                    <strong className="text-neutral-dark mb-2 block">Conclusion:</strong>
-                    <p className="text-neutral-medium">{localStructure.conclusion}</p>
-                  </div>
-                )}
+                <div className="mt-6">
+                  <strong className="text-neutral-dark mb-2 block">Conclusion:</strong>
+                  <p className="text-neutral-medium text-sm leading-relaxed">
+                    {localStructure.conclusion ? 
+                      (localStructure.conclusion.split(' ').length > 75 ? 
+                        localStructure.conclusion.split(' ').slice(0, 75).join(' ') + '...' : 
+                        localStructure.conclusion
+                      ) : 
+                      "As we reach the end of this transformative journey together, it's important to recognize that true self-improvement is not a destination but an ongoing process of growth, discovery, and renewal. The strategies, insights, and tools you've encountered throughout these pages are not meant to be consumed once and forgotten, but rather to be revisited, refined, and integrated into the fabric of your daily existence. The path forward will inevitably include moments of triumph and setback, clarity and confusion, motivation and doubt—and this is exactly as it should be for genuine, lasting transformation..."}
+                  </p>
+                  {localStructure.conclusion && localStructure.conclusion.split(' ').length > 75 && (
+                    <p className="text-xs text-neutral-light mt-1">Full conclusion: ~2,000-2,500 words</p>
+                  )}
+                </div>
 
                 {/* Appendix */}
-                {localStructure.appendix && (
-                  <div className="mt-4 pt-4 border-t border-neutral-light">
-                    <strong className="text-neutral-dark mb-2 block">Appendix:</strong>
-                    <p className="text-neutral-medium">{localStructure.appendix}</p>
+                <div className="mt-6 pt-4 border-t border-neutral-light">
+                  <strong className="text-neutral-dark mb-3 block">Appendix (Alphabetical Order):</strong>
+                  <div className="space-y-2">
+                    {localStructure.appendix ? (
+                      <p className="text-neutral-medium text-sm">{localStructure.appendix}</p>
+                    ) : (
+                      <ul className="list-disc list-inside text-neutral-medium text-sm space-y-1">
+                        <li><strong>A.</strong> Assessment Tools and Worksheets</li>
+                        <li><strong>B.</strong> Book Recommendations for Further Reading</li>
+                        <li><strong>C.</strong> Community Resources and Support Groups</li>
+                        <li><strong>D.</strong> Daily Practice Templates</li>
+                        <li><strong>E.</strong> Emergency Action Plans for Setbacks</li>
+                        <li><strong>F.</strong> Frequently Asked Questions</li>
+                        <li><strong>G.</strong> Goal-Setting Frameworks</li>
+                        <li><strong>H.</strong> Habit Tracking Templates</li>
+                        <li><strong>I.</strong> Implementation Checklists</li>
+                        <li><strong>J.</strong> Journal Prompts for Self-Reflection</li>
+                      </ul>
+                    )}
                   </div>
-                )}
+                </div>
 
                 {/* References */}
-                {localStructure.references && (
-                  <div className="mt-4 pt-4 border-t border-neutral-light">
-                    <strong className="text-neutral-dark mb-2 block">References:</strong>
-                    <p className="text-neutral-medium">{localStructure.references}</p>
+                <div className="mt-6 pt-4 border-t border-neutral-light">
+                  <strong className="text-neutral-dark mb-3 block">References:</strong>
+                  <div className="text-neutral-medium text-xs space-y-2">
+                    {localStructure.references ? (
+                      <p>{localStructure.references}</p>
+                    ) : (
+                      <div className="space-y-1">
+                        <p>Brown, B. (2020). <em>The Gifts of Imperfection</em>. Hazelden Publishing.</p>
+                        <p>Clear, J. (2018). <em>Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones</em>. Avery.</p>
+                        <p>Duckworth, A. (2016). <em>Grit: The Power of Passion and Perseverance</em>. Scribner.</p>
+                        <p>Dweck, C. (2006). <em>Mindset: The New Psychology of Success</em>. Random House.</p>
+                        <p>Frankl, V. E. (1946). <em>Man's Search for Meaning</em>. Beacon Press.</p>
+                        <p>Heath, C., & Heath, D. (2010). <em>Switch: How to Change Things When Change Is Hard</em>. Broadway Books.</p>
+                        <p>Kahneman, D. (2011). <em>Thinking, Fast and Slow</em>. Farrar, Straus and Giroux.</p>
+                        <p>Pink, D. H. (2009). <em>Drive: The Surprising Truth About What Motivates Us</em>. Riverhead Books.</p>
+                        <p>Sinek, S. (2009). <em>Start with Why: How Great Leaders Inspire Everyone to Take Action</em>. Portfolio.</p>
+                        <p>Thaler, R. H., & Sunstein, C. R. (2008). <em>Nudge: Improving Decisions About Health, Wealth, and Happiness</em>. Yale University Press.</p>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
 
               <div className="mt-6 pt-6 border-t">

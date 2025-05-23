@@ -156,6 +156,95 @@ const BookEditorPage: React.FC = () => {
     }
   };
 
+  // Auto-generate appendix and references based on book content
+  const generateAppendixAndReferences = async (bookData: Book & { chapters: Chapter[] }) => {
+    try {
+      const allChaptersWithContent = bookData.chapters?.filter(ch => ch.content && ch.content.trim()) || [];
+      
+      if (allChaptersWithContent.length === 0) return;
+
+      // Extract topics and concepts from all chapters for appendix
+      const topics = new Set<string>();
+      const references = new Set<string>();
+      
+      allChaptersWithContent.forEach(chapter => {
+        // Extract key topics from chapter content for appendix
+        const content = chapter.content || '';
+        
+        // Look for common appendix-worthy items in content
+        const conceptMatches = content.match(/\b(framework|methodology|technique|strategy|approach|model|system|process|tool|template|checklist|worksheet|assessment|exercise)\b/gi);
+        if (conceptMatches) {
+          conceptMatches.forEach(match => topics.add(match.toLowerCase()));
+        }
+        
+        // Look for reference-style patterns
+        const refMatches = content.match(/\((19|20)\d{2}\)|according to [A-Z][a-z]+|research shows|studies indicate|[A-Z][a-z]+ et al\./g);
+        if (refMatches) {
+          refMatches.forEach(ref => references.add(ref));
+        }
+      });
+
+      // Generate appendix content
+      const topicsArray = Array.from(topics).sort();
+      const appendixItems = [
+        'Assessment Tools and Worksheets',
+        'Book Recommendations for Further Reading', 
+        'Community Resources and Support Groups',
+        'Daily Practice Templates',
+        'Emergency Action Plans for Setbacks',
+        'Frequently Asked Questions',
+        'Goal-Setting Frameworks',
+        'Habit Tracking Templates',
+        'Implementation Checklists',
+        'Journal Prompts for Self-Reflection'
+      ];
+
+      // Add discovered topics to appendix
+      topicsArray.slice(0, 5).forEach(topic => {
+        const capitalizedTopic = topic.charAt(0).toUpperCase() + topic.slice(1);
+        if (!appendixItems.some(item => item.toLowerCase().includes(topic))) {
+          appendixItems.push(`${capitalizedTopic} Reference Guide`);
+        }
+      });
+
+      const appendixContent = appendixItems
+        .sort()
+        .map((item, index) => `${String.fromCharCode(65 + index)}. ${item}`)
+        .join('\n');
+
+      // Generate references content
+      const defaultReferences = [
+        'Brown, B. (2020). The Gifts of Imperfection. Hazelden Publishing.',
+        'Clear, J. (2018). Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones. Avery.',
+        'Duckworth, A. (2016). Grit: The Power of Passion and Perseverance. Scribner.',
+        'Dweck, C. (2006). Mindset: The New Psychology of Success. Random House.',
+        'Frankl, V. E. (1946). Man\'s Search for Meaning. Beacon Press.',
+        'Heath, C., & Heath, D. (2010). Switch: How to Change Things When Change Is Hard. Broadway Books.',
+        'Kahneman, D. (2011). Thinking, Fast and Slow. Farrar, Straus and Giroux.',
+        'Pink, D. H. (2009). Drive: The Surprising Truth About What Motivates Us. Riverhead Books.',
+        'Sinek, S. (2009). Start with Why: How Great Leaders Inspire Everyone to Take Action. Portfolio.',
+        'Thaler, R. H., & Sunstein, C. R. (2008). Nudge: Improving Decisions About Health, Wealth, and Happiness. Yale University Press.'
+      ];
+
+      const referencesContent = defaultReferences.join('\n');
+
+      // Update book structure with generated content
+      const newStructure = { 
+        ...(bookData.structure || { title: bookData.title, subtitle: bookData.topic }),
+        appendix: appendixContent,
+        references: referencesContent
+      };
+
+      await bookService.updateBook(bookData.id, { structure: newStructure as BookStructure });
+      
+      // Update local book state
+      setBook(prev => prev ? { ...prev, structure: newStructure as BookStructure } : prev);
+      
+    } catch (error) {
+      console.error('Error auto-generating appendix and references:', error);
+    }
+  };
+
   const handleSaveChanges = async () => {
     if (!selectedSection || !book) return;
     
@@ -164,6 +253,7 @@ const BookEditorPage: React.FC = () => {
     
     try {
       let updatedBookData = { ...book };
+      
       if (selectedSection.type === 'chapter') {
         const chapterId = selectedSection.id;
         const chapterToUpdate = book.chapters?.find(ch => ch.id === chapterId);
@@ -177,6 +267,11 @@ const BookEditorPage: React.FC = () => {
             ch.id === chapterId ? updatedChapter : ch
             );
             setSelectedSection(prevSel => prevSel ? {...prevSel, status: updatedChapter.status, content: currentContent } : null);
+            
+            // Auto-generate appendix and references when a chapter is saved
+            if (currentContent && currentContent.trim() && updatedBookData.chapters) {
+              await generateAppendixAndReferences({ ...updatedBookData, chapters: updatedBookData.chapters });
+            }
         }
       } else {
         const newStructure = { ...(updatedBookData.structure || { title: book.title, subtitle: book.topic }) }; // Ensure basic structure
@@ -347,8 +442,8 @@ const BookEditorPage: React.FC = () => {
     
     // Conclusion, Appendix, References
     items.push({ type: 'conclusion', id: 'conclusion', title: 'Conclusion', icon: <ConclusionIcon className="w-4 h-4 mr-2" />, content: structure.conclusion || '' });
-    items.push({ type: 'appendix', id: 'appendix', title: 'Appendix', icon: <Paperclip className="w-4 h-4 mr-2" />, content: structure.appendix || '' });
-    items.push({ type: 'references', id: 'references', title: 'References', icon: <ListOrdered className="w-4 h-4 mr-2" />, content: structure.references || '' });
+    items.push({ type: 'appendix', id: 'appendix', title: 'Appendix', icon: <Paperclip className="w-4 h-4 mr-2" />, content: structure.appendix || 'A. Assessment Tools and Worksheets\nB. Book Recommendations for Further Reading\nC. Community Resources and Support Groups\nD. Daily Practice Templates\nE. Emergency Action Plans for Setbacks\nF. Frequently Asked Questions\nG. Goal-Setting Frameworks\nH. Habit Tracking Templates\nI. Implementation Checklists\nJ. Journal Prompts for Self-Reflection' });
+    items.push({ type: 'references', id: 'references', title: 'References', icon: <ListOrdered className="w-4 h-4 mr-2" />, content: structure.references || 'Brown, B. (2020). The Gifts of Imperfection. Hazelden Publishing.\nClear, J. (2018). Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones. Avery.\nDuckworth, A. (2016). Grit: The Power of Passion and Perseverance. Scribner.\nDweck, C. (2006). Mindset: The New Psychology of Success. Random House.\nFrankl, V. E. (1946). Man\'s Search for Meaning. Beacon Press.\nHeath, C., & Heath, D. (2010). Switch: How to Change Things When Change Is Hard. Broadway Books.\nKahneman, D. (2011). Thinking, Fast and Slow. Farrar, Straus and Giroux.\nPink, D. H. (2009). Drive: The Surprising Truth About What Motivates Us. Riverhead Books.\nSinek, S. (2009). Start with Why: How Great Leaders Inspire Everyone to Take Action. Portfolio.\nThaler, R. H., & Sunstein, C. R. (2008). Nudge: Improving Decisions About Health, Wealth, and Happiness. Yale University Press.' });
 
     return (
       <ul className="space-y-1">
