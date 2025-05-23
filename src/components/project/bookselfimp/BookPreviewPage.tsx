@@ -5,9 +5,7 @@ import { cn } from '../../../lib/utils';
 import { bookService } from '../../../lib/books';
 import type { Book, Chapter, BookStructure } from '../../../types/books';
 import MarkdownEditor from '../../MarkdownEditor';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas'; // Ensure html2canvas is imported
-import { marked } from 'marked';
+import html2pdf from 'html2pdf.js';
 
 const BookPreviewPage: React.FC = () => {
   const { bookId } = useParams<{ bookId: string }>();
@@ -101,274 +99,312 @@ const BookPreviewPage: React.FC = () => {
     setPdfLoading(true); 
     setError('');
 
-    const doc = new jsPDF({
-      orientation: 'p',
-      unit: 'mm',
-      format: 'a4',
-      putOnlyUsedFonts: true,
-    });
-
-    const pageMargin = 20;
-    const bottomMargin = 25;
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const contentWidth = pageWidth - 2 * pageMargin;
-    const maxY = pageHeight - bottomMargin;
-
-    let currentY = pageMargin;
-    let pageNumber = 1;
-
-    const addPageIfNeeded = (requiredHeight: number = 10) => {
-      if (currentY + requiredHeight > maxY) {
-        doc.addPage();
-        pageNumber++;
-        currentY = pageMargin;
-        addFooter();
-      }
-    };
-    
-    const addFooter = () => {
-      doc.setFontSize(10);
-      doc.setTextColor(128, 128, 128);
-      const text = `Page ${pageNumber}`;
-      const textWidth = doc.getStringUnitWidth(text) * doc.getFontSize() / doc.internal.scaleFactor;
-      const x = (pageWidth - textWidth) / 2;
-      const y = pageHeight - 15;
-      doc.text(text, x, y);
-    };
-
-    const addText = (text: string, fontSize: number = 11, isBold: boolean = false, isItalic: boolean = false, color: [number, number, number] = [0, 0, 0]) => {
-      doc.setFontSize(fontSize);
-      doc.setTextColor(color[0], color[1], color[2]);
-      doc.setFont('helvetica', isBold ? 'bold' : (isItalic ? 'italic' : 'normal'));
+    try {
+      // Create HTML content with proper styling
+      const htmlContent = generateBookHTML();
       
-      const lines = doc.splitTextToSize(text, contentWidth);
-      const lineHeight = fontSize * 0.35;
-      
-      addPageIfNeeded(lines.length * lineHeight);
-      
-      doc.text(lines, pageMargin, currentY);
-      currentY += lines.length * lineHeight + 3;
-    };
+      const options = {
+        margin: 1,
+        filename: `${book.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'book'}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 1,
+          useCORS: true
+        },
+        jsPDF: { 
+          unit: 'in', 
+          format: 'letter', 
+          orientation: 'portrait'
+        }
+      };
 
-    const addHeading = (text: string, level: number = 1) => {
-      const fontSize = level === 1 ? 18 : level === 2 ? 14 : 12;
-      const spacing = level === 1 ? 8 : 5;
-      
-      currentY += spacing;
-      addText(text, fontSize, true, false, [51, 51, 51]);
-      currentY += 3;
-    };
+      await html2pdf().set(options).from(htmlContent).save();
+    } catch (e) {
+      console.error("Error generating PDF:", e);
+      setError("Failed to generate PDF. Check console for details.");
+    } finally {
+      setPdfLoading(false); 
+    }
+  };
 
-    const addParagraph = (text: string) => {
-      if (text.trim()) {
-        addText(text, 11, false, false, [51, 51, 51]);
-        currentY += 2;
-      }
-    };
-
-    const parseMarkdown = (markdown: string) => {
-      if (!markdown) return;
-      
-      const lines = markdown.split('\n');
-      let currentParagraph = '';
-      
-      for (const line of lines) {
-        const trimmed = line.trim();
+  const generateBookHTML = () => {
+    let html = `
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Questrial&display=swap');
         
-        if (trimmed.startsWith('# ')) {
-          if (currentParagraph) {
-            addParagraph(currentParagraph);
-            currentParagraph = '';
-          }
-          addHeading(trimmed.substring(2), 1);
-        } else if (trimmed.startsWith('## ')) {
-          if (currentParagraph) {
-            addParagraph(currentParagraph);
-            currentParagraph = '';
-          }
-          addHeading(trimmed.substring(3), 2);
-        } else if (trimmed.startsWith('### ')) {
-          if (currentParagraph) {
-            addParagraph(currentParagraph);
-            currentParagraph = '';
-          }
-          addHeading(trimmed.substring(4), 3);
-        } else if (trimmed === '') {
-          if (currentParagraph) {
-            addParagraph(currentParagraph);
-            currentParagraph = '';
-          }
-        } else {
-          if (currentParagraph) currentParagraph += ' ';
-          currentParagraph += trimmed;
+        :root {
+          --primary-color: #ae5630;
+          --primary-light: rgba(174, 86, 48, 0.2);
         }
-      }
-      
-      if (currentParagraph) {
-        addParagraph(currentParagraph);
-      }
-    };
-
-
-    // Helper function to add section with optional new page
-    const addSection = (title: string | null, content: string | null, options: { forceNewPage?: boolean, isPartTitle?: boolean, level?: number } = {}) => {
-      const { forceNewPage = false, isPartTitle = false, level = 1 } = options;
-      
-      if (forceNewPage && currentY > pageMargin) {
-        addPageIfNeeded(50);
-      }
-      
-      if (isPartTitle && title) {
-        // Center part titles on page
-        currentY += 50;
-        addText(title, 20, true, false, [51, 51, 51]);
-        currentY += 30;
-        if (currentY < maxY - 50) {
-          addPageIfNeeded(50);
+        
+        body {
+          font-family: 'Questrial', Arial, sans-serif;
+          font-size: 12pt;
+          line-height: 1.5;
+          color: #333;
+          margin: 20px;
+          padding: 0;
         }
-        return;
-      }
-      
-      if (title) {
-        addHeading(title, level);
-      }
-      
-      if (content) {
-        parseMarkdown(content);
-      }
-    };
-    
-    addFooter(); // Add footer to the first page
+        
+        .page-break {
+          page-break-before: always;
+        }
+        
+        .cover-page {
+          text-align: center;
+          margin-top: 200px;
+          page-break-after: always;
+        }
+        
+        .cover-title {
+          font-family: 'Comfortaa', sans-serif;
+          font-size: 24pt;
+          font-weight: bold;
+          margin-bottom: 20px;
+          color: var(--primary-color);
+        }
+        
+        .cover-subtitle {
+          font-family: 'Comfortaa', sans-serif;
+          font-size: 18pt;
+          margin-bottom: 20px;
+          color: #666;
+        }
+        
+        .cover-author {
+          font-family: 'Comfortaa', sans-serif;
+          font-size: 14pt;
+          color: var(--primary-color);
+        }
+        
+        h1 {
+          font-family: 'Comfortaa', sans-serif;
+          font-size: 18pt;
+          font-weight: bold;
+          margin-top: 0;
+          margin-bottom: 20px;
+          color: var(--primary-color);
+          page-break-before: always;
+        }
+        
+        h1.prologue-title, h1.introduction-title {
+          font-size: 20pt;
+          text-align: center;
+          margin-top: 200px;
+          page-break-before: always !important;
+          page-break-after: always !important;
+        }
+        
+        h2 {
+          font-family: 'Comfortaa', sans-serif;
+          font-size: 16pt;
+          font-weight: bold;
+          margin-top: 25px;
+          margin-bottom: 15px;
+          page-break-before: always;
+          color: #333;
+          line-height: 1.3;
+        }
+        
+        h3 {
+          font-family: 'Comfortaa', sans-serif;
+          font-size: 14pt;
+          font-weight: bold;
+          margin-top: 20px;
+          margin-bottom: 10px;
+          color: var(--primary-color);
+        }
+        
+        p {
+          margin-bottom: 12px;
+        }
+        
+        .chapter-description {
+          font-style: italic;
+          color: #666;
+          margin-bottom: 20px;
+        }
+        
+        .part-title {
+          font-family: 'Comfortaa', sans-serif;
+          font-size: 20pt;
+          font-weight: bold;
+          text-align: center;
+          margin-top: 200px;
+          page-break-before: always;
+          page-break-after: always;
+          color: var(--primary-color);
+        }
+        
+        .toc-title {
+          font-family: 'Comfortaa', sans-serif;
+          font-size: 18pt;
+          font-weight: bold;
+          text-align: center;
+          margin-bottom: 30px;
+          page-break-before: always;
+          color: var(--primary-color);
+        }
+        
+        .toc-item {
+          margin-bottom: 8px;
+        }
+        
+        .toc-item.indent {
+          margin-left: 20px;
+        }
+        
+        .quote, .attention {
+          font-style: italic;
+          border-left: 4px solid var(--primary-color);
+          background-color: var(--primary-light);
+          padding: 15px;
+          margin: 20px 0;
+        }
+        
+        blockquote {
+          font-style: italic;
+          border-left: 4px solid var(--primary-color);
+          background-color: var(--primary-light);
+          padding: 15px;
+          margin: 20px 0;
+        }
+      </style>
+    </head>
+    <body>
+    `;
 
     // Cover Page
     if (book.structure?.coverPageDetails) {
-      currentY = pageHeight / 3; // Center vertically
-      
+      html += `<div class="cover-page">`;
       if (book.structure.coverPageDetails.title) {
-        addText(book.structure.coverPageDetails.title, 24, true, false, [51, 51, 51]);
-        currentY += 15;
+        html += `<div class="cover-title">${book.structure.coverPageDetails.title}</div>`;
       }
-      
       if (book.structure.coverPageDetails.subtitle) {
-        addText(book.structure.coverPageDetails.subtitle, 18, false, false, [51, 51, 51]);
-        currentY += 15;
+        html += `<div class="cover-subtitle">${book.structure.coverPageDetails.subtitle}</div>`;
       }
-      
       if (book.structure.coverPageDetails.authorName) {
-        addText(`By ${book.structure.coverPageDetails.authorName}`, 14, false, false, [51, 51, 51]);
+        html += `<div class="cover-author">By ${book.structure.coverPageDetails.authorName}</div>`;
       }
-      
-      addPageIfNeeded(50);
+      html += `</div>`;
     }
 
     // Table of Contents
-    currentY += 10;
-    addHeading('Table of Contents', 1);
+    html += `<h1 class="toc-title">Table of Contents</h1>`;
     
-    if (book.structure?.acknowledgement) addText('Acknowledgement', 11, false, false, [51, 51, 51]);
-    if (book.structure?.prologue) addText('Prologue', 11, false, false, [51, 51, 51]);
-    if (book.structure?.introduction) addText('Introduction', 11, false, false, [51, 51, 51]);
+    if (book.structure?.acknowledgement) html += `<div class="toc-item">Acknowledgement</div>`;
+    if (book.structure?.prologue) html += `<div class="toc-item">Prologue</div>`;
+    if (book.structure?.introduction) html += `<div class="toc-item">Introduction</div>`;
 
     if (book.structure?.parts && book.structure.parts.length > 0) {
       book.structure.parts.forEach(part => {
-        addText(`Part ${part.partNumber}: ${part.partTitle}`, 11, true, false, [51, 51, 51]);
+        html += `<div class="toc-item"><strong>Part ${part.partNumber}: ${part.partTitle}</strong></div>`;
         part.chapters.forEach(chapStruct => {
-          addText(`  Chapter ${chapStruct.number}: ${chapStruct.title}`, 11, false, false, [51, 51, 51]);
+          html += `<div class="toc-item indent">Chapter ${chapStruct.number}: ${chapStruct.title}</div>`;
         });
       });
     } else {
       (book.chapters || []).sort((a,b) => a.number - b.number).forEach(chapter => {
-        addText(`Chapter ${chapter.number}: ${chapter.title}`, 11, false, false, [51, 51, 51]);
+        html += `<div class="toc-item">Chapter ${chapter.number}: ${chapter.title}</div>`;
       });
     }
     
-    if (book.structure?.conclusion) addText('Conclusion', 11, false, false, [51, 51, 51]);
-    if (book.structure?.appendix) addText('Appendix', 11, false, false, [51, 51, 51]);
-    if (book.structure?.references) addText('References', 11, false, false, [51, 51, 51]);
-    
-    addPageIfNeeded(50);
-    
+    if (book.structure?.conclusion) html += `<div class="toc-item">Conclusion</div>`;
+    if (book.structure?.appendix) html += `<div class="toc-item">Appendix</div>`;
+    if (book.structure?.references) html += `<div class="toc-item">References</div>`;
+
     // Content Sections
     if (book.structure?.acknowledgement) {
-      addSection('Acknowledgement', book.structure.acknowledgement, { forceNewPage: true });
+      html += `<h1>Acknowledgement</h1>${markdownToHTML(book.structure.acknowledgement)}`;
     }
     
     if (book.structure?.prologue) {
-      addSection('Prologue', book.structure.prologue, { forceNewPage: true });
+      html += `<h1 class="prologue-title">Prologue</h1>${markdownToHTML(book.structure.prologue)}`;
     }
     
     if (book.structure?.introduction) {
-      addSection('Introduction', book.structure.introduction, { forceNewPage: true });
+      html += `<h1 class="introduction-title">Introduction</h1>${markdownToHTML(book.structure.introduction)}`;
     }
 
+    // Parts and Chapters
     if (book.structure?.parts && book.structure.parts.length > 0) {
       for (const part of book.structure.parts) {
-        addSection(`Part ${part.partNumber}: ${part.partTitle}`, null, { forceNewPage: true, isPartTitle: true });
+        // Part title on its own page
+        html += `<div class="part-title">Part ${part.partNumber}: ${part.partTitle}</div>`;
         
+        // Chapters
         for (const chapStruct of part.chapters) {
           const chapter = (book.chapters || []).find(c => c.number === chapStruct.number && c.title === chapStruct.title);
           
-          addPageIfNeeded(30);
-          addHeading(`Chapter ${chapStruct.number}: ${chapStruct.title}`, 2);
-          
+          html += `<h2>Chapter ${chapStruct.number}: ${chapStruct.title}</h2>`;
           if (chapStruct.description) {
-            addText(chapStruct.description, 11, false, true, [80, 80, 80]);
+            html += `<p class="chapter-description">${chapStruct.description}</p>`;
           }
-          
           if (chapter?.content) {
-            parseMarkdown(chapter.content);
+            html += markdownToHTML(chapter.content);
           } else {
-            addText('Content not available.', 11, false, true, [128, 128, 128]);
+            html += '<p>Content not available.</p>';
           }
         }
       }
     } else {
       const sortedChapters = [...(book.chapters || [])].sort((a,b) => a.number - b.number);
       for (const chapter of sortedChapters) {
-        addPageIfNeeded(30);
-        addHeading(`Chapter ${chapter.number}: ${chapter.title}`, 2);
-        
+        html += `<h2>Chapter ${chapter.number}: ${chapter.title}</h2>`;
         if (chapter.metadata?.description) {
-          addText(chapter.metadata.description, 11, false, true, [80, 80, 80]);
+          html += `<p class="chapter-description">${chapter.metadata.description}</p>`;
         }
-        
         if (chapter.content) {
-          parseMarkdown(chapter.content);
+          html += markdownToHTML(chapter.content);
         } else {
-          addText('Content not available.', 11, false, true, [128, 128, 128]);
+          html += '<p>Content not available.</p>';
         }
       }
     }
 
     if (book.structure?.conclusion) {
-      addSection('Conclusion', book.structure.conclusion, { forceNewPage: true });
+      html += `<h1>Conclusion</h1>${markdownToHTML(book.structure.conclusion)}`;
     }
     
     if (book.structure?.appendix) {
-      addSection('Appendix', book.structure.appendix, { forceNewPage: true });
+      html += `<h1>Appendix</h1>${markdownToHTML(book.structure.appendix)}`;
     }
     
     if (book.structure?.references) {
-      addSection('References', book.structure.references, { forceNewPage: true });
+      html += `<h1>References</h1>${markdownToHTML(book.structure.references)}`;
     }
 
-    // Ensure footer is on the very last page if it wasn't added by addPageIfNeeded
-    const finalPageNumber = doc.internal.pages.length; // doc.internal.pages is 0-indexed array, length is the count
-    if (pageNumber === finalPageNumber && finalPageNumber > 0 && doc.internal.pages[finalPageNumber-1]) { 
-        doc.setPage(finalPageNumber); // setPage is 1-based
-        addFooter(); // Re-add footer to ensure it's there (jsPDF might overwrite with addImage)
-    }
+    html += `</body></html>`;
+    return html;
+  };
 
-
-    try {
-      doc.save(`${book.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'book'}.pdf`);
-    } catch (e) {
-      console.error("Error saving PDF:", e);
-      setError("Failed to save PDF. Check console for details.");
-    } finally {
-      setPdfLoading(false); 
-    }
+  const markdownToHTML = (markdown: string | null | undefined): string => {
+    if (!markdown) return '';
+    
+    // Enhanced markdown to HTML conversion with blockquotes
+    return markdown
+      // Handle blockquotes first
+      .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
+      // Handle headings
+      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+      // Handle bold and italic
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      // Handle line breaks and paragraphs
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br>')
+      .replace(/^(.*)$/gm, '<p>$1</p>')
+      // Clean up empty paragraphs and fix heading paragraphs
+      .replace(/<p><\/p>/g, '')
+      .replace(/<p><h/g, '<h')
+      .replace(/<\/h([1-6])><\/p>/g, '</h$1>')
+      .replace(/<p><blockquote>/g, '<blockquote>')
+      .replace(/<\/blockquote><\/p>/g, '</blockquote>');
   };
 
   const toggleSection = (sectionKey: string) => {
