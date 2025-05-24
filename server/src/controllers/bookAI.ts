@@ -691,6 +691,15 @@ ${chapter.number === (book.structure?.parts ?
   (book.structure?.chapters ? book.structure.chapters.length + 1 : 999)
 ) && book.structure?.conclusion ? `This is the CONCLUSION. Use the following content as guidance: ${book.structure.conclusion}` : ''}
 
+At the end of each chapter add the key points, as defined
+***
+### Key Points
+- [Key takeaway 1 from this chapter]
+- [Key takeaway 2 from this chapter] 
+- [Key takeaway 3 from this chapter]
+- [Key takeaway 4 from this chapter]
+- [Key takeaway 5 from this chapter]
+***
 Write high-quality content that follows all the guidelines above.`;
 
     // STEP 1: Search for supporting data using search-enabled model
@@ -764,15 +773,8 @@ CHAPTER STRUCTURE REQUIREMENTS:
 - Include citations in-text using format: (Source Name, Year)
 - All references will be compiled automatically into the book's main References chapter
 
-MANDATORY CHAPTER ENDING:
-Every chapter must end with:
 
-### Key Points
-- [Key takeaway 1 from this chapter]
-- [Key takeaway 2 from this chapter] 
-- [Key takeaway 3 from this chapter]
-- [Key takeaway 4 from this chapter]
-- [Key takeaway 5 from this chapter]`;
+`;
 
     const messages = [
       { role: 'system', content: systemPrompt },

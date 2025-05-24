@@ -276,16 +276,21 @@ const BookPreviewPage: React.FC = () => {
     }
 
     /* ---------- 8) KEY-POINTS BOX ---------- */
-    .key-points {
-      background: rgba(120,113,108,.15);
-      border: 1px solid rgba(120,113,108,.7);
-      border-radius: 12px;
-      padding: 4pt;
-      margin: 20px 0;
-      page-break-inside: avoid;
+    
+    .key-points{
+      border-radius:0.75rem;
+      border:1px solid rgba(168,162,158,.70);
+      background:rgba(214,211,209,.15);
+      padding:1rem;
+      margin:1rem 0;
+      font:500 1rem/1.5 'Questrial',sans-serif;
+      color:#57534E;
+      page-break-inside:avoid;
     }
 
-    .key-points h3,
+
+
+   /* .key-points h3,
     .key-points h4 {
       color: #78716c;
       font-size: 10pt;
@@ -308,7 +313,7 @@ const BookPreviewPage: React.FC = () => {
       margin-top: 2pt;
       margin-bottom: 2pt;
       padding-left: 12pt;
-    }
+    }*/
 
 
     /* ---------- 9) TABLE-OF-CONTENTS & PART PAGES ---------- */
@@ -451,76 +456,101 @@ const BookPreviewPage: React.FC = () => {
 
   const markdownToHTML = (markdown: string | null | undefined): string => {
     if (!markdown) return '';
-    
+  
     let html = markdown;
     
-    // Handle tables first (before other processing)
-    html = html.replace(/\|(.+)\|\n\|[-\s|:]+\|\n((?:\|.+\|\n?)*)/g, (match, header, rows) => {
-      // Process header
-      const headerCells = header.split('|').map((cell: string) => cell.trim()).filter((cell: string) => cell.length > 0);
-      const headerHtml = headerCells.map((cell: string) => `<th>${cell}</th>`).join('');
-      
-      // Process body rows
-      const bodyRows = rows.trim().split('\n').filter((row: string) => row.trim().length > 0);
-      const bodyHtml = bodyRows.map((row: string) => {
-        const cells = row.split('|').map((cell: string) => cell.trim()).filter((cell: string) => cell.length > 0);
-        const cellsHtml = cells.map((cell: string) => `<td>${cell}</td>`).join('');
-        return `<tr>${cellsHtml}</tr>`;
-      }).join('');
-      
-      return `<table>
-        <thead>
-          <tr>${headerHtml}</tr>
-        </thead>
-        <tbody>
-          ${bodyHtml}
-        </tbody>
-      </table>`;
-    });
+    // Debug: Check if content contains *** patterns
+    if (html.includes('***')) {
+      console.log('Found *** patterns in content:', html.substring(html.indexOf('***'), html.indexOf('***') + 100));
+    }
+  
     
-    // Handle Key Points sections with special styling
-    html = html.replace(/^(#{1,4})\s*(Key Points.*?)$/gim, (match, hashes, title) => {
-      return `<div class="key-points">\n${hashes.replace(/#/g, '').length === 3 ? '<h3>' : '<h4>'}${title}${hashes.replace(/#/g, '').length === 3 ? '</h3>' : '</h4>'}\n`;
-    });
+    html = html.replace(
+      /\|(.+)\|\n\|[-\s|:]+\|\n((?:\|.+\|\n?)*)/g,
+      (match: string, header: string, rows: string): string => {
+        // header row
+        const headerCells: string[] = header
+          .split('|')
+          .map((cell: string) => cell.trim())
+          .filter((cell: string) => cell.length > 0);
+        const headerHtml = headerCells
+          .map((cell: string) => `<th>${cell}</th>`)
+          .join('');
+  
+        // body rows
+        const bodyRows: string[] = rows
+          .trim()
+          .split('\n')
+          .filter((r: string) => r.trim().length > 0);
+  
+        const bodyHtml = bodyRows
+          .map((row: string) => {
+            const cells: string[] = row
+              .split('|')
+              .map((c: string) => c.trim())
+              .filter((c: string) => c.length > 0);
+            return `<tr>${cells
+              .map((c: string) => `<td>${c}</td>`)
+              .join('')}</tr>`;
+          })
+          .join('');
+  
+        return `
+          <table>
+            <thead><tr>${headerHtml}</tr></thead>
+            <tbody>${bodyHtml}</tbody>
+          </table>`;
+      }
+    );
+  
     
-    // Close Key Points sections before next heading or at end
-    html = html.replace(/(<div class="key-points">[\s\S]*?)(?=(^#{1,4}\s|$))/gm, (match, content) => {
-      return content + '\n</div>\n';
-    });
-    
-    // Enhanced markdown to HTML conversion with blockquotes
-    return html
-      // Handle blockquotes first
+    html = html
+      // block-quotes
       .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
-      // Handle headings (but skip those already processed in key points)
-      .replace(/^### ((?!.*Key Points).*$)/gim, '<h3>$1</h3>')
-      .replace(/^## ((?!.*Key Points).*$)/gim, '<h2>$1</h2>')
-      .replace(/^# ((?!.*Key Points).*$)/gim, '<h1>$1</h1>')
-      // Handle bold and italic
+  
+      // headings
+      .replace(/^#### (.*$)/gim, '<h4>$1</h4>')
+      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+  
+      // key-points  *** … ***
+      .replace(/\*\*\*([\s\S]+?)\*\*\*/g, '<div class="key-points">$1</div>')
+  
+      // bold & italic
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      // Handle lists
-      .replace(/^\- (.+)$/gm, '<li>$1</li>')
+  
+      // lists → temporary <li>
+      .replace(/^- (.+)$/gm, '<li>$1</li>')
       .replace(/^(\d+)\. (.+)$/gm, '<li>$1</li>')
-      // Wrap consecutive list items in ul tags
-      .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
-      // Handle line breaks and paragraphs
+  
+      // wrap consecutive <li> runs in <ul>
+      .replace(/(<li>.*?<\/li>)(\s*<li>)/gs, '<ul>$1</ul>$2')
+      .replace(/(<\/ul>\s*)<ul>/g, '')
+  
+      // paragraph & line-break handling (skip lines that already start with <)
       .replace(/\n\n/g, '</p><p>')
       .replace(/\n/g, '<br>')
-      .replace(/^(.*)$/gm, '<p>$1</p>')
-      // Clean up empty paragraphs and fix heading paragraphs
+      .replace(/^(?!\s*<)(.+)$/gm, '<p>$1</p>')
+  
+      // clean-ups for stray wrappers
       .replace(/<p><\/p>/g, '')
-      .replace(/<p><h/g, '<h')
-      .replace(/<\/h([1-6])><\/p>/g, '</h$1>')
-      .replace(/<p><blockquote>/g, '<blockquote>')
-      .replace(/<\/blockquote><\/p>/g, '</blockquote>')
-      .replace(/<p><table>/g, '<table>')
-      .replace(/<\/table><\/p>/g, '</table>')
-      .replace(/<p><ul>/g, '<ul>')
-      .replace(/<\/ul><\/p>/g, '</ul>')
-      .replace(/<p><div class="key-points">/g, '<div class="key-points">')
-      .replace(/<\/div><\/p>/g, '</div>');
+      .replace(/<p>(<h[1-6])/g, '$1')
+      .replace(/(<\/h[1-6]>)<\/p>/g, '$1')
+      .replace(/<p>(<blockquote>)/g, '$1')
+      .replace(/(<\/blockquote>)<\/p>/g, '$1')
+      .replace(/<p>(<table>)/g, '$1')
+      .replace(/(<\/table>)<\/p>/g, '$1')
+      .replace(/<p>(<ul>)/g, '$1')
+      .replace(/(<\/ul>)<\/p>/g, '$1')
+      .replace(/<p>(<div class="key-points">)/g, '$1')
+      .replace(/(<\/div>)<\/p>/g, '$1');
+  
+    return html;
   };
+  
+  
 
   const toggleSection = (sectionKey: string) => {
     setExpandedSections(prev => ({ ...prev, [sectionKey]: !prev[sectionKey] }));
