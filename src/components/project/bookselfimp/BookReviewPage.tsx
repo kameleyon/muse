@@ -90,7 +90,7 @@ const BookReviewPage: React.FC = () => {
                   ))}
                 </ul>
               </div>
-              <div>
+              <div className="mb-3">
                 <strong className="text-neutral-dark">Desires:</strong>
                 <ul className="list-disc list-inside text-neutral-medium mt-1">
                   {marketResearch.targetAudience.desires.map((desire: string, index: number) => (
@@ -98,6 +98,12 @@ const BookReviewPage: React.FC = () => {
                   ))}
                 </ul>
               </div>
+              {marketResearch.targetAudience.dailyLife && (
+                <div>
+                  <strong className="text-neutral-dark">Daily Life Context:</strong>
+                  <p className="text-neutral-medium mt-1">{marketResearch.targetAudience.dailyLife}</p>
+                </div>
+              )}
             </div>
 
             <div className="bg-white rounded-lg shadow-sm p-6">
@@ -142,7 +148,70 @@ const BookReviewPage: React.FC = () => {
                   {marketResearch.recommendations.colors.reasoning}
                 </p>
               </div>
+              {marketResearch.recommendations.pricing && (
+                <div className="mt-4 pt-4 border-t border-neutral-light">
+                  <strong className="text-neutral-dark">Pricing Strategy:</strong>
+                  <div className="mt-2">
+                    <span className="text-lg font-semibold text-primary">{marketResearch.recommendations.pricing.suggested}</span>
+                    <p className="text-sm text-neutral-medium mt-1">{marketResearch.recommendations.pricing.reasoning}</p>
+                  </div>
+                </div>
+              )}
             </div>
+
+            {/* Content Specifications */}
+            {(marketResearch.readingLevel || marketResearch.design || marketResearch.contentSpecs) && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="flex items-center mb-4">
+                  <FileText className="w-6 h-6 text-primary mr-2" />
+                  <h2 className="text-xl font-heading font-semibold text-secondary">
+                    Content Specifications
+                  </h2>
+                </div>
+                {marketResearch.readingLevel && (
+                  <div className="mb-4">
+                    <strong className="text-neutral-dark">Reading Level:</strong>
+                    <span className="text-neutral-medium ml-2">{marketResearch.readingLevel} ({marketResearch.gradeLevel})</span>
+                  </div>
+                )}
+                {marketResearch.sentenceLength && (
+                  <div className="mb-4">
+                    <strong className="text-neutral-dark">Sentence Length:</strong>
+                    <span className="text-neutral-medium ml-2">{marketResearch.sentenceLength}</span>
+                  </div>
+                )}
+                {marketResearch.vocabularyLevel && (
+                  <div className="mb-4">
+                    <strong className="text-neutral-dark">Vocabulary Level:</strong>
+                    <span className="text-neutral-medium ml-2">{marketResearch.vocabularyLevel}</span>
+                  </div>
+                )}
+                {marketResearch.design && (
+                  <div className="mb-4">
+                    <strong className="text-neutral-dark">Visual Elements:</strong>
+                    <span className="text-neutral-medium ml-2">{marketResearch.design.visualElements} per chapter</span>
+                  </div>
+                )}
+                {marketResearch.contentSpecs && (
+                  <div className="space-y-2">
+                    <div>
+                      <strong className="text-neutral-dark">Examples per Chapter:</strong>
+                      <span className="text-neutral-medium ml-2">{marketResearch.contentSpecs.examplesPerChapter}</span>
+                    </div>
+                    <div>
+                      <strong className="text-neutral-dark">Include Exercises:</strong>
+                      <span className="text-neutral-medium ml-2">{marketResearch.contentSpecs.exerciseInclusion === 'true' ? 'Yes' : 'No'}</span>
+                    </div>
+                    {marketResearch.contentSpecs.specialInstructions && (
+                      <div>
+                        <strong className="text-neutral-dark">Special Instructions:</strong>
+                        <p className="text-neutral-medium mt-1">{marketResearch.contentSpecs.specialInstructions}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Book Structure Section */}

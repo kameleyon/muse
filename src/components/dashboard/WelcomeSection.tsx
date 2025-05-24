@@ -66,9 +66,9 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            "model": "qwen/qwen-plus",
+            "model": "anthropic/claude-sonnet-4",
             "messages": [
-              { "role": "user", "content": "Provide a random meaningful quote suitable for a creative professional. Only return the quote text and the author, separated by ' - '. Example: 'Creativity takes courage.' - Henri Matisse" }
+              { "role": "user", "content": "Provide a random meaningful quote suitable for a creative and professional writting. Make it motivational and inspirational for content generation. Only return the quote text and the author, separated by ' - '. Example: 'Creativity takes courage.' - Henri Matisse" }
             ],
             "max_tokens": 200,
             "temperature": 0.8

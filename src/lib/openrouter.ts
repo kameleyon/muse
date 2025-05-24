@@ -200,7 +200,7 @@ Your response must be valid JSON and include at minimum these fields:
     }
   ],
    "conclusion": "Conclusion text with markdown formatting", "estimatedWords": 4500,
-   "totalWords": 160000
+   "totalWords": 184000
 }
 
 Be creative with the structure but ensure the "chapters" array always exists. Each chapter should have at minimum a number, title, description, and estimatedWords. You can add additional fields to chapters or add other structural elements to the book as needed.

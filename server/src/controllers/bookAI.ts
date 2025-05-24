@@ -208,6 +208,8 @@ Please conduct thorough market research and provide:
 5. Suggested color schemes for book cover that would attract target audience
 6. Key pain points and desires of the target audience
 7. Pricing strategy recommendations
+8. Reading level and content specifications
+9. Design and formatting requirements
 
 You must respond with ONLY valid JSON in this exact format:
 {
@@ -215,7 +217,8 @@ You must respond with ONLY valid JSON in this exact format:
     "demographics": "detailed demographics",
     "psychographics": "interests, values, behaviors",
     "painPoints": ["pain point 1", "pain point 2"],
-    "desires": ["desire 1", "desire 2"]
+    "desires": ["desire 1", "desire 2"],
+    "dailyLife": "specific examples of daily life scenarios this audience faces"
   },
   "marketAnalysis": {
     "size": "market size estimate",
@@ -236,6 +239,20 @@ You must respond with ONLY valid JSON in this exact format:
       "suggested": "$XX.XX",
       "reasoning": "pricing rationale"
     }
+  },
+  "readingLevel": "Flesch Reading Ease score (e.g., Standard 60-69)",
+  "gradeLevel": "target grade level (e.g., 8th-9th grade)",
+  "sentenceLength": "preferred sentence length (e.g., short, medium, long)",
+  "vocabularyLevel": "vocabulary complexity (e.g., accessible but varied, technical, simple)",
+  "design": {
+    "colors": "primary: #hexcode, secondary: #hexcode, accent: #hexcode",
+    "visualElements": "recommended number of charts/visuals per chapter",
+    "formatting": "specific formatting preferences for target audience"
+  },
+  "contentSpecs": {
+    "examplesPerChapter": "recommended number of real-world examples",
+    "exerciseInclusion": "true/false - whether to include exercises",
+    "specialInstructions": "any specific content requirements"
   }
 }`;
 
@@ -285,10 +302,10 @@ CONTENT REQUIREMENTS:
 2. The total estimated word count for the entire book (including Prologue, Introduction, main chapters, and Conclusion) should be between 125,000 and 184,000 words.
 3. Each main chapter (within the 'parts' array) must have a creative and descriptive title, a detailed explanation/description of its content and purpose, an estimated word count, key topics to be covered, and 3-5 key points the reader should take away. Chapter numbering should be sequential for these main chapters, starting from 1.
 4. Generate content for 'prologue', 'introduction', and 'conclusion' as top-level string fields in the JSON. These are NOT chapters within the 'parts' array and should NOT be numbered as chapters.
-   - The 'prologue' string should contain compelling content (approx. 3000 words) that hooks the reader, including its own context and key points formatted within the markdown.
-   - The 'introduction' string should contain detailed content (approx. 3000 words) explaining the book's premise, scope, what the reader will gain, and a roadmap. It should include its own context and key points formatted within the markdown.
-   - The 'conclusion' string should contain meaningful content (approx. 3000 words) summarizing key takeaways, reiterating the core message, and offering final thoughts. It should include its own context and key points formatted within the markdown.
-5. The 'acknowledgement', 'appendix', and 'references' fields should be brief top-level strings. 'coverPageDetails' is also a top-level object. These are not part of the main chapter flow or word count intensive sections like Prologue/Intro/Conclusion.
+   - The 'prologue' string should contain a prologue (1,500-2,500 words) that immediately engages readers by: Opening with a vivid scene, surprising statement, or relatable problem; Establishing the book's core premise or conflict within the first 500 words; Including specific sensory details and concrete examples; Creating emotional connection through personal anecdote or universal experience; Ending with a clear promise of what the book will deliver; Matching the book's specified tone and target audience.
+   - The 'introduction' string should contain a comprehensive introduction (2,500-4,000 words) that: Opens with a clear, engaging heading that captures the book's essence; Includes 3-5 substantial sections that progressively build the book's foundation; Establishes the problem/opportunity this book addresses; Shares why this book exists now and why the author is uniquely qualified; Provides a roadmap of what readers will learn/gain from each section; Includes 2-3 specific examples or mini-case studies; Addresses common misconceptions or objections; Ends with clear instructions on how to use this book; Uses subheadings to break up text every 400-600 words; Matches the book's specified tone and speaks directly to target audience pain points.
+   - The 'conclusion' string should contain a powerful conclusion (2,500-4,000 words) that: Opens with an evocative heading that signals completion and new beginning; Synthesizes key insights without merely repeating chapter summaries; Includes 3-5 substantial sections that build toward a crescendo; Addresses the 'what now?' question with concrete next steps; Acknowledges the reader's journey and growth through the book; Paints a vivid picture of the reader's potential future state; Includes a memorable final message or call-to-action; Provides additional resources or community connections; Uses subheadings to structure the conclusion's narrative arc; Circles back to opening themes while showing transformation; Matches book's tone while adding inspirational elevation.
+5. The 'acknowledgement' field should contain a concise acknowledgement section (100-200 words) that: Thanks 2-3 key individuals or groups who made the book possible; Includes specific contributions rather than generic thanks; Mentions early readers, mentors, or community members who shaped the work; Acknowledges family/personal support briefly but genuinely; References any organizations, platforms, or communities integral to the book; Maintains professional warmth without excessive sentimentality; Ends with a forward-looking note about the book's intended impact; Matches the book's tone while being slightly more personal. The 'appendix' and 'references' fields should be brief top-level strings. 'coverPageDetails' is also a top-level object. These are not part of the main chapter flow or word count intensive sections like Prologue/Intro/Conclusion.
 6. Be creative with part titles and actual chapter titles based on the topic and market research.
 7. Ensure the JSON format is strictly followed as per the example.
 
@@ -304,6 +321,10 @@ Market Research Findings:
 - Market Gaps: ${marketResearch.marketAnalysis.gaps.join(', ')}
 - Recommended Tone: ${marketResearch.recommendations.tone}
 - Recommended Style: ${marketResearch.recommendations.style}
+- Recommended Reading Level: ${marketResearch.readingLevel}
+- Recommended Grade Level: ${marketResearch.gradeLevel}
+- Recommended Sentence Length: ${marketResearch.sentenceLength}
+- Recommended Vocabulary Level: ${marketResearch.vocabularyLevel}
 
 
 
@@ -314,12 +335,12 @@ You must respond with ONLY valid JSON in this exact format:
   "audience": "refined target audience description",
   "style": "specific writing style based on research",
   "tone": "specific tone based on research",
-  "marketPosition": "how to position this book in the market",
-  "uniqueValue": "what makes this book different",
-  "acknowledgement": "Brief acknowledgement text (e.g., 100-200 words).",
-  "prologue": "## Prologue Title Chosen by AI\\n\\nRich markdown content for the prologue (approx. 3000 words)...\\n\\n### Key Points from Prologue\\n- Point 1\\n- Point 2",
-  "introduction": "## Introduction Title Chosen by AI\\n\\nDetailed markdown content for the introduction (approx. 3000 words)...\\n\\n### Key Points from Introduction\\n- Point 1\\n- Point 2",
-  "conclusion": "## Conclusion Title Chosen by AI\\n\\nMeaningful markdown content for the conclusion (approx. 3000 words)...\\n\\n### Key Points from Conclusion\\n- Point 1\\n- Point 2",
+  "marketPosition": "Define market position (75-150 words) using this framework: Primary category/shelf placement; 2-3 successful comp titles and how this book differs; Target retailer categories; Price point positioning (premium/accessible/budget) with justification; Format priorities (hardcover/paperback/audio/digital); One-sentence elevator pitch for booksellers.",
+  "uniqueValue": "Write a compelling unique value proposition (50-100 words) that identifies ONE primary differentiator from existing books in this category, states a specific benefit readers get here they can't find elsewhere, uses concrete language rather than abstract claims, avoids overused terms like 'comprehensive,' 'ultimate,' or 'revolutionary,' includes a measurable outcome or transformation when possible, formatted as 2-3 punchy sentences that could work as back-cover copy.",
+  "acknowledgement": "Concise acknowledgement section (100-200 words) that thanks 2-3 key individuals or groups who made the book possible, includes specific contributions rather than generic thanks, mentions early readers, mentors, or community members who shaped the work, acknowledges family/personal support briefly but genuinely, references any organizations, platforms, or communities integral to the book, maintains professional warmth without excessive sentimentality, ends with a forward-looking note about the book's intended impact, and matches the book's tone while being slightly more personal.",
+  "prologue": "## Prologue Title Chosen by AI\\n\\nPrologue content (1,500-2,500 words) that immediately engages readers by opening with a vivid scene, surprising statement, or relatable problem, establishing the book's core premise or conflict within the first 500 words, including specific sensory details and concrete examples, creating emotional connection through personal anecdote or universal experience, ending with a clear promise of what the book will deliver, and matching the book's specified tone and target audience...\\n\\n### Key Points from Prologue\\n- Point 1\\n- Point 2",
+  "introduction": "# Introduction Title Chosen by AI\\n\\nComprehensive introduction content (2,500-4,000 words) that establishes the problem/opportunity this book addresses, shares why this book exists now and why the author is uniquely qualified, addresses common misconceptions or objections, ends with clear instructions on how to use this book, uses subheadings to break up text every 400-600 words, and matches the book's specified tone and speaks directly to target audience pain points...\\n\\n### Key Points from Introduction\\n- Point 1\\n- Point 2",
+  "conclusion": "# Evocative Conclusion Title Chosen by AI\\n\\nPowerful conclusion content (2,500-4,000 words) that synthesizes key insights without merely repeating chapter summaries, addresses the 'what now?' question with concrete next steps, acknowledges the reader's journey and growth through the book, paints a vivid picture of the reader's potential future state, includes a memorable final message or call-to-action, provides additional resources or community connections, uses subheadings to structure the conclusion's narrative arc, circles back to opening themes while showing transformation, and matches book's tone while adding inspirational elevation...\\n\\n### Key Points from Conclusion\\n- Point 1\\n- Point 2",
   "appendix": "Optional: Brief appendix content, if applicable.",
   "references": "Optional: Brief references or bibliography, if applicable.",
   "coverPageDetails": {
@@ -340,12 +361,12 @@ You must respond with ONLY valid JSON in this exact format:
           "keyPoints": ["Key takeaway 1 for Ch1", "Key takeaway 2 for Ch1", "Key takeaway 3 for Ch1"],
           "keyTopics": ["Main topic of Ch1", "Sub-topic A for Ch1", "Sub-topic B for Ch1"]
         }
-        // ... AI to add 3-6 more chapters to this part, with sequential numbering ...
+        // ... AI to add 4-7 more chapters to this part, with sequential numbering ...
       ]
     }
     // ... AI to add more parts, each with 4-7 chapters and sequential part numbers ...
   ],
-  "totalWords": 150000, // AI calculates this sum from all chapter estimatedWords + prologue + intro + conclusion, aiming for 125k-184k.
+  "totalWords": 185000, // AI calculates this sum from all chapter estimatedWords + prologue + intro + conclusion, aiming for 125k-184k.
   "colorScheme": {
     "primary": "${marketResearch.recommendations.colors.primary}",
     "secondary": "${marketResearch.recommendations.colors.secondary}",
@@ -358,7 +379,7 @@ You must respond with ONLY valid JSON in this exact format:
       { role: 'user', content: userPrompt }
     ];
 
-    const model = 'anthropic/claude-3.7-sonnet'; 
+    const model = 'anthropic/claude-sonnet-4'; 
     
     const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
     const completion = await executeOpenRouterRequest({
@@ -366,7 +387,7 @@ You must respond with ONLY valid JSON in this exact format:
       prompt,
       messages,
       temperature: 0.7,
-      max_tokens: 16000 
+      max_tokens: 50000 
     });
 
     // Log the first 500 characters of the response for debugging
@@ -526,7 +547,49 @@ export const generateChapter = async (req: Request, res: Response) => {
     // If not, we'll need to adapt our update strategy later
     const hasMetadataColumn = Object.prototype.hasOwnProperty.call(chapter, 'metadata');
 
-    const systemPrompt = `You are an expert book writer specializing in creating content that resonates with specific target audiences. Write in the exact tone and style specified, addressing the audience's pain points and desires.`;
+    const systemPrompt = `You are an expert book writer specializing in creating content that resonates with specific target audiences. Write in the exact tone and style specified, addressing the audience's pain points and desires.
+
+Write this chapter following these STRICT guidelines:
+
+**CONTENT QUALITY & VOICE:**
+1. Write at a ${book.marketResearch?.readingLevel || 'Standard (60-69)'} Flesch Reading Ease level (${book.marketResearch?.gradeLevel || '8th-9th grade'})
+2. Use ${book.structure?.tone || 'conversational'} tone with ${book.marketResearch?.sentenceLength || 'medium'} sentence lengths
+3. Vocabulary complexity: ${book.marketResearch?.vocabularyLevel || 'accessible but varied'}
+4. FORBIDDEN PHRASES: Never use "picture this", "imagine", "celestial", "buckle up", "let's dive in", "journey", "unlock", "transform your life", "game-changer", "revolutionary", "ultimate guide"
+5. AVOID: Starting sections with questions, excessive metaphors, emoji, exclamation points (max 1 per 1000 words)
+6. DO: Vary sentence openings, use specific examples from ${book.marketResearch?.targetAudience?.dailyLife || 'everyday modern life'}, ground abstract concepts in concrete scenarios
+
+**CONSISTENCY REQUIREMENTS:**
+7. Review previous chapters to ensure NO repeated: examples, case studies, anecdotes, or conceptual explanations
+8. Unique examples only - flag if similar territory covered in: ${previousChapters.length > 0 ? previousChapters.join(', ') : 'N/A'}
+9. Maintain consistent terminology established in: ${book.glossary || 'chapter 1'}
+
+**FORMATTING SPECIFICATIONS:**
+10. DO NOT repeat the chapter title (already provided in structure)
+11. START with captivating first sentence - no throat-clearing or preview
+12. Paragraph indentation: Use 2 spaces at start of each paragraph
+13. Line spacing: Single space between all elements (including between bullet point titles and lists)
+14. Structure:
+    - Main sections: ### (not ##)
+    - Subsections: ####
+    - **Bold** for key terms (first mention only)
+    - Bullet points: - (with consistent spacing)
+    - > for notable quotes or callouts only
+15. Include ${book.marketResearch?.design?.visualElements || chapterDetails?.visualElements || '1-2'} data visualizations using markdown tables or ASCII-style simple graphs when data supports it
+16. Color palette references: ${book.marketResearch?.design?.colors || book.design?.colors || 'primary: purple, secondary: gold, accent: white'}
+
+**CHAPTER SPECIFICATIONS:**
+17. Word count: ${chapterDetails?.estimatedWords || 5000} words (±10%)
+18. Include ${book.marketResearch?.contentSpecs?.examplesPerChapter || chapterDetails?.examples || '3-4'} real-world examples
+19. ${book.marketResearch?.contentSpecs?.exerciseInclusion === 'true' || chapterDetails?.exercises ? 'Include practical exercises' : 'Focus on narrative flow'}
+20. Target audience specifics: ${book.marketResearch?.targetAudience?.demographics || '25-45, urban, professional'}
+
+**SPECIAL INSTRUCTIONS:**
+${book.marketResearch?.contentSpecs?.specialInstructions || chapterDetails?.specialInstructions || 'None'}
+${chapter.number === 0 || (chapter.number === (book.structure?.parts ? 
+  Math.max(...book.structure.parts.flatMap((part: any) => part.chapters.map((ch: any) => ch.number))) + 1 : 
+  (book.structure?.chapters ? book.structure.chapters.length + 1 : 999)
+)) ? 'Adapt format for special section requirements' : ''}`;
     
     const userPrompt = `Book Title: ${book.title}
 Subtitle: ${book.structure?.subtitle || ''}
@@ -554,31 +617,79 @@ ${chapter.number === (book.structure?.parts ?
   (book.structure?.chapters ? book.structure.chapters.length + 1 : 999)
 ) && book.structure?.conclusion ? `This is the CONCLUSION. Use the following content as guidance: ${book.structure.conclusion}` : ''}
 
-Write this chapter following these guidelines:
-1. Use the specified ${book.structure?.tone || 'conversational'} tone throughout
-2. Follow the ${book.structure?.style || 'clear and engaging'} writing style
-3. Address the target audience's specific needs and interests
-4. Include practical examples and actionable insights
-5. Maintain consistency with previous chapters
-6. Aim for approximately ${chapterDetails?.estimatedWords || 4000} words
-7. Format the content as proper markdown:
-   - Use ## for the main chapter title
-   - Use ### for subsections
-   - Use **bold** for emphasis
-   - Use - or * for bullet points
-   - Use > for blockquotes
-   - Ensure proper paragraph spacing (empty line between paragraphs)
-   - Use numbered lists where appropriate
-8. Start with the chapter title as ## heading
-9. Structure the content with clear subsections using ### headings
-10. If this is a special section (prologue, introduction, conclusion), adapt the formatting accordingly`;
+Write high-quality content that follows all the guidelines above.`;
+
+    // STEP 1: Search for supporting data using search-enabled model
+    const searchPrompt = `You are a research assistant specializing in gathering current, factual information to support book content.
+
+Topic: ${book.topic}
+Chapter ${chapter.number}: ${chapter.title}
+Chapter Description: ${chapterDetails?.description || ''}
+Key Topics: ${chapterDetails?.keyTopics ? chapterDetails.keyTopics.join(', ') : ''}
+Target Audience: ${book.marketResearch?.targetAudience?.demographics || ''}
+
+TASK: Search the internet for the following types of current supporting data:
+1. Recent statistics, studies, or research related to this chapter's topics
+2. Current examples, case studies, or real-world applications
+3. Expert quotes or insights from credible sources
+4. Latest trends or developments in this field
+5. Factual data that supports the key points: ${chapterDetails?.keyPoints ? chapterDetails.keyPoints.join(', ') : ''}
+
+REQUIREMENTS:
+- Focus on information published within the last 2-3 years when possible
+- Prioritize credible sources (academic papers, government data, established publications)
+- Include exact publication dates and source URLs
+- Gather 8-12 distinct pieces of supporting information
+- Include specific numbers, percentages, or measurable data when available
+
+FORMAT your response as a structured research report with:
+- Source citations with full URLs
+- Publication dates
+- Key statistics or facts
+- Relevant quotes from experts
+- How each piece of data relates to the chapter content
+
+Begin your research now.`;
+
+    const searchMessages = [
+      { role: 'system', content: 'You are a thorough research assistant with web search capabilities. Provide comprehensive, current information with proper citations.' },
+      { role: 'user', content: searchPrompt }
+    ];
+
+    console.log('Step 1: Gathering supporting research data...');
+    const searchResponse = await executeOpenRouterRequest({
+      model: 'openai/gpt-4o-search-preview',
+      prompt: searchMessages.map(m => `${m.role}: ${m.content}`).join('\n'),
+      messages: searchMessages as any,
+      temperature: 0.3,
+      max_tokens: 4000
+    });
+
+    const researchData = searchResponse.choices[0].message.content || '';
+    console.log('Research data gathered:', researchData.substring(0, 500) + '...');
+
+    // STEP 2: Write the chapter using the research data with Claude
+    const enhancedUserPrompt = `${userPrompt}
+
+SUPPORTING RESEARCH DATA:
+${researchData}
+
+INTEGRATION INSTRUCTIONS:
+- Seamlessly integrate the research data into your chapter content
+- Include specific statistics, examples, and expert insights from the research
+- Add proper citations throughout the text in this format: (Source Name, Year)
+- Compile all sources into a "References" section at the end of the chapter
+- Ensure all claims are backed by the provided research data
+- Use the research to strengthen your key points and examples
+
+Write high-quality content that follows all the guidelines above while incorporating the research data naturally.`;
 
     const messages = [
       { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt }
+      { role: 'user', content: enhancedUserPrompt }
     ];
 
-    const model = 'qwen/qwen-plus';
+    const model = 'anthropic/claude-sonnet-4';
     
     // Adjust temperature based on tone
     let temperature = 0.7;
@@ -592,7 +703,7 @@ Write this chapter following these guidelines:
     
     // Adjust max_tokens based on estimated words (roughly 1.3 tokens per word)
     // Use a safe approach for accessing chapter's estimated words
-    let estimatedWords = 3000; // Default
+    let estimatedWords = 4000; // Default
     if (chapterDetails?.estimatedWords) {
       estimatedWords = chapterDetails.estimatedWords;
     }

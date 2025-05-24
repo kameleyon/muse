@@ -322,7 +322,7 @@ You must respond with ONLY valid JSON in this exact format:
     }
     // ... AI to add more parts, each with 4-7 chapters and sequential part numbers ...
   ],
-  "totalWords": 150000, // AI calculates this sum from all chapter estimatedWords + prologue + intro + conclusion, aiming for 125k-184k.
+  "totalWords": 184000, // AI calculates this sum from all chapter estimatedWords + prologue + intro + conclusion, aiming for 125k-184k.
   "colorScheme": {
     "primary": "${marketResearch.recommendations.colors.primary}",
     "secondary": "${marketResearch.recommendations.colors.secondary}",
@@ -527,7 +527,7 @@ Write this chapter following these guidelines:
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
         ];
-        const model = 'qwen/qwen-plus';
+        const model = 'anthropic/claude-sonnet-4';
         // Adjust temperature based on tone
         let temperature = 0.7;
         if (book.structure?.tone?.toLowerCase().includes('creative') ||

@@ -4978,3 +4978,1358 @@
 2025-05-23 21:18:47 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
 2025-05-23 21:18:47 [info]: Making OpenRouter request to model: qwen/qwen-plus
 2025-05-23 21:20:29 [info]: OpenRouter request successful. Tokens used: 3421
+2025-05-24 11:02:39 [info]: Checking Supabase connection...
+2025-05-24 11:02:39 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 11:02:40 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 11:02:40 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 11:02:40 [info]: Running database migrations...
+2025-05-24 11:02:40 [info]: Projects table exists, proceed with other migrations
+2025-05-24 11:02:40 [info]: Found 12 migration files to run
+2025-05-24 11:02:40 [info]: Migrations table does not exist, creating it...
+2025-05-24 11:02:40 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:02:40 [info]: Will attempt to continue with migrations
+2025-05-24 11:02:40 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 11:02:40 [info]: Will process all migration files
+2025-05-24 11:02:40 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:02:40 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:02:40 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:02:40 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:02:40 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:02:40 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:02:40 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:02:40 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:02:40 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:02:40 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:02:41 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:02:41 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:02:41 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:02:41 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:02:41 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:02:41 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:02:41 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:02:41 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:02:41 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:02:41 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:02:41 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:02:41 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 11:02:41 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:02:41 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 11:02:41 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 11:02:41 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:02:41 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 11:02:41 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:02:41 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:02:41 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:02:41 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:02:41 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:02:41 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:02:41 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:02:41 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:02:41 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:02:41 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 11:02:41 [info]: Server running in development mode on port 9998
+2025-05-24 11:08:15 [info]: Checking Supabase connection...
+2025-05-24 11:08:15 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 11:08:15 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 11:08:15 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 11:08:15 [info]: Running database migrations...
+2025-05-24 11:08:15 [info]: Projects table exists, proceed with other migrations
+2025-05-24 11:08:15 [info]: Found 12 migration files to run
+2025-05-24 11:08:15 [info]: Migrations table does not exist, creating it...
+2025-05-24 11:08:15 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:15 [info]: Will attempt to continue with migrations
+2025-05-24 11:08:15 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 11:08:15 [info]: Will process all migration files
+2025-05-24 11:08:15 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:08:16 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:16 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:08:16 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:08:16 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:16 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:08:16 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:08:16 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:16 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:08:16 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:08:16 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:16 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:08:16 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:08:16 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:16 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:08:16 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:08:16 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:16 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:08:16 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:08:16 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:16 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:08:16 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 11:08:16 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:16 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 11:08:16 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 11:08:16 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:16 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 11:08:16 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:08:16 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:16 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:08:16 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:08:16 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:16 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:08:16 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:08:17 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:17 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:08:17 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 11:08:17 [info]: Server running in development mode on port 9998
+2025-05-24 11:08:57 [info]: Checking Supabase connection...
+2025-05-24 11:08:57 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 11:08:57 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 11:08:57 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 11:08:57 [info]: Running database migrations...
+2025-05-24 11:08:57 [info]: Projects table exists, proceed with other migrations
+2025-05-24 11:08:57 [info]: Found 12 migration files to run
+2025-05-24 11:08:57 [info]: Migrations table does not exist, creating it...
+2025-05-24 11:08:57 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:57 [info]: Will attempt to continue with migrations
+2025-05-24 11:08:57 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 11:08:57 [info]: Will process all migration files
+2025-05-24 11:08:57 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:08:58 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:58 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:08:58 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:08:58 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:58 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:08:58 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:08:58 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:58 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:08:58 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:08:58 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:58 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:08:58 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:08:58 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:58 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:08:58 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:08:58 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:58 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:08:58 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:08:58 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:58 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:08:58 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 11:08:58 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:58 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 11:08:58 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 11:08:58 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:58 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 11:08:58 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:08:58 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:58 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:08:58 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:08:59 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:59 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:08:59 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:08:59 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:08:59 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:08:59 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 11:08:59 [info]: Server running in development mode on port 9998
+2025-05-24 11:17:08 [info]: Checking Supabase connection...
+2025-05-24 11:17:08 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 11:17:16 [info]: Checking Supabase connection...
+2025-05-24 11:17:16 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 11:17:16 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 11:17:16 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 11:17:16 [info]: Running database migrations...
+2025-05-24 11:17:16 [info]: Projects table exists, proceed with other migrations
+2025-05-24 11:17:16 [info]: Found 12 migration files to run
+2025-05-24 11:17:16 [info]: Migrations table does not exist, creating it...
+2025-05-24 11:17:16 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:17:16 [info]: Will attempt to continue with migrations
+2025-05-24 11:17:16 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 11:17:16 [info]: Will process all migration files
+2025-05-24 11:17:16 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:17:16 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:17:16 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:17:16 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:17:16 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:17:16 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:17:16 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:17:16 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:17:16 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:17:16 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:17:17 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:17:17 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:17:17 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:17:17 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:17:17 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:17:17 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:17:17 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:17:17 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:17:17 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:17:17 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:17:17 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:17:17 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 11:17:17 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:17:17 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 11:17:17 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 11:17:17 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:17:17 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 11:17:17 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:17:17 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:17:17 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:17:17 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:17:17 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:17:17 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:17:17 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:17:17 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:17:17 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:17:17 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 11:17:17 [info]: Server running in development mode on port 9998
+2025-05-24 11:29:59 [info]: Checking Supabase connection...
+2025-05-24 11:29:59 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 11:30:00 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 11:30:00 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 11:30:00 [info]: Running database migrations...
+2025-05-24 11:30:00 [info]: Projects table exists, proceed with other migrations
+2025-05-24 11:30:00 [info]: Found 12 migration files to run
+2025-05-24 11:30:00 [info]: Migrations table does not exist, creating it...
+2025-05-24 11:30:00 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:30:00 [info]: Will attempt to continue with migrations
+2025-05-24 11:30:00 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 11:30:00 [info]: Will process all migration files
+2025-05-24 11:30:00 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:30:00 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:30:00 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:30:00 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:30:00 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:30:00 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:30:00 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:30:00 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:30:00 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:30:00 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:30:01 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:30:01 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:30:01 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:30:01 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:30:01 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:30:01 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:30:01 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:30:01 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:30:01 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:30:01 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:30:01 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:30:01 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 11:30:01 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:30:01 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 11:30:01 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 11:30:01 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:30:01 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 11:30:01 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:30:01 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:30:01 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:30:01 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:30:01 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:30:01 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:30:01 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:30:01 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:30:01 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:30:01 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 11:30:01 [info]: Server running in development mode on port 9998
+2025-05-24 11:33:46 [info]: Checking Supabase connection...
+2025-05-24 11:33:46 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 11:33:46 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 11:33:46 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 11:33:46 [info]: Running database migrations...
+2025-05-24 11:33:46 [info]: Projects table exists, proceed with other migrations
+2025-05-24 11:33:46 [info]: Found 12 migration files to run
+2025-05-24 11:33:46 [info]: Migrations table does not exist, creating it...
+2025-05-24 11:33:46 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:46 [info]: Will attempt to continue with migrations
+2025-05-24 11:33:46 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 11:33:46 [info]: Will process all migration files
+2025-05-24 11:33:46 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:33:46 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:46 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:33:46 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:33:47 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:47 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:33:47 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:33:47 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:47 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:33:47 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:33:47 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:47 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:33:47 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:33:47 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:47 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:33:47 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:33:47 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:47 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:33:47 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:33:53 [info]: Checking Supabase connection...
+2025-05-24 11:33:53 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 11:33:53 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 11:33:53 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 11:33:53 [info]: Running database migrations...
+2025-05-24 11:33:53 [info]: Projects table exists, proceed with other migrations
+2025-05-24 11:33:53 [info]: Found 12 migration files to run
+2025-05-24 11:33:53 [info]: Migrations table does not exist, creating it...
+2025-05-24 11:33:53 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:53 [info]: Will attempt to continue with migrations
+2025-05-24 11:33:53 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 11:33:53 [info]: Will process all migration files
+2025-05-24 11:33:53 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:33:54 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:54 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:33:54 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:33:54 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:54 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:33:54 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:33:54 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:54 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:33:54 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:33:54 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:54 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:33:54 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:33:54 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:54 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:33:54 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:33:54 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:54 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:33:54 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:33:54 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:54 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:33:54 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 11:33:54 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:54 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 11:33:54 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 11:33:54 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:54 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 11:33:54 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:33:54 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:54 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:33:54 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:33:55 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:55 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:33:55 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:33:55 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:33:55 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:33:55 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 11:33:55 [info]: Server running in development mode on port 9998
+2025-05-24 11:37:42 [info]: Checking Supabase connection...
+2025-05-24 11:37:42 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 11:37:43 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 11:37:43 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 11:37:43 [info]: Running database migrations...
+2025-05-24 11:37:43 [info]: Projects table exists, proceed with other migrations
+2025-05-24 11:37:43 [info]: Found 12 migration files to run
+2025-05-24 11:37:43 [info]: Migrations table does not exist, creating it...
+2025-05-24 11:37:43 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:43 [info]: Will attempt to continue with migrations
+2025-05-24 11:37:43 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 11:37:43 [info]: Will process all migration files
+2025-05-24 11:37:43 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:37:43 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:43 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:37:43 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:37:43 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:43 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:37:43 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:37:43 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:43 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:37:43 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:37:44 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:44 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:37:44 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:37:44 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:44 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:37:44 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:37:44 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:44 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:37:44 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:37:44 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:50 [info]: Checking Supabase connection...
+2025-05-24 11:37:50 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 11:37:50 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 11:37:50 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 11:37:50 [info]: Running database migrations...
+2025-05-24 11:37:51 [info]: Projects table exists, proceed with other migrations
+2025-05-24 11:37:51 [info]: Found 12 migration files to run
+2025-05-24 11:37:51 [info]: Migrations table does not exist, creating it...
+2025-05-24 11:37:51 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:51 [info]: Will attempt to continue with migrations
+2025-05-24 11:37:51 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 11:37:51 [info]: Will process all migration files
+2025-05-24 11:37:51 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:37:51 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:51 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:37:51 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:37:51 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:51 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:37:51 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:37:51 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:51 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:37:51 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:37:51 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:51 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:37:51 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:37:51 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:51 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:37:51 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:37:51 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:51 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:37:51 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:37:51 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:51 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:37:51 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 11:37:51 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:51 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 11:37:51 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 11:37:52 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:52 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 11:37:52 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:37:52 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:52 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:37:52 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:37:52 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:52 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:37:52 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:37:52 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:37:52 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:37:52 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 11:37:52 [info]: Server running in development mode on port 9998
+2025-05-24 11:38:00 [info]: Checking Supabase connection...
+2025-05-24 11:38:00 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 11:38:01 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 11:38:01 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 11:38:01 [info]: Running database migrations...
+2025-05-24 11:38:01 [info]: Projects table exists, proceed with other migrations
+2025-05-24 11:38:01 [info]: Found 12 migration files to run
+2025-05-24 11:38:01 [info]: Migrations table does not exist, creating it...
+2025-05-24 11:38:01 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:38:01 [info]: Will attempt to continue with migrations
+2025-05-24 11:38:01 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 11:38:01 [info]: Will process all migration files
+2025-05-24 11:38:01 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:38:01 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:38:01 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:38:01 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:38:01 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:38:01 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:38:01 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:38:01 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:38:01 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:38:01 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:38:01 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:38:01 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:38:01 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:38:01 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:38:01 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:38:01 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:38:01 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:38:01 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:38:01 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:38:02 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:38:02 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:38:02 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 11:38:02 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:38:02 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 11:38:02 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 11:38:02 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:38:02 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 11:38:02 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:38:02 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:38:02 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:38:02 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:38:02 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:38:02 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:38:02 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:38:02 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:38:02 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:38:02 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 11:38:02 [info]: Server running in development mode on port 9998
+2025-05-24 11:39:36 [info]: Checking Supabase connection...
+2025-05-24 11:39:36 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 11:39:36 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 11:39:36 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 11:39:36 [info]: Running database migrations...
+2025-05-24 11:39:36 [info]: Projects table exists, proceed with other migrations
+2025-05-24 11:39:36 [info]: Found 12 migration files to run
+2025-05-24 11:39:36 [info]: Migrations table does not exist, creating it...
+2025-05-24 11:39:36 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:39:36 [info]: Will attempt to continue with migrations
+2025-05-24 11:39:36 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 11:39:36 [info]: Will process all migration files
+2025-05-24 11:39:36 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:39:36 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:39:36 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:39:36 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:39:37 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:39:37 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:39:37 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:39:37 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:39:37 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:39:37 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:39:37 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:39:37 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:39:37 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:39:37 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:39:37 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:39:37 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:39:37 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:39:37 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:39:37 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:39:37 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:39:37 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:39:37 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 11:39:37 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:39:37 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 11:39:37 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 11:39:37 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:39:37 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 11:39:37 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:39:37 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:39:37 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:39:37 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:39:37 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:39:37 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:39:37 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:39:37 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:39:37 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:39:37 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 11:39:37 [info]: Server running in development mode on port 9998
+2025-05-24 11:41:24 [info]: Checking Supabase connection...
+2025-05-24 11:41:24 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 11:41:24 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 11:41:24 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 11:41:24 [info]: Running database migrations...
+2025-05-24 11:41:24 [info]: Projects table exists, proceed with other migrations
+2025-05-24 11:41:24 [info]: Found 12 migration files to run
+2025-05-24 11:41:24 [info]: Migrations table does not exist, creating it...
+2025-05-24 11:41:24 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:41:24 [info]: Will attempt to continue with migrations
+2025-05-24 11:41:24 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 11:41:24 [info]: Will process all migration files
+2025-05-24 11:41:24 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:41:25 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:41:25 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:41:25 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:41:25 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:41:25 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:41:25 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:41:25 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:41:25 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:41:25 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:41:25 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:41:25 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:41:25 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:41:25 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:41:25 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:41:25 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:41:25 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:41:25 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:41:25 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:41:25 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:41:25 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:41:25 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 11:41:25 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:41:25 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 11:41:25 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 11:41:25 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:41:25 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 11:41:25 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:41:25 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:41:25 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:41:25 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:41:25 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:41:25 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:41:25 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:41:25 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:41:25 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:41:25 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 11:41:25 [info]: Server running in development mode on port 9998
+2025-05-24 11:44:04 [info]: Checking Supabase connection...
+2025-05-24 11:44:04 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 11:44:04 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 11:44:04 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 11:44:04 [info]: Running database migrations...
+2025-05-24 11:44:04 [info]: Projects table exists, proceed with other migrations
+2025-05-24 11:44:04 [info]: Found 12 migration files to run
+2025-05-24 11:44:04 [info]: Migrations table does not exist, creating it...
+2025-05-24 11:44:04 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:44:04 [info]: Will attempt to continue with migrations
+2025-05-24 11:44:04 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 11:44:04 [info]: Will process all migration files
+2025-05-24 11:44:04 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:44:04 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:44:04 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:44:04 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:44:04 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:44:04 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:44:04 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:44:04 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:44:04 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:44:04 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:44:04 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:44:04 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:44:04 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:44:05 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:44:05 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:44:05 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:44:05 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:44:05 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:44:05 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:44:05 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:44:05 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:44:05 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 11:44:05 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:44:05 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 11:44:05 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 11:44:05 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:44:05 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 11:44:05 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:44:05 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:44:05 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:44:05 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:44:05 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:44:05 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:44:05 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:44:05 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:44:05 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:44:05 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 11:44:05 [info]: Server running in development mode on port 9998
+2025-05-24 11:45:16 [info]: Checking Supabase connection...
+2025-05-24 11:45:16 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 11:45:16 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 11:45:16 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 11:45:16 [info]: Running database migrations...
+2025-05-24 11:45:16 [info]: Projects table exists, proceed with other migrations
+2025-05-24 11:45:16 [info]: Found 12 migration files to run
+2025-05-24 11:45:16 [info]: Migrations table does not exist, creating it...
+2025-05-24 11:45:16 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:45:16 [info]: Will attempt to continue with migrations
+2025-05-24 11:45:16 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 11:45:16 [info]: Will process all migration files
+2025-05-24 11:45:16 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:45:17 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:45:17 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 11:45:17 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:45:17 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:45:17 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 11:45:17 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:45:17 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:45:17 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 11:45:17 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:45:17 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:45:17 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 11:45:17 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:45:17 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:45:17 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 11:45:17 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:45:17 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:45:17 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 11:45:17 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:45:17 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:45:17 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 11:45:17 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 11:45:17 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:45:17 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 11:45:17 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 11:45:17 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:45:17 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 11:45:17 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:45:18 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:45:18 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 11:45:18 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:45:18 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:45:18 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 11:45:18 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:45:18 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 11:45:18 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 11:45:18 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 11:45:18 [info]: Server running in development mode on port 9998
+2025-05-24 12:24:26 [info]: Checking Supabase connection...
+2025-05-24 12:24:26 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 12:24:26 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 12:24:26 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 12:24:26 [info]: Running database migrations...
+2025-05-24 12:24:26 [info]: Projects table exists, proceed with other migrations
+2025-05-24 12:24:26 [info]: Found 12 migration files to run
+2025-05-24 12:24:26 [info]: Migrations table does not exist, creating it...
+2025-05-24 12:24:26 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:26 [info]: Will attempt to continue with migrations
+2025-05-24 12:24:26 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 12:24:26 [info]: Will process all migration files
+2025-05-24 12:24:26 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:24:26 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:26 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:24:26 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:24:27 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:27 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:24:27 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:24:27 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:27 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:24:27 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:24:27 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:27 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:24:27 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:24:27 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:27 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:24:27 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:24:27 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:27 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:24:27 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:24:27 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:27 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:24:27 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 12:24:27 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:27 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 12:24:27 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 12:24:27 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:27 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 12:24:27 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:24:27 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:27 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:24:27 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:24:27 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:27 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:24:27 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:24:34 [info]: Checking Supabase connection...
+2025-05-24 12:24:34 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 12:24:35 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 12:24:35 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 12:24:35 [info]: Running database migrations...
+2025-05-24 12:24:35 [info]: Projects table exists, proceed with other migrations
+2025-05-24 12:24:35 [info]: Found 12 migration files to run
+2025-05-24 12:24:35 [info]: Migrations table does not exist, creating it...
+2025-05-24 12:24:35 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:35 [info]: Will attempt to continue with migrations
+2025-05-24 12:24:35 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 12:24:35 [info]: Will process all migration files
+2025-05-24 12:24:35 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:24:35 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:35 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:24:35 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:24:35 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:35 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:24:35 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:24:35 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:35 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:24:35 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:24:35 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:35 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:24:35 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:24:35 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:35 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:24:35 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:24:36 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:36 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:24:36 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:24:36 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:36 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:24:36 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 12:24:36 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:36 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 12:24:36 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 12:24:36 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:36 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 12:24:36 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:24:36 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:36 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:24:36 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:24:36 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:36 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:24:36 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:24:36 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:24:36 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:24:36 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 12:24:36 [info]: Server running in development mode on port 9998
+2025-05-24 12:34:27 [info]: Checking Supabase connection...
+2025-05-24 12:34:27 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 12:34:28 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 12:34:28 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 12:34:28 [info]: Running database migrations...
+2025-05-24 12:34:28 [info]: Projects table exists, proceed with other migrations
+2025-05-24 12:34:28 [info]: Found 12 migration files to run
+2025-05-24 12:34:28 [info]: Migrations table does not exist, creating it...
+2025-05-24 12:34:28 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:28 [info]: Will attempt to continue with migrations
+2025-05-24 12:34:28 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 12:34:28 [info]: Will process all migration files
+2025-05-24 12:34:28 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:34:28 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:28 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:34:28 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:34:28 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:28 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:34:28 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:34:28 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:28 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:34:28 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:34:29 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:29 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:34:29 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:34:29 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:29 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:34:29 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:34:29 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:29 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:34:29 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:34:29 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:29 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:34:29 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 12:34:29 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:29 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 12:34:29 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 12:34:29 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:29 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 12:34:29 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:34:29 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:29 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:34:29 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:34:29 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:29 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:34:29 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:34:29 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:29 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:34:29 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 12:34:29 [info]: Server running in development mode on port 9998
+2025-05-24 12:34:40 [info]: Checking Supabase connection...
+2025-05-24 12:34:40 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 12:34:40 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 12:34:40 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 12:34:40 [info]: Running database migrations...
+2025-05-24 12:34:40 [info]: Projects table exists, proceed with other migrations
+2025-05-24 12:34:40 [info]: Found 12 migration files to run
+2025-05-24 12:34:40 [info]: Migrations table does not exist, creating it...
+2025-05-24 12:34:40 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:40 [info]: Will attempt to continue with migrations
+2025-05-24 12:34:40 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 12:34:40 [info]: Will process all migration files
+2025-05-24 12:34:40 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:34:40 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:40 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:34:40 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:34:41 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:41 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:34:41 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:34:41 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:41 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:34:41 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:34:41 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:41 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:34:41 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:34:41 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:41 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:34:41 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:34:41 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:41 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:34:41 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:34:41 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:41 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:34:41 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 12:34:41 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:41 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 12:34:41 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 12:34:41 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:41 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 12:34:41 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:34:41 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:41 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:34:41 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:34:41 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:41 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:34:41 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:34:41 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:34:41 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:34:41 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 12:34:42 [info]: Server running in development mode on port 9998
+2025-05-24 12:35:08 [info]: Checking Supabase connection...
+2025-05-24 12:35:08 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 12:35:08 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 12:35:08 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 12:35:08 [info]: Running database migrations...
+2025-05-24 12:35:08 [info]: Projects table exists, proceed with other migrations
+2025-05-24 12:35:08 [info]: Found 12 migration files to run
+2025-05-24 12:35:08 [info]: Migrations table does not exist, creating it...
+2025-05-24 12:35:08 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:08 [info]: Will attempt to continue with migrations
+2025-05-24 12:35:08 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 12:35:08 [info]: Will process all migration files
+2025-05-24 12:35:08 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:35:08 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:08 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:35:08 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:35:08 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:08 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:35:08 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:35:08 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:08 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:35:08 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:35:08 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:08 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:35:08 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:35:08 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:08 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:35:08 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:35:08 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:08 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:35:08 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:35:09 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:09 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:35:09 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 12:35:09 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:09 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 12:35:09 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 12:35:09 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:09 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 12:35:09 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:35:09 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:09 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:35:09 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:35:09 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:09 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:35:09 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:35:09 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:09 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:35:09 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 12:35:09 [info]: Server running in development mode on port 9998
+2025-05-24 12:35:17 [info]: Checking Supabase connection...
+2025-05-24 12:35:17 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 12:35:18 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 12:35:18 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 12:35:18 [info]: Running database migrations...
+2025-05-24 12:35:18 [info]: Projects table exists, proceed with other migrations
+2025-05-24 12:35:18 [info]: Found 12 migration files to run
+2025-05-24 12:35:18 [info]: Migrations table does not exist, creating it...
+2025-05-24 12:35:18 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:18 [info]: Will attempt to continue with migrations
+2025-05-24 12:35:18 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 12:35:18 [info]: Will process all migration files
+2025-05-24 12:35:18 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:35:18 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:18 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:35:18 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:35:18 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:18 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:35:18 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:35:18 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:18 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:35:18 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:35:18 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:18 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:35:18 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:35:19 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:19 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:35:19 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:35:19 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:19 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:35:19 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:35:19 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:19 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:35:19 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 12:35:31 [info]: Checking Supabase connection...
+2025-05-24 12:35:31 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 12:35:32 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 12:35:32 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 12:35:32 [info]: Running database migrations...
+2025-05-24 12:35:32 [info]: Projects table exists, proceed with other migrations
+2025-05-24 12:35:32 [info]: Found 12 migration files to run
+2025-05-24 12:35:32 [info]: Migrations table does not exist, creating it...
+2025-05-24 12:35:32 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:32 [info]: Will attempt to continue with migrations
+2025-05-24 12:35:32 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 12:35:32 [info]: Will process all migration files
+2025-05-24 12:35:32 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:35:32 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:32 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:35:32 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:35:32 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:32 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:35:32 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:35:33 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:33 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:35:33 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:35:33 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:33 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:35:33 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:35:33 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:33 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:35:33 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:35:33 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:33 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:35:33 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:35:33 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:33 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:35:33 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 12:35:33 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:33 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 12:35:33 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 12:35:33 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:33 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 12:35:33 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:35:33 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:33 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:35:33 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:35:33 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:33 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:35:33 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:35:33 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:35:33 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:35:33 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 12:35:33 [info]: Server running in development mode on port 9998
+2025-05-24 12:51:22 [info]: Checking Supabase connection...
+2025-05-24 12:51:22 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 12:51:22 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 12:51:22 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 12:51:22 [info]: Running database migrations...
+2025-05-24 12:51:22 [info]: Projects table exists, proceed with other migrations
+2025-05-24 12:51:22 [info]: Found 12 migration files to run
+2025-05-24 12:51:22 [info]: Migrations table does not exist, creating it...
+2025-05-24 12:51:22 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:51:22 [info]: Will attempt to continue with migrations
+2025-05-24 12:51:22 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 12:51:22 [info]: Will process all migration files
+2025-05-24 12:51:22 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:51:22 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:51:22 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:51:22 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:51:22 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:51:22 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:51:22 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:51:22 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:51:22 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:51:22 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:51:23 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:51:23 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:51:23 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:51:23 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:51:23 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:51:23 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:51:23 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:51:23 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:51:23 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:51:23 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:51:23 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:51:23 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 12:51:23 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:51:23 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 12:51:23 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 12:51:23 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:51:23 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 12:51:23 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:51:23 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:51:23 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:51:23 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:51:23 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:51:23 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:51:23 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:51:23 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:51:23 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:51:23 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 12:51:23 [info]: Server running in development mode on port 9998
+2025-05-24 12:54:05 [info]: Checking Supabase connection...
+2025-05-24 12:54:05 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 12:54:06 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 12:54:06 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 12:54:06 [info]: Running database migrations...
+2025-05-24 12:54:06 [info]: Projects table exists, proceed with other migrations
+2025-05-24 12:54:06 [info]: Found 12 migration files to run
+2025-05-24 12:54:06 [info]: Migrations table does not exist, creating it...
+2025-05-24 12:54:06 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:06 [info]: Will attempt to continue with migrations
+2025-05-24 12:54:06 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 12:54:06 [info]: Will process all migration files
+2025-05-24 12:54:06 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:54:06 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:06 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:54:06 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:54:06 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:06 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:54:06 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:54:06 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:06 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:54:06 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:54:07 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:07 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:54:07 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:54:07 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:07 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:54:07 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:54:07 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:07 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:54:07 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:54:07 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:07 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:54:07 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 12:54:07 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:07 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 12:54:07 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 12:54:07 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:07 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 12:54:07 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:54:07 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:07 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:54:07 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:54:07 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:07 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:54:07 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:54:08 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:08 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:54:08 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 12:54:08 [info]: Server running in development mode on port 9998
+2025-05-24 12:54:13 [info]: Checking Supabase connection...
+2025-05-24 12:54:13 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 12:54:13 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 12:54:13 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 12:54:13 [info]: Running database migrations...
+2025-05-24 12:54:14 [info]: Projects table exists, proceed with other migrations
+2025-05-24 12:54:14 [info]: Found 12 migration files to run
+2025-05-24 12:54:14 [info]: Migrations table does not exist, creating it...
+2025-05-24 12:54:14 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:14 [info]: Will attempt to continue with migrations
+2025-05-24 12:54:14 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 12:54:14 [info]: Will process all migration files
+2025-05-24 12:54:14 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:54:14 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:14 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:54:14 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:54:14 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:14 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:54:14 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:54:14 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:14 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:54:14 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:54:14 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:14 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:54:14 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:54:14 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:14 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:54:14 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:54:14 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:14 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:54:14 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:54:14 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:14 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:54:14 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 12:54:15 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:15 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 12:54:15 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 12:54:15 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:15 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 12:54:15 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:54:15 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:15 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:54:15 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:54:15 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:15 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:54:15 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:54:15 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:15 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:54:15 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 12:54:15 [info]: Server running in development mode on port 9998
+2025-05-24 12:54:42 [info]: Checking Supabase connection...
+2025-05-24 12:54:42 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 12:54:43 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 12:54:43 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 12:54:43 [info]: Running database migrations...
+2025-05-24 12:54:43 [info]: Projects table exists, proceed with other migrations
+2025-05-24 12:54:43 [info]: Found 12 migration files to run
+2025-05-24 12:54:43 [info]: Migrations table does not exist, creating it...
+2025-05-24 12:54:43 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:43 [info]: Will attempt to continue with migrations
+2025-05-24 12:54:43 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 12:54:43 [info]: Will process all migration files
+2025-05-24 12:54:43 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:54:43 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:43 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:54:43 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:54:43 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:43 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:54:43 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:54:43 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:43 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:54:43 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:54:43 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:43 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:54:43 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:54:43 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:43 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:54:43 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:54:43 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:43 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:54:43 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:54:43 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:43 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:54:43 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 12:54:43 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:43 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 12:54:43 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 12:54:44 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:44 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 12:54:44 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:54:44 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:44 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:54:44 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:54:44 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:44 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:54:44 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:54:44 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:54:44 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:54:44 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 12:54:44 [info]: Server running in development mode on port 9998
+2025-05-24 12:55:32 [info]: Checking Supabase connection...
+2025-05-24 12:55:32 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 12:55:33 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 12:55:33 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 12:55:33 [info]: Running database migrations...
+2025-05-24 12:55:33 [info]: Projects table exists, proceed with other migrations
+2025-05-24 12:55:33 [info]: Found 12 migration files to run
+2025-05-24 12:55:33 [info]: Migrations table does not exist, creating it...
+2025-05-24 12:55:33 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:55:33 [info]: Will attempt to continue with migrations
+2025-05-24 12:55:33 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 12:55:33 [info]: Will process all migration files
+2025-05-24 12:55:33 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:55:33 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:55:33 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:55:33 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:55:33 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:55:33 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:55:33 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:55:33 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:55:33 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:55:33 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:55:33 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:55:33 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:55:33 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:55:33 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:55:33 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:55:33 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:55:33 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:55:33 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:55:33 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:55:33 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:55:33 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:55:33 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 12:55:33 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:55:33 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 12:55:33 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 12:55:34 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:55:34 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 12:55:34 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:55:34 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:55:34 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:55:34 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:55:34 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:55:34 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:55:34 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:55:34 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:55:34 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:55:34 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 12:55:34 [info]: Server running in development mode on port 9998
+2025-05-24 12:56:03 [info]: Checking Supabase connection...
+2025-05-24 12:56:03 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 12:56:03 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 12:56:03 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 12:56:03 [info]: Running database migrations...
+2025-05-24 12:56:03 [info]: Projects table exists, proceed with other migrations
+2025-05-24 12:56:03 [info]: Found 12 migration files to run
+2025-05-24 12:56:03 [info]: Migrations table does not exist, creating it...
+2025-05-24 12:56:03 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:03 [info]: Will attempt to continue with migrations
+2025-05-24 12:56:03 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 12:56:03 [info]: Will process all migration files
+2025-05-24 12:56:03 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:56:03 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:03 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:56:03 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:56:03 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:03 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:56:03 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:56:04 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:04 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:56:04 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:56:04 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:04 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:56:04 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:56:04 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:04 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:56:04 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:56:04 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:04 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:56:04 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:56:04 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:04 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:56:04 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 12:56:04 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:04 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 12:56:04 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 12:56:04 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:04 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 12:56:04 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:56:04 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:04 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:56:04 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:56:04 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:04 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:56:04 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:56:04 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:04 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:56:04 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 12:56:04 [info]: Server running in development mode on port 9998
+2025-05-24 12:56:44 [info]: Checking Supabase connection...
+2025-05-24 12:56:44 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 12:56:44 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 12:56:44 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 12:56:44 [info]: Running database migrations...
+2025-05-24 12:56:45 [info]: Projects table exists, proceed with other migrations
+2025-05-24 12:56:45 [info]: Found 12 migration files to run
+2025-05-24 12:56:45 [info]: Migrations table does not exist, creating it...
+2025-05-24 12:56:45 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:45 [info]: Will attempt to continue with migrations
+2025-05-24 12:56:58 [info]: Checking Supabase connection...
+2025-05-24 12:56:59 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-05-24 12:56:59 [info]: Supabase connection successful. Projects table exists.
+2025-05-24 12:56:59 [info]: Running migrations to ensure schema is up to date...
+2025-05-24 12:56:59 [info]: Running database migrations...
+2025-05-24 12:56:59 [info]: Projects table exists, proceed with other migrations
+2025-05-24 12:56:59 [info]: Found 12 migration files to run
+2025-05-24 12:56:59 [info]: Migrations table does not exist, creating it...
+2025-05-24 12:56:59 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:59 [info]: Will attempt to continue with migrations
+2025-05-24 12:56:59 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-05-24 12:56:59 [info]: Will process all migration files
+2025-05-24 12:56:59 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:56:59 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:59 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-05-24 12:56:59 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:56:59 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:59 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-05-24 12:56:59 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:56:59 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:59 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-05-24 12:56:59 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:56:59 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:59 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-05-24 12:56:59 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:56:59 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:59 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-05-24 12:56:59 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:56:59 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:59 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-05-24 12:56:59 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:56:59 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:59 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-05-24 12:56:59 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-05-24 12:56:59 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:56:59 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-05-24 12:56:59 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-05-24 12:57:00 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:57:00 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-05-24 12:57:00 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:57:00 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:57:00 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-05-24 12:57:00 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:57:00 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:57:00 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-05-24 12:57:00 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:57:00 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-05-24 12:57:00 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-05-24 12:57:00 [info]: Projects table is now accessible - migrations successful!
+2025-05-24 12:57:00 [info]: Server running in development mode on port 9998

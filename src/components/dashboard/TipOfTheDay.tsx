@@ -58,7 +58,7 @@ const TipOfTheDay: React.FC = () => {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            "model": "qwen/qwen-plus",
+            "model": "anthropic/claude-sonnet-4",
             "messages": [
               {
                 "role": "system",
