@@ -144,6 +144,16 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
         // Convert to markdown
         let markdown = htmlToMarkdown(processedContent);
         
+        // Format Key Points sections with special styling
+        markdown = markdown.replace(/^(#{1,4})\s*(Key Points.*?)$/gim, (match, hashes, title) => {
+          return `<div class="key-points">\n\n${hashes} ${title}`;
+        });
+        
+        // Close Key Points sections before next heading or at end
+        markdown = markdown.replace(/(<div class="key-points">[\s\S]*?)(?=(^#{1,4}\s|$))/gm, (match, content) => {
+          return content + '\n\n</div>\n';
+        });
+        
         // Format code blocks with Mermaid syntax for better PDF display
         markdown = markdown.replace(/```graph TB\s+([\s\S]*?)```/g, (match, code) => {
           return `\n<div class="diagram-block">\n<div class="diagram-title">Business Model Diagram</div>\n<pre class="diagram-content">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>\n</div>\n`;
@@ -363,32 +373,45 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
         
         #content-for-pdf table {
           width: 100%;
-          border-collapse: collapse;
+          border-collapse: separate;
+          border-spacing: 0;
           margin: 0;
           font-size: 14px;
+          border-radius: 12px;
+          overflow: hidden;
+          border: 1px solid rgba(120, 113, 108, 0.7);
         }
         
         #content-for-pdf th, #content-for-pdf td {
-          border: 1px solid #ddd;
+          border-right: 1px solid rgba(120, 113, 108, 0.7);
+          border-bottom: 1px solid rgba(120, 113, 108, 0.7);
           padding: 12px 15px;
           text-align: left;
           vertical-align: top;
+          color: rgba(120, 113, 108, 0.7);
+        }
+        
+        #content-for-pdf th:last-child, #content-for-pdf td:last-child {
+          border-right: none;
+        }
+        
+        #content-for-pdf tr:last-child td {
+          border-bottom: none;
         }
         
         #content-for-pdf th {
-          background-color: ${brandColors.primary + '10' || '#ae563010'};
-          border-bottom: 2px solid ${brandColors.primary + '30' || '#ae563030'};
+          background-color: rgba(120, 113, 108, 0.4);
           font-weight: bold;
-          color: ${brandColors.primary || '#ae5630'};
+          color: #fafaf9;
           font-size: 14px;
         }
         
         #content-for-pdf tr:nth-child(even) {
-          background-color: #f9f9f9;
+          background-color: rgba(120, 113, 108, 0.05);
         }
         
         #content-for-pdf tr:hover {
-          background-color: #f5f5f5;
+          background-color: rgba(120, 113, 108, 0.1);
         }
         
         #content-for-pdf blockquote {
@@ -399,6 +422,46 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
           margin-bottom: 1rem;
           font-style: italic;
           color: #555;
+        }
+        
+        /* Key Points Styling */
+        #content-for-pdf .key-points,
+        #content-for-pdf [class*="key-point"],
+        #content-for-pdf div:has(> h3:first-child:contains("Key Points")),
+        #content-for-pdf div:has(> h4:first-child:contains("Key Points")) {
+          background-color: rgba(120, 113, 108, 0.15);
+          border: 1px solid rgba(120, 113, 108, 0.7);
+          border-radius: 12px;
+          padding: 16px;
+          margin: 20px 0;
+          page-break-inside: avoid;
+        }
+        
+        #content-for-pdf .key-points h3,
+        #content-for-pdf .key-points h4,
+        #content-for-pdf [class*="key-point"] h3,
+        #content-for-pdf [class*="key-point"] h4 {
+          color: #78716c;
+          font-size: 13px;
+          margin-top: 0;
+          margin-bottom: 8px;
+          font-style: normal;
+        }
+        
+        #content-for-pdf .key-points p,
+        #content-for-pdf .key-points li,
+        #content-for-pdf [class*="key-point"] p,
+        #content-for-pdf [class*="key-point"] li {
+          color: rgba(120, 113, 108, 0.7);
+          font-size: 13px;
+          line-height: 1.5;
+          margin-bottom: 8px;
+        }
+        
+        #content-for-pdf .key-points ul,
+        #content-for-pdf [class*="key-point"] ul {
+          margin-top: 8px;
+          margin-bottom: 8px;
         }
         
         #content-for-pdf hr {
@@ -518,7 +581,15 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
       const pageCount = Math.ceil(scaledHeight / contentHeight);
       console.log(`Document will require ${pageCount} pages at scale ${scale.toFixed(2)}`);
       
-      // Helper function to find safe break points (avoid cutting text)
+      // Calculate approximate lines per page based on font metrics
+      const calculateLinesPerPage = (): number => {
+        const avgLineHeight = 22; // pixels (based on 1.5 line-height with 14px font)
+        const usablePageHeight = contentHeight / scale; // Convert from PDF points to pixels
+        const approxLinesPerPage = Math.floor(usablePageHeight / avgLineHeight);
+        return Math.max(20, approxLinesPerPage - 3); // Reserve 3 lines buffer
+      };
+
+      // Helper function to find safe break points using line-based calculation
       const findSafeBreakPoint = (startY: number, maxHeight: number): number => {
         // Make container visible temporarily for accurate measurements
         const originalPosition = container.style.position;
@@ -526,8 +597,16 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
         container.style.position = 'absolute';
         container.style.left = '0';
         
-        const elements = Array.from(container.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, blockquote, pre, div, ul, ol'));
-        let bestBreakPoint = maxHeight * 0.85; // Less conservative for better page usage
+        // Calculate target lines for this page
+        const targetLines = calculateLinesPerPage();
+        const avgLineHeight = 22;
+        const targetHeight = targetLines * avgLineHeight;
+        
+        // Use the smaller of calculated height or max height
+        const effectiveMaxHeight = Math.min(targetHeight, maxHeight * 0.9);
+        
+        const elements = Array.from(container.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, blockquote, pre, div, ul, ol, .key-points, table'));
+        let bestBreakPoint = effectiveMaxHeight;
         let foundGoodBreak = false;
         
         // Look for elements that would be good break points
@@ -542,24 +621,38 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
           // Skip elements completely before our range
           if (elementBottom <= 10) continue;
           
+          // Special handling for key-points divs and tables
+          if (element.classList.contains('key-points') || element.tagName === 'TABLE') {
+            // Never split key points sections or tables
+            if (elementTop >= 0 && elementTop < effectiveMaxHeight && elementBottom > effectiveMaxHeight) {
+              // Break before the key points section or table
+              goodBreakPoints.push(elementTop - 20);
+              foundGoodBreak = true;
+            }
+            // If it fits completely, it's a good break point after it
+            else if (elementBottom > 0 && elementBottom <= effectiveMaxHeight - 40) {
+              goodBreakPoints.push(elementBottom + 15);
+              foundGoodBreak = true;
+            }
+          }
           // For list items, ensure we don't cut in the middle of a bullet point
-          if (element.tagName === 'LI') {
+          else if (element.tagName === 'LI') {
             // Get the actual text content position (accounting for bullet)
             const computedStyle = window.getComputedStyle(element);
             const listStylePosition = computedStyle.listStylePosition;
             const paddingLeft = parseFloat(computedStyle.paddingLeft);
             
             // If element would be cut off, break before it
-            if (elementTop >= 0 && elementTop < maxHeight && elementBottom > maxHeight) {
+            if (elementTop >= 0 && elementTop < effectiveMaxHeight && elementBottom > effectiveMaxHeight) {
               // For list items, ensure we have enough space for at least 2 lines
               const minSpaceNeeded = parseFloat(computedStyle.lineHeight) * 2;
-              if (maxHeight - elementTop < minSpaceNeeded) {
+              if (effectiveMaxHeight - elementTop < minSpaceNeeded) {
                 goodBreakPoints.push(elementTop - 15); // Larger buffer for list items
                 foundGoodBreak = true;
               }
             }
             // If element ends cleanly within range, it's a good break point
-            else if (elementBottom > 0 && elementBottom <= maxHeight - 30) {
+            else if (elementBottom > 0 && elementBottom <= effectiveMaxHeight - 30) {
               goodBreakPoints.push(elementBottom + 10); // Larger buffer after list items
               foundGoodBreak = true;
             }
@@ -567,12 +660,12 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
           // For text content elements, avoid splitting them
           else if (['P', 'BLOCKQUOTE', 'PRE'].includes(element.tagName)) {
             // If element would be cut off, break before it
-            if (elementTop >= 0 && elementTop < maxHeight && elementBottom > maxHeight) {
+            if (elementTop >= 0 && elementTop < effectiveMaxHeight && elementBottom > effectiveMaxHeight) {
               goodBreakPoints.push(elementTop - 10); // Small buffer
               foundGoodBreak = true;
             }
             // If element ends cleanly within range, it's a good break point
-            else if (elementBottom > 0 && elementBottom <= maxHeight - 50) {
+            else if (elementBottom > 0 && elementBottom <= effectiveMaxHeight - 50) {
               goodBreakPoints.push(elementBottom + 5); // Small buffer after
               foundGoodBreak = true;
             }
@@ -581,7 +674,7 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
           // For headings, ensure they stay with following content
           if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(element.tagName)) {
             // Never break right after a heading
-            if (elementBottom > 0 && elementBottom < maxHeight - 100) {
+            if (elementBottom > 0 && elementBottom < effectiveMaxHeight - 60) {
               // Find next content element
               const nextElement = element.nextElementSibling;
               if (nextElement) {
@@ -590,7 +683,7 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
                 const nextBottom = nextTop + nextRect.height;
                 
                 // If heading + next element fit, don't break between them
-                if (nextBottom <= maxHeight) {
+                if (nextBottom <= effectiveMaxHeight) {
                   continue;
                 } else {
                   // Break before the heading instead
@@ -607,19 +700,19 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
         container.style.left = originalLeft;
         
         if (foundGoodBreak && goodBreakPoints.length > 0) {
-          // Find the best break point (closest to ideal height but not exceeding)
-          const idealHeight = maxHeight * 0.85;
+          // Find the best break point (closest to effective height but not exceeding)
+          const idealHeight = effectiveMaxHeight * 0.9;
           bestBreakPoint = goodBreakPoints.reduce((best, current) => {
-            if (current <= maxHeight && current >= maxHeight * 0.5) {
+            if (current <= effectiveMaxHeight && current >= effectiveMaxHeight * 0.6) {
               return Math.abs(current - idealHeight) < Math.abs(best - idealHeight) ? current : best;
             }
             return best;
           }, goodBreakPoints[0]);
         }
         
-        // Ensure minimum and maximum bounds
-        bestBreakPoint = Math.max(bestBreakPoint, maxHeight * 0.6); // Increased minimum for better content distribution
-        bestBreakPoint = Math.min(bestBreakPoint, maxHeight * 0.95); // Allow more content per page
+        // Ensure minimum and maximum bounds based on line calculation
+        bestBreakPoint = Math.max(bestBreakPoint, effectiveMaxHeight * 0.7);
+        bestBreakPoint = Math.min(bestBreakPoint, effectiveMaxHeight);
         
         return bestBreakPoint;
       };

@@ -2,6 +2,80 @@ import { Request, Response } from 'express';
 import { supabaseClient, supabaseAdmin } from '../services/supabase';
 import { executeOpenRouterRequest } from '../services/openrouter';
 
+// Helper function to extract references from chapter content
+function extractReferencesFromContent(content: string): string[] {
+  const references: string[] = [];
+  
+  // Extract citations in format (Source Name, Year)
+  const citationRegex = /\(([^,]+),\s*(\d{4})\)/g;
+  let match;
+  
+  while ((match = citationRegex.exec(content)) !== null) {
+    const sourceName = match[1].trim();
+    const year = match[2];
+    const reference = `${sourceName} (${year})`;
+    
+    if (!references.includes(reference)) {
+      references.push(reference);
+    }
+  }
+  
+  return references;
+}
+
+// Helper function to update book's centralized references
+async function updateBookReferences(bookId: string, newReferences: string[]): Promise<void> {
+  try {
+    // Get current book structure
+    const { data: book, error: bookError } = await supabaseAdmin
+      .from('books')
+      .select('structure')
+      .eq('id', bookId)
+      .single();
+    
+    if (bookError) {
+      console.error('Error fetching book for references update:', bookError);
+      return;
+    }
+    
+    const currentStructure = book.structure || {};
+    const currentReferences = currentStructure.references || '';
+    
+    // Parse existing references
+    const existingRefs = currentReferences.split('\n').filter((ref: string) => ref.trim().length > 0);
+    
+    // Add new references that don't already exist
+    const allReferences = [...existingRefs];
+    newReferences.forEach(ref => {
+      if (!allReferences.includes(ref)) {
+        allReferences.push(ref);
+      }
+    });
+    
+    // Sort references alphabetically
+    allReferences.sort();
+    
+    // Update book structure with new references
+    const updatedStructure = {
+      ...currentStructure,
+      references: allReferences.join('\n')
+    };
+    
+    const { error: updateError } = await supabaseAdmin
+      .from('books')
+      .update({ structure: updatedStructure })
+      .eq('id', bookId);
+    
+    if (updateError) {
+      console.error('Error updating book references:', updateError);
+    } else {
+      console.log(`Updated references for book ${bookId}: ${newReferences.length} new references added`);
+    }
+  } catch (error) {
+    console.error('Error in updateBookReferences:', error);
+  }
+}
+
 // Clean JSON response helper
 function cleanJsonResponse(response: string): any {
   console.log("Received response from AI model, attempting to extract JSON...");
@@ -302,9 +376,9 @@ CONTENT REQUIREMENTS:
 2. The total estimated word count for the entire book (including Prologue, Introduction, main chapters, and Conclusion) should be between 125,000 and 184,000 words.
 3. Each main chapter (within the 'parts' array) must have a creative and descriptive title, a detailed explanation/description of its content and purpose, an estimated word count, key topics to be covered, and 3-5 key points the reader should take away. Chapter numbering should be sequential for these main chapters, starting from 1.
 4. Generate content for 'prologue', 'introduction', and 'conclusion' as top-level string fields in the JSON. These are NOT chapters within the 'parts' array and should NOT be numbered as chapters.
-   - The 'prologue' string should contain a prologue (1,500-2,500 words) that immediately engages readers by: Opening with a vivid scene, surprising statement, or relatable problem; Establishing the book's core premise or conflict within the first 500 words; Including specific sensory details and concrete examples; Creating emotional connection through personal anecdote or universal experience; Ending with a clear promise of what the book will deliver; Matching the book's specified tone and target audience.
-   - The 'introduction' string should contain a comprehensive introduction (2,500-4,000 words) that: Opens with a clear, engaging heading that captures the book's essence; Includes 3-5 substantial sections that progressively build the book's foundation; Establishes the problem/opportunity this book addresses; Shares why this book exists now and why the author is uniquely qualified; Provides a roadmap of what readers will learn/gain from each section; Includes 2-3 specific examples or mini-case studies; Addresses common misconceptions or objections; Ends with clear instructions on how to use this book; Uses subheadings to break up text every 400-600 words; Matches the book's specified tone and speaks directly to target audience pain points.
-   - The 'conclusion' string should contain a powerful conclusion (2,500-4,000 words) that: Opens with an evocative heading that signals completion and new beginning; Synthesizes key insights without merely repeating chapter summaries; Includes 3-5 substantial sections that build toward a crescendo; Addresses the 'what now?' question with concrete next steps; Acknowledges the reader's journey and growth through the book; Paints a vivid picture of the reader's potential future state; Includes a memorable final message or call-to-action; Provides additional resources or community connections; Uses subheadings to structure the conclusion's narrative arc; Circles back to opening themes while showing transformation; Matches book's tone while adding inspirational elevation.
+   - The 'prologue' string should contain a prologue (1,500-2,500 words) that immediately engages readers by: Opening with a vivid scene, surprising statement, or relatable problem; Establishing the book's core premise or conflict within the first 500 words; Including specific sensory details and concrete examples; Creating emotional connection through personal anecdote or universal experience; Ending with a clear promise of what the book will deliver; Matching the book's specified tone and target audience. MUST end with a "### Key Points" section containing 3-5 bullet points summarizing the prologue.
+   - The 'introduction' string should contain a comprehensive introduction (2,500-4,000 words) that: Opens with a clear, engaging heading that captures the book's essence; Includes 3-5 substantial sections that progressively build the book's foundation; Establishes the problem/opportunity this book addresses; Shares why this book exists now and why the author is uniquely qualified; Provides a roadmap of what readers will learn/gain from each section; Includes 2-3 specific examples or mini-case studies; Addresses common misconceptions or objections; Ends with clear instructions on how to use this book; Uses subheadings to break up text every 400-600 words; Matches the book's specified tone and speaks directly to target audience pain points. MUST end with a "### Key Points" section containing 3-5 bullet points summarizing the introduction.
+   - The 'conclusion' string should contain a powerful conclusion (2,500-4,000 words) that: Opens with an evocative heading that signals completion and new beginning; Synthesizes key insights without merely repeating chapter summaries; Includes 3-5 substantial sections that build toward a crescendo; Addresses the 'what now?' question with concrete next steps; Acknowledges the reader's journey and growth through the book; Paints a vivid picture of the reader's potential future state; Includes a memorable final message or call-to-action; Provides additional resources or community connections; Uses subheadings to structure the conclusion's narrative arc; Circles back to opening themes while showing transformation; Matches book's tone while adding inspirational elevation. MUST end with a "### Key Points" section containing 3-5 bullet points summarizing the conclusion.
 5. The 'acknowledgement' field should contain a concise acknowledgement section (100-200 words) that: Thanks 2-3 key individuals or groups who made the book possible; Includes specific contributions rather than generic thanks; Mentions early readers, mentors, or community members who shaped the work; Acknowledges family/personal support briefly but genuinely; References any organizations, platforms, or communities integral to the book; Maintains professional warmth without excessive sentimentality; Ends with a forward-looking note about the book's intended impact; Matches the book's tone while being slightly more personal. The 'appendix' and 'references' fields should be brief top-level strings. 'coverPageDetails' is also a top-level object. These are not part of the main chapter flow or word count intensive sections like Prologue/Intro/Conclusion.
 6. Be creative with part titles and actual chapter titles based on the topic and market research.
 7. Ensure the JSON format is strictly followed as per the example.
@@ -682,7 +756,23 @@ INTEGRATION INSTRUCTIONS:
 - Ensure all claims are backed by the provided research data
 - Use the research to strengthen your key points and examples
 
-Write high-quality content that follows all the guidelines above while incorporating the research data naturally.`;
+Write high-quality content that follows all the guidelines above while incorporating the research data naturally.
+
+CHAPTER STRUCTURE REQUIREMENTS:
+- End each chapter with a "### Key Points" section containing 3-5 bullet points summarizing the chapter
+- Do NOT include a "References" section at the end of the chapter
+- Include citations in-text using format: (Source Name, Year)
+- All references will be compiled automatically into the book's main References chapter
+
+MANDATORY CHAPTER ENDING:
+Every chapter must end with:
+
+### Key Points
+- [Key takeaway 1 from this chapter]
+- [Key takeaway 2 from this chapter] 
+- [Key takeaway 3 from this chapter]
+- [Key takeaway 4 from this chapter]
+- [Key takeaway 5 from this chapter]`;
 
     const messages = [
       { role: 'system', content: systemPrompt },
@@ -758,7 +848,18 @@ Write high-quality content that follows all the guidelines above while incorpora
       .update({ updated_at: new Date().toISOString() })
       .eq('id', chapter.book_id);
 
-    res.json({ chapter: firstUpdatedChapter });
+    // Extract references from the generated content
+    const references = extractReferencesFromContent(content);
+    
+    // Update book's centralized references if any were found
+    if (references.length > 0) {
+      await updateBookReferences(chapter.book_id, references);
+    }
+
+    res.json({ 
+      chapter: firstUpdatedChapter,
+      referencesFound: references.length
+    });
   } catch (error: any) {
     console.error('Error generating chapter:', error);
     res.status(500).json({ error: error.message || 'Failed to generate chapter' });

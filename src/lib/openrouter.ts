@@ -280,9 +280,11 @@ Write this chapter following these guidelines:
 7. Format the content as proper markdown:
    - Use ## for the main chapter title
    - Use ### for subsections
+   - Use #### for important point in subsctions
    - Use **bold** for emphasis
    - Use - or * for bullet points
    - Use > for blockquotes
+   - Use *** Your key-point text goes here ***
    - Ensure proper paragraph spacing (empty line between paragraphs)
    - Use numbered lists where appropriate
    - Use backticks for inline code or technical terms

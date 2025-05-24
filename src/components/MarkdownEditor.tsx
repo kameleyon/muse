@@ -28,6 +28,11 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     // Headers
     html = html.replace(/^## (.+)$/gm, '<h2 class="text-2xl font-heading font-semibold text-secondary mt-6 mb-4">$1</h2>')
     html = html.replace(/^### (.+)$/gm, '<h3 class="text-xl font-heading font-semibold text-secondary mt-4 mb-3">$1</h3>')
+    html = html.replace(/^#### (.+)$/gm, '<h4 class="text-lg font-heading font-semibold text-secondary mt-4 mb-2">$1</h4>')
+
+    // Key Points 
+    html = html.replace(/\*\*\*([\s\S]+?)\*\*\*/gs,`<div class="rounded-xl border border-stone-400/70 bg-stone-300/15 p-4 my-4 font-medium text-stone-600 text-md">$1</div>`)
+    
     
     // Bold
     html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold">$1</strong>')
@@ -48,6 +53,44 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     
     // Code blocks
     html = html.replace(/`([^`]+)`/g, '<code class="bg-neutral-lightest px-1 py-0.5 rounded text-sm font-mono">$1</code>')
+    
+    // Tables - Enhanced styling with rounded corners and custom colors
+    html = html.replace(/\|(.+)\|\n\|[-\s|:]+\|\n((?:\|.+\|\n?)*)/g, (match, header, rows) => {
+      // Process header
+      const headerCells = header.split('|').map((cell: string) => cell.trim()).filter((cell: string) => cell.length > 0)
+      const headerHtml = headerCells.map((cell: string) => `<th class="px-3 py-3 text-left text-white test-md bg-stone/85 font-regular">${cell}</th>`).join('')
+      
+      // Process body rows
+      const bodyRows = rows.trim().split('\n').filter((row: string) => row.trim().length > 0)
+      const bodyHtml = bodyRows.map((row: string) => {
+        const cells = row.split('|').map((cell: string) => cell.trim()).filter((cell: string) => cell.length > 0)
+        const cellsHtml = cells.map((cell: string) => `<td class="px-3 py-3 text-stone/85 text-sm border-stone/70">${cell}</td>`).join('')
+        return `<tr class="border-b border-stone/70">${cellsHtml}</tr>`
+      }).join('')
+      
+      return `<div class="overflow-x-auto my-6">
+        <table class="w-full rounded-xl overflow-hidden border border-stone/70">
+          <thead>
+            <tr>${headerHtml}</tr>
+          </thead>
+          <tbody>
+            ${bodyHtml}
+          </tbody>
+        </table>
+      </div>`
+    })
+    
+    // Key Points sections - Enhanced styling
+    html = html.replace(/^(#{1,4})\s*(Key Points.*?)$/gim, (match, hashes, title) => {
+      return `<div class="bg-stone/15 rounded-xl border border-stone/70 p-4 my-6">
+        <h3 class="text-stone text-[10px] font-semibold mb-2 mt-0">${title}</h3>
+        <div class="key-points-content text-stone/85 text-[10px]">`
+    })
+    
+    // Close Key Points sections before next heading or at end
+    html = html.replace(/(<div class="bg-stone\/15.*?key-points-content.*?>[\s\S]*?)(?=(^#{1,4}\s|$))/gm, (match, content) => {
+      return content + '</div></div>\n'
+    })
     
     return html
   }

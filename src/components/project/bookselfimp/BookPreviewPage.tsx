@@ -131,166 +131,218 @@ const BookPreviewPage: React.FC = () => {
     if (!book) return '';
     
     let html = `
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <style>
-        @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Questrial&display=swap');
-        
-        :root {
-          --primary-color: #ae5630;
-          --primary-light: rgba(174, 86, 48, 0.20);
-        }
-        
-        body {
-          font-family: 'Questrial', Arial, sans-serif;
-          font-size: 11pt;
-          line-height: 1.89;
-          color: #333;
-          margin-top: 20px;
-          margin-left: 20px;
-          margin-right: 20px;
-          margin-bottom: 30px;
-          padding: 0;
-        }
-        
-        
-        .cover-page {
-          text-align: center;
-          margin-top: 200px;
-          page-break-after: always;
-        }
-        
-        .cover-title {
-          font-family: 'Comfortaa', sans-serif;
-          font-size: 24pt;
-          font-weight: bold;
-          margin-bottom: 20px;
-          color: var(--primary-color);
-        }
-        
-        .cover-subtitle {
-          font-family: 'Comfortaa', sans-serif;
-          font-size: 18pt;
-          margin-bottom: 20px;
-          color: #666;
-        }
-        
-        .cover-author {
-          font-family: 'Comfortaa', sans-serif;
-          font-size: 14pt;
-          color: var(--primary-color);
-        }
-        
-        h1 {
-          font-family: 'Comfortaa', sans-serif;
-          font-size: 16pt;
-          font-weight: bold;
-          margin-bottom: 15px;
-          line-height: 1.8;
-          color: var(--primary-color);
-          page-break-before: always !important;
-          page-break-after: avoid;
-          page-break-inside: avoid;
-          orphans: 2;
-          widows: 2;
-        }
-        
-        h1.prologue-title, h1.introduction-title {
-          font-size: 17pt;
-          text-align: center;
-          margin-top: 200px;
-        
-          page-break-before: always !important;
-          
-        }
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
 
-      
-        
-        h2 {
-          font-family: 'Comfortaa', sans-serif;
-          font-size: 15pt;
-          font-weight: bold;
-          margin-bottom: 5px;
-          color: #333;
-          line-height: 1.3;
-        }
-        
-        h3 {
-          font-family: 'Comfortaa', sans-serif;
-          font-size: 12pt;
-          font-weight: bold;
-          margin-bottom: 3px;
-          color: var(--primary-color);
-        }
-        
-        p {
-          margin-bottom: 16px;
-          orphans: 2;
-          widows: 2;
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-        }
-        
-        .chapter-description {
-          font-style: italic;
-          color: #666;
-          margin-top: 12px;
-          margin-bottom: 5x;
-          padding-bottom: 25px;
-          border-bottom: 1px solid #e0e0e0;
-        }
-        
-        
+  <!-- Google fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Questrial&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---------- 1) SHEET MARGINS ---------- */
+    @page {
+      margin: 36pt;           /* 0.5-inch on every edge */
+    }
+
+    /* ---------- 2) ROOT & BODY ---------- */
+    :root {
+      --primary-color: #ae5630;
+      --primary-light: rgba(174, 86, 48, 0.20);
+    }
+
+    body {
+      font-family: 'Questrial', Arial, sans-serif;
+      font-size: 11pt;
+      line-height: 1.89;
+      color: #333;
+      margin: 0;                     /* @page already handles the real margin */
+    }
+
+    /* ---------- 3) UNIVERSAL PAGE-BREAK HELPERS ---------- */
+    h1, h2, h3,
+    p,
+    table,
+    blockquote,
+    .quote,
+    .attention,
+    .key-points {
+      page-break-inside: avoid;
+    }
+
+    /* Widows / orphans for all paragraphs */
+    p { orphans: 2; widows: 2; margin-bottom: 16px; }
+    p { text-indent: 50px;  }   /* entire paragraph shifts right */
 
 
-        .part-title {
-          font-family: 'Comfortaa', sans-serif;
-          font-size: 24pt;
-          font-weight: bold;
-          text-align: center;
-          margin-top: 200px;
-          page-break-before: always !important;
-          page-break-after: always !important;
-          color: var(--primary-color);
-        }
-        
-        .toc-title {
-          font-family: 'Comfortaa', sans-serif;
-          font-size: 18pt;
-          font-weight: bold;
-          text-align: center;
-          margin-bottom: 30px;
-          page-break-before: always;
-          color: var(--primary-color);
-        }
-        
-        .toc-item {
-          margin-bottom: 12px;
-        }
-        
-        .toc-item.indent {
-          margin-left: 20px;
-        }
-        
-        .quote, .attention {
-          font-style: italic;
-          border-left: 4px solid var(--primary-color);
-          background-color: var(--primary-light);
-          padding: 15px;
-          margin: 20px 0;
-        }
-        
-        blockquote {
-          font-style: italic;
-          border-left: 4px solid var(--primary-color);
-          background-color: var(--primary-light);
-          padding: 15px;
-          margin: 20px 0;
-        }
-      </style>
-    </head>
-    <body>
+    /* ---------- 4) COVER PAGE ---------- */
+    .cover-page {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;                 /* fills the sheet neatly */
+      text-align: center;
+      page-break-after: always;
+    }
+
+    .cover-title   { font-family: 'Comfortaa', sans-serif; font-size: 30pt; font-weight: 700; color: var(--primary-color); margin: 0 0 20px; }
+    .cover-subtitle{ font-family: 'Comfortaa', sans-serif; font-size: 18pt;             color: #666;               margin: 0 0 20px; }
+    .cover-author  { font-family: 'Comfortaa', sans-serif; font-size: 14pt;             color: var(--primary-color); }
+
+    /* ---------- 5) HEADINGS ---------- */
+    h1 {
+      font-family: 'Comfortaa', sans-serif;
+      font-size: 17pt;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin: 40px 0 15px;           /* generous but safe */
+      line-height: 1.8;
+      page-break-before: always;     /* start new page but WITHOUT huge top offset */
+      page-break-after: avoid;
+    }
+
+    /* Special first-chapter titles */
+    h1.prologue-title, h1.introduction-title {
+      font-size: 17pt;
+      text-align: center;
+      margin: 0 0 40px;
+      page-break-before: always;
+    }
+
+    h2 {
+      font-family: 'Comfortaa', sans-serif;
+      font-size: 15pt;
+      font-weight: 700;
+      color: #333;
+      margin: 30px 0 10px;
+      line-height: 1.3;
+    }
+
+    h3 {
+      font-family: 'Comfortaa', sans-serif;
+      font-size: 13pt;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin: 25px 0 7px;
+      line-height: 1.3;
+    }
+
+    h4 {
+      font-family: 'Comfortaa', sans-serif;
+      font-size: 12pt;
+      font-weight: 700;
+      margin: 25px 0 7px;
+      line-height: 1.3;
+    }
+
+
+    /* ---------- 6) TABLES ---------- */
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 10pt;
+      margin: 20px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(120, 113, 108, 0.7);
+    }
+
+    th, td {
+      padding: 10px 10px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid rgba(120, 113, 108, 0.7);
+      border-right: 1px solid rgba(120, 113, 108, 0.7);
+      color: rgba(120, 113, 108, 0.9);
+    }
+
+    th:last-child,
+    td:last-child        { border-right: none; }
+    tr:last-child  td    { border-bottom: none; }
+    th                   { background: rgba(120, 113, 108, 0.85); color: #ffffff; font-size: 10pt; font-weight: regular;}
+    tr:nth-child(even)   { background: rgba(120, 113, 108, 0.05); rgba(120, 113, 108, 0.9); font-size: 9pt; font-weight: regular;}
+
+    /* ---------- 7) CALLOUTS / BLOCKQUOTES ---------- */
+    .quote,
+    .attention,
+    blockquote {
+      font-style: italic;
+      border-left: 3px solid var(--primary-color);
+      background: var(--primary-light);
+      padding: 10px;
+      margin: 20px 0;
+    }
+
+    /* ---------- 8) KEY-POINTS BOX ---------- */
+    .key-points {
+      background: rgba(120,113,108,.15);
+      border: 1px solid rgba(120,113,108,.7);
+      border-radius: 12px;
+      padding: 4pt;
+      margin: 20px 0;
+      page-break-inside: avoid;
+    }
+
+    .key-points h3,
+    .key-points h4 {
+      color: #78716c;
+      font-size: 10pt;
+      margin-top: 0;
+      margin-bottom: 2pt;
+      font-style: normal;
+      font-weight: 600;
+    }
+
+    .key-points p,
+    .key-points li {
+      color: rgba(120, 113, 108, 0.85);
+      font-size: 10pt;
+      line-height: 1.4;
+      margin-bottom: 2pt;
+      text-indent: 0;
+    }
+
+    .key-points ul {
+      margin-top: 2pt;
+      margin-bottom: 2pt;
+      padding-left: 12pt;
+    }
+
+
+    /* ---------- 9) TABLE-OF-CONTENTS & PART PAGES ---------- */
+    .toc-title {
+      font-family: 'Comfortaa', sans-serif;
+      font-size: 18pt;
+      font-weight: 700;
+      text-align: center;
+      color: var(--primary-color);
+      margin: 0 0 30px;
+      page-break-before: always;
+    }
+    
+    .toc-item.indent {
+       margin-left: 20px;
+     }
+
+    .part-title {
+      font-family: 'Comfortaa', sans-serif;
+      font-size: 24pt;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;        
+      color: var(--primary-color);
+      margin: 0 0 40px;
+      page-break-before: always;
+      page-break-after: always;
+    }
+  </style>
+</head>
+<body>
     `;
 
     // Cover Page
@@ -400,17 +452,58 @@ const BookPreviewPage: React.FC = () => {
   const markdownToHTML = (markdown: string | null | undefined): string => {
     if (!markdown) return '';
     
+    let html = markdown;
+    
+    // Handle tables first (before other processing)
+    html = html.replace(/\|(.+)\|\n\|[-\s|:]+\|\n((?:\|.+\|\n?)*)/g, (match, header, rows) => {
+      // Process header
+      const headerCells = header.split('|').map((cell: string) => cell.trim()).filter((cell: string) => cell.length > 0);
+      const headerHtml = headerCells.map((cell: string) => `<th>${cell}</th>`).join('');
+      
+      // Process body rows
+      const bodyRows = rows.trim().split('\n').filter((row: string) => row.trim().length > 0);
+      const bodyHtml = bodyRows.map((row: string) => {
+        const cells = row.split('|').map((cell: string) => cell.trim()).filter((cell: string) => cell.length > 0);
+        const cellsHtml = cells.map((cell: string) => `<td>${cell}</td>`).join('');
+        return `<tr>${cellsHtml}</tr>`;
+      }).join('');
+      
+      return `<table>
+        <thead>
+          <tr>${headerHtml}</tr>
+        </thead>
+        <tbody>
+          ${bodyHtml}
+        </tbody>
+      </table>`;
+    });
+    
+    // Handle Key Points sections with special styling
+    html = html.replace(/^(#{1,4})\s*(Key Points.*?)$/gim, (match, hashes, title) => {
+      return `<div class="key-points">\n${hashes.replace(/#/g, '').length === 3 ? '<h3>' : '<h4>'}${title}${hashes.replace(/#/g, '').length === 3 ? '</h3>' : '</h4>'}\n`;
+    });
+    
+    // Close Key Points sections before next heading or at end
+    html = html.replace(/(<div class="key-points">[\s\S]*?)(?=(^#{1,4}\s|$))/gm, (match, content) => {
+      return content + '\n</div>\n';
+    });
+    
     // Enhanced markdown to HTML conversion with blockquotes
-    return markdown
+    return html
       // Handle blockquotes first
       .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
-      // Handle headings
-      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+      // Handle headings (but skip those already processed in key points)
+      .replace(/^### ((?!.*Key Points).*$)/gim, '<h3>$1</h3>')
+      .replace(/^## ((?!.*Key Points).*$)/gim, '<h2>$1</h2>')
+      .replace(/^# ((?!.*Key Points).*$)/gim, '<h1>$1</h1>')
       // Handle bold and italic
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      // Handle lists
+      .replace(/^\- (.+)$/gm, '<li>$1</li>')
+      .replace(/^(\d+)\. (.+)$/gm, '<li>$1</li>')
+      // Wrap consecutive list items in ul tags
+      .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
       // Handle line breaks and paragraphs
       .replace(/\n\n/g, '</p><p>')
       .replace(/\n/g, '<br>')
@@ -420,7 +513,13 @@ const BookPreviewPage: React.FC = () => {
       .replace(/<p><h/g, '<h')
       .replace(/<\/h([1-6])><\/p>/g, '</h$1>')
       .replace(/<p><blockquote>/g, '<blockquote>')
-      .replace(/<\/blockquote><\/p>/g, '</blockquote>');
+      .replace(/<\/blockquote><\/p>/g, '</blockquote>')
+      .replace(/<p><table>/g, '<table>')
+      .replace(/<\/table><\/p>/g, '</table>')
+      .replace(/<p><ul>/g, '<ul>')
+      .replace(/<\/ul><\/p>/g, '</ul>')
+      .replace(/<p><div class="key-points">/g, '<div class="key-points">')
+      .replace(/<\/div><\/p>/g, '</div>');
   };
 
   const toggleSection = (sectionKey: string) => {
@@ -544,7 +643,7 @@ const BookPreviewPage: React.FC = () => {
         </button>
         <div className="flex justify-between items-start ">
           <div>
-            <h1 className="text-3xl font-heading font-semibold text-secondary">
+            <h1 className="text-xl font-heading font-semibold text-secondary">
               {book!.title}
             </h1>
             {book!.structure?.subtitle && (
