@@ -144,10 +144,13 @@ const BookPreviewPage: React.FC = () => {
         
         body {
           font-family: 'Questrial', Arial, sans-serif;
-          font-size: 12pt;
+          font-size: 11pt;
           line-height: 1.89;
           color: #333;
-          margin: 20px;
+          margin-top: 20px;
+          margin-left: 20px;
+          margin-right: 20px;
+          margin-bottom: 30px;
           padding: 0;
         }
         
@@ -184,14 +187,14 @@ const BookPreviewPage: React.FC = () => {
           font-size: 16pt;
           font-weight: bold;
           margin-top: 0;
-          line-height: 1.8;
+          line-height: 1.75;
           color: var(--primary-color);
           page-break-before: always !important;
           
         }
         
         h1.prologue-title, h1.introduction-title {
-          font-size: 20pt;
+          font-size: 17pt;
           text-align: center;
           margin-top: 200px;
           page-break-before: always !important;
@@ -202,21 +205,21 @@ const BookPreviewPage: React.FC = () => {
         
         h2 {
           font-family: 'Comfortaa', sans-serif;
-          font-size: 16pt;
+          font-size: 15pt;
           font-weight: bold;
-          margin-top: 25px;
-          margin-bottom: 12px;
+          
+          margin-bottom: 15px;
           
           color: #333;
-          line-height: 1.5;
+          line-height: 1.3;
         }
         
         h3 {
           font-family: 'Comfortaa', sans-serif;
-          font-size: 14pt;
+          font-size: 12pt;
           font-weight: bold;
-          margin-top: 10px;
-          margin-bottom: 5px;
+          
+          
           color: var(--primary-color);
         }
         
@@ -227,8 +230,7 @@ const BookPreviewPage: React.FC = () => {
         .chapter-description {
           font-style: italic;
           color: #666;
-          margin-bottom: 20px;
-          margin-top: 5px
+          margin-top: 12px
         }
         
         
@@ -236,7 +238,7 @@ const BookPreviewPage: React.FC = () => {
 
         .part-title {
           font-family: 'Comfortaa', sans-serif;
-          font-size: 20pt;
+          font-size: 24pt;
           font-weight: bold;
           text-align: center;
           margin-top: 200px;

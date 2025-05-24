@@ -153,7 +153,7 @@ function cleanJsonResponse(response) {
                         number: (partIndex * 4) + j + 1,
                         title: `${partTitle.split(' ')[0]} Chapter ${j + 1}`,
                         description: `Auto-generated chapter covering ${partTitle.toLowerCase()}`,
-                        estimatedWords: 4000
+                        estimatedWords: 3000
                     }))
                 }));
             }
@@ -225,13 +225,16 @@ You must respond with ONLY valid JSON in this exact format:
             { role: 'user', content: userPrompt }
         ];
         const model = 'openai/gpt-4o-search-preview';
+        console.log(`Generating market research for topic: ${topic}`);
+        const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
         const completion = await (0, openrouter_1.executeOpenRouterRequest)({
             model,
-            prompt: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
+            prompt,
+            messages: messages,
             temperature: 0.7,
             max_tokens: 3000
         });
-        const marketResearch = cleanJsonResponse(completion.choices[0].message.content);
+        const marketResearch = cleanJsonResponse(completion.choices[0].message.content || '');
         res.json({ marketResearch });
     }
     catch (error) {
@@ -244,6 +247,8 @@ const generateBookStructure = async (req, res) => {
     try {
         const { topic, marketResearch, references = [] } = req.body;
         const systemPrompt = `You are an expert book outliner who creates JSON-structured book outlines. Your entire response MUST be valid, parseable JSON with no text before or after the JSON object. Based on the market research provided, create a comprehensive book structure.
+    Format a comprehensive and detailed outline showing a vast and deep mastery of the ${topic} with Distinct Parts or sections including their clear chapter titles and brief descriptions.
+Use markdown formatting with # for main sections and ## for subsections,
 
 CRITICAL JSON FORMAT REQUIREMENTS:
 1. Output ONLY well-formed, valid JSON that can be parsed directly with JSON.parse()
@@ -254,11 +259,16 @@ CRITICAL JSON FORMAT REQUIREMENTS:
 6. DO NOT use single quotes for strings in your JSON
 
 CONTENT REQUIREMENTS:
-1. Create 30 or more total chapters organized into 7-8 parts
-2. Each part should contain 4-7 thematically related chapters
-3. Each chapter should have a descriptive title and explanation
-4. Include a prologue, introduction, and conclusion
-5. Match the example format precisely
+1. Create a book structure with multiple parts. Each part should contain 4-7 thematically related chapters. These are the main content chapters.
+2. The total estimated word count for the entire book (including Prologue, Introduction, main chapters, and Conclusion) should be between 125,000 and 184,000 words.
+3. Each main chapter (within the 'parts' array) must have a creative and descriptive title, a detailed explanation/description of its content and purpose, an estimated word count, key topics to be covered, and 3-5 key points the reader should take away. Chapter numbering should be sequential for these main chapters, starting from 1.
+4. Generate content for 'prologue', 'introduction', and 'conclusion' as top-level string fields in the JSON. These are NOT chapters within the 'parts' array and should NOT be numbered as chapters.
+   - The 'prologue' string should contain compelling content (approx. 3000 words) that hooks the reader, including its own context and key points formatted within the markdown.
+   - The 'introduction' string should contain detailed content (approx. 3000 words) explaining the book's premise, scope, what the reader will gain, and a roadmap. It should include its own context and key points formatted within the markdown.
+   - The 'conclusion' string should contain meaningful content (approx. 3000 words) summarizing key takeaways, reiterating the core message, and offering final thoughts. It should include its own context and key points formatted within the markdown.
+5. The 'acknowledgement', 'appendix', and 'references' fields should be brief top-level strings. 'coverPageDetails' is also a top-level object. These are not part of the main chapter flow or word count intensive sections like Prologue/Intro/Conclusion.
+6. Be creative with part titles and actual chapter titles based on the topic and market research.
+7. Ensure the JSON format is strictly followed as per the example.
 
 CRITICAL: Your ENTIRE response must be ONLY the JSON object with no preceding or following text.`;
         const userPrompt = `Topic: ${topic}
@@ -272,18 +282,7 @@ Market Research Findings:
 - Recommended Tone: ${marketResearch.recommendations.tone}
 - Recommended Style: ${marketResearch.recommendations.style}
 
-Create a book structure 
 
-Based on this market research, create a comprehensive book structure that:
-1. Addresses all identified pain points
-2. Fulfills the audience's desires
-3. Fills the market gaps
-4. Uses the recommended tone and style
-5. Is structured for maximum engagement with the target audience
-6. Is organized into logical parts with related chapters grouped together 
-7. Includes at least 30 or more total chapters (with 4-7 chapters per part)
-8. Includes word count estimates for each chapter
-9. Contains a compelling market position, unique value proposition, and prologue
 
 You must respond with ONLY valid JSON in this exact format:
 {
@@ -294,26 +293,36 @@ You must respond with ONLY valid JSON in this exact format:
   "tone": "specific tone based on research",
   "marketPosition": "how to position this book in the market",
   "uniqueValue": "what makes this book different",
-  "acknowledgement": "a brief acknowledgement section",
-  "prologue": "a compelling prologue that hooks the reader",
-  "introduction": "a detailed introduction with heading and 1-2 paragraphs explaining the premise",
-  "conclusion": "a meaningful conclusion with heading and 1-2 paragraphs summarizing key takeaways",
+  "acknowledgement": "Brief acknowledgement text (e.g., 100-200 words).",
+  "prologue": "## Prologue Title Chosen by AI\\n\\nRich markdown content for the prologue (approx. 3000 words)...\\n\\n### Key Points from Prologue\\n- Point 1\\n- Point 2",
+  "introduction": "## Introduction Title Chosen by AI\\n\\nDetailed markdown content for the introduction (approx. 3000 words)...\\n\\n### Key Points from Introduction\\n- Point 1\\n- Point 2",
+  "conclusion": "## Conclusion Title Chosen by AI\\n\\nMeaningful markdown content for the conclusion (approx. 3000 words)...\\n\\n### Key Points from Conclusion\\n- Point 1\\n- Point 2",
+  "appendix": "Optional: Brief appendix content, if applicable.",
+  "references": "Optional: Brief references or bibliography, if applicable.",
+  "coverPageDetails": {
+    "title": "Main Book Title (Generated by AI)",
+    "subtitle": "Compelling Subtitle (Generated by AI)",
+    "authorName": "Author Name (Can be placeholder or based on input if provided)"
+  },
   "parts": [
     {
       "partNumber": 1,
-      "partTitle": "PART TITLE IN ALL CAPS",
+      "partTitle": "Creative Title for Part I (Generated by AI)",
       "chapters": [
         {
-          "number": 1,
-          "title": "Chapter Title",
-          "description": "Brief description addressing specific pain points/desires",
-          "estimatedWords": 4000,
-          "keyTopics": ["topic1", "topic2"]
+          "number": 1, // Start actual chapter numbering from 1
+          "title": "Creative Title for Chapter 1 (Generated by AI)",
+          "description": "Detailed description of Chapter 1's content, purpose, and relevance to the part's theme and audience needs.",
+          "estimatedWords": 5000, // Example, AI to distribute words to meet total
+          "keyPoints": ["Key takeaway 1 for Ch1", "Key takeaway 2 for Ch1", "Key takeaway 3 for Ch1"],
+          "keyTopics": ["Main topic of Ch1", "Sub-topic A for Ch1", "Sub-topic B for Ch1"]
         }
+        // ... AI to add 3-6 more chapters to this part, with sequential numbering ...
       ]
     }
+    // ... AI to add more parts, each with 4-7 chapters and sequential part numbers ...
   ],
-  "totalWords": 184000,
+  "totalWords": 150000, // AI calculates this sum from all chapter estimatedWords + prologue + intro + conclusion, aiming for 125k-184k.
   "colorScheme": {
     "primary": "${marketResearch.recommendations.colors.primary}",
     "secondary": "${marketResearch.recommendations.colors.secondary}",
@@ -324,15 +333,18 @@ You must respond with ONLY valid JSON in this exact format:
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
         ];
-        const model = 'anthropic/claude-3.7-sonnet'; // Switch back to GPT-4o as it produces more reliable JSON responses
+        const model = 'anthropic/claude-3.7-sonnet';
+        const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
         const completion = await (0, openrouter_1.executeOpenRouterRequest)({
             model,
-            prompt: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
+            prompt,
+            messages,
             temperature: 0.7,
-            max_tokens: 18000 // Increased from 4000 to support more comprehensive structures
+            max_tokens: 16000
         });
         // Log the first 500 characters of the response for debugging
-        const rawResponse = completion.choices[0].message.content;
+        // Extract content from the response
+        const rawResponse = completion.choices[0].message.content || '';
         console.log("Raw response from AI (first 500 chars):", rawResponse.substring(0, 500));
         // Try to clean and parse the JSON response
         const structure = cleanJsonResponse(rawResponse);
@@ -347,24 +359,55 @@ exports.generateBookStructure = generateBookStructure;
 const generateChapter = async (req, res) => {
     try {
         const { chapterId } = req.body;
-        // Get chapter details
-        const { data: chapter, error: chapterError } = await supabase_1.supabaseClient
+        console.log(`Attempting to generate chapter with ID: ${chapterId}`);
+        // Get chapter details with explicit error handling
+        console.log(`Looking for chapter with ID: ${chapterId}`);
+        const chapterResult = await supabase_1.supabaseAdmin // Use supabaseAdmin
             .from('chapters')
             .select('*')
-            .eq('id', chapterId)
-            .single();
-        if (chapterError)
-            throw chapterError;
-        // Get book details
-        const { data: book, error: bookError } = await supabase_1.supabaseClient
+            .eq('id', chapterId);
+        if (chapterResult.error) {
+            console.error(`Chapter query error:`, chapterResult.error);
+            throw new Error(`Failed to retrieve chapter: ${chapterResult.error.message}`);
+        }
+        if (!chapterResult.data || chapterResult.data.length === 0) {
+            console.error(`No chapter found with ID: ${chapterId}`);
+            // Additional diagnostics to help debug the issue
+            const allChaptersResult = await supabase_1.supabaseAdmin // Use supabaseAdmin
+                .from('chapters')
+                .select('id, book_id, title')
+                .limit(10);
+            if (allChaptersResult.error) {
+                console.error('Error checking for any chapters:', allChaptersResult.error);
+            }
+            else if (allChaptersResult.data.length === 0) {
+                console.error('No chapters exist in the database at all');
+            }
+            else {
+                console.error(`Found ${allChaptersResult.data.length} chapters in database, but none with ID ${chapterId}`);
+                console.error('First few chapters:', allChaptersResult.data);
+            }
+            throw new Error(`Chapter not found with ID: ${chapterId}. This likely means the chapter wasn't created properly when the book was set up.`);
+        }
+        const chapter = chapterResult.data[0];
+        console.log(`Found chapter:`, chapter);
+        // Get book details with explicit error handling
+        const bookResult = await supabase_1.supabaseAdmin // Use supabaseAdmin
             .from('books')
             .select('*')
-            .eq('id', chapter.book_id)
-            .single();
-        if (bookError)
-            throw bookError;
+            .eq('id', chapter.book_id);
+        if (bookResult.error) {
+            console.error(`Book query error:`, bookResult.error);
+            throw new Error(`Failed to retrieve book: ${bookResult.error.message}`);
+        }
+        if (!bookResult.data || bookResult.data.length === 0) {
+            console.error(`No book found with ID: ${chapter.book_id}`);
+            throw new Error(`Book not found with ID: ${chapter.book_id}`);
+        }
+        const book = bookResult.data[0];
+        console.log(`Found book:`, book.id, book.title);
         // Get previous chapters for context
-        const { data: allChapters } = await supabase_1.supabaseClient
+        const { data: allChapters } = await supabase_1.supabaseAdmin // Use supabaseAdmin
             .from('chapters')
             .select('number, title')
             .eq('book_id', chapter.book_id)
@@ -372,23 +415,70 @@ const generateChapter = async (req, res) => {
             .order('number');
         const previousChapters = allChapters?.map((ch) => ch.title) || [];
         // Find current chapter details from the structure
-        let chapterDetails;
+        let chapterDetails = null;
         let partTitle = '';
+        console.log(`Looking for chapter details for chapter number ${chapter.number}`);
         // Check if using the parts structure
-        if (book.structure?.parts) {
+        if (book.structure?.parts && Array.isArray(book.structure.parts)) {
+            console.log(`Book has parts structure with ${book.structure.parts.length} parts`);
             for (const part of book.structure.parts) {
+                if (!part.chapters || !Array.isArray(part.chapters)) {
+                    console.log(`Part ${part.partTitle || 'unknown'} has invalid chapters array`);
+                    continue;
+                }
                 const foundChapter = part.chapters.find((ch) => ch.number === chapter.number);
                 if (foundChapter) {
                     chapterDetails = foundChapter;
                     partTitle = part.partTitle;
+                    console.log(`Found chapter details in part: ${partTitle}`);
                     break;
                 }
             }
         }
-        else if (book.structure?.chapters) {
+        else if (book.structure?.chapters && Array.isArray(book.structure.chapters)) {
             // Fallback to flat chapters array
+            console.log(`Book has flat chapters structure with ${book.structure.chapters.length} chapters`);
             chapterDetails = book.structure.chapters.find((ch) => ch.number === chapter.number);
+            if (chapterDetails) {
+                console.log(`Found chapter details in flat structure`);
+            }
         }
+        // If no structure details are found, create minimal details from the chapter itself
+        if (!chapterDetails) {
+            console.log(`No chapter details found in book structure, creating minimal details`);
+            // Safely access metadata, which might not exist yet in the database schema
+            let description = 'No description available';
+            let estimatedWords = 4000;
+            try {
+                if (typeof chapter.metadata === 'object' && chapter.metadata !== null) {
+                    description = chapter.metadata.description || description;
+                    estimatedWords = chapter.metadata.estimatedWords || estimatedWords;
+                }
+                else if (typeof chapter.metadata === 'string' && chapter.metadata.trim() !== '') {
+                    // Try to parse if it's a string
+                    try {
+                        const parsedMetadata = JSON.parse(chapter.metadata);
+                        description = parsedMetadata.description || description;
+                        estimatedWords = parsedMetadata.estimatedWords || estimatedWords;
+                    }
+                    catch (e) {
+                        console.warn('Failed to parse metadata string:', e);
+                    }
+                }
+            }
+            catch (e) {
+                console.warn('Error accessing chapter metadata:', e);
+            }
+            chapterDetails = {
+                title: chapter.title,
+                number: chapter.number,
+                description: description,
+                estimatedWords: estimatedWords
+            };
+        }
+        // Check if we have a metadata column in the database
+        // If not, we'll need to adapt our update strategy later
+        const hasMetadataColumn = Object.prototype.hasOwnProperty.call(chapter, 'metadata');
         const systemPrompt = `You are an expert book writer specializing in creating content that resonates with specific target audiences. Write in the exact tone and style specified, addressing the audience's pain points and desires.`;
         const userPrompt = `Book Title: ${book.title}
 Subtitle: ${book.structure?.subtitle || ''}
@@ -404,7 +494,7 @@ Chapter ${chapter.number}: ${chapter.title}
 Description: ${chapterDetails?.description || ''}
 ${chapterDetails?.keyTopics ? `Key Topics to Cover: ${chapterDetails.keyTopics.join(', ')}` : ''}
 ${chapterDetails?.keyPoints ? `Key Points to Include: ${chapterDetails.keyPoints.join(', ')}` : ''}
-Target Word Count: ${chapterDetails?.estimatedWords || 3000} words
+Target Word Count: ${chapterDetails?.estimatedWords || 4000} words
 
 ${previousChapters.length > 0 ? `Previous chapters covered: ${previousChapters.join(', ')}` : 'This is the first chapter.'}
 
@@ -421,7 +511,7 @@ Write this chapter following these guidelines:
 3. Address the target audience's specific needs and interests
 4. Include practical examples and actionable insights
 5. Maintain consistency with previous chapters
-6. Aim for approximately ${chapterDetails?.estimatedWords || 3000} words
+6. Aim for approximately ${chapterDetails?.estimatedWords || 4000} words
 7. Format the content as proper markdown:
    - Use ## for the main chapter title
    - Use ### for subsections
@@ -449,33 +539,51 @@ Write this chapter following these guidelines:
             temperature = 0.5;
         }
         // Adjust max_tokens based on estimated words (roughly 1.3 tokens per word)
-        const maxTokens = Math.min(Math.ceil((book.structure?.chapters?.[chapter.number - 1]?.estimatedWords || 3000) * 1.5), 8000);
+        // Use a safe approach for accessing chapter's estimated words
+        let estimatedWords = 3000; // Default
+        if (chapterDetails?.estimatedWords) {
+            estimatedWords = chapterDetails.estimatedWords;
+        }
+        const maxTokens = Math.min(Math.ceil(estimatedWords * 1.5), 8000);
+        const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
         const response = await (0, openrouter_1.executeOpenRouterRequest)({
             model,
-            prompt: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
+            prompt,
+            messages,
             temperature,
             max_tokens: maxTokens
         });
         // Update chapter with generated content
-        const content = response.choices[0].message.content;
-        const { data: updatedChapter, error: updateError } = await supabase_1.supabaseClient
-            .from('chapters')
-            .update({
+        const content = response.choices[0].message.content || '';
+        // Create update payload based on whether metadata column exists
+        let updatePayload = {
             content,
             status: 'in_progress',
             updated_at: new Date().toISOString()
-        })
+        };
+        // Also update word count
+        const wordCount = content.split(/\s+/).filter(Boolean).length;
+        updatePayload.word_count = wordCount;
+        console.log(`Updating chapter with ${wordCount} words`);
+        const { data: updatedChapter, error: updateError } = await supabase_1.supabaseAdmin // Use supabaseAdmin
+            .from('chapters')
+            .update(updatePayload)
             .eq('id', chapterId)
-            .select()
-            .single();
-        if (updateError)
+            .select();
+        if (updateError) {
+            console.error('Error updating chapter:', updateError);
             throw updateError;
+        }
+        if (!updatedChapter || updatedChapter.length === 0) {
+            throw new Error('Chapter update failed - no data returned');
+        }
+        const firstUpdatedChapter = updatedChapter[0];
         // Update book's updated_at timestamp
-        await supabase_1.supabaseClient
+        await supabase_1.supabaseAdmin // Use supabaseAdmin
             .from('books')
             .update({ updated_at: new Date().toISOString() })
             .eq('id', chapter.book_id);
-        res.json({ chapter: updatedChapter });
+        res.json({ chapter: firstUpdatedChapter });
     }
     catch (error) {
         console.error('Error generating chapter:', error);
@@ -486,14 +594,39 @@ exports.generateChapter = generateChapter;
 const reviseChapter = async (req, res) => {
     try {
         const { chapterId, revisionInstructions } = req.body;
-        // Get chapter details
-        const { data: chapter, error: chapterError } = await supabase_1.supabaseClient
+        console.log(`Attempting to revise chapter with ID: ${chapterId}`);
+        console.log(`Revision instructions: ${revisionInstructions.substring(0, 100)}...`);
+        // Get chapter details with explicit error handling
+        console.log(`Looking for chapter with ID: ${chapterId}`);
+        const chapterResult = await supabase_1.supabaseAdmin // Use supabaseAdmin
             .from('chapters')
             .select('*')
-            .eq('id', chapterId)
-            .single();
-        if (chapterError)
-            throw chapterError;
+            .eq('id', chapterId);
+        if (chapterResult.error) {
+            console.error(`Chapter query error:`, chapterResult.error);
+            throw new Error(`Failed to retrieve chapter: ${chapterResult.error.message}`);
+        }
+        if (!chapterResult.data || chapterResult.data.length === 0) {
+            console.error(`No chapter found with ID: ${chapterId}`);
+            // Additional diagnostics to help debug the issue
+            const allChaptersResult = await supabase_1.supabaseAdmin // Use supabaseAdmin
+                .from('chapters')
+                .select('id, book_id, title')
+                .limit(10);
+            if (allChaptersResult.error) {
+                console.error('Error checking for any chapters:', allChaptersResult.error);
+            }
+            else if (allChaptersResult.data.length === 0) {
+                console.error('No chapters exist in the database at all');
+            }
+            else {
+                console.error(`Found ${allChaptersResult.data.length} chapters in database, but none with ID ${chapterId}`);
+                console.error('First few chapters:', allChaptersResult.data);
+            }
+            throw new Error(`Chapter not found with ID: ${chapterId}. This likely means the chapter wasn't created properly when the book was set up.`);
+        }
+        const chapter = chapterResult.data[0];
+        console.log(`Found chapter:`, chapter.id, chapter.title);
         if (!chapter.content) {
             throw new Error('Chapter has no content to revise');
         }
@@ -510,27 +643,43 @@ Please revise the content accordingly.`;
             { role: 'user', content: userPrompt }
         ];
         const model = 'anthropic/claude-3.7-sonnet';
+        const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
         const response2 = await (0, openrouter_1.executeOpenRouterRequest)({
             model,
-            prompt: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
+            prompt,
+            messages,
             temperature: 0.7,
             max_tokens: 4000
         });
         // Update chapter with revised content
-        const revisedContent = response2.choices[0].message.content;
-        const { data: updatedChapter, error: updateError } = await supabase_1.supabaseClient
-            .from('chapters')
-            .update({
+        const revisedContent = response2.choices[0].message.content || '';
+        // Create update payload with word count
+        const wordCount = revisedContent.split(/\s+/).filter(Boolean).length;
+        const updatePayload = {
             content: revisedContent,
             status: 'in_progress',
-            updated_at: new Date().toISOString()
-        })
+            updated_at: new Date().toISOString(),
+            word_count: wordCount
+        };
+        console.log(`Updating chapter with ${wordCount} words of revised content`);
+        const { data: updatedChapter, error: updateError } = await supabase_1.supabaseAdmin // Use supabaseAdmin
+            .from('chapters')
+            .update(updatePayload)
             .eq('id', chapterId)
-            .select()
-            .single();
-        if (updateError)
+            .select();
+        if (updateError) {
+            console.error('Error updating chapter:', updateError);
             throw updateError;
-        res.json({ chapter: updatedChapter });
+        }
+        if (!updatedChapter || updatedChapter.length === 0) {
+            throw new Error('Chapter update failed - no data returned');
+        }
+        // Update book's updated_at timestamp
+        await supabase_1.supabaseAdmin // Use supabaseAdmin
+            .from('books')
+            .update({ updated_at: new Date().toISOString() })
+            .eq('id', chapter.book_id);
+        res.json({ chapter: updatedChapter[0] });
     }
     catch (error) {
         console.error('Error revising chapter:', error);

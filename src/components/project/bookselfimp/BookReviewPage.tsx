@@ -425,7 +425,7 @@ const BookReviewPage: React.FC = () => {
 
               <div className="mt-6 pt-6 border-t">
                 <p className="text-sm text-neutral-medium">
-                  <strong>Total word count:</strong> {localStructure.totalWords.toLocaleString()}
+                  <strong>Total word count:</strong> {localStructure.totalWords?.toLocaleString() || 'Not calculated'}
                 </p>
               </div>
             </div>

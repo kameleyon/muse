@@ -35,7 +35,7 @@ const TEMPLATE_STYLES: Record<string, {
       bodyFont: 'Helvetica, Arial, sans-serif'
     },
     extraStyles: {
-      lineHeight: '1.5',
+      lineHeight: '1.8',
       letterSpacing: '0.01em'
     }
   },
@@ -198,7 +198,7 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
       
       // Apply styles with increased width for better readability
       container.style.width = '850px';
-      container.style.padding = '50px 60px';
+      container.style.padding = '60px 60px 50px 60px';
       container.style.backgroundColor = brandColors.background || '#ffffff';
       container.style.color = '#333333';
       
@@ -235,7 +235,7 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
       styleEl.innerHTML = `
         #content-for-pdf {
           color: #333333;
-          padding-bottom: 60px; /* Extra space at bottom */
+          padding-bottom: 65px; /* Extra space at bottom */
         }
         
         #content-for-pdf h1, #content-for-pdf h2, #content-for-pdf h3, #content-for-pdf h4, #content-for-pdf h5, #content-for-pdf h6 {
