@@ -139,7 +139,7 @@ const NewBookPage: React.FC = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold font-heading mb-2">Self Improvement Book</h1>
         <p className="text-neutral-medium max-w-3xl">
-            Create a Self-Improvement Book.
+            Write a Self-Improvement, How-to, Guidebook, or Educational Book.
         </p>
       </div>
         
@@ -180,8 +180,8 @@ const NewBookPage: React.FC = () => {
                   onClick={() => setTopic(prompt)}
                   className={cn(
                     "px-3 py-1 text-xs rounded-full ",
-                    "bg-secondary/50 text-secondary",
-                    "hover:bg-primary hover:text-primary transition-colors"
+                    "bg-secondary/40 text-white",
+                    "hover:bg-primary hover:white transition-colors"
                   )}
                 >
                   {prompt}
@@ -318,8 +318,8 @@ const NewBookPage: React.FC = () => {
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <p className="font-medium text-stone text-xl line-clamp-1">{book.title}</p>
-                        <p className="text-sm text-stone mt-1 line-clamp-2">{book.topic}</p>
+                        <p className="font-medium text-stone text-lg line-clamp-1">{book.title}</p>
+                        <p className="text-sm text-stone/70 mt-1 line-clamp-2">{book.topic}</p>
                       </div>
                       {getBookStatusIcon(book.status)}
                     </div>

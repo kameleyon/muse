@@ -240,8 +240,8 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
         
         #content-for-pdf h1, #content-for-pdf h2, #content-for-pdf h3, #content-for-pdf h4, #content-for-pdf h5, #content-for-pdf h6 {
           font-family: ${templateFonts.headingFont || 'Arial, sans-serif'};
-          margin-top: 1.5em;
-          margin-bottom: 0.1em;
+          margin-top: 1.2em;
+          margin-bottom: 0.3em;
           page-break-after: avoid;
           page-break-inside: avoid;
           color: ${brandColors.primary || '#ae5630'};
@@ -297,18 +297,19 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
         
         #content-for-pdf ul, #content-for-pdf ol {
           padding-left: 1.5rem;
-          margin-top: 0.05em;
+          margin-top: 0.2em;
           margin-bottom: 1rem;
           page-break-inside: avoid;
         }
         
         #content-for-pdf li {
-          margin-bottom: 0.25rem;
+          margin-bottom: 0.4rem;
           page-break-inside: avoid;
-          orphans: 2;
-          widows: 2;
+          orphans: 3;
+          widows: 3;
           word-wrap: break-word;
           overflow-wrap: break-word;
+          line-height: 1.6;
         }
         
         #content-for-pdf pre {
@@ -505,7 +506,7 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
       const a4Height = 842;
       
       // Calculate scale to fit content width to page width, with margins
-      const margin = 50;
+      const margin = 40;
       const contentWidth = a4Width - (margin * 2);
       const scale = contentWidth / docWidth;
       
@@ -526,7 +527,7 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
         container.style.left = '0';
         
         const elements = Array.from(container.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, blockquote, pre, div, ul, ol'));
-        let bestBreakPoint = maxHeight * 0.75; // Start more conservative
+        let bestBreakPoint = maxHeight * 0.85; // Less conservative for better page usage
         let foundGoodBreak = false;
         
         // Look for elements that would be good break points
@@ -541,8 +542,30 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
           // Skip elements completely before our range
           if (elementBottom <= 10) continue;
           
+          // For list items, ensure we don't cut in the middle of a bullet point
+          if (element.tagName === 'LI') {
+            // Get the actual text content position (accounting for bullet)
+            const computedStyle = window.getComputedStyle(element);
+            const listStylePosition = computedStyle.listStylePosition;
+            const paddingLeft = parseFloat(computedStyle.paddingLeft);
+            
+            // If element would be cut off, break before it
+            if (elementTop >= 0 && elementTop < maxHeight && elementBottom > maxHeight) {
+              // For list items, ensure we have enough space for at least 2 lines
+              const minSpaceNeeded = parseFloat(computedStyle.lineHeight) * 2;
+              if (maxHeight - elementTop < minSpaceNeeded) {
+                goodBreakPoints.push(elementTop - 15); // Larger buffer for list items
+                foundGoodBreak = true;
+              }
+            }
+            // If element ends cleanly within range, it's a good break point
+            else if (elementBottom > 0 && elementBottom <= maxHeight - 30) {
+              goodBreakPoints.push(elementBottom + 10); // Larger buffer after list items
+              foundGoodBreak = true;
+            }
+          }
           // For text content elements, avoid splitting them
-          if (['P', 'LI', 'BLOCKQUOTE', 'PRE'].includes(element.tagName)) {
+          else if (['P', 'BLOCKQUOTE', 'PRE'].includes(element.tagName)) {
             // If element would be cut off, break before it
             if (elementTop >= 0 && elementTop < maxHeight && elementBottom > maxHeight) {
               goodBreakPoints.push(elementTop - 10); // Small buffer
@@ -595,8 +618,8 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
         }
         
         // Ensure minimum and maximum bounds
-        bestBreakPoint = Math.max(bestBreakPoint, maxHeight * 0.5);
-        bestBreakPoint = Math.min(bestBreakPoint, maxHeight);
+        bestBreakPoint = Math.max(bestBreakPoint, maxHeight * 0.6); // Increased minimum for better content distribution
+        bestBreakPoint = Math.min(bestBreakPoint, maxHeight * 0.95); // Allow more content per page
         
         return bestBreakPoint;
       };
@@ -626,7 +649,7 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
           y: currentY,
           height: pageHeight,
           width: docWidth,
-          scale: 2, // Higher scale for better quality
+          scale: 3, // Even higher scale for better text quality
           useCORS: true,
           allowTaint: true,
           backgroundColor: brandColors.background || '#ffffff',
