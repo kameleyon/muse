@@ -186,17 +186,21 @@ const BookPreviewPage: React.FC = () => {
           font-family: 'Comfortaa', sans-serif;
           font-size: 16pt;
           font-weight: bold;
-          margin-top: 0;
-          line-height: 1.75;
+          margin-bottom: 15px;
+          line-height: 1.8;
           color: var(--primary-color);
           page-break-before: always !important;
-          
+          page-break-after: avoid;
+          page-break-inside: avoid;
+          orphans: 2;
+          widows: 2;
         }
         
         h1.prologue-title, h1.introduction-title {
           font-size: 17pt;
           text-align: center;
           margin-top: 200px;
+        
           page-break-before: always !important;
           
         }
@@ -207,9 +211,7 @@ const BookPreviewPage: React.FC = () => {
           font-family: 'Comfortaa', sans-serif;
           font-size: 15pt;
           font-weight: bold;
-          
-          margin-bottom: 15px;
-          
+          margin-bottom: 5px;
           color: #333;
           line-height: 1.3;
         }
@@ -218,19 +220,25 @@ const BookPreviewPage: React.FC = () => {
           font-family: 'Comfortaa', sans-serif;
           font-size: 12pt;
           font-weight: bold;
-          
-          
+          margin-bottom: 3px;
           color: var(--primary-color);
         }
         
         p {
           margin-bottom: 16px;
+          orphans: 2;
+          widows: 2;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
         }
         
         .chapter-description {
           font-style: italic;
           color: #666;
-          margin-top: 12px
+          margin-top: 12px;
+          margin-bottom: 5x;
+          padding-bottom: 25px;
+          border-bottom: 1px solid #e0e0e0;
         }
         
         

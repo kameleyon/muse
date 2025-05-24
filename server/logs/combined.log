@@ -4963,3 +4963,18 @@
 2025-05-23 20:21:39 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
 2025-05-23 20:21:39 [info]: Projects table is now accessible - migrations successful!
 2025-05-23 20:21:39 [info]: Server running in development mode on port 9998
+2025-05-23 20:28:56 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-05-23 20:28:56 [info]: Making OpenRouter request to model: openai/gpt-4o-search-preview
+2025-05-23 20:29:03 [info]: OpenRouter request successful. Tokens used: 1160
+2025-05-23 20:29:03 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-05-23 20:29:03 [info]: Making OpenRouter request to model: anthropic/claude-3.7-sonnet
+2025-05-23 20:33:33 [info]: OpenRouter request successful. Tokens used: 17188
+2025-05-23 20:39:02 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-05-23 20:39:02 [info]: Making OpenRouter request to model: openai/gpt-4o-search-preview
+2025-05-23 20:39:08 [info]: OpenRouter request successful. Tokens used: 1240
+2025-05-23 20:39:08 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-05-23 20:39:08 [info]: Making OpenRouter request to model: anthropic/claude-3.7-sonnet
+2025-05-23 20:43:11 [info]: OpenRouter request successful. Tokens used: 15728
+2025-05-23 21:18:47 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-05-23 21:18:47 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-05-23 21:20:29 [info]: OpenRouter request successful. Tokens used: 3421

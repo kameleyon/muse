@@ -241,8 +241,9 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
         #content-for-pdf h1, #content-for-pdf h2, #content-for-pdf h3, #content-for-pdf h4, #content-for-pdf h5, #content-for-pdf h6 {
           font-family: ${templateFonts.headingFont || 'Arial, sans-serif'};
           margin-top: 1.5em;
-          margin-bottom: 0.5em;
+          margin-bottom: 0.1em;
           page-break-after: avoid;
+          page-break-inside: avoid;
           color: ${brandColors.primary || '#ae5630'};
         }
         
@@ -272,6 +273,11 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
           margin-bottom: 1em;
           line-height: ${typeof templateStyle.extraStyles?.lineHeight === 'string' ? 
             templateStyle.extraStyles.lineHeight : '1.5'};
+          orphans: 3;
+          widows: 3;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          page-break-inside: avoid;
         }
         
         #content-for-pdf strong {
@@ -291,11 +297,18 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
         
         #content-for-pdf ul, #content-for-pdf ol {
           padding-left: 1.5rem;
+          margin-top: 0.05em;
           margin-bottom: 1rem;
+          page-break-inside: avoid;
         }
         
         #content-for-pdf li {
           margin-bottom: 0.25rem;
+          page-break-inside: avoid;
+          orphans: 2;
+          widows: 2;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
         }
         
         #content-for-pdf pre {
@@ -504,19 +517,114 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
       const pageCount = Math.ceil(scaledHeight / contentHeight);
       console.log(`Document will require ${pageCount} pages at scale ${scale.toFixed(2)}`);
       
-      // Generate each page
-      const promises = [];
-      
-      for (let i = 0; i < pageCount; i++) {
-        const yPos = i * (contentHeight / scale);
-        const remainingHeight = Math.min(contentHeight / scale, docHeight - yPos);
+      // Helper function to find safe break points (avoid cutting text)
+      const findSafeBreakPoint = (startY: number, maxHeight: number): number => {
+        // Make container visible temporarily for accurate measurements
+        const originalPosition = container.style.position;
+        const originalLeft = container.style.left;
+        container.style.position = 'absolute';
+        container.style.left = '0';
         
-        console.log(`Rendering page ${i + 1}, starting at y=${yPos}px, height=${remainingHeight}px`);
+        const elements = Array.from(container.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, blockquote, pre, div, ul, ol'));
+        let bestBreakPoint = maxHeight * 0.75; // Start more conservative
+        let foundGoodBreak = false;
+        
+        // Look for elements that would be good break points
+        const goodBreakPoints: number[] = [];
+        
+        for (const element of elements) {
+          const rect = element.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
+          const elementTop = rect.top - containerRect.top - startY;
+          const elementBottom = elementTop + rect.height;
+          
+          // Skip elements completely before our range
+          if (elementBottom <= 10) continue;
+          
+          // For text content elements, avoid splitting them
+          if (['P', 'LI', 'BLOCKQUOTE', 'PRE'].includes(element.tagName)) {
+            // If element would be cut off, break before it
+            if (elementTop >= 0 && elementTop < maxHeight && elementBottom > maxHeight) {
+              goodBreakPoints.push(elementTop - 10); // Small buffer
+              foundGoodBreak = true;
+            }
+            // If element ends cleanly within range, it's a good break point
+            else if (elementBottom > 0 && elementBottom <= maxHeight - 50) {
+              goodBreakPoints.push(elementBottom + 5); // Small buffer after
+              foundGoodBreak = true;
+            }
+          }
+          
+          // For headings, ensure they stay with following content
+          if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(element.tagName)) {
+            // Never break right after a heading
+            if (elementBottom > 0 && elementBottom < maxHeight - 100) {
+              // Find next content element
+              const nextElement = element.nextElementSibling;
+              if (nextElement) {
+                const nextRect = nextElement.getBoundingClientRect();
+                const nextTop = nextRect.top - containerRect.top - startY;
+                const nextBottom = nextTop + nextRect.height;
+                
+                // If heading + next element fit, don't break between them
+                if (nextBottom <= maxHeight) {
+                  continue;
+                } else {
+                  // Break before the heading instead
+                  goodBreakPoints.push(elementTop - 10);
+                  foundGoodBreak = true;
+                }
+              }
+            }
+          }
+        }
+        
+        // Restore container position
+        container.style.position = originalPosition;
+        container.style.left = originalLeft;
+        
+        if (foundGoodBreak && goodBreakPoints.length > 0) {
+          // Find the best break point (closest to ideal height but not exceeding)
+          const idealHeight = maxHeight * 0.85;
+          bestBreakPoint = goodBreakPoints.reduce((best, current) => {
+            if (current <= maxHeight && current >= maxHeight * 0.5) {
+              return Math.abs(current - idealHeight) < Math.abs(best - idealHeight) ? current : best;
+            }
+            return best;
+          }, goodBreakPoints[0]);
+        }
+        
+        // Ensure minimum and maximum bounds
+        bestBreakPoint = Math.max(bestBreakPoint, maxHeight * 0.5);
+        bestBreakPoint = Math.min(bestBreakPoint, maxHeight);
+        
+        return bestBreakPoint;
+      };
+
+      // Generate each page with intelligent break points
+      const promises = [];
+      let currentY = 0;
+      let pageIndex = 0;
+      
+      while (currentY < docHeight && pageIndex < 50) { // Safety limit
+        const maxPageHeight = contentHeight / scale;
+        const remainingContent = docHeight - currentY;
+        
+        let pageHeight;
+        if (remainingContent <= maxPageHeight) {
+          // Last page - use remaining content
+          pageHeight = remainingContent;
+        } else {
+          // Find safe break point
+          pageHeight = findSafeBreakPoint(currentY, maxPageHeight);
+        }
+        
+        console.log(`Rendering page ${pageIndex + 1}, starting at y=${currentY}px, height=${pageHeight}px`);
         
         // Create a promise to render this page segment
         const promise = html2canvas(container, {
-          y: yPos,
-          height: remainingHeight,
+          y: currentY,
+          height: pageHeight,
           width: docWidth,
           scale: 2, // Higher scale for better quality
           useCORS: true,
@@ -525,7 +633,7 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
           logging: false
         }).then(canvas => {
           // Add a new page for all pages after the first
-          if (i > 0) {
+          if (pageIndex > 0) {
             pdf.addPage();
           }
           
@@ -552,7 +660,7 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
           pdf.setFontSize(9);
           pdf.setTextColor(100, 100, 100);
           pdf.text(
-            `Page ${i + 1} of ${pageCount}`,
+            `Page ${pageIndex + 1}`,
             a4Width - margin,
             a4Height - 20,
             { align: 'right' }
@@ -565,10 +673,12 @@ const PdfExporter: React.FC<PdfExporterProps> = ({
             a4Height - 20
           );
           
-          return i + 1; // Return page number for tracking progress
+          return pageIndex + 1; // Return page number for tracking progress
         });
         
         promises.push(promise);
+        currentY += pageHeight;
+        pageIndex++;
       }
       
       // Wait for all pages to be rendered
