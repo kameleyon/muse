@@ -643,12 +643,17 @@ Write this chapter following these STRICT guidelines:
 11. START with captivating first sentence - no throat-clearing or preview
 12. Paragraph indentation: Use 2 spaces at start of each paragraph
 13. Line spacing: Single space between all elements (including between bullet point titles and lists)
-14. Structure:
-    - Main sections: ### (not ##)
-    - Subsections: ####
-    - **Bold** for key terms (first mention only)
-    - Bullet points: - (with consistent spacing)
-    - > for notable quotes or callouts only
+14. Format the content as proper markdown:
+   - Use ## for the main chapter title
+   - Use ### for subsections
+   - Use #### for important point in subsctions
+   - Use **bold** for emphasis
+   - Use - or * for bullet points
+   - Use > for blockquotes
+   - Use *** Your key-point text goes here ***
+   - Ensure proper paragraph spacing (empty line between paragraphs)
+   - Use numbered lists where appropriate
+   - Use backticks for inline code or technical terms
 15. Include ${book.marketResearch?.design?.visualElements || chapterDetails?.visualElements || '1-2'} data visualizations using markdown tables or ASCII-style simple graphs when data supports it
 16. Color palette references: ${book.marketResearch?.design?.colors || book.design?.colors || 'primary: purple, secondary: gold, accent: white'}
 
@@ -691,9 +696,9 @@ ${chapter.number === (book.structure?.parts ?
   (book.structure?.chapters ? book.structure.chapters.length + 1 : 999)
 ) && book.structure?.conclusion ? `This is the CONCLUSION. Use the following content as guidance: ${book.structure.conclusion}` : ''}
 
-At the end of each chapter add the key points, as defined
+At the end of each chapter, add the key points, as defined
 ***
-### Key Points
+#### Key Points to takeaway from this chapter
 - [Key takeaway 1 from this chapter]
 - [Key takeaway 2 from this chapter] 
 - [Key takeaway 3 from this chapter]
@@ -768,7 +773,7 @@ INTEGRATION INSTRUCTIONS:
 Write high-quality content that follows all the guidelines above while incorporating the research data naturally.
 
 CHAPTER STRUCTURE REQUIREMENTS:
-- End each chapter with a "### Key Points" section containing 3-5 bullet points summarizing the chapter
+- End each chapter with a "#### Key Points" section containing 3-5 bullet points summarizing the chapter
 - Do NOT include a "References" section at the end of the chapter
 - Include citations in-text using format: (Source Name, Year)
 - All references will be compiled automatically into the book's main References chapter

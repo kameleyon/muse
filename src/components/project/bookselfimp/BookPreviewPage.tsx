@@ -160,7 +160,7 @@ const BookPreviewPage: React.FC = () => {
     }
 
     /* ---------- 3) UNIVERSAL PAGE-BREAK HELPERS ---------- */
-    h1, h2, h3,
+    h1, h2, h3, h4, h5, h6,
     p,
     table,
     blockquote,
@@ -232,8 +232,8 @@ const BookPreviewPage: React.FC = () => {
       font-family: 'Comfortaa', sans-serif;
       font-size: 12pt;
       font-weight: 700;
-      margin: 25px 0 7px;
-      line-height: 1.3;
+      line-height: 1.6;
+      color: #333;
     }
 
 
@@ -283,39 +283,29 @@ const BookPreviewPage: React.FC = () => {
       background:rgba(214,211,209,.15);
       padding:1rem;
       margin:1rem 0;
-      font:500 1rem/1.5 'Questrial',sans-serif;
+      font:500 0.9rem 'Questrial',sans-serif;
       color:#57534E;
-      page-break-inside:avoid;
-    }
-
-
-
-   /* .key-points h3,
-    .key-points h4 {
-      color: #78716c;
-      font-size: 10pt;
-      margin-top: 0;
-      margin-bottom: 2pt;
-      font-style: normal;
-      font-weight: 600;
-    }
-
-    .key-points p,
-    .key-points li {
-      color: rgba(120, 113, 108, 0.85);
-      font-size: 10pt;
-      line-height: 1.4;
-      margin-bottom: 2pt;
-      text-indent: 0;
+      line-height: 1.6;
+      
     }
 
     .key-points ul {
-      margin-top: 2pt;
-      margin-bottom: 2pt;
-      padding-left: 12pt;
-    }*/
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
 
+    .key-points li {
+      display: table;
+      margin-bottom: 15px;
+    }
 
+    .key-points li:before {
+      content: "•";
+      display: table-cell;
+      padding-right: 0.75rem;
+      font-weight: bold;
+    }
     /* ---------- 9) TABLE-OF-CONTENTS & PART PAGES ---------- */
     .toc-title {
       font-family: 'Comfortaa', sans-serif;
@@ -456,98 +446,89 @@ const BookPreviewPage: React.FC = () => {
 
   const markdownToHTML = (markdown: string | null | undefined): string => {
     if (!markdown) return '';
-  
-    let html = markdown;
     
     // Debug: Check if content contains *** patterns
-    if (html.includes('***')) {
-      console.log('Found *** patterns in content:', html.substring(html.indexOf('***'), html.indexOf('***') + 100));
+    if (markdown.includes('***')) {
+      console.log('Found *** patterns in content:', markdown.substring(markdown.indexOf('***'), markdown.indexOf('***') + 100));
     }
-  
     
+    // Basic markdown rendering
+    let html = markdown
+    
+    // Headers
+    html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+
+    // Key Points 
+    html = html.replace(/\*\*\*([\s\S]+?)\*\*\*/gs, '<div class="key-points">$1</div>')
+    
+    // Bold
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    
+    // Italic
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>')
+    
+    // Lists
+    html = html.replace(/^- (.+)$/gm, (match, content) => {
+      // Check if this is inside a key-points block
+      return `<li>${content.trim()}</li>`;
+    });
+    
+    // Wrap consecutive li elements more carefully
     html = html.replace(
-      /\|(.+)\|\n\|[-\s|:]+\|\n((?:\|.+\|\n?)*)/g,
-      (match: string, header: string, rows: string): string => {
-        // header row
-        const headerCells: string[] = header
-          .split('|')
-          .map((cell: string) => cell.trim())
-          .filter((cell: string) => cell.length > 0);
-        const headerHtml = headerCells
-          .map((cell: string) => `<th>${cell}</th>`)
-          .join('');
-  
-        // body rows
-        const bodyRows: string[] = rows
-          .trim()
-          .split('\n')
-          .filter((r: string) => r.trim().length > 0);
-  
-        const bodyHtml = bodyRows
-          .map((row: string) => {
-            const cells: string[] = row
-              .split('|')
-              .map((c: string) => c.trim())
-              .filter((c: string) => c.length > 0);
-            return `<tr>${cells
-              .map((c: string) => `<td>${c}</td>`)
-              .join('')}</tr>`;
-          })
-          .join('');
-  
-        return `
-          <table>
-            <thead><tr>${headerHtml}</tr></thead>
-            <tbody>${bodyHtml}</tbody>
-          </table>`;
-      }
+      /((?:<li>.*?<\/li>\s*)+)/g,
+      (match) => `<ul>${match}</ul>`
     );
-  
     
-    html = html
-      // block-quotes
-      .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
-  
-      // headings
-      .replace(/^#### (.*$)/gim, '<h4>$1</h4>')
-      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-  
-      // key-points  *** … ***
-      .replace(/\*\*\*([\s\S]+?)\*\*\*/g, '<div class="key-points">$1</div>')
-  
-      // bold & italic
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-  
-      // lists → temporary <li>
-      .replace(/^- (.+)$/gm, '<li>$1</li>')
-      .replace(/^(\d+)\. (.+)$/gm, '<li>$1</li>')
-  
-      // wrap consecutive <li> runs in <ul>
-      .replace(/(<li>.*?<\/li>)(\s*<li>)/gs, '<ul>$1</ul>$2')
-      .replace(/(<\/ul>\s*)<ul>/g, '')
-  
-      // paragraph & line-break handling (skip lines that already start with <)
-      .replace(/\n\n/g, '</p><p>')
-      .replace(/\n/g, '<br>')
-      .replace(/^(?!\s*<)(.+)$/gm, '<p>$1</p>')
-  
-      // clean-ups for stray wrappers
-      .replace(/<p><\/p>/g, '')
-      .replace(/<p>(<h[1-6])/g, '$1')
-      .replace(/(<\/h[1-6]>)<\/p>/g, '$1')
-      .replace(/<p>(<blockquote>)/g, '$1')
-      .replace(/(<\/blockquote>)<\/p>/g, '$1')
-      .replace(/<p>(<table>)/g, '$1')
-      .replace(/(<\/table>)<\/p>/g, '$1')
-      .replace(/<p>(<ul>)/g, '$1')
-      .replace(/(<\/ul>)<\/p>/g, '$1')
-      .replace(/<p>(<div class="key-points">)/g, '$1')
-      .replace(/(<\/div>)<\/p>/g, '$1');
-  
-    return html;
+    // Blockquotes
+    html = html.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+    
+    // Tables - Enhanced styling with rounded corners and custom colors
+    html = html.replace(/\|(.+)\|\n\|[-\s|:]+\|\n((?:\|.+\|\n?)*)/g, (match, header, rows) => {
+      // Process header
+      const headerCells = header.split('|').map((cell: string) => cell.trim()).filter((cell: string) => cell.length > 0)
+      const headerHtml = headerCells.map((cell: string) => `<th>${cell}</th>`).join('')
+      
+      // Process body rows
+      const bodyRows = rows.trim().split('\n').filter((row: string) => row.trim().length > 0)
+      const bodyHtml = bodyRows.map((row: string) => {
+        const cells = row.split('|').map((cell: string) => cell.trim()).filter((cell: string) => cell.length > 0)
+        const cellsHtml = cells.map((cell: string) => `<td>${cell}</td>`).join('')
+        return `<tr>${cellsHtml}</tr>`
+      }).join('')
+      
+      return `<table>
+          <thead>
+            <tr>${headerHtml}</tr>
+          </thead>
+          <tbody>
+            ${bodyHtml}
+          </tbody>
+        </table>`
+    })
+    
+    // Code blocks
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>')
+    
+    // Paragraphs
+    html = html.replace(/\n\n/g, '</p><p>')
+    html = '<p>' + html + '</p>'
+    
+    // Clean-ups for stray wrappers
+    html = html.replace(/<p><\/p>/g, '')
+    html = html.replace(/<p>(<h[1-6])/g, '$1')
+    html = html.replace(/(<\/h[1-6]>)<\/p>/g, '$1')
+    html = html.replace(/<p>(<blockquote>)/g, '$1')
+    html = html.replace(/(<\/blockquote>)<\/p>/g, '$1')
+    html = html.replace(/<p>(<table>)/g, '$1')
+    html = html.replace(/(<\/table>)<\/p>/g, '$1')
+    html = html.replace(/<p>(<ul>)/g, '$1')
+    html = html.replace(/(<\/ul>)<\/p>/g, '$1')
+    html = html.replace(/<p>(<div class="key-points">)/g, '$1')
+    html = html.replace(/(<\/div>)<\/p>/g, '$1')
+       
+    return html
   };
   
   

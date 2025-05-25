@@ -80,18 +80,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       </div>`
     })
     
-    // Key Points sections - Enhanced styling
-    html = html.replace(/^(#{1,4})\s*(Key Points.*?)$/gim, (match, hashes, title) => {
-      return `<div class="bg-stone/15 rounded-xl border border-stone/70 p-4 my-6">
-        <h3 class="text-stone text-[10px] font-semibold mb-2 mt-0">${title}</h3>
-        <div class="key-points-content text-stone/85 text-[10px]">`
-    })
-    
-    // Close Key Points sections before next heading or at end
-    html = html.replace(/(<div class="bg-stone\/15.*?key-points-content.*?>[\s\S]*?)(?=(^#{1,4}\s|$))/gm, (match, content) => {
-      return content + '</div></div>\n'
-    })
-    
+       
     return html
   }
 
