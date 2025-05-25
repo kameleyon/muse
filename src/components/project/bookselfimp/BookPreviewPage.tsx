@@ -306,6 +306,13 @@ const BookPreviewPage: React.FC = () => {
       padding-right: 0.75rem;
       font-weight: bold;
     }
+
+    .key-points h4 {
+      margin: 0 0 0.5rem 0;
+      font-size: 12pt;
+      color: #57534E;
+      font-weight: 700;
+    }
     /* ---------- 9) TABLE-OF-CONTENTS & PART PAGES ---------- */
     .toc-title {
       font-family: 'Comfortaa', sans-serif;

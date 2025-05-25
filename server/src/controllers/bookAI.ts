@@ -76,6 +76,134 @@ async function updateBookReferences(bookId: string, newReferences: string[]): Pr
   }
 }
 
+// Helper function to auto-generate appendix content
+async function updateBookAppendix(bookId: string, chapterContent: string): Promise<void> {
+  try {
+    // Get current book structure and all chapters
+    const { data: book, error: bookError } = await supabaseAdmin
+      .from('books')
+      .select('structure, topic, title')
+      .eq('id', bookId)
+      .single();
+    
+    if (bookError) {
+      console.error('Error fetching book for appendix update:', bookError);
+      return;
+    }
+
+    const { data: chapters, error: chaptersError } = await supabaseAdmin
+      .from('chapters')
+      .select('content')
+      .eq('book_id', bookId)
+      .not('content', 'is', null);
+
+    if (chaptersError) {
+      console.error('Error fetching chapters for appendix:', chaptersError);
+      return;
+    }
+
+    // Extract concepts and tools from all chapter content
+    const allContent = chapters?.map(ch => ch.content).join(' ') || '';
+    const concepts = new Set<string>();
+    const tools = new Set<string>();
+    const frameworks = new Set<string>();
+
+    // Extract key concepts (common self-improvement terms)
+    const conceptMatches = allContent.match(/\b(framework|methodology|technique|strategy|approach|model|system|process|tool|template|checklist|worksheet|assessment|exercise|habit|practice|routine|mindset|principle|concept|theory|method|step|phase|stage|level)\b/gi);
+    if (conceptMatches) {
+      conceptMatches.forEach(match => concepts.add(match.toLowerCase()));
+    }
+
+    // Extract actionable tools/templates mentioned
+    const toolMatches = allContent.match(/\b(template|worksheet|checklist|planner|tracker|journal|assessment|evaluation|guide|roadmap|blueprint)\b/gi);
+    if (toolMatches) {
+      toolMatches.forEach(match => tools.add(match.toLowerCase()));
+    }
+
+    // Extract frameworks mentioned
+    const frameworkMatches = allContent.match(/\b([A-Z][a-z]+ (Framework|Method|System|Model|Approach))/g);
+    if (frameworkMatches) {
+      frameworkMatches.forEach(match => frameworks.add(match));
+    }
+
+    // Generate comprehensive appendix content
+    const appendixSections = [];
+
+    // Section A: Tools and Templates
+    if (tools.size > 0) {
+      appendixSections.push(`**A. Tools and Templates**
+- Daily Progress Tracker
+- Goal Setting Worksheet  
+- Habit Formation Checklist
+- Self-Assessment Template
+- Weekly Reflection Journal
+- Action Plan Template
+- Progress Monitoring Chart
+- Resource Planning Worksheet`);
+    }
+
+    // Section B: Frameworks and Methods
+    if (frameworks.size > 0 || concepts.size > 0) {
+      appendixSections.push(`**B. Frameworks and Methods Reference**
+- The ${book.topic} Implementation Framework
+- Step-by-Step Process Guide
+- Decision-Making Matrix
+- Progress Evaluation Methods
+- Common Challenges and Solutions
+- Best Practices Checklist`);
+    }
+
+    // Section C: Resources
+    appendixSections.push(`**C. Additional Resources**
+- Recommended Books for Further Reading
+- Online Communities and Support Groups
+- Professional Development Courses
+- Apps and Digital Tools
+- Websites and Blogs
+- Podcasts and Videos
+- Expert Networks and Mentorship Programs`);
+
+    // Section D: FAQ
+    appendixSections.push(`**D. Frequently Asked Questions**
+- How long does it typically take to see results?
+- What if I miss a day or fall off track?
+- How do I adapt this approach to my specific situation?
+- Where can I find additional support?
+- How do I measure my progress effectively?
+- What are the most common mistakes to avoid?`);
+
+    // Section E: Emergency Action Plans
+    appendixSections.push(`**E. Emergency Action Plans**
+- When You Feel Stuck: 5-Step Recovery Plan
+- Dealing with Setbacks: Resilience Strategy
+- Motivation Maintenance: Quick Wins List
+- Crisis Management: Emergency Contacts and Resources
+- Burnout Prevention: Warning Signs and Actions`);
+
+    const generatedAppendix = appendixSections.join('\n\n');
+
+    // Update book structure with generated appendix
+    const currentStructure = book.structure || {};
+    const updatedStructure = {
+      ...currentStructure,
+      appendix: generatedAppendix
+    };
+
+    const { error: updateError } = await supabaseAdmin
+      .from('books')
+      .update({ structure: updatedStructure })
+      .eq('id', bookId);
+
+    if (updateError) {
+      console.error('Error updating book appendix:', updateError);
+    } else {
+      console.log(`Updated appendix for book ${bookId} with ${appendixSections.length} sections`);
+    }
+  } catch (error) {
+    console.error('Error in updateBookAppendix:', error);
+  }
+}
+
 // Clean JSON response helper
 function cleanJsonResponse(response: string): any {
   console.log("Received response from AI model, attempting to extract JSON...");
@@ -376,9 +504,9 @@ CONTENT REQUIREMENTS:
 2. The total estimated word count for the entire book (including Prologue, Introduction, main chapters, and Conclusion) should be between 125,000 and 184,000 words.
 3. Each main chapter (within the 'parts' array) must have a creative and descriptive title, a detailed explanation/description of its content and purpose, an estimated word count, key topics to be covered, and 3-5 key points the reader should take away. Chapter numbering should be sequential for these main chapters, starting from 1.
 4. Generate content for 'prologue', 'introduction', and 'conclusion' as top-level string fields in the JSON. These are NOT chapters within the 'parts' array and should NOT be numbered as chapters.
-   - The 'prologue' string should contain a prologue (1,500-2,500 words) that immediately engages readers by: Opening with a vivid scene, surprising statement, or relatable problem; Establishing the book's core premise or conflict within the first 500 words; Including specific sensory details and concrete examples; Creating emotional connection through personal anecdote or universal experience; Ending with a clear promise of what the book will deliver; Matching the book's specified tone and target audience. MUST end with a "### Key Points" section containing 3-5 bullet points summarizing the prologue.
-   - The 'introduction' string should contain a comprehensive introduction (2,500-4,000 words) that: Opens with a clear, engaging heading that captures the book's essence; Includes 3-5 substantial sections that progressively build the book's foundation; Establishes the problem/opportunity this book addresses; Shares why this book exists now and why the author is uniquely qualified; Provides a roadmap of what readers will learn/gain from each section; Includes 2-3 specific examples or mini-case studies; Addresses common misconceptions or objections; Ends with clear instructions on how to use this book; Uses subheadings to break up text every 400-600 words; Matches the book's specified tone and speaks directly to target audience pain points. MUST end with a "### Key Points" section containing 3-5 bullet points summarizing the introduction.
-   - The 'conclusion' string should contain a powerful conclusion (2,500-4,000 words) that: Opens with an evocative heading that signals completion and new beginning; Synthesizes key insights without merely repeating chapter summaries; Includes 3-5 substantial sections that build toward a crescendo; Addresses the 'what now?' question with concrete next steps; Acknowledges the reader's journey and growth through the book; Paints a vivid picture of the reader's potential future state; Includes a memorable final message or call-to-action; Provides additional resources or community connections; Uses subheadings to structure the conclusion's narrative arc; Circles back to opening themes while showing transformation; Matches book's tone while adding inspirational elevation. MUST end with a "### Key Points" section containing 3-5 bullet points summarizing the conclusion.
+   - The 'prologue' string should contain a prologue (1,500-2,500 words) that immediately engages readers by: Opening with a vivid scene, surprising statement, or relatable problem; Establishing the book's core premise or conflict within the first 500 words; Including specific sensory details and concrete examples; Creating emotional connection through personal anecdote or universal experience; Ending with a clear promise of what the book will deliver; Matching the book's specified tone and target audience. MUST end with "***\n#### Key Points from Prologue\n- Point 1\n- Point 2\n- Point 3\n- Point 4\n- Point 5\n***"
+   - The 'introduction' string should contain a comprehensive introduction (2,500-4,000 words) that: Opens with a clear, engaging heading that captures the book's essence; Includes 3-5 substantial sections that progressively build the book's foundation; Establishes the problem/opportunity this book addresses; Shares why this book exists now and why the author is uniquely qualified; Provides a roadmap of what readers will learn/gain from each section; Includes 2-3 specific examples or mini-case studies; Addresses common misconceptions or objections; Ends with clear instructions on how to use this book; Uses subheadings to break up text every 400-600 words; Matches the book's specified tone and speaks directly to target audience pain points. MUST end with "***\n#### Key Points from Introduction\n- Point 1\n- Point 2\n- Point 3\n- Point 4\n- Point 5\n***"
+   - The 'conclusion' string should contain a powerful conclusion (2,500-4,000 words) that: Opens with an evocative heading that signals completion and new beginning; Synthesizes key insights without merely repeating chapter summaries; Includes 3-5 substantial sections that build toward a crescendo; Addresses the 'what now?' question with concrete next steps; Acknowledges the reader's journey and growth through the book; Paints a vivid picture of the reader's potential future state; Includes a memorable final message or call-to-action; Provides additional resources or community connections; Uses subheadings to structure the conclusion's narrative arc; Circles back to opening themes while showing transformation; Matches book's tone while adding inspirational elevation. MUST end with "***\n#### Key Points from Conclusion\n- Point 1\n- Point 2\n- Point 3\n- Point 4\n- Point 5\n***"
 5. The 'acknowledgement' field should contain a concise acknowledgement section (100-200 words) that: Thanks 2-3 key individuals or groups who made the book possible; Includes specific contributions rather than generic thanks; Mentions early readers, mentors, or community members who shaped the work; Acknowledges family/personal support briefly but genuinely; References any organizations, platforms, or communities integral to the book; Maintains professional warmth without excessive sentimentality; Ends with a forward-looking note about the book's intended impact; Matches the book's tone while being slightly more personal. The 'appendix' and 'references' fields should be brief top-level strings. 'coverPageDetails' is also a top-level object. These are not part of the main chapter flow or word count intensive sections like Prologue/Intro/Conclusion.
 6. Be creative with part titles and actual chapter titles based on the topic and market research.
 7. Ensure the JSON format is strictly followed as per the example.
@@ -412,9 +540,9 @@ You must respond with ONLY valid JSON in this exact format:
   "marketPosition": "Define market position (75-150 words) using this framework: Primary category/shelf placement; 2-3 successful comp titles and how this book differs; Target retailer categories; Price point positioning (premium/accessible/budget) with justification; Format priorities (hardcover/paperback/audio/digital); One-sentence elevator pitch for booksellers.",
   "uniqueValue": "Write a compelling unique value proposition (50-100 words) that identifies ONE primary differentiator from existing books in this category, states a specific benefit readers get here they can't find elsewhere, uses concrete language rather than abstract claims, avoids overused terms like 'comprehensive,' 'ultimate,' or 'revolutionary,' includes a measurable outcome or transformation when possible, formatted as 2-3 punchy sentences that could work as back-cover copy.",
   "acknowledgement": "Concise acknowledgement section (100-200 words) that thanks 2-3 key individuals or groups who made the book possible, includes specific contributions rather than generic thanks, mentions early readers, mentors, or community members who shaped the work, acknowledges family/personal support briefly but genuinely, references any organizations, platforms, or communities integral to the book, maintains professional warmth without excessive sentimentality, ends with a forward-looking note about the book's intended impact, and matches the book's tone while being slightly more personal.",
-  "prologue": "## Prologue Title Chosen by AI\\n\\nPrologue content (1,500-2,500 words) that immediately engages readers by opening with a vivid scene, surprising statement, or relatable problem, establishing the book's core premise or conflict within the first 500 words, including specific sensory details and concrete examples, creating emotional connection through personal anecdote or universal experience, ending with a clear promise of what the book will deliver, and matching the book's specified tone and target audience...\\n\\n### Key Points from Prologue\\n- Point 1\\n- Point 2",
-  "introduction": "# Introduction Title Chosen by AI\\n\\nComprehensive introduction content (2,500-4,000 words) that establishes the problem/opportunity this book addresses, shares why this book exists now and why the author is uniquely qualified, addresses common misconceptions or objections, ends with clear instructions on how to use this book, uses subheadings to break up text every 400-600 words, and matches the book's specified tone and speaks directly to target audience pain points...\\n\\n### Key Points from Introduction\\n- Point 1\\n- Point 2",
-  "conclusion": "# Evocative Conclusion Title Chosen by AI\\n\\nPowerful conclusion content (2,500-4,000 words) that synthesizes key insights without merely repeating chapter summaries, addresses the 'what now?' question with concrete next steps, acknowledges the reader's journey and growth through the book, paints a vivid picture of the reader's potential future state, includes a memorable final message or call-to-action, provides additional resources or community connections, uses subheadings to structure the conclusion's narrative arc, circles back to opening themes while showing transformation, and matches book's tone while adding inspirational elevation...\\n\\n### Key Points from Conclusion\\n- Point 1\\n- Point 2",
+  "prologue": "## Prologue Title Chosen by AI\\n\\nPrologue content (1,500-2,500 words) that immediately engages readers by opening with a vivid scene, surprising statement, or relatable problem, establishing the book's core premise or conflict within the first 500 words, including specific sensory details and concrete examples, creating emotional connection through personal anecdote or universal experience, ending with a clear promise of what the book will deliver, and matching the book's specified tone and target audience...\\n\\n***\\n#### Key Points from Prologue\\n- Point 1\\n- Point 2\\n- Point 3\\n- Point 4\\n- Point 5\\n***",
+  "introduction": "# Introduction Title Chosen by AI\\n\\nComprehensive introduction content (2,500-4,000 words) that establishes the problem/opportunity this book addresses, shares why this book exists now and why the author is uniquely qualified, addresses common misconceptions or objections, ends with clear instructions on how to use this book, uses subheadings to break up text every 400-600 words, and matches the book's specified tone and speaks directly to target audience pain points...\\n\\n***\\n#### Key Points from Introduction\\n- Point 1\\n- Point 2\\n- Point 3\\n- Point 4\\n- Point 5\\n***",
+  "conclusion": "# Evocative Conclusion Title Chosen by AI\\n\\nPowerful conclusion content (2,500-4,000 words) that synthesizes key insights without merely repeating chapter summaries, addresses the 'what now?' question with concrete next steps, acknowledges the reader's journey and growth through the book, paints a vivid picture of the reader's potential future state, includes a memorable final message or call-to-action, provides additional resources or community connections, uses subheadings to structure the conclusion's narrative arc, circles back to opening themes while showing transformation, and matches book's tone while adding inspirational elevation...\\n\\n***\\n#### Key Points from Conclusion\\n- Point 1\\n- Point 2\\n- Point 3\\n- Point 4\\n- Point 5\\n***",
   "appendix": "Optional: Brief appendix content, if applicable.",
   "references": "Optional: Brief references or bibliography, if applicable.",
   "coverPageDetails": {
@@ -862,6 +990,9 @@ CHAPTER STRUCTURE REQUIREMENTS:
     if (references.length > 0) {
       await updateBookReferences(chapter.book_id, references);
     }
+
+    // Auto-generate/update appendix content based on new chapter
+    await updateBookAppendix(chapter.book_id, content);
 
     res.json({ 
       chapter: firstUpdatedChapter,
