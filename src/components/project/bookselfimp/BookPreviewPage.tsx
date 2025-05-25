@@ -164,6 +164,9 @@ const BookPreviewPage: React.FC = () => {
     p,
     table,
     blockquote,
+    ul,
+    li,
+    ol,
     .quote,
     .attention,
     .key-points {
@@ -322,6 +325,7 @@ const BookPreviewPage: React.FC = () => {
       color: var(--primary-color);
       margin: 0 0 30px;
       page-break-before: always;
+      line-height: 1.89;
     }
     
     .toc-item.indent {
