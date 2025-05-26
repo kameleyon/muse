@@ -357,8 +357,13 @@ const BookPreviewPage: React.FC = () => {
       color: var(--primary-color);
       margin: 40px 0 15px;           /* generous but safe */
       line-height: 1.8;
-      page-break-before: always;     /* start new page but WITHOUT huge top offset */
+      page-break-before: auto;       /* Let content flow naturally */
       page-break-after: avoid;
+    }
+    
+    /* Only force page breaks for major sections */
+    h1.new-page {
+      page-break-before: always;
     }
 
     /* Special first-chapter titles */
@@ -367,6 +372,28 @@ const BookPreviewPage: React.FC = () => {
       text-align: center;
       margin: 0 0 40px;
       page-break-before: always;
+    }
+    
+    /* Empty chapter styling */
+    .empty-chapter {
+      margin: 20px 0;
+      padding: 10px;
+      background: var(--primary-light);
+      border-radius: 8px;
+      page-break-inside: avoid;
+    }
+    
+    .empty-chapter h1 {
+      font-size: 14pt;
+      margin: 0 0 5px;
+      page-break-before: auto;
+    }
+    
+    .empty-chapter p {
+      margin: 0;
+      font-style: italic;
+      color: #666;
+      font-size: 10pt;
     }
 
     h2 {
@@ -489,15 +516,11 @@ const BookPreviewPage: React.FC = () => {
       font-family: 'Comfortaa', sans-serif;
       font-size: 24pt;
       font-weight: 700;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;        
       color: var(--primary-color);
-      margin: 0 0 40px;
+      margin: 60px 0 40px;
+      text-align: center;
       page-break-before: always;
-      page-break-after: always;
+      page-break-after: auto;  /* Don't force a page break after */
     }
   </style>
 </head>
@@ -529,7 +552,7 @@ const BookPreviewPage: React.FC = () => {
 
     // Table of Contents
     console.log('\n--- GENERATING TABLE OF CONTENTS ---');
-    html += `<h1 class="toc-title">Table of Contents</h1>`;
+    html += `<h1 class="toc-title new-page">Table of Contents</h1>`;
     
     if (book.structure?.acknowledgement) html += `<div class="toc-item">Acknowledgement</div>`;
     if (book.structure?.prologue) html += `<div class="toc-item">Prologue</div>`;
@@ -558,7 +581,7 @@ const BookPreviewPage: React.FC = () => {
       console.log('Processing acknowledgement, length:', book.structure.acknowledgement.length);
       const ackHTML = markdownToHTML(book.structure.acknowledgement);
       console.log('Acknowledgement HTML length:', ackHTML.length);
-      html += `<h1>Acknowledgement</h1>${ackHTML}`;
+      html += `<h1 class="new-page">Acknowledgement</h1>${ackHTML}`;
     }
     
     if (book.structure?.prologue) {
@@ -587,8 +610,8 @@ const BookPreviewPage: React.FC = () => {
         console.log(`\nProcessing Part ${part.partNumber}: ${part.partTitle}`);
         console.log(`Part has ${part.chapters.length} chapters`);
         
-        // Part title on its own page
-        html += `<div class="part-title">Part ${part.partNumber}: ${part.partTitle}</div>`;
+        // Part title
+        html += `<h1 class="part-title">Part ${part.partNumber}: ${part.partTitle}</h1>`;
         
         // Chapters
         for (const chapStruct of part.chapters) {
@@ -629,12 +652,13 @@ const BookPreviewPage: React.FC = () => {
             });
           }
           
-          html += `<h1>Chapter ${chapStruct.number}: ${chapStruct.title}</h1>`;
-          if (chapStruct.description) {
-            html += `<p class="chapter-description">${chapStruct.description}</p>`;
-          }
-          
           if (chapter?.content) {
+            // Add new-page class only for chapters with content
+            html += `<h1 class="new-page">Chapter ${chapStruct.number}: ${chapStruct.title}</h1>`;
+            if (chapStruct.description) {
+              html += `<p class="chapter-description">${chapStruct.description}</p>`;
+            }
+            
             console.log(`  Converting markdown to HTML for chapter ${chapter.number}`);
             
             // Special debugging for Chapter 2
@@ -666,7 +690,11 @@ const BookPreviewPage: React.FC = () => {
             html += convertedHTML;
           } else {
             console.log(`  WARNING: No content for chapter ${chapStruct.number}`);
-            html += '<p>Content not available.</p>';
+            // Group empty chapters together without page breaks
+            html += `<div class="empty-chapter">
+              <h1>Chapter ${chapStruct.number}: ${chapStruct.title}</h1>
+              <p>Content not yet available</p>
+            </div>`;
           }
         }
       }
@@ -681,12 +709,13 @@ const BookPreviewPage: React.FC = () => {
         console.log(`  - Content length: ${chapter.content?.length || 0}`);
         console.log(`  - Has content: ${!!chapter.content}`);
         
-        html += `<h1>Chapter ${chapter.number}: ${chapter.title}</h1>`;
-        if (chapter.metadata?.description) {
-          html += `<p class="chapter-description">${chapter.metadata.description}</p>`;
-        }
-        
         if (chapter.content) {
+          // Add new-page class only for chapters with content
+          html += `<h1 class="new-page">Chapter ${chapter.number}: ${chapter.title}</h1>`;
+          if (chapter.metadata?.description) {
+            html += `<p class="chapter-description">${chapter.metadata.description}</p>`;
+          }
+          
           console.log(`  Converting markdown to HTML...`);
           
           // Special debugging for Chapter 2
@@ -718,7 +747,11 @@ const BookPreviewPage: React.FC = () => {
           html += convertedHTML;
         } else {
           console.log(`  WARNING: No content for chapter ${chapter.number}`);
-          html += '<p>Content not available.</p>';
+          // Group empty chapters together without page breaks
+          html += `<div class="empty-chapter">
+            <h1>Chapter ${chapter.number}: ${chapter.title}</h1>
+            <p>Content not yet available</p>
+          </div>`;
         }
       }
     }
@@ -727,21 +760,21 @@ const BookPreviewPage: React.FC = () => {
       console.log('\nProcessing conclusion, length:', book.structure.conclusion.length);
       const conclusionHTML = markdownToHTML(book.structure.conclusion);
       console.log('Conclusion HTML length:', conclusionHTML.length);
-      html += `<h1>Conclusion</h1>${conclusionHTML}`;
+      html += `<h1 class="new-page">Conclusion</h1>${conclusionHTML}`;
     }
     
     if (book.structure?.appendix) {
       console.log('\nProcessing appendix, length:', book.structure.appendix.length);
       const appendixHTML = markdownToHTML(book.structure.appendix);
       console.log('Appendix HTML length:', appendixHTML.length);
-      html += `<h1>Appendix</h1>${appendixHTML}`;
+      html += `<h1 class="new-page">Appendix</h1>${appendixHTML}`;
     }
     
     if (book.structure?.references) {
       console.log('\nProcessing references, length:', book.structure.references.length);
       const referencesHTML = markdownToHTML(book.structure.references);
       console.log('References HTML length:', referencesHTML.length);
-      html += `<h1>References</h1>${referencesHTML}`;
+      html += `<h1 class="new-page">References</h1>${referencesHTML}`;
     }
 
     html += `</body></html>`;
@@ -751,6 +784,28 @@ const BookPreviewPage: React.FC = () => {
     console.log('HTML contains "Chapter 1":', html.includes('Chapter 1'));
     console.log('HTML contains "Chapter 2":', html.includes('Chapter 2'));
     console.log('HTML contains "Content not available":', html.includes('Content not available'));
+    
+    // Count page break elements
+    const h1Count = (html.match(/<h1/g) || []).length;
+    const partTitleCount = (html.match(/class="part-title"/g) || []).length;
+    const pageBreakCount = h1Count + partTitleCount;
+    console.log('\n--- PAGE BREAK ANALYSIS ---');
+    console.log('H1 tags (with page-break-before):', h1Count);
+    console.log('Part title divs (with page breaks):', partTitleCount);
+    console.log('Total potential page breaks:', pageBreakCount);
+    console.log('Empty chapters ("Content not available"):', (html.match(/Content not available/g) || []).length);
+    
+    // Check Chapter 2 specific content
+    const chapter2Start = html.indexOf('Chapter 2: Discovering Your Habit Personality');
+    if (chapter2Start > -1) {
+      const chapter2End = html.indexOf('<h1', chapter2Start + 1);
+      const chapter2Section = chapter2End > -1 ? html.substring(chapter2Start, chapter2End) : html.substring(chapter2Start);
+      console.log('\n--- CHAPTER 2 SECTION ANALYSIS ---');
+      console.log('Chapter 2 section length:', chapter2Section.length);
+      console.log('Chapter 2 paragraph tags:', (chapter2Section.match(/<p>/g) || []).length);
+      console.log('Chapter 2 line breaks:', (chapter2Section.match(/<br>/g) || []).length);
+    }
+    
     console.log('--- generateBookHTML END ---\n');
     
     return html;
