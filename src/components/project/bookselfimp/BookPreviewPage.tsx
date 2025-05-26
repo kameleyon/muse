@@ -366,13 +366,13 @@ const BookPreviewPage: React.FC = () => {
       page-break-before: always;
     }
 
-    /* Special first-chapter titles */
+    /* Special first-chapter titles 
     h1.prologue-title, h1.introduction-title {
       font-size: 17pt;
       text-align: center;
       margin: 0 0 40px;
       page-break-before: always;
-    }
+    }*/
     
     /* Empty chapter styling */
     .empty-chapter {
@@ -462,38 +462,41 @@ const BookPreviewPage: React.FC = () => {
     }
 
     /* ---------- 8) KEY-POINTS BOX ---------- */
-    .key-points {
-      background: rgba(120,113,108,.15);
-      border: 1px solid rgba(120,113,108,.7);
-      border-radius: 12px;
-      padding: 4pt;
-      margin: 20px 0;
-      page-break-inside: avoid;
-    }
-
-    .key-points h3,
-    .key-points h4 {
-      color: #78716c;
-      font-size: 10pt;
-      margin-top: 0;
-      margin-bottom: 2pt;
-      font-style: normal;
-      font-weight: 600;
-    }
-
-    .key-points p,
-    .key-points li {
-      color: rgba(120, 113, 108, 0.85);
-      font-size: 10pt;
-      line-height: 1.4;
-      margin-bottom: 2pt;
-      text-indent: 0;
+    .key-points{
+      border-radius:0.75rem;
+      border:1px solid rgba(168,162,158,.70);
+      background:rgba(214,211,209,.15);
+      padding:1rem;
+      margin:1rem 0;
+      font:500 0.9rem 'Questrial',sans-serif;
+      color:#57534E;
+      line-height: 1.6;
+      
     }
 
     .key-points ul {
-      margin-top: 2pt;
-      margin-bottom: 2pt;
-      padding-left: 12pt;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .key-points li {
+      display: table;
+      margin-bottom: 15px;
+    }
+
+    .key-points li:before {
+      content: "•";
+      display: table-cell;
+      padding-right: 0.75rem;
+      font-weight: bold;
+    }
+
+    .key-points h4 {
+      margin: 0 0 0.5rem 0;
+      font-size: 12pt;
+      color: #57534E;
+      font-weight: 700;
     }
 
 
@@ -506,6 +509,7 @@ const BookPreviewPage: React.FC = () => {
       color: var(--primary-color);
       margin: 0 0 30px;
       page-break-before: always;
+      line-height: 1.8;
     }
     
     .toc-item.indent {
@@ -518,7 +522,11 @@ const BookPreviewPage: React.FC = () => {
       font-weight: 700;
       color: var(--primary-color);
       margin: 60px 0 40px;
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;  
       page-break-before: always;
       page-break-after: auto;  /* Don't force a page break after */
     }
@@ -812,112 +820,242 @@ const BookPreviewPage: React.FC = () => {
   };
 
   const markdownToHTML = (markdown: string | null | undefined): string => {
-    console.log('\n  --- markdownToHTML START ---');
-    console.log('  Input type:', typeof markdown);
-    console.log('  Input is null:', markdown === null);
-    console.log('  Input is undefined:', markdown === undefined);
-    console.log('  Input length:', markdown?.length || 0);
+    if (!markdown) return '';
+  
+    // HTML entity encoding for security
+    const escapeHtml = (text: string): string => {
+      const htmlEntities: Record<string, string> = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return text.replace(/[&<>"']/g, (char: string) => htmlEntities[char] || char);
+    };
+  
+    // Preserve code blocks and inline code before processing
+    const codeBlocks: string[] = [];
+    const inlineCode: string[] = [];
     
-    if (!markdown) {
-      console.log('  WARNING: No markdown content to convert');
-      return '';
-    }
-    
-    console.log('  Markdown preview (first 200 chars):', markdown.substring(0, 200));
-    console.log('  Contains special chars check:');
-    console.log('    - Contains table (|):', markdown.includes('|'));
-    console.log('    - Contains heading (#):', markdown.includes('#'));
-    console.log('    - Contains bold (**):', markdown.includes('**'));
-    console.log('    - Contains list (-):', markdown.includes('\n- '));
-    console.log('    - Contains blockquote (>):', markdown.includes('\n> '));
-    
-    let html = markdown;
-    
-    try {
-      console.log('  Starting markdown conversions...');
-    
-    // Handle tables first (before other processing)
-    const tableMatches = html.match(/\|(.+)\|\n\|[-\s|:]+\|\n((?:\|.+\|\n?)*)/g);
-    console.log('  Table patterns found:', tableMatches?.length || 0);
-    
-    html = html.replace(/\|(.+)\|\n\|[-\s|:]+\|\n((?:\|.+\|\n?)*)/g, (match, header, rows) => {
-      // Process header
-      const headerCells = header.split('|').map((cell: string) => cell.trim()).filter((cell: string) => cell.length > 0);
-      const headerHtml = headerCells.map((cell: string) => `<th>${cell}</th>`).join('');
+    // Extract fenced code blocks first (```language\n...\n```)
+    let html = markdown.replace(/```(\w*)\n([\s\S]*?)```/g, (match: string, lang: string, code: string): string => {
+      const index = codeBlocks.length;
+      const className = lang ? ` class="language-${lang}"` : '';
+      codeBlocks.push(`<pre><code${className}>${escapeHtml(code.trim())}</code></pre>`);
+      return `__CODE_BLOCK_${index}__`;
+    });
+  
+    // Extract inline code (single backticks)
+    html = html.replace(/`([^`\n]+)`/g, (match: string, code: string): string => {
+      const index = inlineCode.length;
+      inlineCode.push(`<code>${escapeHtml(code)}</code>`);
+      return `__INLINE_CODE_${index}__`;
+    });
+  
+    // Headers (h1-h6) with id generation for anchoring
+    const generateId = (text: string): string => {
+      return text.toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .trim();
+    };
+  
+    // Headers (keeping h1 for PDF compatibility, but you might want to adjust)
+    html = html.replace(/^###### (.+)$/gm, '<h6>$1</h6>');
+    html = html.replace(/^##### (.+)$/gm, '<h5>$1</h5>');
+    html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
+    html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+    html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+  
+    // Key Points (custom syntax: ***...***) - Handle multiline
+    html = html.replace(/\*\*\*([\s\S]*?)\*\*\*/g, (match: string, content: string): string => {
+      const lines = content.trim()
+        .split('\n')
+        .map((line: string) => line.trim())
+        .filter((line: string) => line.length > 0);
       
-      // Process body rows
-      const bodyRows = rows.trim().split('\n').filter((row: string) => row.trim().length > 0);
-      const bodyHtml = bodyRows.map((row: string) => {
-        const cells = row.split('|').map((cell: string) => cell.trim()).filter((cell: string) => cell.length > 0);
-        const cellsHtml = cells.map((cell: string) => `<td>${cell}</td>`).join('');
-        return `<tr>${cellsHtml}</tr>`;
-      }).join('');
+      // Check if it's a list-based key points section
+      const hasListItems = lines.some(line => line.startsWith('-') || line.startsWith('*') || line.startsWith('+'));
       
-      return `<table>
-        <thead>
-          <tr>${headerHtml}</tr>
-        </thead>
-        <tbody>
-          ${bodyHtml}
-        </tbody>
-      </table>`;
+      if (hasListItems) {
+        // Process as a list
+        let listContent = '<ul>\n';
+        lines.forEach((line: string) => {
+          if (line.match(/^[-*+]\s+(.+)$/)) {
+            const content = line.replace(/^[-*+]\s+/, '');
+            listContent += `  <li>${content}</li>\n`;
+          } else if (line.length > 0) {
+            // Handle title or non-list content
+            if (!listContent.includes('<h4>')) {
+              listContent = `<h4>${line}</h4>\n` + listContent;
+            }
+          }
+        });
+        listContent += '</ul>';
+        return `<div class="key-points">${listContent}</div>`;
+      } else {
+        // Process as regular content
+        const processedContent = lines.join('<br>');
+        return `<div class="key-points">${processedContent}</div>`;
+      }
+    });
+  
+    // Horizontal rules
+    html = html.replace(/^([-*_])\1{2,}$/gm, '<hr>');
+  
+    // Blockquotes (simple version for compatibility)
+    html = html.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
+    
+    // Merge consecutive blockquotes
+    html = html.replace(/(<\/blockquote>\s*<blockquote>)/g, '<br>');
+  
+    // Tables - Enhanced with better parsing
+    html = html.replace(/^\|(.+)\|\s*\n\|([\s\-:|]+)\|\s*\n((?:\|.+\|\s*\n?)*)/gm, 
+      (match: string, headerRow: string, alignmentRow: string, bodyRows: string): string => {
+        // Parse alignment
+        const alignments = alignmentRow.split('|')
+          .map((cell: string) => cell.trim())
+          .filter((cell: string) => cell.length > 0)
+          .map((cell: string) => {
+            if (cell.startsWith(':') && cell.endsWith(':')) return 'center';
+            if (cell.endsWith(':')) return 'right';
+            if (cell.startsWith(':')) return 'left';
+            return '';
+          });
+  
+        // Process header
+        const headerCells = headerRow.split('|')
+          .map((cell: string) => cell.trim())
+          .filter((cell: string) => cell.length > 0);
+        
+        const headerHtml = headerCells
+          .map((cell: string, i: number) => {
+            const align = alignments[i] ? ` style="text-align: ${alignments[i]}"` : '';
+            return `<th${align}>${cell}</th>`;
+          })
+          .join('');
+  
+        // Process body rows
+        const rows = bodyRows.trim().split('\n').filter((row: string) => row.trim().length > 0);
+        const bodyHtml = rows.map((row: string) => {
+          const cells = row.split('|')
+            .map((cell: string) => cell.trim())
+            .filter((cell: string, index: number, arr: string[]) => {
+              // Keep cells that are between pipe symbols
+              return index > 0 && index < arr.length - 1;
+            });
+          
+          const cellsHtml = cells
+            .map((cell: string, i: number) => {
+              const align = alignments[i] ? ` style="text-align: ${alignments[i]}"` : '';
+              return `<td${align}>${cell}</td>`;
+            })
+            .join('');
+          
+          return `<tr>${cellsHtml}</tr>`;
+        }).join('\n    ');
+  
+        return `<table>
+    <thead>
+      <tr>${headerHtml}</tr>
+    </thead>
+    <tbody>
+      ${bodyHtml}
+    </tbody>
+  </table>`;
+      }
+    );
+  
+    // Task lists
+    html = html.replace(/^- \[([ x])\] (.+)$/gm, (match: string, checked: string, text: string): string => {
+      const isChecked = checked === 'x' ? ' checked' : '';
+      return `<li class="task-list-item"><input type="checkbox" disabled${isChecked}> ${text}</li>`;
+    });
+  
+    // Lists - Simple version for better compatibility
+    // First mark list items
+    html = html.replace(/^(\d+)\.\s+(.+)$/gm, '<oli>$2</oli>');
+    html = html.replace(/^[-*+]\s+(?!\[[ x]\])(.+)$/gm, '<uli>$1</uli>');
+    
+    // Wrap consecutive items
+    html = html.replace(/((?:<oli>.*?<\/oli>\s*)+)/g, '<ol>$1</ol>');
+    html = html.replace(/((?:<uli>.*?<\/uli>\s*)+)/g, '<ul>$1</ul>');
+    
+    // Convert to proper li tags
+    html = html.replace(/<oli>/g, '<li>');
+    html = html.replace(/<\/oli>/g, '</li>');
+    html = html.replace(/<uli>/g, '<li>');
+    html = html.replace(/<\/uli>/g, '</li>');
+  
+    // Links
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    
+    // Images
+    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
+  
+    // Strong emphasis (bold) - Must come before single * for italic
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+  
+    // Emphasis (italic) - After bold to avoid conflicts
+    html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    html = html.replace(/_([^_]+)_/g, '<em>$1</em>');
+  
+    // Strikethrough
+    html = html.replace(/~~([^~]+?)~~/g, '<del>$1</del>');
+  
+    // Line breaks (two spaces at end of line)
+    html = html.replace(/  $/gm, '<br>');
+  
+    // Paragraphs - More sophisticated handling
+    const paragraphize = (text: string): string => {
+      // Split into blocks
+      const blocks = text.split(/\n{2,}/);
+      
+      return blocks.map((block: string) => {
+        block = block.trim();
+        
+        // Don't wrap if it's already wrapped in block-level elements
+        if (block.match(/^<(?:h[1-6]|ul|ol|li|blockquote|pre|table|div|hr)/)) {
+          return block;
+        }
+        
+        // Don't wrap if it's a code block placeholder
+        if (block.match(/^__CODE_BLOCK_\d+__$/)) {
+          return block;
+        }
+        
+        // Don't wrap empty blocks
+        if (!block) {
+          return '';
+        }
+        
+        // Wrap in paragraph tags
+        return `<p>${block}</p>`;
+      }).filter((block: string) => block).join('\n\n');
+    };
+    
+    html = paragraphize(html);
+  
+    // Restore code blocks and inline code
+    codeBlocks.forEach((code: string, index: number) => {
+      html = html.replace(`__CODE_BLOCK_${index}__`, code);
     });
     
-    // Handle Key Points sections with special styling
-    html = html.replace(/^(#{1,4})\s*(Key Points.*?)$/gim, (match, hashes, title) => {
-      return `<div class="key-points">\n${hashes.replace(/#/g, '').length === 3 ? '<h3>' : '<h4>'}${title}${hashes.replace(/#/g, '').length === 3 ? '</h3>' : '</h4>'}\n`;
+    inlineCode.forEach((code: string, index: number) => {
+      html = html.replace(`__INLINE_CODE_${index}__`, code);
     });
-    
-    // Close Key Points sections before next heading or at end
-    html = html.replace(/(<div class="key-points">[\s\S]*?)(?=(^#{1,4}\s|$))/gm, (match, content) => {
-      return content + '\n</div>\n';
-    });
-    
-    // Enhanced markdown to HTML conversion with blockquotes
-    return html
-      // Handle blockquotes first
-      .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
-      // Handle headings (but skip those already processed in key points)
-      .replace(/^### ((?!.*Key Points).*$)/gim, '<h3>$1</h3>')
-      .replace(/^## ((?!.*Key Points).*$)/gim, '<h2>$1</h2>')
-      .replace(/^# ((?!.*Key Points).*$)/gim, '<h1>$1</h1>')
-      // Handle bold and italic
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      // Handle lists
-      .replace(/^\- (.+)$/gm, '<li>$1</li>')
-      .replace(/^(\d+)\. (.+)$/gm, '<li>$1</li>')
-      // Wrap consecutive list items in ul tags
-      .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
-      // Handle line breaks and paragraphs
-      .replace(/\n\n/g, '</p><p>')
-      .replace(/\n/g, '<br>')
-      .replace(/^(.*)$/gm, '<p>$1</p>')
-      // Clean up empty paragraphs and fix heading paragraphs
-      .replace(/<p><\/p>/g, '')
-      .replace(/<p><h/g, '<h')
-      .replace(/<\/h([1-6])><\/p>/g, '</h$1>')
-      .replace(/<p><blockquote>/g, '<blockquote>')
-      .replace(/<\/blockquote><\/p>/g, '</blockquote>')
-      .replace(/<p><table>/g, '<table>')
-      .replace(/<\/table><\/p>/g, '</table>')
-      .replace(/<p><ul>/g, '<ul>')
-      .replace(/<\/ul><\/p>/g, '</ul>')
-      .replace(/<p><div class="key-points">/g, '<div class="key-points">')
-      .replace(/<\/div><\/p>/g, '</div>');
-      
-      console.log('  Markdown conversion completed successfully');
-    } catch (error) {
-      console.error('  ERROR in markdownToHTML:', error);
-      console.error('  Error stack:', (error as Error).stack);
-      console.log('  Returning empty string due to error');
-      return '';
-    }
-      
-    console.log('  Converted HTML length:', html.length);
-    console.log('  Converted HTML preview (first 200 chars):', html.substring(0, 200));
-    console.log('  --- markdownToHTML END ---\n');
-    
+  
+    // Clean up any remaining paragraph issues
+    html = html.replace(/<p>\s*<\/p>/g, '');
+    html = html.replace(/<p>(<(?:h[1-6]|ul|ol|li|blockquote|pre|table|div|hr))/g, '$1');
+    html = html.replace(/(<\/(?:h[1-6]|ul|ol|li|blockquote|pre|table|div|hr)>)<\/p>/g, '$1');
+  
+    // Clean up extra newlines
+    html = html.replace(/\n{3,}/g, '\n\n');
+  
     return html;
   };
 
