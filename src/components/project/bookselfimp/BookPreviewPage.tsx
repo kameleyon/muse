@@ -19,15 +19,42 @@ const BookPreviewPage: React.FC = () => {
   const [activeChapterId, setActiveChapterId] = useState<string | null>(null);
 
   const loadBookData = useCallback(async () => {
-    if (!bookId) return;
+    console.log('\n=== LOADING BOOK DATA ===');
+    console.log('Book ID:', bookId);
+    
+    if (!bookId) {
+      console.log('No bookId provided, returning');
+      return;
+    }
+    
     try {
       setLoading(true);
+      console.log('Fetching book data from service...');
       const bookData = await bookService.getBook(bookId);
+      
+      console.log('Book data received:');
+      console.log('  - ID:', bookData?.id);
+      console.log('  - Title:', bookData?.title);
+      console.log('  - Has structure:', !!bookData?.structure);
+      console.log('  - Chapters count:', bookData?.chapters?.length || 0);
+      
+      if (bookData?.chapters) {
+        console.log('\nChapters in loaded book:');
+        bookData.chapters.forEach((ch, idx) => {
+          console.log(`  [${idx}] Chapter ${ch.number}: "${ch.title}"`);
+          console.log(`       - Content length: ${ch.content?.length || 0}`);
+          console.log(`       - Has content: ${!!ch.content}`);
+        });
+      }
+      
       setBook(bookData);
+      console.log('Book data set to state');
     } catch (err: any) {
+      console.error('Error loading book:', err);
       setError(err.message || 'Failed to load book');
     } finally {
       setLoading(false);
+      console.log('=== BOOK DATA LOADING COMPLETE ===\n');
     }
   }, [bookId]);
 
@@ -95,13 +122,78 @@ const BookPreviewPage: React.FC = () => {
   };
 
   const downloadPdfFile = async () => {
-    if (!book) return;
+    console.log('=== PDF GENERATION START ===');
+    console.log('Book object:', book);
+    console.log('Book ID:', book?.id);
+    console.log('Book Title:', book?.title);
+    console.log('Book Structure exists:', !!book?.structure);
+    console.log('Book Chapters count:', book?.chapters?.length || 0);
+    
+    if (!book) {
+      console.error('No book object available');
+      return;
+    }
+    
+    // Log chapter details
+    console.log('\n=== CHAPTER DETAILS ===');
+    book.chapters?.forEach((chapter, index) => {
+      console.log(`\nChapter at index ${index}:`);
+      console.log(`  - ID: ${chapter.id}`);
+      console.log(`  - Number property: ${chapter.number}`);
+      console.log(`  - Title: "${chapter.title}"`);
+      console.log(`  - Content length: ${chapter.content?.length || 0} characters`);
+      console.log(`  - Content preview: ${chapter.content?.substring(0, 100)}...`);
+      console.log(`  - Has content: ${!!chapter.content}`);
+      console.log(`  - Content type: ${typeof chapter.content}`);
+      
+      // Special note about chapter numbering
+      if (chapter.title === 'The Myth of Universal Willpower') {
+        console.log(`  *** NOTE: This is "The Myth of Universal Willpower" chapter`);
+        console.log(`      It has number=${chapter.number} but contains content`);
+      }
+      if (chapter.title === 'Discovering Your Habit Personality') {
+        console.log(`  *** NOTE: This is "Discovering Your Habit Personality" chapter`);
+        console.log(`      It has number=${chapter.number} and content length=${chapter.content?.length || 0}`);
+      }
+    });
+    
     setPdfLoading(true); 
     setError('');
 
     try {
+      console.log('\n=== GENERATING HTML ===');
       // Create HTML content with proper styling
       const htmlContent = generateBookHTML();
+      console.log('Generated HTML length:', htmlContent.length);
+      console.log('HTML preview (first 500 chars):', htmlContent.substring(0, 500));
+      console.log('HTML preview (last 500 chars):', htmlContent.substring(htmlContent.length - 500));
+      
+      // Check if HTML contains chapter content
+      const hasChapterContent = htmlContent.includes('Chapter 1:') || htmlContent.includes('Chapter 2:');
+      console.log('HTML contains chapter markers:', hasChapterContent);
+      
+      // Additional HTML validation
+      console.log('\n=== HTML VALIDATION ===');
+      console.log('HTML starts with DOCTYPE:', htmlContent.startsWith('\n    <!DOCTYPE html>'));
+      console.log('HTML ends with </html>:', htmlContent.endsWith('</html>'));
+      console.log('HTML contains <body>:', htmlContent.includes('<body>'));
+      console.log('HTML contains </body>:', htmlContent.includes('</body>'));
+      
+      // Check for potential problematic characters
+      const nullBytes = (htmlContent.match(/\x00/g) || []).length;
+      console.log('Null bytes found:', nullBytes);
+      
+      // Check HTML structure
+      const bodyStart = htmlContent.indexOf('<body>');
+      const bodyEnd = htmlContent.indexOf('</body>');
+      console.log('Body tag positions - start:', bodyStart, 'end:', bodyEnd);
+      
+      if (bodyStart > -1 && bodyEnd > -1) {
+        const bodyContent = htmlContent.substring(bodyStart + 6, bodyEnd);
+        console.log('Body content length:', bodyContent.length);
+        console.log('Body contains Chapter 1:', bodyContent.includes('Chapter 1'));
+        console.log('Body contains Chapter 2:', bodyContent.includes('Chapter 2'));
+      }
       
       const options = {
         margin: [1, 1, 1, 1], // Changed from single number to array [top, right, bottom, left]
@@ -117,18 +209,85 @@ const BookPreviewPage: React.FC = () => {
           orientation: 'portrait'
         }
       };
+      
+      console.log('\n=== PDF OPTIONS ===');
+      console.log('PDF options:', JSON.stringify(options, null, 2));
 
-      await html2pdf().set(options).from(htmlContent).save();
+      console.log('\n=== CREATING PDF ===');
+      console.log('Passing HTML to html2pdf...');
+      console.log('HTML null check:', htmlContent === null);
+      console.log('HTML undefined check:', htmlContent === undefined);
+      console.log('HTML empty check:', htmlContent === '');
+      console.log('HTML type:', typeof htmlContent);
+      
+      // Try different approaches to debug the issue
+      console.log('Creating html2pdf instance...');
+      
+      try {
+        // Method 1: Direct chaining (original approach)
+        console.log('Attempting direct chaining method...');
+        await html2pdf().set(options).from(htmlContent).save();
+        console.log('Direct chaining method succeeded');
+      } catch (e1) {
+        console.error('Direct chaining failed:', (e1 as Error).message);
+        
+        try {
+          // Method 2: Step by step with element
+          console.log('\nAttempting element-based method...');
+          const element = document.createElement('div');
+          element.innerHTML = htmlContent;
+          console.log('Created div element with HTML content');
+          console.log('Element children count:', element.children.length);
+          console.log('Element innerHTML length:', element.innerHTML.length);
+          
+          await html2pdf().set(options).from(element).save();
+          console.log('Element-based method succeeded');
+        } catch (e2) {
+          console.error('Element-based method failed:', (e2 as Error).message);
+          
+          // Method 3: Create a temporary container in DOM
+          console.log('\nAttempting DOM-based method...');
+          const tempContainer = document.createElement('div');
+          tempContainer.id = 'pdf-temp-container';
+          tempContainer.style.position = 'absolute';
+          tempContainer.style.left = '-9999px';
+          tempContainer.style.top = '-9999px';
+          tempContainer.innerHTML = htmlContent;
+          document.body.appendChild(tempContainer);
+          console.log('Added temp container to DOM');
+          
+          try {
+            await html2pdf().set(options).from(tempContainer).save();
+            console.log('DOM-based method succeeded');
+          } catch (e3) {
+            console.error('DOM-based method failed:', (e3 as Error).message);
+          } finally {
+            document.body.removeChild(tempContainer);
+            console.log('Removed temp container from DOM');
+          }
+        }
+      }
+      
+      console.log('PDF generation completed');
     } catch (e) {
+      console.error("\n=== PDF GENERATION ERROR ===");
       console.error("Error generating PDF:", e);
+      console.error("Error stack:", (e as Error).stack);
       setError("Failed to generate PDF. Check console for details.");
     } finally {
       setPdfLoading(false); 
+      console.log('=== PDF GENERATION END ===\n');
     }
   };
 
   const generateBookHTML = () => {
-    if (!book) return '';
+    console.log('\n--- generateBookHTML START ---');
+    console.log('Book available:', !!book);
+    
+    if (!book) {
+      console.error('No book in generateBookHTML');
+      return '';
+    }
     
     let html = `
     <!DOCTYPE html>
@@ -346,7 +505,13 @@ const BookPreviewPage: React.FC = () => {
     `;
 
     // Cover Page
+    console.log('\n--- GENERATING COVER PAGE ---');
     if (book.structure?.coverPageDetails) {
+      console.log('Cover page details found');
+      console.log('  - Title:', book.structure.coverPageDetails.title);
+      console.log('  - Subtitle:', book.structure.coverPageDetails.subtitle);
+      console.log('  - Author:', book.structure.coverPageDetails.authorName);
+      
       html += `<div class="cover-page">`;
       if (book.structure.coverPageDetails.title) {
         html += `<div class="cover-title">${book.structure.coverPageDetails.title}</div>`;
@@ -358,9 +523,12 @@ const BookPreviewPage: React.FC = () => {
         html += `<div class="cover-author">By ${book.structure.coverPageDetails.authorName}</div>`;
       }
       html += `</div>`;
+    } else {
+      console.log('No cover page details found');
     }
 
     // Table of Contents
+    console.log('\n--- GENERATING TABLE OF CONTENTS ---');
     html += `<h1 class="toc-title">Table of Contents</h1>`;
     
     if (book.structure?.acknowledgement) html += `<div class="toc-item">Acknowledgement</div>`;
@@ -385,76 +553,238 @@ const BookPreviewPage: React.FC = () => {
     if (book.structure?.references) html += `<div class="toc-item">References</div>`;
 
     // Content Sections
+    console.log('\n--- PROCESSING CONTENT SECTIONS ---');
     if (book.structure?.acknowledgement) {
-      html += `<h1>Acknowledgement</h1>${markdownToHTML(book.structure.acknowledgement)}`;
+      console.log('Processing acknowledgement, length:', book.structure.acknowledgement.length);
+      const ackHTML = markdownToHTML(book.structure.acknowledgement);
+      console.log('Acknowledgement HTML length:', ackHTML.length);
+      html += `<h1>Acknowledgement</h1>${ackHTML}`;
     }
     
     if (book.structure?.prologue) {
-      html += `<h1 class="prologue-title">Prologue</h1>${markdownToHTML(book.structure.prologue)}`;
+      console.log('Processing prologue, length:', book.structure.prologue.length);
+      const prologueHTML = markdownToHTML(book.structure.prologue);
+      console.log('Prologue HTML length:', prologueHTML.length);
+      html += `<h1 class="prologue-title">Prologue</h1>${prologueHTML}`;
     }
     
     if (book.structure?.introduction) {
-      html += `<h1 class="introduction-title">Introduction</h1>${markdownToHTML(book.structure.introduction)}`;
+      console.log('Processing introduction, length:', book.structure.introduction.length);
+      const introHTML = markdownToHTML(book.structure.introduction);
+      console.log('Introduction HTML length:', introHTML.length);
+      html += `<h1 class="introduction-title">Introduction</h1>${introHTML}`;
     }
 
     // Parts and Chapters
+    console.log('\n--- PROCESSING CHAPTERS ---');
+    console.log('Has parts structure:', !!(book.structure?.parts && book.structure.parts.length > 0));
+    console.log('Parts count:', book.structure?.parts?.length || 0);
+    console.log('Direct chapters count:', book.chapters?.length || 0);
+    
     if (book.structure?.parts && book.structure.parts.length > 0) {
+      console.log('Processing parts-based structure...');
       for (const part of book.structure.parts) {
+        console.log(`\nProcessing Part ${part.partNumber}: ${part.partTitle}`);
+        console.log(`Part has ${part.chapters.length} chapters`);
+        
         // Part title on its own page
         html += `<div class="part-title">Part ${part.partNumber}: ${part.partTitle}</div>`;
         
         // Chapters
         for (const chapStruct of part.chapters) {
-          const chapter = (book.chapters || []).find(c => c.number === chapStruct.number && c.title === chapStruct.title);
+          console.log(`\n  Looking for chapter - Number: ${chapStruct.number}, Title: ${chapStruct.title}`);
+          
+          // Log the matching logic
+          const matchByBoth = (book.chapters || []).find(c => c.number === chapStruct.number && c.title === chapStruct.title);
+          const matchByNumber = (book.chapters || []).find(c => c.number === chapStruct.number);
+          const matchByTitle = (book.chapters || []).find(c => c.title === chapStruct.title);
+          
+          console.log(`  Match by both number & title: ${!!matchByBoth}`);
+          console.log(`  Match by number only: ${!!matchByNumber}`);
+          console.log(`  Match by title only: ${!!matchByTitle}`);
+          
+          const chapter = matchByBoth || matchByTitle || matchByNumber;
+          
+          if (chapter) {
+            console.log(`  Found matching chapter:`);
+            console.log(`    - ID: ${chapter.id}`);
+            console.log(`    - Number: ${chapter.number}`);
+            console.log(`    - Title: ${chapter.title}`);
+            console.log(`    - Content length: ${chapter.content?.length || 0}`);
+            console.log(`    - Has content: ${!!chapter.content}`);
+            console.log(`    - Content is string: ${typeof chapter.content === 'string'}`);
+            
+            // Check for common issues
+            if (chapter.content && chapter.content.length > 0) {
+              const trimmedContent = chapter.content.trim();
+              console.log(`    - Trimmed content length: ${trimmedContent.length}`);
+              console.log(`    - Starts with whitespace: ${chapter.content !== trimmedContent}`);
+              console.log(`    - First 50 chars: "${chapter.content.substring(0, 50).replace(/\n/g, '\\n')}"`);
+            }
+          } else {
+            console.log(`  WARNING: No matching chapter found!`);
+            console.log(`  Available chapters in book.chapters:`);
+            (book.chapters || []).forEach((ch, idx) => {
+              console.log(`    [${idx}] Number: ${ch.number}, Title: "${ch.title}"`);
+            });
+          }
           
           html += `<h1>Chapter ${chapStruct.number}: ${chapStruct.title}</h1>`;
           if (chapStruct.description) {
             html += `<p class="chapter-description">${chapStruct.description}</p>`;
           }
+          
           if (chapter?.content) {
-            html += markdownToHTML(chapter.content);
+            console.log(`  Converting markdown to HTML for chapter ${chapter.number}`);
+            
+            // Special debugging for Chapter 2
+            if (chapter.number === 2) {
+              console.log('  *** SPECIAL DEBUG FOR CHAPTER 2 ***');
+              console.log('  Chapter 2 content first 500 chars:', chapter.content.substring(0, 500));
+              console.log('  Chapter 2 content last 500 chars:', chapter.content.substring(chapter.content.length - 500));
+              console.log('  Chapter 2 contains Unicode:', /[^\x00-\x7F]/.test(chapter.content));
+              console.log('  Chapter 2 contains null bytes:', chapter.content.includes('\x00'));
+              
+              // Check for invisible characters
+              const invisibleChars = chapter.content.match(/[\x00-\x1F\x7F-\x9F]/g);
+              if (invisibleChars) {
+                console.log('  Chapter 2 invisible characters found:', invisibleChars.length);
+                console.log('  First few invisible char codes:', invisibleChars.slice(0, 10).map(c => c.charCodeAt(0)));
+              }
+            }
+            
+            const convertedHTML = markdownToHTML(chapter.content);
+            console.log(`  Converted HTML length: ${convertedHTML.length}`);
+            console.log(`  Converted HTML preview: ${convertedHTML.substring(0, 200)}...`);
+            
+            // More debugging for Chapter 2
+            if (chapter.number === 2) {
+              console.log('  Chapter 2 converted HTML is empty:', convertedHTML === '');
+              console.log('  Chapter 2 converted HTML is whitespace only:', convertedHTML.trim() === '');
+            }
+            
+            html += convertedHTML;
           } else {
+            console.log(`  WARNING: No content for chapter ${chapStruct.number}`);
             html += '<p>Content not available.</p>';
           }
         }
       }
     } else {
+      console.log('Processing direct chapters (no parts structure)...');
       const sortedChapters = [...(book.chapters || [])].sort((a,b) => a.number - b.number);
+      console.log(`Sorted chapters count: ${sortedChapters.length}`);
+      
       for (const chapter of sortedChapters) {
+        console.log(`\nProcessing Chapter ${chapter.number}: ${chapter.title}`);
+        console.log(`  - ID: ${chapter.id}`);
+        console.log(`  - Content length: ${chapter.content?.length || 0}`);
+        console.log(`  - Has content: ${!!chapter.content}`);
+        
         html += `<h1>Chapter ${chapter.number}: ${chapter.title}</h1>`;
         if (chapter.metadata?.description) {
           html += `<p class="chapter-description">${chapter.metadata.description}</p>`;
         }
+        
         if (chapter.content) {
-          html += markdownToHTML(chapter.content);
+          console.log(`  Converting markdown to HTML...`);
+          
+          // Special debugging for Chapter 2
+          if (chapter.number === 2) {
+            console.log('  *** SPECIAL DEBUG FOR CHAPTER 2 (non-parts) ***');
+            console.log('  Chapter 2 content first 500 chars:', chapter.content.substring(0, 500));
+            console.log('  Chapter 2 content last 500 chars:', chapter.content.substring(chapter.content.length - 500));
+            console.log('  Chapter 2 contains Unicode:', /[^\x00-\x7F]/.test(chapter.content));
+            console.log('  Chapter 2 contains null bytes:', chapter.content.includes('\x00'));
+            
+            // Check for invisible characters
+            const invisibleChars = chapter.content.match(/[\x00-\x1F\x7F-\x9F]/g);
+            if (invisibleChars) {
+              console.log('  Chapter 2 invisible characters found:', invisibleChars.length);
+              console.log('  First few invisible char codes:', invisibleChars.slice(0, 10).map(c => c.charCodeAt(0)));
+            }
+          }
+          
+          const convertedHTML = markdownToHTML(chapter.content);
+          console.log(`  Converted HTML length: ${convertedHTML.length}`);
+          console.log(`  Converted HTML preview: ${convertedHTML.substring(0, 200)}...`);
+          
+          // More debugging for Chapter 2
+          if (chapter.number === 2) {
+            console.log('  Chapter 2 converted HTML is empty:', convertedHTML === '');
+            console.log('  Chapter 2 converted HTML is whitespace only:', convertedHTML.trim() === '');
+          }
+          
+          html += convertedHTML;
         } else {
+          console.log(`  WARNING: No content for chapter ${chapter.number}`);
           html += '<p>Content not available.</p>';
         }
       }
     }
 
     if (book.structure?.conclusion) {
-      html += `<h1>Conclusion</h1>${markdownToHTML(book.structure.conclusion)}`;
+      console.log('\nProcessing conclusion, length:', book.structure.conclusion.length);
+      const conclusionHTML = markdownToHTML(book.structure.conclusion);
+      console.log('Conclusion HTML length:', conclusionHTML.length);
+      html += `<h1>Conclusion</h1>${conclusionHTML}`;
     }
     
     if (book.structure?.appendix) {
-      html += `<h1>Appendix</h1>${markdownToHTML(book.structure.appendix)}`;
+      console.log('\nProcessing appendix, length:', book.structure.appendix.length);
+      const appendixHTML = markdownToHTML(book.structure.appendix);
+      console.log('Appendix HTML length:', appendixHTML.length);
+      html += `<h1>Appendix</h1>${appendixHTML}`;
     }
     
     if (book.structure?.references) {
-      html += `<h1>References</h1>${markdownToHTML(book.structure.references)}`;
+      console.log('\nProcessing references, length:', book.structure.references.length);
+      const referencesHTML = markdownToHTML(book.structure.references);
+      console.log('References HTML length:', referencesHTML.length);
+      html += `<h1>References</h1>${referencesHTML}`;
     }
 
     html += `</body></html>`;
+    
+    console.log('\n--- HTML GENERATION SUMMARY ---');
+    console.log('Total HTML length:', html.length);
+    console.log('HTML contains "Chapter 1":', html.includes('Chapter 1'));
+    console.log('HTML contains "Chapter 2":', html.includes('Chapter 2'));
+    console.log('HTML contains "Content not available":', html.includes('Content not available'));
+    console.log('--- generateBookHTML END ---\n');
+    
     return html;
   };
 
   const markdownToHTML = (markdown: string | null | undefined): string => {
-    if (!markdown) return '';
+    console.log('\n  --- markdownToHTML START ---');
+    console.log('  Input type:', typeof markdown);
+    console.log('  Input is null:', markdown === null);
+    console.log('  Input is undefined:', markdown === undefined);
+    console.log('  Input length:', markdown?.length || 0);
+    
+    if (!markdown) {
+      console.log('  WARNING: No markdown content to convert');
+      return '';
+    }
+    
+    console.log('  Markdown preview (first 200 chars):', markdown.substring(0, 200));
+    console.log('  Contains special chars check:');
+    console.log('    - Contains table (|):', markdown.includes('|'));
+    console.log('    - Contains heading (#):', markdown.includes('#'));
+    console.log('    - Contains bold (**):', markdown.includes('**'));
+    console.log('    - Contains list (-):', markdown.includes('\n- '));
+    console.log('    - Contains blockquote (>):', markdown.includes('\n> '));
     
     let html = markdown;
     
+    try {
+      console.log('  Starting markdown conversions...');
+    
     // Handle tables first (before other processing)
+    const tableMatches = html.match(/\|(.+)\|\n\|[-\s|:]+\|\n((?:\|.+\|\n?)*)/g);
+    console.log('  Table patterns found:', tableMatches?.length || 0);
+    
     html = html.replace(/\|(.+)\|\n\|[-\s|:]+\|\n((?:\|.+\|\n?)*)/g, (match, header, rows) => {
       // Process header
       const headerCells = header.split('|').map((cell: string) => cell.trim()).filter((cell: string) => cell.length > 0);
@@ -520,6 +850,20 @@ const BookPreviewPage: React.FC = () => {
       .replace(/<\/ul><\/p>/g, '</ul>')
       .replace(/<p><div class="key-points">/g, '<div class="key-points">')
       .replace(/<\/div><\/p>/g, '</div>');
+      
+      console.log('  Markdown conversion completed successfully');
+    } catch (error) {
+      console.error('  ERROR in markdownToHTML:', error);
+      console.error('  Error stack:', (error as Error).stack);
+      console.log('  Returning empty string due to error');
+      return '';
+    }
+      
+    console.log('  Converted HTML length:', html.length);
+    console.log('  Converted HTML preview (first 200 chars):', html.substring(0, 200));
+    console.log('  --- markdownToHTML END ---\n');
+    
+    return html;
   };
 
   const toggleSection = (sectionKey: string) => {
