@@ -284,7 +284,7 @@ Write this chapter following these guidelines:
    - Use **bold** for emphasis
    - Use - or * for bullet points
    - Use > for blockquotes
-   - Use *** Your key-point text goes here ***
+   - Use +$$$+ Your key-point text goes here +$$$+
    - Ensure proper paragraph spacing (empty line between paragraphs)
    - Use numbered lists where appropriate
    - Use backticks for inline code or technical terms

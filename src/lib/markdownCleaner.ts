@@ -21,8 +21,8 @@ export function cleanMarkdown(content: string): string {
   cleaned = cleaned.replace(/#\s*([^#\n]+)/g, '# $1');
 
   // Fix emphasis (convert ** to proper markdown)
-  // First, handle cases with multiple asterisks (*** or more)
-  cleaned = cleaned.replace(/\*{3,}([^*]+)\*{3,}/g, '***$1***');
+  // First, handle cases with multiple dollar signs (+$$$+ or more) for key points
+  cleaned = cleaned.replace(/\+\$\$\$\+([^$]+)\+\$\$\$\+/g, '+$$$+$1+$$$+');
 
   // Then handle standard bold and italic
   cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, '**$1**'); // Bold

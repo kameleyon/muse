@@ -146,6 +146,21 @@ const BookPreviewPage: React.FC = () => {
       console.log(`  - Has content: ${!!chapter.content}`);
       console.log(`  - Content type: ${typeof chapter.content}`);
       
+      // Check for problematic content in each chapter
+      if (chapter.content) {
+        const problematicChars = chapter.content.match(/[^\x20-\x7E\n\r\t]/g);
+        if (problematicChars) {
+          console.warn(`  - WARNING: Chapter contains ${problematicChars.length} non-ASCII characters`);
+          console.warn(`    Sample chars: ${problematicChars.slice(0, 5).map(c => `U+${c.charCodeAt(0).toString(16).toUpperCase()}`).join(', ')}`);
+          console.warn(`    These will be removed during normalization`);
+        }
+        
+        const hasKeyPoints = chapter.content.includes('+$$$+') || chapter.content.includes('***');
+        if (hasKeyPoints) {
+          console.log(`  - Contains key point markers: ${hasKeyPoints}`);
+        }
+      }
+      
       // Special note about chapter numbering
       if (chapter.title === 'The Myth of Universal Willpower') {
         console.log(`  *** NOTE: This is "The Myth of Universal Willpower" chapter`);
@@ -223,48 +238,70 @@ const BookPreviewPage: React.FC = () => {
       // Try different approaches to debug the issue
       console.log('Creating html2pdf instance...');
       
+      // Validate HTML content before attempting PDF generation
+      console.log('\n=== HTML CONTENT VALIDATION ===');
+      
+      // Check for potential problematic patterns
+      const problematicPatterns = [
+        { pattern: /<div[^>]*class="[^"]*key-points[^"]*"[^>]*>/gi, name: 'key-points divs' },
+        { pattern: /<style[^>]*>/gi, name: 'style tags' },
+        { pattern: /<script[^>]*>/gi, name: 'script tags' },
+        { pattern: /\x00/g, name: 'null bytes' },
+        { pattern: /[\u200B-\u200D\uFEFF]/g, name: 'zero-width characters' },
+        { pattern: /data:image/gi, name: 'data URLs' },
+        { pattern: /<svg/gi, name: 'SVG elements' },
+        { pattern: /\+\$\$\$\+/g, name: 'unreplaced key point markers' }
+      ];
+      
+      problematicPatterns.forEach(({ pattern, name }) => {
+        const matches = htmlContent.match(pattern);
+        if (matches) {
+          console.warn(`WARNING: Found ${matches.length} ${name} in HTML`);
+        }
+      });
+      
+      // Check if any chapters have suspiciously long content
+      const chapterMatches = htmlContent.match(/<h1[^>]*>Chapter \d+/gi);
+      console.log('Chapter headings found in HTML:', chapterMatches?.length || 0);
+      
+      // Extra safety: Check if HTML is too large
+      if (htmlContent.length > 500000) {
+        console.warn('WARNING: HTML content is very large:', htmlContent.length, 'characters');
+        console.warn('This might cause PDF generation issues');
+      }
+      
       try {
-        // Method 1: Direct chaining (original approach)
-        console.log('Attempting direct chaining method...');
-        await html2pdf().set(options).from(htmlContent).save();
-        console.log('Direct chaining method succeeded');
+        // Method 1: Convert HTML string to DOM element (CORRECT APPROACH)
+        console.log('Creating DOM element from HTML string...');
+        const element = document.createElement('div');
+        element.innerHTML = htmlContent;
+        console.log('DOM element created successfully');
+        console.log('Element children count:', element.children.length);
+        
+        await html2pdf().set(options).from(element).save();
+        console.log('DOM element method succeeded');
       } catch (e1) {
-        console.error('Direct chaining failed:', (e1 as Error).message);
+        console.error('DOM element method failed:', (e1 as Error).message);
+        console.error('Full error object:', e1);
+        
+        // Fallback: Add element to DOM temporarily
+        console.log('Attempting with element temporarily added to DOM...');
+        const element = document.createElement('div');
+        element.innerHTML = htmlContent;
+        element.style.position = 'absolute';
+        element.style.left = '-9999px';
+        element.style.top = '-9999px';
         
         try {
-          // Method 2: Step by step with element
-          console.log('\nAttempting element-based method...');
-          const element = document.createElement('div');
-          element.innerHTML = htmlContent;
-          console.log('Created div element with HTML content');
-          console.log('Element children count:', element.children.length);
-          console.log('Element innerHTML length:', element.innerHTML.length);
-          
+          document.body.appendChild(element);
+          console.log('Added element to DOM');
           await html2pdf().set(options).from(element).save();
-          console.log('Element-based method succeeded');
+          console.log('DOM-attached method succeeded');
         } catch (e2) {
-          console.error('Element-based method failed:', (e2 as Error).message);
-          
-          // Method 3: Create a temporary container in DOM
-          console.log('\nAttempting DOM-based method...');
-          const tempContainer = document.createElement('div');
-          tempContainer.id = 'pdf-temp-container';
-          tempContainer.style.position = 'absolute';
-          tempContainer.style.left = '-9999px';
-          tempContainer.style.top = '-9999px';
-          tempContainer.innerHTML = htmlContent;
-          document.body.appendChild(tempContainer);
-          console.log('Added temp container to DOM');
-          
-          try {
-            await html2pdf().set(options).from(tempContainer).save();
-            console.log('DOM-based method succeeded');
-          } catch (e3) {
-            console.error('DOM-based method failed:', (e3 as Error).message);
-          } finally {
-            document.body.removeChild(tempContainer);
-            console.log('Removed temp container from DOM');
-          }
+          console.error('DOM-attached method also failed:', (e2 as Error).message);
+        } finally {
+          document.body.removeChild(element);
+          console.log('Removed element from DOM');
         }
       }
       
@@ -319,7 +356,7 @@ const BookPreviewPage: React.FC = () => {
     }
 
     /* ---------- 3) UNIVERSAL PAGE-BREAK HELPERS ---------- */
-    h1, h2, h3,
+    h1, h2, h3, h4, h5, h6,
     p,
     table,
     blockquote,
@@ -357,23 +394,24 @@ const BookPreviewPage: React.FC = () => {
       color: var(--primary-color);
       margin: 40px 0 15px;           /* generous but safe */
       line-height: 1.8;
-      page-break-before: auto;       /* Let content flow naturally */
-      page-break-after: avoid;
-    }
-    
-    /* Only force page breaks for major sections */
-    h1.new-page {
-      page-break-before: always;
+      page-break-before: always;     /* start new page but WITHOUT huge top offset */
+      
     }
 
-    /* Special first-chapter titles 
+    /* Special first-chapter titles */
     h1.prologue-title, h1.introduction-title {
       font-size: 17pt;
       text-align: center;
       margin: 0 0 40px;
       page-break-before: always;
+    }
+
+      /* Only force page breaks for major sections 
+    h1.new-page {
+      page-break-before: always;
     }*/
-    
+
+   
     /* Empty chapter styling */
     .empty-chapter {
       margin: 20px 0;
@@ -389,12 +427,7 @@ const BookPreviewPage: React.FC = () => {
       page-break-before: auto;
     }
     
-    .empty-chapter p {
-      margin: 0;
-      font-style: italic;
-      color: #666;
-      font-size: 10pt;
-    }
+    
 
     h2 {
       font-family: 'Comfortaa', sans-serif;
@@ -418,8 +451,8 @@ const BookPreviewPage: React.FC = () => {
       font-family: 'Comfortaa', sans-serif;
       font-size: 12pt;
       font-weight: 700;
-      margin: 25px 0 7px;
-      line-height: 1.3;
+      line-height: 1.6;
+      color: #333;
     }
 
 
@@ -462,6 +495,7 @@ const BookPreviewPage: React.FC = () => {
     }
 
     /* ---------- 8) KEY-POINTS BOX ---------- */
+    
     .key-points{
       border-radius:0.75rem;
       border:1px solid rgba(168,162,158,.70);
@@ -498,8 +532,6 @@ const BookPreviewPage: React.FC = () => {
       color: #57534E;
       font-weight: 700;
     }
-
-
     /* ---------- 9) TABLE-OF-CONTENTS & PART PAGES ---------- */
     .toc-title {
       font-family: 'Comfortaa', sans-serif;
@@ -509,7 +541,6 @@ const BookPreviewPage: React.FC = () => {
       color: var(--primary-color);
       margin: 0 0 30px;
       page-break-before: always;
-      line-height: 1.8;
     }
     
     .toc-item.indent {
@@ -520,15 +551,15 @@ const BookPreviewPage: React.FC = () => {
       font-family: 'Comfortaa', sans-serif;
       font-size: 24pt;
       font-weight: 700;
-      color: var(--primary-color);
-      margin: 60px 0 40px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: 100vh;  
+      height: 100vh;        
+      color: var(--primary-color);
+      margin: 0 0 40px;
       page-break-before: always;
-      page-break-after: auto;  /* Don't force a page break after */
+      page-break-after: always;
     }
   </style>
 </head>
@@ -586,22 +617,25 @@ const BookPreviewPage: React.FC = () => {
     // Content Sections
     console.log('\n--- PROCESSING CONTENT SECTIONS ---');
     if (book.structure?.acknowledgement) {
-      console.log('Processing acknowledgement, length:', book.structure.acknowledgement.length);
-      const ackHTML = markdownToHTML(book.structure.acknowledgement);
+      const normalizedAck = normalizePastedContent(book.structure.acknowledgement);
+      console.log('Processing acknowledgement, length:', normalizedAck.length);
+      const ackHTML = markdownToHTML(normalizedAck);
       console.log('Acknowledgement HTML length:', ackHTML.length);
       html += `<h1 class="new-page">Acknowledgement</h1>${ackHTML}`;
     }
     
     if (book.structure?.prologue) {
-      console.log('Processing prologue, length:', book.structure.prologue.length);
-      const prologueHTML = markdownToHTML(book.structure.prologue);
+      const normalizedPrologue = normalizePastedContent(book.structure.prologue);
+      console.log('Processing prologue, length:', normalizedPrologue.length);
+      const prologueHTML = markdownToHTML(normalizedPrologue);
       console.log('Prologue HTML length:', prologueHTML.length);
       html += `<h1 class="prologue-title">Prologue</h1>${prologueHTML}`;
     }
     
     if (book.structure?.introduction) {
-      console.log('Processing introduction, length:', book.structure.introduction.length);
-      const introHTML = markdownToHTML(book.structure.introduction);
+      const normalizedIntro = normalizePastedContent(book.structure.introduction);
+      console.log('Processing introduction, length:', normalizedIntro.length);
+      const introHTML = markdownToHTML(normalizedIntro);
       console.log('Introduction HTML length:', introHTML.length);
       html += `<h1 class="introduction-title">Introduction</h1>${introHTML}`;
     }
@@ -661,6 +695,10 @@ const BookPreviewPage: React.FC = () => {
           }
           
           if (chapter?.content) {
+            // NORMALIZE CONTENT BEFORE ANY PROCESSING
+            const normalizedContent = normalizePastedContent(chapter.content);
+            chapter.content = normalizedContent; // Update the chapter content
+            
             // Add new-page class only for chapters with content
             html += `<h1 class="new-page">Chapter ${chapStruct.number}: ${chapStruct.title}</h1>`;
             if (chapStruct.description) {
@@ -669,19 +707,25 @@ const BookPreviewPage: React.FC = () => {
             
             console.log(`  Converting markdown to HTML for chapter ${chapter.number}`);
             
-            // Special debugging for Chapter 2
-            if (chapter.number === 2) {
-              console.log('  *** SPECIAL DEBUG FOR CHAPTER 2 ***');
-              console.log('  Chapter 2 content first 500 chars:', chapter.content.substring(0, 500));
-              console.log('  Chapter 2 content last 500 chars:', chapter.content.substring(chapter.content.length - 500));
-              console.log('  Chapter 2 contains Unicode:', /[^\x00-\x7F]/.test(chapter.content));
-              console.log('  Chapter 2 contains null bytes:', chapter.content.includes('\x00'));
+            // Special debugging for chapters with issues
+            if (chapter.number === 2 || chapter.number === 6) {
+              console.log(`  *** SPECIAL DEBUG FOR CHAPTER ${chapter.number} ***`);
+              console.log(`  Chapter ${chapter.number} content first 500 chars: ${chapter.content.substring(0, 500)}`);
+              console.log(`  Chapter ${chapter.number} content last 500 chars: ${chapter.content.substring(chapter.content.length - 500)}`);
+              console.log(`  Chapter ${chapter.number} contains *** patterns: ${chapter.content.includes('***')}`);
+              console.log(`  Chapter ${chapter.number} contains +$$$+ patterns: ${chapter.content.includes('+$$$+')}`);
+              
+              // Count patterns
+              const tripleAsterisks = (chapter.content.match(/\*\*\*/g) || []).length;
+              const dollarPatterns = (chapter.content.match(/\+\$\$\$\+/g) || []).length;
+              console.log(`  Chapter ${chapter.number} number of *** patterns: ${tripleAsterisks}`);
+              console.log(`  Chapter ${chapter.number} number of +$$$+ patterns: ${dollarPatterns}`);
               
               // Check for invisible characters
               const invisibleChars = chapter.content.match(/[\x00-\x1F\x7F-\x9F]/g);
               if (invisibleChars) {
-                console.log('  Chapter 2 invisible characters found:', invisibleChars.length);
-                console.log('  First few invisible char codes:', invisibleChars.slice(0, 10).map(c => c.charCodeAt(0)));
+                console.log(`  Chapter ${chapter.number} invisible characters found: ${invisibleChars.length}`);
+                console.log(`  First few invisible char codes: ${invisibleChars.slice(0, 10).map(c => c.charCodeAt(0))}`);
               }
             }
             
@@ -689,10 +733,23 @@ const BookPreviewPage: React.FC = () => {
             console.log(`  Converted HTML length: ${convertedHTML.length}`);
             console.log(`  Converted HTML preview: ${convertedHTML.substring(0, 200)}...`);
             
-            // More debugging for Chapter 2
-            if (chapter.number === 2) {
-              console.log('  Chapter 2 converted HTML is empty:', convertedHTML === '');
-              console.log('  Chapter 2 converted HTML is whitespace only:', convertedHTML.trim() === '');
+            // More debugging for problematic chapters
+            if (chapter.number === 2 || chapter.number === 6) {
+              console.log(`  Chapter ${chapter.number} converted HTML is empty: ${convertedHTML === ''}`);
+              console.log(`  Chapter ${chapter.number} converted HTML is whitespace only: ${convertedHTML.trim() === ''}`);
+              
+              // Check for problematic HTML patterns
+              const keyPointsDivs = (convertedHTML.match(/<div class="key-points">/g) || []).length;
+              console.log(`  Chapter ${chapter.number} contains key-points divs: ${keyPointsDivs}`);
+              
+              // Check what the *** patterns were converted to
+              const hrTags = (convertedHTML.match(/<hr>/g) || []).length;
+              console.log(`  Chapter ${chapter.number} contains <hr> tags: ${hrTags}`);
+              
+              // Show a bit more of the converted HTML for debugging
+              if (chapter.number === 6) {
+                console.log(`  Chapter 6 HTML preview (first 1000 chars): ${convertedHTML.substring(0, 1000)}`);
+              }
             }
             
             html += convertedHTML;
@@ -726,19 +783,25 @@ const BookPreviewPage: React.FC = () => {
           
           console.log(`  Converting markdown to HTML...`);
           
-          // Special debugging for Chapter 2
-          if (chapter.number === 2) {
-            console.log('  *** SPECIAL DEBUG FOR CHAPTER 2 (non-parts) ***');
-            console.log('  Chapter 2 content first 500 chars:', chapter.content.substring(0, 500));
-            console.log('  Chapter 2 content last 500 chars:', chapter.content.substring(chapter.content.length - 500));
-            console.log('  Chapter 2 contains Unicode:', /[^\x00-\x7F]/.test(chapter.content));
-            console.log('  Chapter 2 contains null bytes:', chapter.content.includes('\x00'));
+          // Special debugging for chapters with issues
+          if (chapter.number === 2 || chapter.number === 6) {
+            console.log(`  *** SPECIAL DEBUG FOR CHAPTER ${chapter.number} (non-parts) ***`);
+            console.log(`  Chapter ${chapter.number} content first 500 chars: ${chapter.content.substring(0, 500)}`);
+            console.log(`  Chapter ${chapter.number} content last 500 chars: ${chapter.content.substring(chapter.content.length - 500)}`);
+            console.log(`  Chapter ${chapter.number} contains *** patterns: ${chapter.content.includes('***')}`);
+            console.log(`  Chapter ${chapter.number} contains +$$$+ patterns: ${chapter.content.includes('+$$$+')}`);
+            
+            // Count patterns
+            const tripleAsterisks = (chapter.content.match(/\*\*\*/g) || []).length;
+            const dollarPatterns = (chapter.content.match(/\+\$\$\$\+/g) || []).length;
+            console.log(`  Chapter ${chapter.number} number of *** patterns: ${tripleAsterisks}`);
+            console.log(`  Chapter ${chapter.number} number of +$$$+ patterns: ${dollarPatterns}`);
             
             // Check for invisible characters
             const invisibleChars = chapter.content.match(/[\x00-\x1F\x7F-\x9F]/g);
             if (invisibleChars) {
-              console.log('  Chapter 2 invisible characters found:', invisibleChars.length);
-              console.log('  First few invisible char codes:', invisibleChars.slice(0, 10).map(c => c.charCodeAt(0)));
+              console.log(`  Chapter ${chapter.number} invisible characters found: ${invisibleChars.length}`);
+              console.log(`  First few invisible char codes: ${invisibleChars.slice(0, 10).map(c => c.charCodeAt(0))}`);
             }
           }
           
@@ -746,10 +809,23 @@ const BookPreviewPage: React.FC = () => {
           console.log(`  Converted HTML length: ${convertedHTML.length}`);
           console.log(`  Converted HTML preview: ${convertedHTML.substring(0, 200)}...`);
           
-          // More debugging for Chapter 2
-          if (chapter.number === 2) {
-            console.log('  Chapter 2 converted HTML is empty:', convertedHTML === '');
-            console.log('  Chapter 2 converted HTML is whitespace only:', convertedHTML.trim() === '');
+          // More debugging for problematic chapters
+          if (chapter.number === 2 || chapter.number === 6) {
+            console.log(`  Chapter ${chapter.number} converted HTML is empty: ${convertedHTML === ''}`);
+            console.log(`  Chapter ${chapter.number} converted HTML is whitespace only: ${convertedHTML.trim() === ''}`);
+            
+            // Check for problematic HTML patterns
+            const keyPointsDivs = (convertedHTML.match(/<div class="key-points">/g) || []).length;
+            console.log(`  Chapter ${chapter.number} contains key-points divs: ${keyPointsDivs}`);
+            
+            // Check what the *** patterns were converted to
+            const hrTags = (convertedHTML.match(/<hr>/g) || []).length;
+            console.log(`  Chapter ${chapter.number} contains <hr> tags: ${hrTags}`);
+            
+            // Show a bit more of the converted HTML for debugging
+            if (chapter.number === 6) {
+              console.log(`  Chapter 6 HTML preview (first 1000 chars): ${convertedHTML.substring(0, 1000)}`);
+            }
           }
           
           html += convertedHTML;
@@ -765,22 +841,25 @@ const BookPreviewPage: React.FC = () => {
     }
 
     if (book.structure?.conclusion) {
-      console.log('\nProcessing conclusion, length:', book.structure.conclusion.length);
-      const conclusionHTML = markdownToHTML(book.structure.conclusion);
+      const normalizedConclusion = normalizePastedContent(book.structure.conclusion);
+      console.log('\nProcessing conclusion, length:', normalizedConclusion.length);
+      const conclusionHTML = markdownToHTML(normalizedConclusion);
       console.log('Conclusion HTML length:', conclusionHTML.length);
       html += `<h1 class="new-page">Conclusion</h1>${conclusionHTML}`;
     }
     
     if (book.structure?.appendix) {
-      console.log('\nProcessing appendix, length:', book.structure.appendix.length);
-      const appendixHTML = markdownToHTML(book.structure.appendix);
+      const normalizedAppendix = normalizePastedContent(book.structure.appendix);
+      console.log('\nProcessing appendix, length:', normalizedAppendix.length);
+      const appendixHTML = markdownToHTML(normalizedAppendix);
       console.log('Appendix HTML length:', appendixHTML.length);
       html += `<h1 class="new-page">Appendix</h1>${appendixHTML}`;
     }
     
     if (book.structure?.references) {
-      console.log('\nProcessing references, length:', book.structure.references.length);
-      const referencesHTML = markdownToHTML(book.structure.references);
+      const normalizedReferences = normalizePastedContent(book.structure.references);
+      console.log('\nProcessing references, length:', normalizedReferences.length);
+      const referencesHTML = markdownToHTML(normalizedReferences);
       console.log('References HTML length:', referencesHTML.length);
       html += `<h1 class="new-page">References</h1>${referencesHTML}`;
     }
@@ -819,8 +898,65 @@ const BookPreviewPage: React.FC = () => {
     return html;
   };
 
+  // ULTRA-AGGRESSIVE normalization - strip ALL non-ASCII characters
+  const normalizePastedContent = (raw: string): string => {
+    const before = raw.length;
+    
+    // First pass: replace known problematic characters
+    let normalized = raw
+      .replace(/[\u2018\u2019\u201A\u201B''`´]/g, "'")  // ALL quote-like chars to straight apostrophe
+      .replace(/[\u201C\u201D\u201E\u201F""„]/g, '"')   // ALL double quote-like chars to straight quote
+      .replace(/[\u2013\u2014\u2015—–−]/g, '-')         // ALL dash-like chars to hyphen
+      .replace(/[\u2026…]/g, '...')                      // ellipsis
+      .replace(/[\u00A0\u202F\u2060]/g, ' ')            // ALL space-like chars to regular space
+      .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '');     // Remove ALL invisible chars
+    
+    // Second pass: REMOVE ALL remaining non-ASCII characters (no exceptions)
+    normalized = normalized.replace(/[^\x20-\x7E\n\r\t]/g, '');
+    
+    // Clean up any resulting issues
+    normalized = normalized
+      .replace(/\s+/g, ' ')           // Multiple spaces to single space
+      .replace(/\n\s*\n\s*\n/g, '\n\n') // Multiple newlines to double newline
+      .trim();
+    
+    const after = normalized.length;
+    if (before !== after) {
+      console.log(`ULTRA-AGGRESSIVE normalization: ${before} -> ${after} chars (removed ${before - after})`);
+    }
+    
+    return normalized;
+  };
+
   const markdownToHTML = (markdown: string | null | undefined): string => {
     if (!markdown) return '';
+  
+    // Apply aggressive normalization FIRST
+    const normalizedMarkdown = normalizePastedContent(markdown);
+  
+    // Debug logging for external content issues
+    console.log('=== MARKDOWN TO HTML DEBUG ===');
+    console.log('Input markdown length:', markdown.length);
+    console.log('After normalization length:', normalizedMarkdown.length);
+    console.log('First 200 chars of normalized:', normalizedMarkdown.substring(0, 200));
+    
+    // Check for problematic characters in the ORIGINAL markdown (for logging)
+    const invisibleChars = markdown.match(/[\u200B-\u200D\uFEFF]/g);
+    const smartQuotes = markdown.match(/[""'']/g);
+    const specialDashes = markdown.match(/[—–]/g);
+    const nonAscii = markdown.match(/[^\x00-\x7F]/g);
+    
+    console.log('Invisible characters found:', invisibleChars?.length || 0);
+    console.log('Smart quotes found:', smartQuotes?.length || 0);
+    console.log('Special dashes found:', specialDashes?.length || 0);
+    console.log('Non-ASCII characters found:', nonAscii?.length || 0);
+    
+    if (nonAscii && nonAscii.length > 0) {
+      console.log('Sample non-ASCII characters:', nonAscii.slice(0, 10).map(c => `${c} (U+${c.charCodeAt(0).toString(16).toUpperCase()})`));
+    }
+  
+    // Use the normalized markdown for all processing
+    let sanitized = normalizedMarkdown;
   
     // HTML entity encoding for security
     const escapeHtml = (text: string): string => {
@@ -839,7 +975,7 @@ const BookPreviewPage: React.FC = () => {
     const inlineCode: string[] = [];
     
     // Extract fenced code blocks first (```language\n...\n```)
-    let html = markdown.replace(/```(\w*)\n([\s\S]*?)```/g, (match: string, lang: string, code: string): string => {
+    let html = sanitized.replace(/```(\w*)\n([\s\S]*?)```/g, (match: string, lang: string, code: string): string => {
       const index = codeBlocks.length;
       const className = lang ? ` class="language-${lang}"` : '';
       codeBlocks.push(`<pre><code${className}>${escapeHtml(code.trim())}</code></pre>`);
@@ -861,6 +997,9 @@ const BookPreviewPage: React.FC = () => {
         .trim();
     };
   
+    // First, convert any remaining *** patterns to +$$$+ for safety
+    html = html.replace(/\*\*\*/g, '+$$$+');
+    
     // Headers (keeping h1 for PDF compatibility, but you might want to adjust)
     html = html.replace(/^###### (.+)$/gm, '<h6>$1</h6>');
     html = html.replace(/^##### (.+)$/gm, '<h5>$1</h5>');
@@ -869,37 +1008,33 @@ const BookPreviewPage: React.FC = () => {
     html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
     html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
   
-    // Key Points (custom syntax: ***...***) - Handle multiline
-    html = html.replace(/\*\*\*([\s\S]*?)\*\*\*/g, (match: string, content: string): string => {
+    // Key Points (custom syntax: +$$$+...+$$$+) - Convert to simple HTML
+    html = html.replace(/\+\$\$\$\+([\s\S]*?)\+\$\$\$\+/g, (match: string, content: string): string => {
       const lines = content.trim()
         .split('\n')
         .map((line: string) => line.trim())
         .filter((line: string) => line.length > 0);
       
-      // Check if it's a list-based key points section
-      const hasListItems = lines.some(line => line.startsWith('-') || line.startsWith('*') || line.startsWith('+'));
+      // Ultra-simple HTML for PDF compatibility
+      let result = '<p>---</p>\n';
       
-      if (hasListItems) {
-        // Process as a list
-        let listContent = '<ul>\n';
-        lines.forEach((line: string) => {
-          if (line.match(/^[-*+]\s+(.+)$/)) {
-            const content = line.replace(/^[-*+]\s+/, '');
-            listContent += `  <li>${content}</li>\n`;
-          } else if (line.length > 0) {
-            // Handle title or non-list content
-            if (!listContent.includes('<h4>')) {
-              listContent = `<h4>${line}</h4>\n` + listContent;
-            }
-          }
-        });
-        listContent += '</ul>';
-        return `<div class="key-points">${listContent}</div>`;
-      } else {
-        // Process as regular content
-        const processedContent = lines.join('<br>');
-        return `<div class="key-points">${processedContent}</div>`;
-      }
+      lines.forEach((line: string) => {
+        if (line.match(/^[-*+]\s+(.+)$/)) {
+          // Convert list items to simple paragraphs with bullet
+          const content = line.replace(/^[-*+]\s+/, '');
+          result += `<p>• ${content}</p>\n`;
+        } else if (line.match(/^#+\s*(.+)$/)) {
+          // Convert headings to bold paragraphs
+          const heading = line.replace(/^#+\s*/, '');
+          result += `<p><strong>${heading}</strong></p>\n`;
+        } else {
+          // Regular paragraphs
+          result += `<p>${line}</p>\n`;
+        }
+      });
+      
+      result += '<p>---</p>\n';
+      return result;
     });
   
     // Horizontal rules
@@ -911,60 +1046,33 @@ const BookPreviewPage: React.FC = () => {
     // Merge consecutive blockquotes
     html = html.replace(/(<\/blockquote>\s*<blockquote>)/g, '<br>');
   
-    // Tables - Enhanced with better parsing
+    // Tables - Simplified for PDF compatibility
     html = html.replace(/^\|(.+)\|\s*\n\|([\s\-:|]+)\|\s*\n((?:\|.+\|\s*\n?)*)/gm, 
       (match: string, headerRow: string, alignmentRow: string, bodyRows: string): string => {
-        // Parse alignment
-        const alignments = alignmentRow.split('|')
-          .map((cell: string) => cell.trim())
-          .filter((cell: string) => cell.length > 0)
-          .map((cell: string) => {
-            if (cell.startsWith(':') && cell.endsWith(':')) return 'center';
-            if (cell.endsWith(':')) return 'right';
-            if (cell.startsWith(':')) return 'left';
-            return '';
-          });
-  
+        // For PDF compatibility, convert tables to simple text representation
+        let result = '<p>---</p>\n';
+        
         // Process header
         const headerCells = headerRow.split('|')
           .map((cell: string) => cell.trim())
           .filter((cell: string) => cell.length > 0);
         
-        const headerHtml = headerCells
-          .map((cell: string, i: number) => {
-            const align = alignments[i] ? ` style="text-align: ${alignments[i]}"` : '';
-            return `<th${align}>${cell}</th>`;
-          })
-          .join('');
-  
+        result += '<p><strong>' + headerCells.join(' | ') + '</strong></p>\n';
+        
         // Process body rows
         const rows = bodyRows.trim().split('\n').filter((row: string) => row.trim().length > 0);
-        const bodyHtml = rows.map((row: string) => {
+        rows.forEach((row: string) => {
           const cells = row.split('|')
             .map((cell: string) => cell.trim())
             .filter((cell: string, index: number, arr: string[]) => {
-              // Keep cells that are between pipe symbols
               return index > 0 && index < arr.length - 1;
             });
           
-          const cellsHtml = cells
-            .map((cell: string, i: number) => {
-              const align = alignments[i] ? ` style="text-align: ${alignments[i]}"` : '';
-              return `<td${align}>${cell}</td>`;
-            })
-            .join('');
-          
-          return `<tr>${cellsHtml}</tr>`;
-        }).join('\n    ');
-  
-        return `<table>
-    <thead>
-      <tr>${headerHtml}</tr>
-    </thead>
-    <tbody>
-      ${bodyHtml}
-    </tbody>
-  </table>`;
+          result += '<p>' + cells.join(' | ') + '</p>\n';
+        });
+        
+        result += '<p>---</p>\n';
+        return result;
       }
     );
   
@@ -1056,6 +1164,50 @@ const BookPreviewPage: React.FC = () => {
     // Clean up extra newlines
     html = html.replace(/\n{3,}/g, '\n\n');
   
+    // Final safety pass - remove any potentially problematic elements
+    // Remove any remaining div elements (convert to paragraphs)
+    html = html.replace(/<div[^>]*>/g, '<p>');
+    html = html.replace(/<\/div>/g, '</p>');
+    
+    // Remove any style attributes
+    html = html.replace(/\sstyle="[^"]*"/g, '');
+    
+    // Remove any class attributes except for task-list-item
+    html = html.replace(/\sclass="(?!task-list-item)[^"]*"/g, '');
+    
+    // Ensure no nested block elements
+    html = html.replace(/<p>(<h[1-6]>)/g, '$1');
+    html = html.replace(/(<\/h[1-6]>)<\/p>/g, '$1');
+    
+    // AGGRESSIVE FINAL SANITIZATION for html2pdf compatibility
+    // Remove ANY remaining complex elements that might break html2pdf
+    html = html.replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, ''); // Remove SVG
+    html = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, ''); // Remove scripts
+    html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ''); // Remove style tags
+    html = html.replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/gi, ''); // Remove iframes
+    html = html.replace(/<object[^>]*>[\s\S]*?<\/object>/gi, ''); // Remove objects
+    html = html.replace(/<embed[^>]*>/gi, ''); // Remove embeds
+    html = html.replace(/<video[^>]*>[\s\S]*?<\/video>/gi, '[VIDEO]'); // Replace video
+    html = html.replace(/<audio[^>]*>[\s\S]*?<\/audio>/gi, '[AUDIO]'); // Replace audio
+    html = html.replace(/<canvas[^>]*>[\s\S]*?<\/canvas>/gi, '[CANVAS]'); // Replace canvas
+    
+    // Remove data URLs and complex image sources
+    html = html.replace(/<img[^>]*src="data:[^"]*"[^>]*>/gi, '[IMAGE]');
+    
+    // Remove any remaining attributes that might cause issues
+    html = html.replace(/\son\w+="[^"]*"/gi, ''); // Remove event handlers
+    html = html.replace(/\sdata-[^=]*="[^"]*"/gi, ''); // Remove data attributes
+    
+    // Final character sanitization - ensure ONLY safe characters remain
+    html = html.replace(/[^\x20-\x7E\n\r\t<>/"'=\-àáäâèéëêìíïîòóöôùúüûñçÀÁÄÂÈÉËÊÌÍÏÎÒÓÖÔÙÚÜÛÑÇ]/g, ' ');
+    
+    // Clean up any broken tags
+    html = html.replace(/<[^>]*$/g, ''); // Remove incomplete tags at end
+    html = html.replace(/^[^<]*>/g, ''); // Remove incomplete tags at start
+    
+    console.log('Final HTML length after all sanitization:', html.length);
+    console.log('Final HTML sample (first 300 chars):', html.substring(0, 300));
+    
     return html;
   };
 
@@ -1203,7 +1355,7 @@ const BookPreviewPage: React.FC = () => {
               <FileText className="w-4 h-4 mr-2" /> Download MD
             </button>
             <button
-              onClick={downloadPdfFile}
+              onClick={() => downloadPdfFile()}
               disabled={pdfLoading}
               className="px-4 py-2 rounded-lg bg-secondary text-white hover:bg-secondary-hover transition-colors flex items-center disabled:opacity-50"
             >
