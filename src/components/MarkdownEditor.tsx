@@ -31,7 +31,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     html = html.replace(/^#### (.+)$/gm, '<h4 class="text-lg font-heading font-semibold text-secondary mt-4 mb-2">$1</h4>')
 
     // Key Points 
-    html = html.replace(/\+\$\$\$\+([\s\S]+?)\+\$\$\$\+/gs,`<div class="rounded-xl border border-stone-400/70 bg-stone-300/15 p-4 my-4 font-medium text-stone-600 text-md">$1</div>`)
+    html = html.replace(/\+\$\$\$\+([\s\S]+?)\+\$\$\$\+/gs,`<div class="rounded-xl border border-stone-400/70 bg-stone-300/15 p-4 my-12 font-medium text-stone-600 text-md">$1</div>`)
     
     
     // Bold

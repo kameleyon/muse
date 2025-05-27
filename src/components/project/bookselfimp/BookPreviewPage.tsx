@@ -543,10 +543,11 @@ const BookPreviewPage: React.FC = () => {
       border:1px solid rgba(120,113,108,.70);
       background:rgba(120,113,108,.15);
       padding:1rem;
-      margin:1rem 0;
+      margin:1rem;
       font-weight:500;
       color:#57534E;
       font-size:0.875rem;
+      page-break-after: always;
     }
 
     .key-points ul {
@@ -588,15 +589,30 @@ const BookPreviewPage: React.FC = () => {
        margin-left: 20px;
      }
 
+    .chapter-description {
+      font-style: italic;
+      padding: 15px;
+      margin-top: 20px;
+      font-size: 10pt;
+      color: rgba(120, 113, 108);
+    }
+
+    hr.chapter-separator {
+      margin-top: 20px;
+      margin-bottom: 20px; /* Adjust this to push it lower */
+      border: none;
+      border-bottom: 1px solid rgba(120, 113, 108, 0.7);
+    }
+
+
+
     .part-title {
       font-family: 'Comfortaa', sans-serif;
       font-size: 24pt;
       font-weight: 700;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
       align-items: center;
-      height: 100vh;        
+      height: 100vh;     
+      text-align: center;   
       color: var(--primary-color);
       margin: 0 0 40px;
       page-break-before: always;
@@ -743,7 +759,7 @@ const BookPreviewPage: React.FC = () => {
             // Add new-page class only for chapters with content
             html += `<h1 >Chapter ${chapStruct.number}: ${chapStruct.title}</h1>`;
             if (chapStruct.description) {
-              html += `<p class="chapter-description">${chapStruct.description}</p>`;
+              html += `<p class="chapter-description">${chapStruct.description}<hr class="chapter-separator"></p>`;
             }
             
             console.log(`  Converting markdown to HTML for chapter ${chapter.number}`);
