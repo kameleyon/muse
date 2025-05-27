@@ -455,6 +455,24 @@ const BookPreviewPage: React.FC = () => {
       color: #333;
     }
 
+    /* ---------- 5.5) LISTS ---------- */
+    ul, ol {
+      margin: 16px 0;
+      padding-left: 24px;
+    }
+    
+    ul {
+      list-style-type: disc;
+    }
+    
+    ol {
+      list-style-type: decimal;
+    }
+    
+    li {
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
 
     /* ---------- 6) TABLES ---------- */
     table {
@@ -498,14 +516,13 @@ const BookPreviewPage: React.FC = () => {
     
     .key-points{
       border-radius:0.75rem;
-      border:1px solid rgba(168,162,158,.70);
-      background:rgba(214,211,209,.15);
+      border:1px solid rgba(120,113,108,.70);
+      background:rgba(120,113,108,.15);
       padding:1rem;
       margin:1rem 0;
-      font:500 0.9rem 'Questrial',sans-serif;
+      font-weight:500;
       color:#57534E;
-      line-height: 1.6;
-      
+      font-size:0.875rem;
     }
 
     .key-points ul {
@@ -591,7 +608,7 @@ const BookPreviewPage: React.FC = () => {
 
     // Table of Contents
     console.log('\n--- GENERATING TABLE OF CONTENTS ---');
-    html += `<h1 class="toc-title new-page">Table of Contents</h1>`;
+    html += `<h1 class="toc-title ">Table of Contents</h1>`;
     
     if (book.structure?.acknowledgement) html += `<div class="toc-item">Acknowledgement</div>`;
     if (book.structure?.prologue) html += `<div class="toc-item">Prologue</div>`;
@@ -621,7 +638,7 @@ const BookPreviewPage: React.FC = () => {
       console.log('Processing acknowledgement, length:', normalizedAck.length);
       const ackHTML = markdownToHTML(normalizedAck);
       console.log('Acknowledgement HTML length:', ackHTML.length);
-      html += `<h1 class="new-page">Acknowledgement</h1>${ackHTML}`;
+      html += `<h1>Acknowledgement</h1>${ackHTML}`;
     }
     
     if (book.structure?.prologue) {
@@ -700,62 +717,23 @@ const BookPreviewPage: React.FC = () => {
             chapter.content = normalizedContent; // Update the chapter content
             
             // Add new-page class only for chapters with content
-            html += `<h1 class="new-page">Chapter ${chapStruct.number}: ${chapStruct.title}</h1>`;
+            html += `<h1 >Chapter ${chapStruct.number}: ${chapStruct.title}</h1>`;
             if (chapStruct.description) {
               html += `<p class="chapter-description">${chapStruct.description}</p>`;
             }
             
             console.log(`  Converting markdown to HTML for chapter ${chapter.number}`);
             
-            // Special debugging for chapters with issues
-            if (chapter.number === 2 || chapter.number === 6) {
-              console.log(`  *** SPECIAL DEBUG FOR CHAPTER ${chapter.number} ***`);
-              console.log(`  Chapter ${chapter.number} content first 500 chars: ${chapter.content.substring(0, 500)}`);
-              console.log(`  Chapter ${chapter.number} content last 500 chars: ${chapter.content.substring(chapter.content.length - 500)}`);
-              console.log(`  Chapter ${chapter.number} contains *** patterns: ${chapter.content.includes('***')}`);
-              console.log(`  Chapter ${chapter.number} contains +$$$+ patterns: ${chapter.content.includes('+$$$+')}`);
-              
-              // Count patterns
-              const tripleAsterisks = (chapter.content.match(/\*\*\*/g) || []).length;
-              const dollarPatterns = (chapter.content.match(/\+\$\$\$\+/g) || []).length;
-              console.log(`  Chapter ${chapter.number} number of *** patterns: ${tripleAsterisks}`);
-              console.log(`  Chapter ${chapter.number} number of +$$$+ patterns: ${dollarPatterns}`);
-              
-              // Check for invisible characters
-              const invisibleChars = chapter.content.match(/[\x00-\x1F\x7F-\x9F]/g);
-              if (invisibleChars) {
-                console.log(`  Chapter ${chapter.number} invisible characters found: ${invisibleChars.length}`);
-                console.log(`  First few invisible char codes: ${invisibleChars.slice(0, 10).map(c => c.charCodeAt(0))}`);
-              }
-            }
+           
             
             const convertedHTML = markdownToHTML(chapter.content);
-            console.log(`  Converted HTML length: ${convertedHTML.length}`);
-            console.log(`  Converted HTML preview: ${convertedHTML.substring(0, 200)}...`);
             
-            // More debugging for problematic chapters
-            if (chapter.number === 2 || chapter.number === 6) {
-              console.log(`  Chapter ${chapter.number} converted HTML is empty: ${convertedHTML === ''}`);
-              console.log(`  Chapter ${chapter.number} converted HTML is whitespace only: ${convertedHTML.trim() === ''}`);
-              
-              // Check for problematic HTML patterns
-              const keyPointsDivs = (convertedHTML.match(/<div class="key-points">/g) || []).length;
-              console.log(`  Chapter ${chapter.number} contains key-points divs: ${keyPointsDivs}`);
-              
-              // Check what the *** patterns were converted to
-              const hrTags = (convertedHTML.match(/<hr>/g) || []).length;
-              console.log(`  Chapter ${chapter.number} contains <hr> tags: ${hrTags}`);
-              
-              // Show a bit more of the converted HTML for debugging
-              if (chapter.number === 6) {
-                console.log(`  Chapter 6 HTML preview (first 1000 chars): ${convertedHTML.substring(0, 1000)}`);
-              }
-            }
+            
+            
             
             html += convertedHTML;
           } else {
-            console.log(`  WARNING: No content for chapter ${chapStruct.number}`);
-            // Group empty chapters together without page breaks
+            
             html += `<div class="empty-chapter">
               <h1>Chapter ${chapStruct.number}: ${chapStruct.title}</h1>
               <p>Content not yet available</p>
@@ -776,7 +754,7 @@ const BookPreviewPage: React.FC = () => {
         
         if (chapter.content) {
           // Add new-page class only for chapters with content
-          html += `<h1 class="new-page">Chapter ${chapter.number}: ${chapter.title}</h1>`;
+          html += `<h1 >Chapter ${chapter.number}: ${chapter.title}</h1>`;
           if (chapter.metadata?.description) {
             html += `<p class="chapter-description">${chapter.metadata.description}</p>`;
           }
@@ -845,7 +823,7 @@ const BookPreviewPage: React.FC = () => {
       console.log('\nProcessing conclusion, length:', normalizedConclusion.length);
       const conclusionHTML = markdownToHTML(normalizedConclusion);
       console.log('Conclusion HTML length:', conclusionHTML.length);
-      html += `<h1 class="new-page">Conclusion</h1>${conclusionHTML}`;
+      html += `<h1 >Conclusion</h1>${conclusionHTML}`;
     }
     
     if (book.structure?.appendix) {
@@ -853,7 +831,7 @@ const BookPreviewPage: React.FC = () => {
       console.log('\nProcessing appendix, length:', normalizedAppendix.length);
       const appendixHTML = markdownToHTML(normalizedAppendix);
       console.log('Appendix HTML length:', appendixHTML.length);
-      html += `<h1 class="new-page">Appendix</h1>${appendixHTML}`;
+      html += `<h1 >Appendix</h1>${appendixHTML}`;
     }
     
     if (book.structure?.references) {
@@ -861,7 +839,7 @@ const BookPreviewPage: React.FC = () => {
       console.log('\nProcessing references, length:', normalizedReferences.length);
       const referencesHTML = markdownToHTML(normalizedReferences);
       console.log('References HTML length:', referencesHTML.length);
-      html += `<h1 class="new-page">References</h1>${referencesHTML}`;
+      html += `<h1 >References</h1>${referencesHTML}`;
     }
 
     html += `</body></html>`;
@@ -882,16 +860,6 @@ const BookPreviewPage: React.FC = () => {
     console.log('Total potential page breaks:', pageBreakCount);
     console.log('Empty chapters ("Content not available"):', (html.match(/Content not available/g) || []).length);
     
-    // Check Chapter 2 specific content
-    const chapter2Start = html.indexOf('Chapter 2: Discovering Your Habit Personality');
-    if (chapter2Start > -1) {
-      const chapter2End = html.indexOf('<h1', chapter2Start + 1);
-      const chapter2Section = chapter2End > -1 ? html.substring(chapter2Start, chapter2End) : html.substring(chapter2Start);
-      console.log('\n--- CHAPTER 2 SECTION ANALYSIS ---');
-      console.log('Chapter 2 section length:', chapter2Section.length);
-      console.log('Chapter 2 paragraph tags:', (chapter2Section.match(/<p>/g) || []).length);
-      console.log('Chapter 2 line breaks:', (chapter2Section.match(/<br>/g) || []).length);
-    }
     
     console.log('--- generateBookHTML END ---\n');
     
@@ -916,7 +884,7 @@ const BookPreviewPage: React.FC = () => {
     
     // Clean up any resulting issues
     normalized = normalized
-      .replace(/\s+/g, ' ')           // Multiple spaces to single space
+      .replace(/[ \t]+/g, ' ')        // Multiple spaces/tabs to single space (preserve newlines)
       .replace(/\n\s*\n\s*\n/g, '\n\n') // Multiple newlines to double newline
       .trim();
     
@@ -956,7 +924,7 @@ const BookPreviewPage: React.FC = () => {
     }
   
     // Use the normalized markdown for all processing
-    let sanitized = normalizedMarkdown;
+    let html = normalizedMarkdown;
   
     // HTML entity encoding for security
     const escapeHtml = (text: string): string => {
@@ -975,7 +943,7 @@ const BookPreviewPage: React.FC = () => {
     const inlineCode: string[] = [];
     
     // Extract fenced code blocks first (```language\n...\n```)
-    let html = sanitized.replace(/```(\w*)\n([\s\S]*?)```/g, (match: string, lang: string, code: string): string => {
+    html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (match: string, lang: string, code: string): string => {
       const index = codeBlocks.length;
       const className = lang ? ` class="language-${lang}"` : '';
       codeBlocks.push(`<pre><code${className}>${escapeHtml(code.trim())}</code></pre>`);
@@ -989,149 +957,127 @@ const BookPreviewPage: React.FC = () => {
       return `__INLINE_CODE_${index}__`;
     });
   
-    // Headers (h1-h6) with id generation for anchoring
-    const generateId = (text: string): string => {
-      return text.toLowerCase()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .trim();
-    };
-  
-    // First, convert any remaining *** patterns to +$$$+ for safety
-    html = html.replace(/\*\*\*/g, '+$$$+');
-    
-    // Headers (keeping h1 for PDF compatibility, but you might want to adjust)
-    html = html.replace(/^###### (.+)$/gm, '<h6>$1</h6>');
-    html = html.replace(/^##### (.+)$/gm, '<h5>$1</h5>');
+    // Headers - Using PDF-specific styling (process in order from longest to shortest)
     html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
     html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
     html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
     html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
-  
-    // Key Points (custom syntax: +$$$+...+$$$+) - Convert to simple HTML
-    html = html.replace(/\+\$\$\$\+([\s\S]*?)\+\$\$\$\+/g, (match: string, content: string): string => {
-      const lines = content.trim()
-        .split('\n')
-        .map((line: string) => line.trim())
-        .filter((line: string) => line.length > 0);
+    
+    // Key Points - Using exact same syntax and styling as MarkdownEditor
+    html = html.replace(/\+\$\$\$\+([\s\S]+?)\+\$\$\$\+/gs, '<div class="key-points">$1</div>');
+    
+    // Bold - PDF styling
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    
+    // Italic - PDF styling
+    html = html.replace(/\*([^*]+?)\*/g, '<em>$1</em>');
+    
+    // Process lists - Split into lines and process sequentially
+    const lines = html.split('\n');
+    const processedLines: string[] = [];
+    let inUnorderedList = false;
+    let inOrderedList = false;
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
       
-      // Ultra-simple HTML for PDF compatibility
-      let result = '<p>---</p>\n';
-      
-      lines.forEach((line: string) => {
-        if (line.match(/^[-*+]\s+(.+)$/)) {
-          // Convert list items to simple paragraphs with bullet
-          const content = line.replace(/^[-*+]\s+/, '');
-          result += `<p>• ${content}</p>\n`;
-        } else if (line.match(/^#+\s*(.+)$/)) {
-          // Convert headings to bold paragraphs
-          const heading = line.replace(/^#+\s*/, '');
-          result += `<p><strong>${heading}</strong></p>\n`;
-        } else {
-          // Regular paragraphs
-          result += `<p>${line}</p>\n`;
+      // Check for unordered list items
+      if (line.match(/^[-*+]\s+(.+)$/)) {
+        if (!inUnorderedList) {
+          if (inOrderedList) {
+            processedLines.push('</ol>');
+            inOrderedList = false;
+          }
+          processedLines.push('<ul>');
+          inUnorderedList = true;
         }
-      });
-      
-      result += '<p>---</p>\n';
-      return result;
-    });
-  
-    // Horizontal rules
-    html = html.replace(/^([-*_])\1{2,}$/gm, '<hr>');
-  
-    // Blockquotes (simple version for compatibility)
-    html = html.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
-    
-    // Merge consecutive blockquotes
-    html = html.replace(/(<\/blockquote>\s*<blockquote>)/g, '<br>');
-  
-    // Tables - Simplified for PDF compatibility
-    html = html.replace(/^\|(.+)\|\s*\n\|([\s\-:|]+)\|\s*\n((?:\|.+\|\s*\n?)*)/gm, 
-      (match: string, headerRow: string, alignmentRow: string, bodyRows: string): string => {
-        // For PDF compatibility, convert tables to simple text representation
-        let result = '<p>---</p>\n';
-        
-        // Process header
-        const headerCells = headerRow.split('|')
-          .map((cell: string) => cell.trim())
-          .filter((cell: string) => cell.length > 0);
-        
-        result += '<p><strong>' + headerCells.join(' | ') + '</strong></p>\n';
-        
-        // Process body rows
-        const rows = bodyRows.trim().split('\n').filter((row: string) => row.trim().length > 0);
-        rows.forEach((row: string) => {
-          const cells = row.split('|')
-            .map((cell: string) => cell.trim())
-            .filter((cell: string, index: number, arr: string[]) => {
-              return index > 0 && index < arr.length - 1;
-            });
-          
-          result += '<p>' + cells.join(' | ') + '</p>\n';
-        });
-        
-        result += '<p>---</p>\n';
-        return result;
+        processedLines.push(line.replace(/^[-*+]\s+(.+)$/, '<li>$1</li>'));
       }
-    );
-  
-    // Task lists
-    html = html.replace(/^- \[([ x])\] (.+)$/gm, (match: string, checked: string, text: string): string => {
-      const isChecked = checked === 'x' ? ' checked' : '';
-      return `<li class="task-list-item"><input type="checkbox" disabled${isChecked}> ${text}</li>`;
-    });
-  
-    // Lists - Simple version for better compatibility
-    // First mark list items
-    html = html.replace(/^(\d+)\.\s+(.+)$/gm, '<oli>$2</oli>');
-    html = html.replace(/^[-*+]\s+(?!\[[ x]\])(.+)$/gm, '<uli>$1</uli>');
+      // Check for ordered list items
+      else if (line.match(/^\d+\.\s+(.+)$/)) {
+        if (!inOrderedList) {
+          if (inUnorderedList) {
+            processedLines.push('</ul>');
+            inUnorderedList = false;
+          }
+          processedLines.push('<ol>');
+          inOrderedList = true;
+        }
+        processedLines.push(line.replace(/^\d+\.\s+(.+)$/, '<li>$1</li>'));
+      }
+      // Regular line - close any open lists
+      else {
+        if (inUnorderedList) {
+          processedLines.push('</ul>');
+          inUnorderedList = false;
+        }
+        if (inOrderedList) {
+          processedLines.push('</ol>');
+          inOrderedList = false;
+        }
+        processedLines.push(line);
+      }
+    }
     
-    // Wrap consecutive items
-    html = html.replace(/((?:<oli>.*?<\/oli>\s*)+)/g, '<ol>$1</ol>');
-    html = html.replace(/((?:<uli>.*?<\/uli>\s*)+)/g, '<ul>$1</ul>');
+    // Close any remaining open lists
+    if (inUnorderedList) {
+      processedLines.push('</ul>');
+    }
+    if (inOrderedList) {
+      processedLines.push('</ol>');
+    }
     
-    // Convert to proper li tags
-    html = html.replace(/<oli>/g, '<li>');
-    html = html.replace(/<\/oli>/g, '</li>');
-    html = html.replace(/<uli>/g, '<li>');
-    html = html.replace(/<\/uli>/g, '</li>');
-  
-    // Links
-    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    html = processedLines.join('\n');
     
-    // Images
-    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
-  
-    // Strong emphasis (bold) - Must come before single * for italic
-    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-    html = html.replace(/__([^_]+)__/g, '<strong>$1</strong>');
-  
-    // Emphasis (italic) - After bold to avoid conflicts
-    html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-    html = html.replace(/_([^_]+)_/g, '<em>$1</em>');
-  
-    // Strikethrough
-    html = html.replace(/~~([^~]+?)~~/g, '<del>$1</del>');
-  
-    // Line breaks (two spaces at end of line)
-    html = html.replace(/  $/gm, '<br>');
-  
-    // Paragraphs - More sophisticated handling
-    const paragraphize = (text: string): string => {
-      // Split into blocks
-      const blocks = text.split(/\n{2,}/);
+    // Blockquotes - PDF styling
+    html = html.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
+
+    // Tables - Enhanced styling with rounded corners and custom colors (same as MarkdownEditor)
+    html = html.replace(/\|(.+)\|\n\|[-\s|:]+\|\n((?:\|.+\|\n?)*)/g, (match, header, rows) => {
+      // Process header
+      const headerCells = header.split('|').map((cell: string) => cell.trim()).filter((cell: string) => cell.length > 0)
+      const headerHtml = headerCells.map((cell: string) => `<th>${cell}</th>`).join('')
       
-      return blocks.map((block: string) => {
+      // Process body rows
+      const bodyRows = rows.trim().split('\n').filter((row: string) => row.trim().length > 0)
+      const bodyHtml = bodyRows.map((row: string) => {
+        const cells = row.split('|').map((cell: string) => cell.trim()).filter((cell: string) => cell.length > 0)
+        const cellsHtml = cells.map((cell: string) => `<td>${cell}</td>`).join('')
+        return `<tr>${cellsHtml}</tr>`
+      }).join('')
+      
+      return `<table>
+          <thead>
+            <tr>${headerHtml}</tr>
+          </thead>
+          <tbody>
+            ${bodyHtml}
+          </tbody>
+        </table>`
+    })
+    
+    // Paragraphs - Simplified handling for better PDF formatting
+    const paragraphize = (text: string): string => {
+      console.log('=== PARAGRAPHIZE DEBUG ===');
+      console.log('Input text length:', text.length);
+      console.log('First 200 chars:', text.substring(0, 200));
+      
+      // Split into blocks by double line breaks or more
+      const blocks = text.split(/\n\s*\n+/);
+      console.log('Number of blocks after split:', blocks.length);
+      
+      const result = blocks.map((block: string, index: number) => {
         block = block.trim();
         
         // Don't wrap if it's already wrapped in block-level elements
-        if (block.match(/^<(?:h[1-6]|ul|ol|li|blockquote|pre|table|div|hr)/)) {
+        if (block.match(/^<(?:h[1-6]|ul|ol|blockquote|pre|table|div)/)) {
+          console.log(`Block ${index}: Already block element`);
           return block;
         }
         
         // Don't wrap if it's a code block placeholder
         if (block.match(/^__CODE_BLOCK_\d+__$/)) {
+          console.log(`Block ${index}: Code block placeholder`);
           return block;
         }
         
@@ -1140,13 +1086,24 @@ const BookPreviewPage: React.FC = () => {
           return '';
         }
         
+        // For regular text, replace single line breaks with spaces (not <br>)
+        // This creates proper paragraphs instead of line-by-line breaks
+        const processedBlock = block.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
+        console.log(`Block ${index}: Converting to paragraph (${processedBlock.length} chars)`);
+        
         // Wrap in paragraph tags
-        return `<p>${block}</p>`;
-      }).filter((block: string) => block).join('\n\n');
+        return `<p>${processedBlock}</p>`;
+      }).filter((block: string) => block);
+      
+      const finalResult = result.join('\n\n');
+      console.log('Final paragraphized length:', finalResult.length);
+      console.log('=== PARAGRAPHIZE DEBUG END ===');
+      
+      return finalResult;
     };
     
-    html = paragraphize(html);
-  
+    html = paragraphize(html)
+    
     // Restore code blocks and inline code
     codeBlocks.forEach((code: string, index: number) => {
       html = html.replace(`__CODE_BLOCK_${index}__`, code);
@@ -1155,55 +1112,6 @@ const BookPreviewPage: React.FC = () => {
     inlineCode.forEach((code: string, index: number) => {
       html = html.replace(`__INLINE_CODE_${index}__`, code);
     });
-  
-    // Clean up any remaining paragraph issues
-    html = html.replace(/<p>\s*<\/p>/g, '');
-    html = html.replace(/<p>(<(?:h[1-6]|ul|ol|li|blockquote|pre|table|div|hr))/g, '$1');
-    html = html.replace(/(<\/(?:h[1-6]|ul|ol|li|blockquote|pre|table|div|hr)>)<\/p>/g, '$1');
-  
-    // Clean up extra newlines
-    html = html.replace(/\n{3,}/g, '\n\n');
-  
-    // Final safety pass - remove any potentially problematic elements
-    // Remove any remaining div elements (convert to paragraphs)
-    html = html.replace(/<div[^>]*>/g, '<p>');
-    html = html.replace(/<\/div>/g, '</p>');
-    
-    // Remove any style attributes
-    html = html.replace(/\sstyle="[^"]*"/g, '');
-    
-    // Remove any class attributes except for task-list-item
-    html = html.replace(/\sclass="(?!task-list-item)[^"]*"/g, '');
-    
-    // Ensure no nested block elements
-    html = html.replace(/<p>(<h[1-6]>)/g, '$1');
-    html = html.replace(/(<\/h[1-6]>)<\/p>/g, '$1');
-    
-    // AGGRESSIVE FINAL SANITIZATION for html2pdf compatibility
-    // Remove ANY remaining complex elements that might break html2pdf
-    html = html.replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, ''); // Remove SVG
-    html = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, ''); // Remove scripts
-    html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ''); // Remove style tags
-    html = html.replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/gi, ''); // Remove iframes
-    html = html.replace(/<object[^>]*>[\s\S]*?<\/object>/gi, ''); // Remove objects
-    html = html.replace(/<embed[^>]*>/gi, ''); // Remove embeds
-    html = html.replace(/<video[^>]*>[\s\S]*?<\/video>/gi, '[VIDEO]'); // Replace video
-    html = html.replace(/<audio[^>]*>[\s\S]*?<\/audio>/gi, '[AUDIO]'); // Replace audio
-    html = html.replace(/<canvas[^>]*>[\s\S]*?<\/canvas>/gi, '[CANVAS]'); // Replace canvas
-    
-    // Remove data URLs and complex image sources
-    html = html.replace(/<img[^>]*src="data:[^"]*"[^>]*>/gi, '[IMAGE]');
-    
-    // Remove any remaining attributes that might cause issues
-    html = html.replace(/\son\w+="[^"]*"/gi, ''); // Remove event handlers
-    html = html.replace(/\sdata-[^=]*="[^"]*"/gi, ''); // Remove data attributes
-    
-    // Final character sanitization - ensure ONLY safe characters remain
-    html = html.replace(/[^\x20-\x7E\n\r\t<>/"'=\-àáäâèéëêìíïîòóöôùúüûñçÀÁÄÂÈÉËÊÌÍÏÎÒÓÖÔÙÚÜÛÑÇ]/g, ' ');
-    
-    // Clean up any broken tags
-    html = html.replace(/<[^>]*$/g, ''); // Remove incomplete tags at end
-    html = html.replace(/^[^<]*>/g, ''); // Remove incomplete tags at start
     
     console.log('Final HTML length after all sanitization:', html.length);
     console.log('Final HTML sample (first 300 chars):', html.substring(0, 300));
