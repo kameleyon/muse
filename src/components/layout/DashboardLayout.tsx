@@ -8,6 +8,7 @@ import {
   Home, FolderOpen, FileText, Bookmark, Users, Bell, Settings, LogOut
 } from 'lucide-react';
 
+
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }

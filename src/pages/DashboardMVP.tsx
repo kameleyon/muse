@@ -2,17 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { 
   FileText, FolderOpen, Zap, Plus, TrendingUp, 
   Lightbulb, Activity, AlertCircle, CheckCircle,
-  BookOpen, Presentation
+  BookOpen, Presentation, Edit, Clock
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '@/services/supabase';
 import { bookService } from '@/lib/books';
 //import MainLayout from '@/components/layout/MainLayout';
-import '@/styles/dashboard/dashboard.css';
+import '@/styles/ProjectArea.css';
+import '@/styles/ProjectSetup.css';
+import '@/styles/maingen.css';
+import '@/styles/blog.css';
+import BlogTypeGrid from '../components/project/blog/setup/BlogTypeGrid';
 
 // Book interface
 interface Book {
@@ -206,47 +211,73 @@ const DashboardMVP: React.FC = () => {
   const dailyTip = {
     title: 'Pro Tip: Use Templates',
     content: 'Start with our pre-built templates to create content 3x faster. Find them in the Create New dropdown.',
-    icon: <Lightbulb size={16} />,
+    icon: <Lightbulb size={20} />,
   };
 
   return (
     
       <div className="w-full">
         {/* Quick Stats */}
-        <div className="stats-section">
+        
+        {/*<div className="stats-section">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {quickStats.map((stat, idx) => (
-              <div key={`stat-${stat.label}-${idx}`} className="stat-card">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-secondary">{stat.label}</p>
-                    <p className="stat-value">{stat.value}</p>
-                    {stat.trend && (
-                      <p className={`text-xs mt-1 ${
-                        stat.trend === 'up' ? 'text-[#3d3d3a]' :
-                        stat.trend === 'down' ? 'text-[#ae5630]' :
-                        'text-[#30302e]'
-                      }`}>
-                        {stat.trend === 'up' ? '↑' : stat.trend === 'down' ? '↓' : '→'} 
-                        {stat.trend === 'up' ? ' Increasing' : stat.trend === 'down' ? ' Decreasing' : ' Stable'}
-                      </p>
-                    )}
+                {quickStats.map((stat, idx) => (
+                  <div key={`stat-${stat.label}-${idx}`} className="BlogTypeGrid stat-card">
+                    <div>
+                      <p className="text-sm text-secondary">{stat.label}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="stat-value">{stat.value}</p>
+                        {stat.icon}
+                      </div>
+                      {stat.trend && (
+                        <p className={`text-xs mt-1 ${
+                          stat.trend === 'up' ? 'text-[#3d3d3a]' :
+                          stat.trend === 'down' ? 'text-[#ae5630]' :
+                          'text-[#30302e]'
+                        }`}>
+                          {stat.trend === 'up' ? '↑' : stat.trend === 'down' ? '↓' : '→'} 
+                          {stat.trend === 'up' ? ' Increasing' : stat.trend === 'down' ? ' Decreasing' : ' Stable'}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    {stat.icon}
-                  </div>
-                </div>
-              </div>
             ))}
           </div>
-        </div>
+        </div>*/}
+       
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 w-full">
+          {/* Left Column - aligned with navbar left edge */}
+
+          <div className="md:col-span-8 space-y-3">
+          <div className="stats-section">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {quickStats.map((stat, idx) => (
+                  <div key={`stat-${stat.label}-${idx}`} className="BlogTypeGrid stat-card">
+                    <div>
+                      <p className="text-sm text-secondary">{stat.label}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="stat-value">{stat.value}</p>
+                        {stat.icon}
+                      </div>
+                      {stat.trend && (
+                        <p className={`text-xs mt-1 ${
+                          stat.trend === 'up' ? 'text-[#3d3d3a]' :
+                          stat.trend === 'down' ? 'text-[#ae5630]' :
+                          'text-[#30302e]'
+                        }`}>
+                          {stat.trend === 'up' ? '↑' : stat.trend === 'down' ? '↓' : '→'} 
+                          {stat.trend === 'up' ? ' Increasing' : stat.trend === 'down' ? ' Decreasing' : ' Stable'}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+          </div>
             {/* Recent Files */}
-            <div className="file-section">
+            <div className="file-section bg-neutral-white">
               <div className="card-header">
                 <div className="flex justify-between items-center">
                   <h2 className="h2">Recent Files</h2>
@@ -256,86 +287,101 @@ const DashboardMVP: React.FC = () => {
                 </div>
               </div>
               <div className="card-content">
-                <div className="recent-files">
-                  {loading ? (
-                    <div className="p-8 text-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                      <p className="mt-2 text-neutral-medium">Loading your content...</p>
-                    </div>
-                  ) : error ? (
-                    <div className="p-4 bg-red-50 rounded-lg">
-                      <p className="text-red-600 text-sm">Error loading content: {error}</p>
-                    </div>
-                  ) : recentItems.length === 0 ? (
-                    <div className="p-8 text-center">
-                      <p className="text-neutral-medium">No content yet. Start by creating a book or project!</p>
-                    </div>
-                  ) : recentItems.map((item, idx) => (
-                    <div key={`item-${item.id}-${idx}`} className="file-card">
-                      <div className="flex items-center space-x-3 mb-3">
-                        {item.type === 'book' ? (
-                          <BookOpen size={20} className="text-[#3d3d3a]" />
-                        ) : (
-                          <Presentation size={20} className="text-[#3d3d3a]" />
-                        )}
-                        <div className="flex-1">
-                          <p className="font-medium text-[#232321]">{item.name}</p>
-                          <p className="text-sm text-secondary">
-                            {formatDistanceToNow(item.lastModified)} ago • {item.typeName}
-                          </p>
-                          {item.description && (
-                            <p className="text-xs text-neutral-medium mt-1 line-clamp-1">{item.description}</p>
-                          )}
+                {loading ? (
+                  <div className="p-8 text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                    <p className="mt-2 text-neutral-medium">Loading your content...</p>
+                  </div>
+                ) : error ? (
+                  <div className="p-4 bg-red-50 rounded-lg">
+                    <p className="text-red-600 text-sm">Error loading content: {error}</p>
+                  </div>
+                ) : recentItems.length === 0 ? (
+                  <div className="p-8 text-center">
+                    <p className="text-neutral-medium">No content yet. Start by creating a book or project!</p>
+                  </div>
+                ) : (
+                  <div className="recent-files-list">
+                    {recentItems.map((item, idx) => (
+                      <div key={`item-${item.id}-${idx}`} className="file-list-item">
+                        <div className="flex items-center gap-4 w-full">
+                          {/* Icon */}
+                          <div className="file-icon">
+                            {item.type === 'book' ? (
+                              <BookOpen size={50} className="text-[#3d3d3a]/60 bg-neutral-light p-2 rounded-md" />
+                            ) : (
+                              <Presentation size={50} className="text-[#3d3d3a]/60 bg-neutral-light p-2 rounded-md" />
+                            )}
+                          </div>
+                          
+                          {/* Title */}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-[#232321]/80 truncate">{item.name}</p>
+                          </div>
+                          
+                          {/* Last Updated */}
+                          <div className="text-sm text-secondary/80 whitespace-nowrap">
+                            {formatDistanceToNow(item.lastModified)} ago
+                          </div>
+                          
+                          {/* Status Icon */}
+                          <div className="status-icon">
+                            <Clock size={16} className="text-[#ae5630]/90" />
+                          </div>
+                          
+                          {/* Edit Icon */}
+                          <button
+                            className="edit-icon-btn"
+                            onClick={() => window.location.href = item.type === 'book' ? `/book/${item.id}/edit` : `/project/${item.id}`}
+                            aria-label="Edit"
+                          >
+                            <Edit size={16} className="text-[#3d3d3a]/80 hover:text-[#ae5630]" />
+                          </button>
                         </div>
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="btn btn-outline w-full"
-                        onClick={() => window.location.href = item.type === 'book' ? `/book/${item.id}/edit` : `/project/${item.id}`}
-                      >
-                        Open
-                      </Button>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* Daily Tip */}
+            <div className="tips-section">
+              <div className="tip-card">
+                <div className="flex items-start space-x-3">
+                  <div className="text-primary mt-1">
+                    {dailyTip.icon}
+                  </div>
+                  <div>
+                    <h3 className="h3 mb-1">{dailyTip.title}</h3>
+                    <p className="text-sm text-secondary">{dailyTip.content}</p>
+                  </div>
                 </div>
               </div>
             </div>
+            
 
-            {/* Create New Content CTA */}
-            <div className="quick-actions">
-              <div className="action-card">
-                <h3 className="h3 mb-2">Ready to create?</h3>
-                <p className="mb-4">Start a new book or use our AI to generate content</p>
-                <Link to="/new-book">
-                  <Button className="btn btn-primary">
-                    <Plus size={20} className="mr-2" />
-                    Create New Book
-                  </Button>
-                </Link>
-              </div>
-            </div>
+            
           </div>
 
-          {/* Right Column */}
-          <div className="space-y-6">
+          {/* Right Column - aligned with navbar right edge */}
+          <div className="md:col-span-4 space-y-3">
             {/* Smart Notifications */}
-            <div className="activity-section">
+            <div className="activity-section shadow-md bg-clay">
               <div className="card-header">
-                <h2 className="h2">Notifications</h2>
+                <h2 className="h2 text-neutral-light">Notifications</h2>
               </div>
               <div className="activity-list">
                 {smartNotifications.map((notification, idx) => (
                   <div key={`smart-notification-item-${notification.id}-${idx}`} className="activity-item">
-                    <div className="activity-icon">
+                    <div className="activity-icon text-neutral-light/80">
                       {notification.type === 'success' && <CheckCircle size={16} />}
                       {notification.type === 'warning' && <AlertCircle size={16} />}
                       {notification.type === 'info' && <Activity size={16} />}
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-[#232321] text-sm">{notification.title}</p>
-                      <p className="text-sm text-secondary mt-1">{notification.message}</p>
-                      <p className="text-xs text-[#30302e] mt-1">
+                      <p className="font-medium text-neutral-light/90 text-sm">{notification.title}</p>
+                      <p className="text-sm text-neutral-light/90 mt-1">{notification.message}</p>
+                      <p className="text-xs text-neutral-light/80 mt-1">
                         {formatDistanceToNow(notification.timestamp)} ago
                       </p>
                     </div>
@@ -345,7 +391,7 @@ const DashboardMVP: React.FC = () => {
             </div>
 
             {/* Resource Usage */}
-            <div className="token-section">
+            <div className="token-section bg-neutral-white shadow-sm">
               <div className="card-header">
                 <h2 className="h2">Resource Usage</h2>
               </div>
@@ -402,24 +448,24 @@ const DashboardMVP: React.FC = () => {
                 </div>
               </div>
             </div>
-
-            {/* Daily Tip */}
-            <div className="tips-section">
-              <div className="tip-card">
-                <div className="flex items-start space-x-3">
-                  <div className="text-primary">
-                    {dailyTip.icon}
-                  </div>
-                  <div>
-                    <h3 className="h3 mb-1">{dailyTip.title}</h3>
-                    <p className="text-sm text-secondary">{dailyTip.content}</p>
-                  </div>
-                </div>
+           {/* Create New Content CTA 
+            <div className="quick-actions">
+              <div className="action-card">
+                <h3 className="h3 mb-2">Ready to create?</h3>
+                <p className="mb-4">Start a new book or use our AI to generate content</p>
+                <Link to="/new-book">
+                  <Button className="btn btn-primary text-neutral-white">
+                    <Plus size={20} className="mr-2" />
+                    Create New Book
+                  </Button>
+                </Link>
               </div>
             </div>
+            */}
           </div>
         </div>
-      </div>
+        </ div>
+      
     
   );
 };

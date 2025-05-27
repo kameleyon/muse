@@ -442,6 +442,83 @@
   color: var(--color-primary);
 }
 
+
+/*=================
+DASHBOARD SECTION 
+=================*/
+
+/* Statistics Section */
+.stats-section {
+  padding: 1rem;
+  margin: 0;
+  background-color: #bcb7af;
+  border-radius: 1rem;
+  border: 1px solid #5756541a;
+  color:#bcb7af;
+  box-shadow: var(--shadow-sm);
+}
+
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.stats-filters {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.stats-filter-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #575654;
+  border-radius: 0.5rem;
+  background-color: #faf9f5;
+  color: #bcb7af;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stats-filter-btn.active {
+  background-color: #ae5630;
+  color: #edeae2;
+  border-color: #ae5630;
+}
+
+
+/* Stats Card Enhancement */
+.stat-card {
+  background-color: #bcb7af;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  padding-left: 3rem;
+  transition: all 0.2s ease;
+  
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+  
+}
+
+.stat-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color:#ffffff;
+  
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  font-family: 'Comfortaa', cursive;
+  
+}
+
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .blog-template-grid,
@@ -456,4 +533,6 @@
   .blog-preview {
     margin-top: 1rem;
   }
+
+  
 }
