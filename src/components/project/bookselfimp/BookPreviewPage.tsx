@@ -358,6 +358,9 @@ const BookPreviewPage: React.FC = () => {
     /* ---------- 3) UNIVERSAL PAGE-BREAK HELPERS ---------- */
     h1, h2, h3, h4, h5, h6,
     p,
+    ul,
+    ol,
+    li,
     table,
     blockquote,
     .quote,
@@ -369,6 +372,27 @@ const BookPreviewPage: React.FC = () => {
     /* Widows / orphans for all paragraphs */
     p { orphans: 2; widows: 2; margin-bottom: 16px; }
     p { text-indent: 50px;  }   /* entire paragraph shifts right */
+
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      display: table;
+      margin-bottom: 15px;
+    }
+
+    li:before {
+      content: "•";
+      display: table-cell;
+      padding-right: 0.75rem;
+      font-weight: bold;
+      vertical-align: top;
+    }
+
 
 
     /* ---------- 4) COVER PAGE ---------- */
