@@ -99,6 +99,10 @@ const DashboardMVP: React.FC = () => {
           
           setProjects(userProjects || []);
           
+          // Debug logging
+          console.log('Dashboard - Loaded projects:', userProjects?.length || 0, userProjects);
+          console.log('Dashboard - Loaded books:', userBooks.length, userBooks);
+          
           // Combine books and projects for recent items
           const bookItems: RecentItem[] = userBooks.map(book => ({
             id: book.id,
