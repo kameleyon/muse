@@ -268,6 +268,13 @@ export const bookService = {
 
   // Update book details
   async updateBook(bookId: string, updates: Partial<Book>): Promise<Book> {
+    // Get current book state first to detect status changes
+    const { data: currentBook } = await supabase
+      .from('books')
+      .select('status, title, user_id')
+      .eq('id', bookId)
+      .single()
+
     const { data, error } = await supabase
       .from('books')
       .update({
@@ -279,6 +286,30 @@ export const bookService = {
       .single()
 
     if (error) throw error
+
+    // Check if book was marked as completed and generate notification
+    if (currentBook && currentBook.status !== 'completed' && updates.status === 'completed') {
+      try {
+        const { generateBookCompletionNotification, generateMilestoneNotification } = await import('../services/notificationService');
+        await generateBookCompletionNotification(data.user_id, data.title, bookId);
+        
+        // Check for milestones - get user's total book count
+        const { data: userBooks } = await supabase
+          .from('books')
+          .select('id')
+          .eq('user_id', data.user_id)
+          .eq('status', 'completed');
+        
+        const completedCount = userBooks?.length || 0;
+        if ([1, 5, 10, 25, 50, 100].includes(completedCount)) {
+          await generateMilestoneNotification(data.user_id, 'books_created', completedCount);
+        }
+      } catch (error) {
+        console.error('Failed to generate book completion notifications:', error);
+        // Don't fail the book update if notification generation fails
+      }
+    }
+
     return data
   },
 
@@ -505,6 +536,73 @@ export const bookService = {
       const errorMessage = error.response?.data?.error || error.message || 'Failed to revise chapter';
       throw new Error(errorMessage);
     }
+  },
+
+  // Update chapter details
+  async updateChapter(chapterId: string, updates: Partial<Chapter>): Promise<Chapter> {
+    // Get current chapter state first to detect status changes
+    const { data: currentChapter } = await supabase
+      .from('chapters')
+      .select('status, title, book_id')
+      .eq('id', chapterId)
+      .single()
+
+    const { data, error } = await supabase
+      .from('chapters')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', chapterId)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    // Check if chapter was marked as completed and generate milestone notifications
+    if (currentChapter && currentChapter.status !== 'completed' && updates.status === 'completed') {
+      try {
+        // Get book details for user_id
+        const { data: book } = await supabase
+          .from('books')
+          .select('user_id, title')
+          .eq('id', currentChapter.book_id)
+          .single()
+
+        if (book) {
+          // Check if all chapters in this book are now completed
+          const { data: allChapters } = await supabase
+            .from('chapters')
+            .select('status')
+            .eq('book_id', currentChapter.book_id)
+
+          const allCompleted = allChapters?.every(ch => ch.status === 'completed')
+          
+          if (allCompleted) {
+            // Auto-mark book as completed
+            await this.updateBook(currentChapter.book_id, { status: 'completed' })
+          }
+
+          // Generate chapter milestone notification
+          const { data: userChapters } = await supabase
+            .from('chapters')
+            .select('id')
+            .eq('book_id', currentChapter.book_id)
+            .eq('status', 'completed')
+
+          const completedChapters = userChapters?.length || 0
+          if ([1, 5, 10, 25, 50].includes(completedChapters)) {
+            const { generateMilestoneNotification } = await import('../services/notificationService')
+            await generateMilestoneNotification(book.user_id, 'chapters_completed', completedChapters)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to generate chapter completion notifications:', error)
+        // Don't fail the chapter update if notification generation fails
+      }
+    }
+
+    return data
   },
 
   // Upload reference file

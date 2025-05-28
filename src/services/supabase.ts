@@ -136,9 +136,13 @@ export const createProfileIfNotExists = async (userId: string, userData = {}) =>
     .eq('id', userId)
     .single();
   
+  let isNewUser = false;
+  let result;
+  
   if (!existingProfile) {
     // Create new profile
-    return await supabase
+    isNewUser = true;
+    result = await supabase
       .from('profiles')
       .insert([{ 
         id: userId,
@@ -148,11 +152,24 @@ export const createProfileIfNotExists = async (userId: string, userData = {}) =>
   } else {
     // If profile exists, update it with the provided data
     // This ensures fields like full_name are set correctly after the trigger runs
-    return await supabase
+    result = await supabase
       .from('profiles')
       .update(userData)
       .eq('id', userId);
   }
+  
+  // Generate welcome notifications for new users
+  if (isNewUser && !result.error) {
+    try {
+      const { generateWelcomeNotifications } = await import('./notificationService');
+      await generateWelcomeNotifications(userId);
+    } catch (error) {
+      console.error('Failed to generate welcome notifications:', error);
+      // Don't fail the profile creation if notification generation fails
+    }
+  }
+  
+  return result;
 };
 
 export const uploadAvatar = async (userId: string, file: File) => {

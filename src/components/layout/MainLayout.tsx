@@ -3,8 +3,9 @@ import { useSelector, useDispatch } from 'react-redux'; // Added useDispatch
 import { RootState } from '@/store/store';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { completeLogout } from '@/utils/clearCache';
-import { getUserProfile, updateUserProfile } from '@/services/supabase'; // Added profile functions
+import { getUserProfile, updateUserProfile, supabase } from '@/services/supabase'; // Added profile functions
 import { addToast } from '@/store/slices/uiSlice'; // Added addToast
+import { getNotificationsAPI, Notification } from '@/services/notificationService';
 
 // Lazy load OnboardingModal
 const OnboardingModal = lazy(() => import('@/features/onboarding/components/OnboardingModal'));
@@ -42,6 +43,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [showProjectView, setShowProjectView] = useState(false); // State for project view
   const [currentProjectName, setCurrentProjectName] = useState<string | null>(null); // State for project name
+  const [unreadNotifications, setUnreadNotifications] = useState<number>(0); // Unread notification count
+  const [projectCounts, setProjectCounts] = useState({ draftCount: 0, publishedCount: 0 }); // Real project counts
 
   // Handler for project creation success (now primarily for backend call simulation)
   const handleProjectCreationSuccess = async (details: {
@@ -112,6 +115,70 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     fetchProfileAndCheckOnboarding();
   }, [user?.id, dispatch, location.pathname]); // Rerun if user ID changes or location changes
 
+  // Fetch unread notifications count
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      if (user?.id) {
+        try {
+          const notifications = await getNotificationsAPI({ unreadOnly: true });
+          if (notifications) {
+            setUnreadNotifications(notifications.length);
+          }
+        } catch (error) {
+          console.error('Failed to fetch unread notifications:', error);
+        }
+      } else {
+        setUnreadNotifications(0);
+      }
+    };
+
+    fetchUnreadCount();
+    
+    // Set up interval to check for new notifications every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000);
+    
+    return () => clearInterval(interval);
+  }, [user?.id]);
+
+  // Fetch real project counts
+  useEffect(() => {
+    const fetchProjectCounts = async () => {
+      if (user?.id) {
+        try {
+          // Fetch books and projects from Supabase
+          const { data: userBooks } = await supabase
+            .from('books')
+            .select('status')
+            .eq('user_id', user.id);
+
+          const { data: userProjects } = await supabase
+            .from('projects')
+            .select('status')
+            .eq('user_id', user.id);
+
+          // Count draft and published items
+          const draftBooks = userBooks?.filter(book => book.status === 'draft' || book.status === 'in_progress').length || 0;
+          const publishedBooks = userBooks?.filter(book => book.status === 'completed' || book.status === 'published').length || 0;
+          
+          const draftProjects = userProjects?.filter(project => project.status !== 'completed').length || 0;
+          const publishedProjects = userProjects?.filter(project => project.status === 'completed').length || 0;
+
+          setProjectCounts({
+            draftCount: draftBooks + draftProjects,
+            publishedCount: publishedBooks + publishedProjects
+          });
+        } catch (error) {
+          console.error('Failed to fetch project counts:', error);
+          // Keep default counts on error
+        }
+      } else {
+        setProjectCounts({ draftCount: 0, publishedCount: 0 });
+      }
+    };
+
+    fetchProjectCounts();
+  }, [user?.id]);
+
 
   const handleOnboardingComplete = async (data: OnboardingData) => {
     if (!user?.id) return;
@@ -165,9 +232,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     { path: '/logout', label: 'Logout', icon: <LogOut size={20} color="#3d3d3a" /> }
   ];
   
-  // Sample project stats - in a real app these would be fetched from an API
-  const draftCount = 3;
-  const publishedCount = 8;
+  // Use real project counts from state
+  const { draftCount, publishedCount } = projectCounts;
   
   return (
     <div className="bg-[#EDEAE2] min-h-screen flex flex-col">
@@ -176,13 +242,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <div className="flex items-center">
           <Link to="/dashboard" className="flex items-center">
             <img src="/mmlogolight.png" alt="MagicMuse Logo" className="h-8 w-auto mr-3" />
-            <span className="text-3xl font-comfortaa hidden text-white/70 hover:text-white md:inline">magicmuse</span>
+            <span className="text-3xl font-heading hidden text-white/70 hover:text-white md:inline">magicmuse</span>
           </Link>
         </div>
         <div className="flex items-center gap-4">
+          {/* Notification Bell */}
+          <Link to="/notifications" className="relative p-2 hover:bg-white/10 rounded-lg transition-colors group">
+            <Bell size={20} className="text-white/70 group-hover:text-white transition-colors" />
+            {unreadNotifications > 0 && (
+              <div className="absolute -top-1 -right-1 bg-[#ae5630] text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                {unreadNotifications > 99 ? '99+' : unreadNotifications}
+              </div>
+            )}
+          </Link>
+          
           {/* Profile Link */}
           <Link to="/profile" className="flex items-center gap-2 group">
-             <span className="text-sm text-white/70 font-questrial inline group-hover:text-white transition-colors">{displayName}</span>
+             <span className="text-md text-white/70 font-heading inline group-hover:text-white transition-colors">{displayName}</span>
              <div className="w-8 h-8 rounded-full bg-[#ae5630] flex items-center justify-center group-hover:ring-2 group-hover:ring-primary transition-all">
                {profile?.avatar_url ? (
                  <img src={profile.avatar_url} alt="Avatar" className="w-full h-full rounded-full object-cover" />

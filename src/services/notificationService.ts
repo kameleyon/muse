@@ -136,3 +136,120 @@ export const markAllNotificationsAsReadAPI = async (): Promise<boolean> => {
         return false;
     }
 };
+
+/**
+ * Creates a new notification for a user
+ * @param userId - The user ID to create notification for
+ * @param title - Notification title
+ * @param message - Notification message
+ * @param type - Notification type
+ * @param link - Optional link for the notification
+ * @returns True if successful, false otherwise
+ */
+export const createNotificationAPI = async (
+    userId: string,
+    title: string,
+    message: string,
+    type: string = 'info',
+    link?: string
+): Promise<boolean> => {
+    try {
+        const { error } = await supabase
+            .from('notifications')
+            .insert({
+                user_id: userId,
+                title,
+                message,
+                type,
+                link,
+                read: false
+            });
+
+        if (error) {
+            console.error("Error creating notification:", error);
+            return false;
+        }
+        return true;
+    } catch (error: any) {
+        console.error("Unexpected error creating notification:", error);
+        return false;
+    }
+};
+
+/**
+ * Smart notification generators based on real user activity
+ */
+export const generateWelcomeNotifications = async (userId: string): Promise<void> => {
+    // Check if user already has welcome notifications to avoid duplicates
+    const existingNotifications = await getNotificationsAPI({ limit: 100 });
+    const hasWelcome = existingNotifications?.some(n => n.title.includes('Welcome to MagicMuse'));
+    
+    if (!hasWelcome) {
+        await createNotificationAPI(
+            userId,
+            'Welcome to MagicMuse!',
+            'You\'re all set to start creating amazing books with our AI-powered generation tools. Try creating your first book today!',
+            'feature',
+            '/new-book'
+        );
+        
+        await createNotificationAPI(
+            userId,
+            'Getting Started Tip',
+            'For best results, start with a clear book topic and create a detailed outline. Our AI performs significantly better with structured guidance.',
+            'tip'
+        );
+    }
+};
+
+export const generateBookCompletionNotification = async (userId: string, bookTitle: string, bookId: string): Promise<void> => {
+    await createNotificationAPI(
+        userId,
+        'Book Generation Complete!',
+        `Your book "${bookTitle}" has been successfully generated and is ready for review.`,
+        'achievement',
+        `/book/${bookId}/edit`
+    );
+};
+
+export const generateMilestoneNotification = async (userId: string, milestone: string, count: number): Promise<void> => {
+    const messages = {
+        'books_created': `Congratulations! You've created ${count} books. You're becoming a prolific digital author!`,
+        'words_generated': `Amazing! You've generated over ${count.toLocaleString()} words across your books.`,
+        'chapters_completed': `Great progress! You've completed ${count} chapters across all your books.`
+    };
+    
+    await createNotificationAPI(
+        userId,
+        'Milestone Achieved!',
+        messages[milestone as keyof typeof messages] || `You've reached a new milestone: ${milestone}`,
+        'achievement'
+    );
+};
+
+export const generateSystemNotification = async (userId: string, feature: string): Promise<void> => {
+    const features = {
+        'export_ready': {
+            title: 'Multi-Format Export Available',
+            message: 'Your books can now be exported to PDF, EPUB, and MOBI formats for publishing.'
+        },
+        'new_templates': {
+            title: 'New Book Templates Added',
+            message: 'Check out our latest templates for fiction, business, and self-help books.'
+        },
+        'ai_improved': {
+            title: 'Enhanced AI Generation',
+            message: 'Our AI models have been updated with improved chapter structuring and content quality.'
+        }
+    };
+    
+    const featureData = features[feature as keyof typeof features];
+    if (featureData) {
+        await createNotificationAPI(
+            userId,
+            featureData.title,
+            featureData.message,
+            'system'
+        );
+    }
+};
