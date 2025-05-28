@@ -290,7 +290,7 @@ function cleanJsonResponse(response: string): any {
               number: parseInt(chapterMatch[1]),
               title: chapterMatch[2].trim(),
               description: "Chapter extracted from AI response",
-              estimatedWords: 3000
+              estimatedWords: 5000
             });
           }
           
@@ -311,7 +311,7 @@ function cleanJsonResponse(response: string): any {
           number: parseInt(match[1]),
           title: match[2].trim(),
           description: "Chapter extracted from AI response",
-          estimatedWords: 3000
+          estimatedWords: 5000
         }));
         
         if (flatChapters.length > 0) {
@@ -344,7 +344,7 @@ function cleanJsonResponse(response: string): any {
                 number: totalChapters + (i * 4) + j + 1,
                 title: `Additional Chapter ${j + 1}`,
                 description: "Auto-generated chapter for comprehensive coverage",
-                estimatedWords: 4000
+                estimatedWords: 5000
               }))
             });
           }
@@ -369,7 +369,7 @@ function cleanJsonResponse(response: string): any {
             number: (partIndex * 4) + j + 1,
             title: `${partTitle.split(' ')[0]} Chapter ${j + 1}`,
             description: `Auto-generated chapter covering ${partTitle.toLowerCase()}`,
-            estimatedWords: 3000
+            estimatedWords: 5000
           }))
         }));
       }
@@ -501,7 +501,7 @@ CRITICAL JSON FORMAT REQUIREMENTS:
 
 CONTENT REQUIREMENTS:
 1. Create a book structure with multiple parts. Each part should contain 4-7 thematically related chapters. These are the main content chapters.
-2. The total estimated word count for the entire book (including Prologue, Introduction, main chapters, and Conclusion) should be between 125,000 and 184,000 words.
+2. The total estimated word count for the entire book (including Prologue, Introduction, main chapters, and Conclusion) should be between 110,000 and 145,000 words.
 3. Each main chapter (within the 'parts' array) must have a creative and descriptive title, a detailed explanation/description of its content and purpose, an estimated word count, key topics to be covered, and 3-5 key points the reader should take away. Chapter numbering should be sequential for these main chapters, starting from 1.
 4. Generate content for 'prologue', 'introduction', and 'conclusion' as top-level string fields in the JSON. These are NOT chapters within the 'parts' array and should NOT be numbered as chapters.
    - The 'prologue' string should contain a prologue (1,500-2,500 words) that immediately engages readers by: Opening with a vivid scene, surprising statement, or relatable problem; Establishing the book's core premise or conflict within the first 500 words; Including specific sensory details and concrete examples; Creating emotional connection through personal anecdote or universal experience; Ending with a clear promise of what the book will deliver; Matching the book's specified tone and target audience. MUST end with "+$$$+\n#### Key Points from Prologue\n- Point 1\n- Point 2\n- Point 3\n- Point 4\n- Point 5\n+$$$+"
@@ -568,7 +568,7 @@ You must respond with ONLY valid JSON in this exact format:
     }
     // ... AI to add more parts, each with 4-7 chapters and sequential part numbers ...
   ],
-  "totalWords": 185000, // AI calculates this sum from all chapter estimatedWords + prologue + intro + conclusion, aiming for 125k-184k.
+  "totalWords": 145000, // AI calculates this sum from all chapter estimatedWords + prologue + intro + conclusion, aiming for 110k-145k.
   "colorScheme": {
     "primary": "${marketResearch.recommendations.colors.primary}",
     "secondary": "${marketResearch.recommendations.colors.secondary}",
@@ -717,7 +717,7 @@ export const generateChapter = async (req: Request, res: Response) => {
       
       // Safely access metadata, which might not exist yet in the database schema
       let description = 'No description available';
-      let estimatedWords = 4000;
+      let estimatedWords = 5000;
       
       try {
         if (typeof chapter.metadata === 'object' && chapter.metadata !== null) {
@@ -749,7 +749,9 @@ export const generateChapter = async (req: Request, res: Response) => {
     // If not, we'll need to adapt our update strategy later
     const hasMetadataColumn = Object.prototype.hasOwnProperty.call(chapter, 'metadata');
 
-    const systemPrompt = `You are an expert book writer specializing in creating content that resonates with specific target audiences. Write in the exact tone and style specified, addressing the audience's pain points and desires.
+    const systemPrompt = `You are an expert book writer specializing in creating content that resonates with specific target audiences. Write in the exact tone and style specified, addressing the audience's pain points and desires and ALWAYS MEET EXACTLY ${chapterDetails?.estimatedWords} words (±25 words maximum) .
+
+CRITICAL MISSION: Your primary objective is to write EXACTLY ${chapterDetails?.estimatedWords || 4000} words. This is non-negotiable. Every successful chapter must hit this precise word count target.
 
 Write this chapter following these STRICT guidelines:
 
@@ -786,7 +788,11 @@ Write this chapter following these STRICT guidelines:
 16. Color palette references: ${book.marketResearch?.design?.colors || book.design?.colors || 'primary: purple, secondary: gold, accent: white'}
 
 **CHAPTER SPECIFICATIONS:**
-17. Word count: ${chapterDetails?.estimatedWords || 5000} words (±10%)
+17. **ABSOLUTE CRITICAL REQUIREMENT - Word count: EXACTLY ${chapterDetails?.estimatedWords || 5000} words**
+    - This is MANDATORY - do NOT deliver content that is shorter or longer
+    - If you fall short, add more examples, explanations, case studies, or detailed analysis
+    - If you exceed the target, condense while maintaining quality
+    - COUNT YOUR WORDS as you write and adjust accordingly
 18. Include ${book.marketResearch?.contentSpecs?.examplesPerChapter || chapterDetails?.examples || '3-4'} real-world examples
 19. ${book.marketResearch?.contentSpecs?.exerciseInclusion === 'true' || chapterDetails?.exercises ? 'Include practical exercises' : 'Focus on narrative flow'}
 20. Target audience specifics: ${book.marketResearch?.targetAudience?.demographics || '25-45, urban, professional'}
@@ -812,7 +818,7 @@ Chapter ${chapter.number}: ${chapter.title}
 Description: ${chapterDetails?.description || ''}
 ${chapterDetails?.keyTopics ? `Key Topics to Cover: ${chapterDetails.keyTopics.join(', ')}` : ''}
 ${chapterDetails?.keyPoints ? `Key Points to Include: ${chapterDetails.keyPoints.join(', ')}` : ''}
-Target Word Count: ${chapterDetails?.estimatedWords || 4000} words
+**MANDATORY Target Word Count: EXACTLY ${chapterDetails?.estimatedWords || 4000} words - NO EXCEPTIONS**
 
 ${previousChapters.length > 0 ? `Previous chapters covered: ${previousChapters.join(', ')}` : 'This is the first chapter.'}
 
@@ -824,7 +830,8 @@ ${chapter.number === (book.structure?.parts ?
   (book.structure?.chapters ? book.structure.chapters.length + 1 : 999)
 ) && book.structure?.conclusion ? `This is the CONCLUSION. Use the following content as guidance: ${book.structure.conclusion}` : ''}
 
-At the end of each chapter, add the key points, as defined
+At the end of each chapter, add the key points, exactly as defined:
+
 +$$$+
 #### Key Points to takeaway from this chapter
 - [Key takeaway 1 from this chapter]
@@ -833,7 +840,8 @@ At the end of each chapter, add the key points, as defined
 - [Key takeaway 4 from this chapter]
 - [Key takeaway 5 from this chapter]
 +$$$+
-Write high-quality content that follows all the guidelines above.`;
+
+`;
 
     // STEP 1: Search for supporting data using search-enabled model
     const searchPrompt = `You are a research assistant specializing in gathering current, factual information to support book content.
@@ -914,7 +922,7 @@ CHAPTER STRUCTURE REQUIREMENTS:
       { role: 'user', content: enhancedUserPrompt }
     ];
 
-    const model = 'anthropic/claude-sonnet-4';
+    const model = 'qwen/qwen3-30b-a3b';
     
     // Adjust temperature based on tone
     let temperature = 0.7;
@@ -928,7 +936,7 @@ CHAPTER STRUCTURE REQUIREMENTS:
     
     // Adjust max_tokens based on estimated words (roughly 1.3 tokens per word)
     // Use a safe approach for accessing chapter's estimated words
-    let estimatedWords = 4000; // Default
+    let estimatedWords = 5000; // Default
     if (chapterDetails?.estimatedWords) {
       estimatedWords = chapterDetails.estimatedWords;
     }
@@ -1052,7 +1060,11 @@ export const reviseChapter = async (req: Request, res: Response) => {
       throw new Error('Chapter has no content to revise');
     }
 
-    const systemPrompt = `You are an expert editor. Revise the provided content according to the given instructions while maintaining the overall structure and key points.`;
+    const systemPrompt = `You are an expert editor with ONE PRIMARY MISSION: Deliver content that is EXACTLY ${chapter.estimated_words || chapter.estimatedWords || 5000} words.
+
+NON-NEGOTIABLE REQUIREMENT: The revised content must hit exactly ${chapter.estimated_words || chapter.estimatedWords || 5000} words. This is your success metric.
+
+Revise the provided content according to the given instructions while maintaining the overall structure and key points, BUT your absolute priority is meeting the exact word count target.`;
     
     const userPrompt = `Original content:
 ${chapter.content}
@@ -1060,7 +1072,16 @@ ${chapter.content}
 Revision instructions:
 ${revisionInstructions}
 
-Please revise the content accordingly.`;
+**MANDATORY WORD COUNT: ${chapter.estimated_words || chapter.estimatedWords || 5000} words EXACTLY**
+
+EXECUTION STRATEGY:
+- If revision makes content too short: Add more detailed examples, expand explanations, include additional case studies, provide deeper analysis
+- If revision makes content too long: Condense without losing key information, combine related points, streamline prose
+- VERIFY your word count before submitting - this is your primary success criterion
+
+**FAILURE TO MEET THE EXACT WORD COUNT IS CONSIDERED A FAILED REVISION.**
+
+Please revise the content accordingly, ensuring you meet the exact word count requirement.`;
 
     const messages = [
       { role: 'system', content: systemPrompt },
