@@ -757,6 +757,8 @@ export const generateChapter = async (req: Request, res: Response) => {
 
 CRITICAL MISSION: Your primary objective is to write EXACTLY ${targetWords} words. This is non-negotiable. Every successful chapter must hit this precise word count target.
 
+NEVER ASK QUESTIONS: Do not ask for confirmation, clarification, or permission to continue. Write the content directly without any meta-commentary about the writing process.
+
 Write this chapter following these STRICT guidelines:
 
 **CONTENT QUALITY & VOICE:**
@@ -845,6 +847,8 @@ At the end of each chapter, add the key points, exactly as defined:
 - [Key takeaway 5 from this chapter]
 +$$$+
 
+ABSOLUTE REQUIREMENT: Write content directly. Do NOT ask questions like "Would you like me to continue?" or "Should I proceed with...?" Just write the chapter content continuously until you reach the exact word count.
+
 `;
 
     // STEP 1: Search for supporting data using search-enabled model
@@ -926,7 +930,7 @@ CHAPTER STRUCTURE REQUIREMENTS:
       { role: 'user', content: enhancedUserPrompt }
     ];
 
-    const model = 'anthropic/claude-3.5-haiku';
+    const model = 'meta-llama/llama-4-scout';
     
     // Adjust temperature based on tone
     let temperature = 0.8;
@@ -939,7 +943,7 @@ CHAPTER STRUCTURE REQUIREMENTS:
     }
     
     // Configure chunked generation
-    const WORDS_PER_CHUNK = 1000; // Generate in 1K word chunks
+    const WORDS_PER_CHUNK = 875; // Generate in 750-1000 word chunks (875 average)
     const numChunks = Math.ceil(targetWords / WORDS_PER_CHUNK);
     
     console.log(`Generating chapter in ${numChunks} chunks of ~${WORDS_PER_CHUNK} words each`);
@@ -953,8 +957,20 @@ CHAPTER STRUCTURE REQUIREMENTS:
       res.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
+        'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no' // Disable nginx buffering
       });
+      
+      // Send initial progress event
+      const initialData = {
+        type: 'progress',
+        chunkIndex: 0,
+        totalChunks: numChunks,
+        percentage: 0,
+        message: 'Generating content...',
+        estimatedTotalWords: targetWords
+      };
+      res.write(`data: ${JSON.stringify(initialData)}\n\n`);
     }
     
     for (let chunkIndex = 0; chunkIndex < numChunks; chunkIndex++) {
@@ -976,11 +992,15 @@ Previous content written so far:
 ${previousContent}
 
 Continue writing the next ${chunkWords} words. Do NOT repeat any content already written.
-${isLastChunk ? 'This is the FINAL chunk - make sure to conclude the chapter properly with the Key Points section.' : 'Continue naturally from where you left off.'}`;
+${isLastChunk ? 'This is the FINAL chunk - make sure to conclude the chapter properly with the Key Points section.' : 'Continue naturally from where you left off.'}
+
+CRITICAL: Write the content directly without asking questions or seeking confirmation. Do NOT ask "Would you like me to continue?" or similar questions. Just write the chapter content.`;
       } else {
         chunkPrompt = `${enhancedUserPrompt}
 
-Write the first ${chunkWords} words of this chapter. ${numChunks > 1 ? 'This is part 1 of ' + numChunks + '.' : ''}`;
+Write the first ${chunkWords} words of this chapter. ${numChunks > 1 ? 'This is part 1 of ' + numChunks + '.' : ''}
+
+CRITICAL: Write the content directly without asking questions or seeking confirmation. Do NOT ask "Would you like me to continue?" or similar questions. Just write the chapter content.`;
       }
       
       const chunkMessages = [
@@ -1007,10 +1027,23 @@ Write the first ${chunkWords} words of this chapter. ${numChunks > 1 ? 'This is 
       
       // Stream chunk to client if in streaming mode
       if (streamMode) {
+        // First send progress update
+        const progressPercentage = Math.round(((chunkIndex + 1) / numChunks) * 100);
+        const progressData = {
+          type: 'progress',
+          chunkIndex: chunkIndex + 1,
+          totalChunks: numChunks,
+          percentage: progressPercentage,
+          message: `Generating content... ${progressPercentage}%`,
+          currentWords: fullContent.split(/\s+/).filter(Boolean).length,
+          estimatedTotalWords: targetWords
+        };
+        res.write(`data: ${JSON.stringify(progressData)}\n\n`);
+        
         // Stream with typing effect - send words incrementally
         const words = chunkContent.split(/(\s+)/); // Keep whitespace
-        const WORDS_PER_BATCH = 5; // Send 5 words at a time for smooth typing
-        const BATCH_DELAY = 50; // Milliseconds between batches
+        const WORDS_PER_BATCH = 3; // Send 3 words at a time for smooth typing
+        const BATCH_DELAY = 30; // Faster typing (30ms between batches)
         
         for (let i = 0; i < words.length; i += WORDS_PER_BATCH * 2) { // *2 because we're keeping whitespace
           const wordBatch = words.slice(i, i + WORDS_PER_BATCH * 2).join('');
@@ -1020,12 +1053,7 @@ Write the first ${chunkWords} words of this chapter. ${numChunks > 1 ? 'This is 
             chunkIndex: chunkIndex + 1,
             totalChunks: numChunks,
             content: wordBatch,
-            isPartial: true,
-            progress: {
-              currentWord: Math.floor(i / 2),
-              totalWords: Math.floor(words.length / 2),
-              percentage: Math.round((i / words.length) * 100)
-            }
+            isPartial: true
           };
           
           res.write(`data: ${JSON.stringify(typingData)}\n\n`);
@@ -1036,11 +1064,12 @@ Write the first ${chunkWords} words of this chapter. ${numChunks > 1 ? 'This is 
         
         // Send chunk completion
         const chunkData = {
-          type: 'chunk',
+          type: 'chunk_complete',
           chunkIndex: chunkIndex + 1,
           totalChunks: numChunks,
           content: chunkContent,
-          words: chunkContent.split(/\s+/).filter(Boolean).length
+          words: chunkContent.split(/\s+/).filter(Boolean).length,
+          totalWords: fullContent.split(/\s+/).filter(Boolean).length
         };
         res.write(`data: ${JSON.stringify(chunkData)}\n\n`);
       }

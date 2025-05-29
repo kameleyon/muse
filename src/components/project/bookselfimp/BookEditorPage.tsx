@@ -21,6 +21,7 @@ import {
 import { cn } from '../../../lib/utils'
 import { bookService } from '../../../lib/books'
 import MarkdownEditor from '../../MarkdownEditor'
+import TypingContentDisplay from '../../TypingContentDisplay'
 import type { Book, Chapter, BookStructure } from '../../../types/books'
 
 type EditableSectionType =
@@ -58,6 +59,15 @@ const BookEditorPage: React.FC = () => {
   const [revisionInstructions, setRevisionInstructions] = useState('')
   const [showRevisionModal, setShowRevisionModal] = useState(false)
   const [activeSectionTypeForEditor, setActiveSectionTypeForEditor] = useState<EditableSectionType | null>(null);
+  const [generationProgress, setGenerationProgress] = useState<{
+    percentage: number;
+    message: string;
+    chunkIndex: number;
+    totalChunks: number;
+    currentWords: number;
+    estimatedTotalWords: number;
+  } | null>(null);
+  const [typingContent, setTypingContent] = useState('');
 
 
   const loadBookAndStructure = useCallback(async () => {
@@ -119,19 +129,44 @@ const BookEditorPage: React.FC = () => {
     
     setGenerating(true);
     setError('');
+    setTypingContent(''); // Reset typing content
+    setGenerationProgress(null); // Reset progress
     
     try {
       if (selectedSection.type === 'chapter') {
         const chapterId = selectedSection.id;
-        const updatedChapter = await bookService.generateChapter(chapterId);
+        
+        // Use streaming generation with progress callback
+        const updatedChapter = await bookService.generateChapter(chapterId, (data) => {
+          // Handle different event types from the stream
+          if (data.type === 'progress') {
+            setGenerationProgress({
+              percentage: data.percentage,
+              message: data.message,
+              chunkIndex: data.chunkIndex,
+              totalChunks: data.totalChunks,
+              currentWords: data.currentWords || 0,
+              estimatedTotalWords: data.estimatedTotalWords || 0
+            });
+          } else if (data.type === 'typing') {
+            // Accumulate typed content
+            setTypingContent(prev => prev + data.content);
+          } else if (data.type === 'chunk_complete') {
+            // Chunk completed, content is accumulated in typingContent
+          }
+        });
+        
+        // Final content is now complete
         setCurrentContent(updatedChapter.content);
+        setTypingContent(''); // Clear typing content
+        setGenerationProgress(null); // Clear progress
         
         setBook(prevBook => {
           if (!prevBook) return null;
           return {
             ...prevBook,
             chapters: prevBook.chapters?.map(ch =>
-              ch.id === chapterId ? { ...updatedChapter, content: updatedChapter.content } : ch // Ensure content is updated here
+              ch.id === chapterId ? { ...updatedChapter, content: updatedChapter.content } : ch
             ) || []
           };
         });
@@ -151,6 +186,8 @@ const BookEditorPage: React.FC = () => {
       }
     } catch (err: any) {
       setError(err.message || `Failed to generate ${selectedSection.title}`);
+      setGenerationProgress(null);
+      setTypingContent('');
     } finally {
       setGenerating(false);
     }
@@ -596,14 +633,48 @@ const BookEditorPage: React.FC = () => {
                 </div>
               )}
 
+              {/* Progress Bar */}
+              {generationProgress && (
+                <div className="p-4 bg-primary/5 border-b border-primary/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-primary">
+                      {generationProgress.message}
+                    </span>
+                    <span className="text-sm text-neutral-medium">
+                      {generationProgress.currentWords} / {generationProgress.estimatedTotalWords} words
+                    </span>
+                  </div>
+                  <div className="w-full bg-neutral-light rounded-full h-2 overflow-hidden">
+                    <div 
+                      className="bg-primary h-full rounded-full transition-all duration-300 ease-out"
+                      style={{ width: `${generationProgress.percentage}%` }}
+                    >
+                      <div className="h-full bg-white/30 animate-pulse" />
+                    </div>
+                  </div>
+                  <div className="flex justify-between mt-1 text-xs text-neutral-medium">
+                    <span>Chunk {generationProgress.chunkIndex} of {generationProgress.totalChunks}</span>
+                    <span>{generationProgress.percentage}%</span>
+                  </div>
+                </div>
+              )}
+
               <div className="flex-1 p-4 md:p-6 overflow-y-auto h-auto bg-white ml-6 rounded-2xl border-2 border-neutral-light shadown-md shadow-primary mt-4">
-                <MarkdownEditor
-                  value={currentContent}
-                  onChange={setCurrentContent}
-                  placeholder={generating ? "Generating content..." : `Edit ${selectedSection.title}...`}
-                  disabled={generating || activeSectionTypeForEditor === 'part-header'}
-                  className="w-full h-full flex-grow p-2 border-none focus:ring-0" // Ensure it fills space
-                />
+                {generating && typingContent ? (
+                  // Show typing content during generation with proper markdown rendering
+                  <TypingContentDisplay 
+                    content={typingContent}
+                    className="p-4"
+                  />
+                ) : (
+                  <MarkdownEditor
+                    value={currentContent}
+                    onChange={setCurrentContent}
+                    placeholder={generating ? "Generating content..." : `Edit ${selectedSection.title}...`}
+                    disabled={generating || activeSectionTypeForEditor === 'part-header'}
+                    className="w-full h-full flex-grow p-2 border-none focus:ring-0"
+                  />
+                )}
               </div>
             </>
           ) : (

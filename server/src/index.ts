@@ -39,6 +39,7 @@ app.use(xss()); // Sanitize request data against XSS
 app.use(cors({
   origin: config.corsOrigins,
   credentials: true,
+  exposedHeaders: ['X-Accel-Buffering'], // For SSE support
 }));
 app.use(morgan('dev')); // HTTP request logger
 

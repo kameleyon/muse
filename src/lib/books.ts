@@ -420,8 +420,8 @@ export const bookService = {
     return data
   },
 
-  // Generate chapter content
-  async generateChapter(chapterId: string): Promise<Chapter> {
+  // Generate chapter content with optional streaming
+  async generateChapter(chapterId: string, onProgress?: (data: any) => void): Promise<Chapter> {
     console.log(`Generating content for chapter ID: ${chapterId}`);
     
     // First, verify the chapter exists
@@ -483,23 +483,90 @@ export const bookService = {
     // Proceed with generation
     try {
       console.log(`Making API request to generate chapter content...`);
-      const response = await axios.post(
-        `${this.baseUrl}/api/book-ai/generate-chapter`,
-        { chapterId },
-        {
+      
+      // If onProgress callback is provided, use streaming
+      if (onProgress) {
+        const response = await fetch(`${this.baseUrl}/api/book-ai/generate-chapter`, {
+          method: 'POST',
           headers: {
-            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+            'Accept': 'text/event-stream'
+          },
+          body: JSON.stringify({ chapterId, streamMode: true })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let accumulatedContent = '';
+        let finalChapter: Chapter | null = null;
+        
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split('\n');
+            
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                if (data === '[DONE]') continue;
+                
+                try {
+                  const parsedData = JSON.parse(data);
+                  
+                  // Handle different event types
+                  if (parsedData.type === 'typing') {
+                    accumulatedContent += parsedData.content;
+                    onProgress({
+                      ...parsedData,
+                      accumulatedContent
+                    });
+                  } else if (parsedData.type === 'complete') {
+                    finalChapter = parsedData.chapter;
+                  } else {
+                    onProgress(parsedData);
+                  }
+                } catch (e) {
+                  console.error('Error parsing SSE data:', e);
+                }
+              }
+            }
           }
         }
-      );
-      
-      if (!response.data || !response.data.chapter) {
-        console.error('API response did not include chapter data');
-        throw new Error('No chapter data returned from generation');
+        
+        if (!finalChapter) {
+          throw new Error('No chapter data returned from streaming generation');
+        }
+        
+        console.log(`Successfully generated content for chapter: ${finalChapter.title}`);
+        return finalChapter;
+      } else {
+        // Non-streaming mode
+        const response = await axios.post(
+          `${this.baseUrl}/api/book-ai/generate-chapter`,
+          { chapterId, streamMode: false },
+          {
+            headers: {
+              'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+            }
+          }
+        );
+        
+        if (!response.data || !response.data.chapter) {
+          console.error('API response did not include chapter data');
+          throw new Error('No chapter data returned from generation');
+        }
+        
+        console.log(`Successfully generated content for chapter: ${response.data.chapter.title}`);
+        return response.data.chapter;
       }
-      
-      console.log(`Successfully generated content for chapter: ${response.data.chapter.title}`);
-      return response.data.chapter;
     } catch (error: any) {
       console.error('Error generating chapter:', error);
       // Extract the most useful error message
