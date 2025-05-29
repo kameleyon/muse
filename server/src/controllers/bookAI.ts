@@ -608,7 +608,7 @@ You must respond with ONLY valid JSON in this exact format:
 
 export const generateChapter = async (req: Request, res: Response) => {
   try {
-    const { chapterId } = req.body;
+    const { chapterId, streamMode = false } = req.body;
     
     console.log(`Attempting to generate chapter with ID: ${chapterId}`);
 
@@ -749,9 +749,13 @@ export const generateChapter = async (req: Request, res: Response) => {
     // If not, we'll need to adapt our update strategy later
     const hasMetadataColumn = Object.prototype.hasOwnProperty.call(chapter, 'metadata');
 
-    const systemPrompt = `You are an expert book writer specializing in creating content that resonates with specific target audiences. Write in the exact tone and style specified, addressing the audience's pain points and desires and ALWAYS MEET EXACTLY ${chapterDetails?.estimatedWords} words (±25 words maximum) .
+    // Enforce 5K maximum word limit
+    const MAX_WORDS = 5000;
+    const targetWords = Math.min(chapterDetails?.estimatedWords || 4000, MAX_WORDS);
+    
+    const systemPrompt = `You are an expert book writer specializing in creating content that resonates with specific target audiences. Write in the exact tone and style specified, addressing the audience's pain points and desires and ALWAYS MEET EXACTLY ${targetWords} words (±25 words maximum) .
 
-CRITICAL MISSION: Your primary objective is to write EXACTLY ${chapterDetails?.estimatedWords || 4000} words. This is non-negotiable. Every successful chapter must hit this precise word count target.
+CRITICAL MISSION: Your primary objective is to write EXACTLY ${targetWords} words. This is non-negotiable. Every successful chapter must hit this precise word count target.
 
 Write this chapter following these STRICT guidelines:
 
@@ -788,7 +792,7 @@ Write this chapter following these STRICT guidelines:
 16. Color palette references: ${book.marketResearch?.design?.colors || book.design?.colors || 'primary: purple, secondary: gold, accent: white'}
 
 **CHAPTER SPECIFICATIONS:**
-17. **ABSOLUTE CRITICAL REQUIREMENT - Word count: EXACTLY ${chapterDetails?.estimatedWords || 5000} words**
+17. **ABSOLUTE CRITICAL REQUIREMENT - Word count: EXACTLY ${targetWords} words**
     - This is MANDATORY - do NOT deliver content that is shorter or longer
     - If you fall short, add more examples, explanations, case studies, or detailed analysis
     - If you exceed the target, condense while maintaining quality
@@ -818,7 +822,7 @@ Chapter ${chapter.number}: ${chapter.title}
 Description: ${chapterDetails?.description || ''}
 ${chapterDetails?.keyTopics ? `Key Topics to Cover: ${chapterDetails.keyTopics.join(', ')}` : ''}
 ${chapterDetails?.keyPoints ? `Key Points to Include: ${chapterDetails.keyPoints.join(', ')}` : ''}
-**MANDATORY Target Word Count: EXACTLY ${chapterDetails?.estimatedWords || 4000} words - NO EXCEPTIONS**
+**MANDATORY Target Word Count: EXACTLY ${targetWords} words - NO EXCEPTIONS**
 
 ${previousChapters.length > 0 ? `Previous chapters covered: ${previousChapters.join(', ')}` : 'This is the first chapter.'}
 
@@ -885,8 +889,8 @@ Begin your research now.`;
       model: 'openai/gpt-4o-search-preview',
       prompt: searchMessages.map(m => `${m.role}: ${m.content}`).join('\n'),
       messages: searchMessages as any,
-      temperature: 0.3,
-      max_tokens: 4000
+      temperature: 0.4,
+      max_tokens: 40000
     });
 
     const researchData = searchResponse.choices[0].message.content || '';
@@ -922,37 +926,127 @@ CHAPTER STRUCTURE REQUIREMENTS:
       { role: 'user', content: enhancedUserPrompt }
     ];
 
-    const model = 'qwen/qwen3-30b-a3b';
+    const model = 'anthropic/claude-3.5-haiku';
     
     // Adjust temperature based on tone
-    let temperature = 0.7;
+    let temperature = 0.8;
     if (book.structure?.tone?.toLowerCase().includes('creative') || 
         book.structure?.tone?.toLowerCase().includes('inspirational')) {
       temperature = 0.9;
     } else if (book.structure?.tone?.toLowerCase().includes('academic') || 
                book.structure?.tone?.toLowerCase().includes('technical')) {
-      temperature = 0.5;
+      temperature = 0.4;
     }
     
-    // Adjust max_tokens based on estimated words (roughly 1.3 tokens per word)
-    // Use a safe approach for accessing chapter's estimated words
-    let estimatedWords = 5000; // Default
-    if (chapterDetails?.estimatedWords) {
-      estimatedWords = chapterDetails.estimatedWords;
-    }
-    const maxTokens = Math.min(Math.ceil(estimatedWords * 1.5), 8000);
+    // Configure chunked generation
+    const WORDS_PER_CHUNK = 1000; // Generate in 1K word chunks
+    const numChunks = Math.ceil(targetWords / WORDS_PER_CHUNK);
     
-    const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
-    const response = await executeOpenRouterRequest({
-      model,
-      prompt,
-      messages,
-      temperature,
-      max_tokens: maxTokens
-    });
+    console.log(`Generating chapter in ${numChunks} chunks of ~${WORDS_PER_CHUNK} words each`);
+    
+    // Generate content in chunks
+    let fullContent = '';
+    let previousContent = '';
+    
+    // If streaming mode, set up SSE headers
+    if (streamMode) {
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      });
+    }
+    
+    for (let chunkIndex = 0; chunkIndex < numChunks; chunkIndex++) {
+      const isFirstChunk = chunkIndex === 0;
+      const isLastChunk = chunkIndex === numChunks - 1;
+      const chunkWords = isLastChunk ? 
+        (targetWords - (chunkIndex * WORDS_PER_CHUNK)) : 
+        WORDS_PER_CHUNK;
+      
+      // Modify prompt for continuation
+      let chunkPrompt = enhancedUserPrompt;
+      if (!isFirstChunk) {
+        chunkPrompt = `${enhancedUserPrompt}
 
-    // Update chapter with generated content
-    const content = response.choices[0].message.content || '';
+CONTINUATION INSTRUCTIONS:
+You are continuing to write Chapter ${chapter.number}: ${chapter.title}.
+
+Previous content written so far:
+${previousContent}
+
+Continue writing the next ${chunkWords} words. Do NOT repeat any content already written.
+${isLastChunk ? 'This is the FINAL chunk - make sure to conclude the chapter properly with the Key Points section.' : 'Continue naturally from where you left off.'}`;
+      } else {
+        chunkPrompt = `${enhancedUserPrompt}
+
+Write the first ${chunkWords} words of this chapter. ${numChunks > 1 ? 'This is part 1 of ' + numChunks + '.' : ''}`;
+      }
+      
+      const chunkMessages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: chunkPrompt }
+      ];
+      
+      const chunkMaxTokens = Math.ceil(chunkWords * 1.5);
+      
+      console.log(`Generating chunk ${chunkIndex + 1}/${numChunks} (~${chunkWords} words)`);
+      
+      const prompt = chunkMessages.map(m => `${m.role}: ${m.content}`).join('\n');
+      const response = await executeOpenRouterRequest({
+        model,
+        prompt,
+        messages: chunkMessages,
+        temperature,
+        max_tokens: chunkMaxTokens
+      });
+      
+      const chunkContent = response.choices[0].message.content || '';
+      fullContent += (isFirstChunk ? '' : '\n\n') + chunkContent;
+      previousContent = fullContent;
+      
+      // Stream chunk to client if in streaming mode
+      if (streamMode) {
+        // Stream with typing effect - send words incrementally
+        const words = chunkContent.split(/(\s+)/); // Keep whitespace
+        const WORDS_PER_BATCH = 5; // Send 5 words at a time for smooth typing
+        const BATCH_DELAY = 50; // Milliseconds between batches
+        
+        for (let i = 0; i < words.length; i += WORDS_PER_BATCH * 2) { // *2 because we're keeping whitespace
+          const wordBatch = words.slice(i, i + WORDS_PER_BATCH * 2).join('');
+          
+          const typingData = {
+            type: 'typing',
+            chunkIndex: chunkIndex + 1,
+            totalChunks: numChunks,
+            content: wordBatch,
+            isPartial: true,
+            progress: {
+              currentWord: Math.floor(i / 2),
+              totalWords: Math.floor(words.length / 2),
+              percentage: Math.round((i / words.length) * 100)
+            }
+          };
+          
+          res.write(`data: ${JSON.stringify(typingData)}\n\n`);
+          
+          // Small delay to create typing effect
+          await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
+        }
+        
+        // Send chunk completion
+        const chunkData = {
+          type: 'chunk',
+          chunkIndex: chunkIndex + 1,
+          totalChunks: numChunks,
+          content: chunkContent,
+          words: chunkContent.split(/\s+/).filter(Boolean).length
+        };
+        res.write(`data: ${JSON.stringify(chunkData)}\n\n`);
+      }
+    }
+    
+    const content = fullContent;
     
     // Create update payload based on whether metadata column exists
     let updatePayload: any = {
@@ -1002,10 +1096,24 @@ CHAPTER STRUCTURE REQUIREMENTS:
     // Auto-generate/update appendix content based on new chapter
     await updateBookAppendix(chapter.book_id, content);
 
-    res.json({ 
-      chapter: firstUpdatedChapter,
-      referencesFound: references.length
-    });
+    // Handle response based on streaming mode
+    if (streamMode) {
+      // Send final completion event
+      const completionData = {
+        type: 'complete',
+        chapter: firstUpdatedChapter,
+        referencesFound: references.length,
+        totalWords: wordCount
+      };
+      res.write(`data: ${JSON.stringify(completionData)}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    } else {
+      res.json({ 
+        chapter: firstUpdatedChapter,
+        referencesFound: references.length
+      });
+    }
   } catch (error: any) {
     console.error('Error generating chapter:', error);
     res.status(500).json({ error: error.message || 'Failed to generate chapter' });
@@ -1095,7 +1203,7 @@ Please revise the content accordingly, ensuring you meet the exact word count re
       model,
       prompt,
       messages,
-      temperature: 0.7,
+      temperature: 0.8,
       max_tokens: 4000
     });
 
@@ -1138,5 +1246,178 @@ Please revise the content accordingly, ensuring you meet the exact word count re
   } catch (error: any) {
     console.error('Error revising chapter:', error);
     res.status(500).json({ error: error.message || 'Failed to revise chapter' });
+  }
+};
+
+export const generatePDF = async (req: Request, res: Response) => {
+  try {
+    const { bookId, chapterIds = [], streamMode = true } = req.body;
+    
+    console.log(`Generating PDF for book: ${bookId}`);
+    
+    // Get book details
+    const { data: book, error: bookError } = await supabaseAdmin
+      .from('books')
+      .select('*')
+      .eq('id', bookId)
+      .single();
+      
+    if (bookError || !book) {
+      throw new Error('Book not found');
+    }
+    
+    // Get chapters to include in PDF
+    let chaptersQuery = supabaseAdmin
+      .from('chapters')
+      .select('*')
+      .eq('book_id', bookId)
+      .order('number');
+      
+    if (chapterIds.length > 0) {
+      chaptersQuery = chaptersQuery.in('id', chapterIds);
+    }
+    
+    const { data: chapters, error: chaptersError } = await chaptersQuery;
+    
+    if (chaptersError || !chapters) {
+      throw new Error('Failed to fetch chapters');
+    }
+    
+    // Filter out chapters without content
+    const chaptersWithContent = chapters.filter(ch => ch.content);
+    
+    if (chaptersWithContent.length === 0) {
+      throw new Error('No chapters with content found');
+    }
+    
+    // Set up streaming response if requested
+    if (streamMode) {
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      });
+    }
+    
+    // Calculate total content size for chunking
+    const totalContent = chaptersWithContent.reduce((acc, ch) => acc + (ch.content?.length || 0), 0);
+    const CHUNK_SIZE = 5000; // Process ~1K words at a time (approx 5K characters)
+    const totalChunks = Math.ceil(totalContent / CHUNK_SIZE);
+    
+    console.log(`Processing ${chaptersWithContent.length} chapters in ~${totalChunks} chunks`);
+    
+    // Generate PDF content in chunks
+    let pdfSections = [];
+    let processedChars = 0;
+    let chunkIndex = 0;
+    
+    // Add cover page
+    pdfSections.push({
+      type: 'cover',
+      content: {
+        title: book.title,
+        subtitle: book.structure?.subtitle || '',
+        author: book.structure?.coverPageDetails?.authorName || 'Author'
+      }
+    });
+    
+    // Add table of contents
+    const tocContent = chaptersWithContent.map(ch => ({
+      number: ch.number,
+      title: ch.title,
+      page: 0 // Will be calculated by PDF renderer
+    }));
+    
+    pdfSections.push({
+      type: 'toc',
+      content: tocContent
+    });
+    
+    // Process chapters in chunks
+    for (const chapter of chaptersWithContent) {
+      const chapterContent = chapter.content || '';
+      let chapterPosition = 0;
+      
+      while (chapterPosition < chapterContent.length) {
+        const chunkEnd = Math.min(chapterPosition + CHUNK_SIZE, chapterContent.length);
+        const chunk = chapterContent.substring(chapterPosition, chunkEnd);
+        
+        pdfSections.push({
+          type: 'chapter',
+          chapterNumber: chapter.number,
+          chapterTitle: chapter.title,
+          content: chunk,
+          isChapterStart: chapterPosition === 0,
+          isChapterEnd: chunkEnd === chapterContent.length
+        });
+        
+        chapterPosition = chunkEnd;
+        processedChars += chunk.length;
+        chunkIndex++;
+        
+        // Stream progress update
+        if (streamMode) {
+          const progressData = {
+            type: 'progress',
+            chunkIndex,
+            totalChunks,
+            processedChars,
+            totalChars: totalContent,
+            percentage: Math.round((processedChars / totalContent) * 100),
+            currentChapter: chapter.title
+          };
+          res.write(`data: ${JSON.stringify(progressData)}\n\n`);
+        }
+      }
+    }
+    
+    // Add references if available
+    if (book.structure?.references) {
+      pdfSections.push({
+        type: 'references',
+        content: book.structure.references
+      });
+    }
+    
+    // Add appendix if available
+    if (book.structure?.appendix) {
+      pdfSections.push({
+        type: 'appendix',
+        content: book.structure.appendix
+      });
+    }
+    
+    // Final response
+    if (streamMode) {
+      const completionData = {
+        type: 'complete',
+        pdfSections,
+        totalPages: pdfSections.length,
+        metadata: {
+          title: book.title,
+          author: book.structure?.coverPageDetails?.authorName || 'Author',
+          createdAt: new Date().toISOString(),
+          totalChapters: chaptersWithContent.length
+        }
+      };
+      res.write(`data: ${JSON.stringify(completionData)}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    } else {
+      res.json({
+        pdfSections,
+        totalPages: pdfSections.length,
+        metadata: {
+          title: book.title,
+          author: book.structure?.coverPageDetails?.authorName || 'Author',
+          createdAt: new Date().toISOString(),
+          totalChapters: chaptersWithContent.length
+        }
+      });
+    }
+    
+  } catch (error: any) {
+    console.error('Error generating PDF:', error);
+    res.status(500).json({ error: error.message || 'Failed to generate PDF' });
   }
 };
