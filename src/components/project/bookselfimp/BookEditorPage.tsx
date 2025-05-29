@@ -652,8 +652,7 @@ const BookEditorPage: React.FC = () => {
                       <div className="h-full bg-white/30 animate-pulse" />
                     </div>
                   </div>
-                  <div className="flex justify-between mt-1 text-xs text-neutral-medium">
-                    <span>Chunk {generationProgress.chunkIndex} of {generationProgress.totalChunks}</span>
+                  <div className="flex justify-end mt-1 text-xs text-neutral-medium">
                     <span>{generationProgress.percentage}%</span>
                   </div>
                 </div>

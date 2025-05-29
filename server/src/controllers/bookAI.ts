@@ -759,6 +759,17 @@ CRITICAL MISSION: Your primary objective is to write EXACTLY ${targetWords} word
 
 NEVER ASK QUESTIONS: Do not ask for confirmation, clarification, or permission to continue. Write the content directly without any meta-commentary about the writing process.
 
+KEY POINTS RULE: Include ONLY ONE "Key Points" section at the very end of the chapter. Do NOT include key points in the middle of content. The key points MUST be in this exact format:
+
++$$$+
+#### Key Points to takeaway from this chapter
+- [Key takeaway 1 from this chapter]
+- [Key takeaway 2 from this chapter]
+- [Key takeaway 3 from this chapter]
+- [Key takeaway 4 from this chapter]
+- [Key takeaway 5 from this chapter]
++$$$+
+
 Write this chapter following these STRICT guidelines:
 
 **CONTENT QUALITY & VOICE:**
@@ -836,12 +847,12 @@ ${chapter.number === (book.structure?.parts ?
   (book.structure?.chapters ? book.structure.chapters.length + 1 : 999)
 ) && book.structure?.conclusion ? `This is the CONCLUSION. Use the following content as guidance: ${book.structure.conclusion}` : ''}
 
-At the end of each chapter, add the key points, exactly as defined:
+CRITICAL KEY POINTS FORMATTING: At the end of each chapter, add the key points in EXACTLY this format (no variations allowed):
 
 +$$$+
 #### Key Points to takeaway from this chapter
 - [Key takeaway 1 from this chapter]
-- [Key takeaway 2 from this chapter] 
+- [Key takeaway 2 from this chapter]
 - [Key takeaway 3 from this chapter]
 - [Key takeaway 4 from this chapter]
 - [Key takeaway 5 from this chapter]
@@ -930,7 +941,7 @@ CHAPTER STRUCTURE REQUIREMENTS:
       { role: 'user', content: enhancedUserPrompt }
     ];
 
-    const model = 'meta-llama/llama-4-scout';
+    const model = 'anthropic/claude-3.7-sonnet';
     
     // Adjust temperature based on tone
     let temperature = 0.8;
@@ -992,13 +1003,17 @@ Previous content written so far:
 ${previousContent}
 
 Continue writing the next ${chunkWords} words. Do NOT repeat any content already written.
-${isLastChunk ? 'This is the FINAL chunk - make sure to conclude the chapter properly with the Key Points section.' : 'Continue naturally from where you left off.'}
+${isLastChunk ? 'This is the FINAL chunk - conclude the chapter with meaningful content and add the Key Points section at the very end in EXACTLY this format:\n\n+$$$+\n#### Key Points to takeaway from this chapter\n- [Key takeaway 1 from this chapter]\n- [Key takeaway 2 from this chapter]\n- [Key takeaway 3 from this chapter]\n- [Key takeaway 4 from this chapter]\n- [Key takeaway 5 from this chapter]\n+$$$+' : 'Continue naturally from where you left off. Do NOT include any Key Points section in this chunk.'}
+
+WORD COUNT CRITICAL: Write exactly ${chunkWords} words for this chunk. Count carefully to ensure precision.
 
 CRITICAL: Write the content directly without asking questions or seeking confirmation. Do NOT ask "Would you like me to continue?" or similar questions. Just write the chapter content.`;
       } else {
         chunkPrompt = `${enhancedUserPrompt}
 
-Write the first ${chunkWords} words of this chapter. ${numChunks > 1 ? 'This is part 1 of ' + numChunks + '.' : ''}
+Write the first ${chunkWords} words of this chapter. ${numChunks > 1 ? 'Do NOT include Key Points in this chunk.' : 'Include the Key Points section at the end in EXACTLY this format:\n\n+$$$+\n#### Key Points to takeaway from this chapter\n- [Key takeaway 1 from this chapter]\n- [Key takeaway 2 from this chapter]\n- [Key takeaway 3 from this chapter]\n- [Key takeaway 4 from this chapter]\n- [Key takeaway 5 from this chapter]\n+$$$+'}
+
+WORD COUNT CRITICAL: Write exactly ${chunkWords} words for this chunk. Count carefully to ensure precision.
 
 CRITICAL: Write the content directly without asking questions or seeking confirmation. Do NOT ask "Would you like me to continue?" or similar questions. Just write the chapter content.`;
       }
@@ -1042,8 +1057,8 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
         
         // Stream with typing effect - send words incrementally
         const words = chunkContent.split(/(\s+)/); // Keep whitespace
-        const WORDS_PER_BATCH = 3; // Send 3 words at a time for smooth typing
-        const BATCH_DELAY = 30; // Faster typing (30ms between batches)
+        const WORDS_PER_BATCH = 2; // Send 2 words at a time for slower display
+        const BATCH_DELAY = 75; // Slower timing (75ms between batches) to allow next chunk generation
         
         for (let i = 0; i < words.length; i += WORDS_PER_BATCH * 2) { // *2 because we're keeping whitespace
           const wordBatch = words.slice(i, i + WORDS_PER_BATCH * 2).join('');
@@ -1058,7 +1073,7 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
           
           res.write(`data: ${JSON.stringify(typingData)}\n\n`);
           
-          // Small delay to create typing effect
+          // Slower delay to create typing effect and allow next chunk generation
           await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
         }
         
