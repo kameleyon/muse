@@ -135,6 +135,17 @@ const BookPreviewPage: React.FC = () => {
     setPdfProgress(0);
     setError('');
 
+    // Create an off-screen container for PDF generation
+    const offscreenContainer = document.createElement('div');
+    offscreenContainer.style.position = 'fixed';
+    offscreenContainer.style.left = '-9999px';
+    offscreenContainer.style.top = '-9999px';
+    offscreenContainer.style.width = '8.5in'; // Letter size width
+    offscreenContainer.style.height = '11in'; // Letter size height
+    offscreenContainer.style.overflow = 'hidden';
+    offscreenContainer.style.visibility = 'hidden';
+    document.body.appendChild(offscreenContainer);
+
     try {
       // Generate the complete HTML content
       const fullHtmlContent = generateBookHTML();
@@ -184,9 +195,15 @@ const BookPreviewPage: React.FC = () => {
         // Create complete HTML for this chunk
         const chunkHtml = htmlHead + chunks[i] + htmlFoot;
         
-        // Create element for this chunk
+        // Create element for this chunk inside the off-screen container
         const element = document.createElement('div');
         element.innerHTML = chunkHtml;
+        element.style.width = '100%';
+        element.style.height = 'auto';
+        
+        // Clear and use the off-screen container
+        offscreenContainer.innerHTML = '';
+        offscreenContainer.appendChild(element);
         
         // Generate PDF for this chunk
         const options = {
@@ -196,7 +213,9 @@ const BookPreviewPage: React.FC = () => {
           html2canvas: { 
             scale: 1,
             useCORS: true,
-            logging: false // Reduce console noise
+            logging: false, // Reduce console noise
+            windowWidth: 816, // 8.5in * 96dpi
+            windowHeight: 1056 // 11in * 96dpi
           },
           jsPDF: { 
             unit: 'in', 
@@ -251,6 +270,10 @@ const BookPreviewPage: React.FC = () => {
       console.error("Error generating PDF:", e);
       setError("Failed to generate PDF. Please try again.");
     } finally {
+      // Clean up the off-screen container
+      if (offscreenContainer && offscreenContainer.parentNode) {
+        document.body.removeChild(offscreenContainer);
+      }
       setPdfLoading(false);
       console.log('=== CHUNKED PDF GENERATION END ===');
     }
