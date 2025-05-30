@@ -953,15 +953,17 @@ CHAPTER STRUCTURE REQUIREMENTS:
       temperature = 0.4;
     }
     
-    // Configure chunked generation
+    // Configure chunked generation with overlapping
     const WORDS_PER_CHUNK = 875; // Generate in 750-1000 word chunks (875 average)
     const numChunks = Math.ceil(targetWords / WORDS_PER_CHUNK);
     
-    console.log(`Generating chapter in ${numChunks} chunks of ~${WORDS_PER_CHUNK} words each`);
+    console.log(`Generating chapter in ${numChunks} chunks of ~${WORDS_PER_CHUNK} words each with overlapping generation`);
     
-    // Generate content in chunks
+    // Generate content in chunks with overlapping generation
     let fullContent = '';
     let previousContent = '';
+    const chunkPromises: Promise<string>[] = [];
+    const chunkResults: string[] = new Array(numChunks);
     
     // If streaming mode, set up SSE headers
     if (streamMode) {
@@ -983,12 +985,13 @@ CHAPTER STRUCTURE REQUIREMENTS:
       };
       res.write(`data: ${JSON.stringify(initialData)}\n\n`);
     }
-    
-    for (let chunkIndex = 0; chunkIndex < numChunks; chunkIndex++) {
+
+    // Function to generate a single chunk
+    const generateChunk = async (chunkIndex: number, previousChunkContent: string): Promise<string> => {
       const isFirstChunk = chunkIndex === 0;
       const isLastChunk = chunkIndex === numChunks - 1;
-      const chunkWords = isLastChunk ? 
-        (targetWords - (chunkIndex * WORDS_PER_CHUNK)) : 
+      const chunkWords = isLastChunk ?
+        (targetWords - (chunkIndex * WORDS_PER_CHUNK)) :
         WORDS_PER_CHUNK;
       
       // Modify prompt for continuation
@@ -1000,7 +1003,7 @@ CONTINUATION INSTRUCTIONS:
 You are continuing to write Chapter ${chapter.number}: ${chapter.title}.
 
 Previous content written so far:
-${previousContent}
+${previousChunkContent}
 
 Continue writing the next ${chunkWords} words. Do NOT repeat any content already written.
 ${isLastChunk ? 'This is the FINAL chunk - conclude the chapter with meaningful content and add the Key Points section at the very end in EXACTLY this format:\n\n+$$$+\n#### Key Points to takeaway from this chapter\n- [Key takeaway 1 from this chapter]\n- [Key takeaway 2 from this chapter]\n- [Key takeaway 3 from this chapter]\n- [Key takeaway 4 from this chapter]\n- [Key takeaway 5 from this chapter]\n+$$$+' : 'Continue naturally from where you left off. Do NOT include any Key Points section in this chunk.'}
@@ -1025,7 +1028,7 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
       
       const chunkMaxTokens = Math.ceil(chunkWords * 1.5);
       
-      console.log(`Generating chunk ${chunkIndex + 1}/${numChunks} (~${chunkWords} words)`);
+      console.log(`Starting generation of chunk ${chunkIndex + 1}/${numChunks} (~${chunkWords} words)`);
       
       const prompt = chunkMessages.map(m => `${m.role}: ${m.content}`).join('\n');
       const response = await executeOpenRouterRequest({
@@ -1037,57 +1040,82 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
       });
       
       const chunkContent = response.choices[0].message.content || '';
-      fullContent += (isFirstChunk ? '' : '\n\n') + chunkContent;
+      console.log(`Completed generation of chunk ${chunkIndex + 1}/${numChunks}`);
+      return chunkContent;
+    };
+
+    // Function to stream a chunk with typing effect
+    const streamChunk = async (chunkIndex: number, chunkContent: string) => {
+      if (!streamMode) return;
+
+      // Send progress update
+      const progressPercentage = Math.round(((chunkIndex + 1) / numChunks) * 100);
+      const progressData = {
+        type: 'progress',
+        chunkIndex: chunkIndex + 1,
+        totalChunks: numChunks,
+        percentage: progressPercentage,
+        message: `Streaming content... ${progressPercentage}%`,
+        currentWords: fullContent.split(/\s+/).filter(Boolean).length,
+        estimatedTotalWords: targetWords
+      };
+      res.write(`data: ${JSON.stringify(progressData)}\n\n`);
+      
+      // Stream with typing effect - send words incrementally
+      const words = chunkContent.split(/(\s+)/); // Keep whitespace
+      const WORDS_PER_BATCH = 3; // Increased from 2 to 3 for faster display
+      const BATCH_DELAY = 50; // Reduced from 75ms to 50ms for faster typing
+      
+      for (let i = 0; i < words.length; i += WORDS_PER_BATCH * 2) { // *2 because we're keeping whitespace
+        const wordBatch = words.slice(i, i + WORDS_PER_BATCH * 2).join('');
+        
+        const typingData = {
+          type: 'typing',
+          chunkIndex: chunkIndex + 1,
+          totalChunks: numChunks,
+          content: wordBatch,
+          isPartial: true
+        };
+        
+        res.write(`data: ${JSON.stringify(typingData)}\n\n`);
+        
+        // Faster delay for smoother typing effect
+        await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
+      }
+      
+      // Send chunk completion
+      const chunkData = {
+        type: 'chunk_complete',
+        chunkIndex: chunkIndex + 1,
+        totalChunks: numChunks,
+        content: chunkContent,
+        words: chunkContent.split(/\s+/).filter(Boolean).length,
+        totalWords: fullContent.split(/\s+/).filter(Boolean).length
+      };
+      res.write(`data: ${JSON.stringify(chunkData)}\n\n`);
+    };
+
+    // Start first chunk generation immediately
+    chunkPromises[0] = generateChunk(0, '');
+    
+    // Process chunks with overlapping generation and streaming
+    for (let chunkIndex = 0; chunkIndex < numChunks; chunkIndex++) {
+      // Wait for current chunk to complete
+      const chunkContent = await chunkPromises[chunkIndex];
+      chunkResults[chunkIndex] = chunkContent;
+      
+      // Update full content
+      fullContent += (chunkIndex === 0 ? '' : '\n\n') + chunkContent;
       previousContent = fullContent;
       
-      // Stream chunk to client if in streaming mode
-      if (streamMode) {
-        // First send progress update
-        const progressPercentage = Math.round(((chunkIndex + 1) / numChunks) * 100);
-        const progressData = {
-          type: 'progress',
-          chunkIndex: chunkIndex + 1,
-          totalChunks: numChunks,
-          percentage: progressPercentage,
-          message: `Generating content... ${progressPercentage}%`,
-          currentWords: fullContent.split(/\s+/).filter(Boolean).length,
-          estimatedTotalWords: targetWords
-        };
-        res.write(`data: ${JSON.stringify(progressData)}\n\n`);
-        
-        // Stream with typing effect - send words incrementally
-        const words = chunkContent.split(/(\s+)/); // Keep whitespace
-        const WORDS_PER_BATCH = 2; // Send 2 words at a time for slower display
-        const BATCH_DELAY = 75; // Slower timing (75ms between batches) to allow next chunk generation
-        
-        for (let i = 0; i < words.length; i += WORDS_PER_BATCH * 2) { // *2 because we're keeping whitespace
-          const wordBatch = words.slice(i, i + WORDS_PER_BATCH * 2).join('');
-          
-          const typingData = {
-            type: 'typing',
-            chunkIndex: chunkIndex + 1,
-            totalChunks: numChunks,
-            content: wordBatch,
-            isPartial: true
-          };
-          
-          res.write(`data: ${JSON.stringify(typingData)}\n\n`);
-          
-          // Slower delay to create typing effect and allow next chunk generation
-          await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
-        }
-        
-        // Send chunk completion
-        const chunkData = {
-          type: 'chunk_complete',
-          chunkIndex: chunkIndex + 1,
-          totalChunks: numChunks,
-          content: chunkContent,
-          words: chunkContent.split(/\s+/).filter(Boolean).length,
-          totalWords: fullContent.split(/\s+/).filter(Boolean).length
-        };
-        res.write(`data: ${JSON.stringify(chunkData)}\n\n`);
+      // Start next chunk generation immediately (overlapping)
+      if (chunkIndex + 1 < numChunks) {
+        chunkPromises[chunkIndex + 1] = generateChunk(chunkIndex + 1, previousContent);
+        console.log(`Started overlapping generation of chunk ${chunkIndex + 2}/${numChunks}`);
       }
+      
+      // Stream current chunk with typing effect
+      await streamChunk(chunkIndex, chunkContent);
     }
     
     const content = fullContent;

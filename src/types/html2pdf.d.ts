@@ -11,6 +11,10 @@ declare module 'html2pdf.js' {
     from(element: string | HTMLElement): Html2PdfInstance;
     set(options: Html2PdfOptions): Html2PdfInstance;
     save(): Promise<void>;
+    outputPdf(type?: 'blob' | 'arraybuffer' | 'datauristring' | 'datauri'): Promise<Blob>;
+    output(type: 'blob'): Promise<Blob>;
+    output(type: 'arraybuffer'): Promise<ArrayBuffer>;
+    output(type: 'datauristring' | 'datauri'): Promise<string>;
   }
 
   function html2pdf(): Html2PdfInstance;

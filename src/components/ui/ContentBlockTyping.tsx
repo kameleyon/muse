@@ -41,8 +41,8 @@ interface ContentBlockTypingProps {
 const ContentBlockTyping: React.FC<ContentBlockTypingProps> = ({
   blocks,
   onComplete,
-  typingSpeed = 30,
-  delayBetweenBlocks = 500,
+  typingSpeed = 20,
+  delayBetweenBlocks = 100,
   className = '',
   brandColors = {
     primary: '#ae5630',

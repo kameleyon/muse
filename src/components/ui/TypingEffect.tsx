@@ -12,7 +12,7 @@ interface TypingEffectProps {
  */
 const TypingEffect: React.FC<TypingEffectProps> = ({
   text,
-  speed = 30,
+  speed = 5,
   onComplete,
   className = ''
 }) => {
