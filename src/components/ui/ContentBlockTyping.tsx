@@ -122,14 +122,10 @@ const ContentBlockTyping: React.FC<ContentBlockTypingProps> = ({
   return (
     <div className={`content-blocks ${className}`}>
       {blocks.map((block, index) => (
-        <div
-          key={block.id}
+        <div 
+          key={block.id} 
           className={`content-block ${getBlockClass(block.type)}`}
-          style={{
-            display: visibleBlocks.includes(block.id) ? 'block' : 'none',
-            minHeight: '2rem', // Ensure minimum height to prevent layout shifts
-            position: 'relative'
-          }}
+          style={{ display: visibleBlocks.includes(block.id) ? 'block' : 'none' }}
         >
           {visibleBlocks.includes(block.id) && currentBlockIndex === index && (
             hasVisualElement(block.content) ? (
@@ -141,15 +137,8 @@ const ContentBlockTyping: React.FC<ContentBlockTypingProps> = ({
                   onComplete={handleBlockTyped}
                   className="typing-container"
                 />
-                <div className="visual-container" style={{
-                  opacity: 0,
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  visibility: 'hidden'
-                }}>
-                  <MarkdownVisualizer
+                <div className="visual-container" style={{ opacity: 0 }}>
+                  <MarkdownVisualizer 
                     content={block.content}
                     enhanceVisuals={options.enhanceVisuals}
                     brandColors={brandColors}
