@@ -1305,7 +1305,7 @@ const BookPreviewPage: React.FC = () => {
                   {pdfLoading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                      {pdfProgress > 0 ? `${pdfProgress}%` : 'Preparing...'}
+                      Generating...
                     </>
                   ) : (
                     <>
