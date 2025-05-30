@@ -6,6 +6,7 @@ import { bookService } from '../../../lib/books';
 import type { Book, Chapter, BookStructure } from '../../../types/books';
 import MarkdownEditor from '../../MarkdownEditor';
 import html2pdf from 'html2pdf.js';
+import { PDFDocument } from 'pdf-lib';
 
 const BookPreviewPage: React.FC = () => {
   const { bookId } = useParams<{ bookId: string }>();
@@ -14,6 +15,7 @@ const BookPreviewPage: React.FC = () => {
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfProgress, setPdfProgress] = useState(0);
   const [error, setError] = useState('');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [activeChapterId, setActiveChapterId] = useState<string | null>(null);
@@ -122,198 +124,135 @@ const BookPreviewPage: React.FC = () => {
   };
 
   const downloadPdfFile = async () => {
-    console.log('=== PDF GENERATION START ===');
-    console.log('Book object:', book);
-    console.log('Book ID:', book?.id);
-    console.log('Book Title:', book?.title);
-    console.log('Book Structure exists:', !!book?.structure);
-    console.log('Book Chapters count:', book?.chapters?.length || 0);
+    console.log('=== CHUNKED PDF GENERATION START ===');
     
     if (!book) {
       console.error('No book object available');
       return;
     }
     
-    // Log chapter details
-    console.log('\n=== CHAPTER DETAILS ===');
-    book.chapters?.forEach((chapter, index) => {
-      console.log(`\nChapter at index ${index}:`);
-      console.log(`  - ID: ${chapter.id}`);
-      console.log(`  - Number property: ${chapter.number}`);
-      console.log(`  - Title: "${chapter.title}"`);
-      console.log(`  - Content length: ${chapter.content?.length || 0} characters`);
-      console.log(`  - Content preview: ${chapter.content?.substring(0, 100)}...`);
-      console.log(`  - Has content: ${!!chapter.content}`);
-      console.log(`  - Content type: ${typeof chapter.content}`);
-      
-      // Check for problematic content in each chapter
-      if (chapter.content) {
-        const problematicChars = chapter.content.match(/[^\x20-\x7E\n\r\t]/g);
-        if (problematicChars) {
-          console.warn(`  - WARNING: Chapter contains ${problematicChars.length} non-ASCII characters`);
-          console.warn(`    Sample chars: ${problematicChars.slice(0, 5).map(c => `U+${c.charCodeAt(0).toString(16).toUpperCase()}`).join(', ')}`);
-          console.warn(`    These will be removed during normalization`);
-        }
-        
-        const hasKeyPoints = chapter.content.includes('+$$$+') || chapter.content.includes('***');
-        if (hasKeyPoints) {
-          console.log(`  - Contains key point markers: ${hasKeyPoints}`);
-        }
-      }
-      
-      // Special note about chapter numbering
-      if (chapter.title === 'The Myth of Universal Willpower') {
-        console.log(`  *** NOTE: This is "The Myth of Universal Willpower" chapter`);
-        console.log(`      It has number=${chapter.number} but contains content`);
-      }
-      if (chapter.title === 'Discovering Your Habit Personality') {
-        console.log(`  *** NOTE: This is "Discovering Your Habit Personality" chapter`);
-        console.log(`      It has number=${chapter.number} and content length=${chapter.content?.length || 0}`);
-      }
-    });
-    
-    setPdfLoading(true); 
+    setPdfLoading(true);
+    setPdfProgress(0);
     setError('');
 
     try {
-      console.log('\n=== GENERATING HTML ===');
-      // Create HTML content with proper styling
-      const htmlContent = generateBookHTML();
-      console.log('Generated HTML length:', htmlContent.length);
-      console.log('HTML preview (first 500 chars):', htmlContent.substring(0, 500));
-      console.log('HTML preview (last 500 chars):', htmlContent.substring(htmlContent.length - 500));
+      // Generate the complete HTML content
+      const fullHtmlContent = generateBookHTML();
+      console.log('Total HTML length:', fullHtmlContent.length);
       
-      // Check if HTML contains chapter content
-      const hasChapterContent = htmlContent.includes('Chapter 1:') || htmlContent.includes('Chapter 2:');
-      console.log('HTML contains chapter markers:', hasChapterContent);
+      // Extract body content for chunking
+      const bodyStart = fullHtmlContent.indexOf('<body>') + 6;
+      const bodyEnd = fullHtmlContent.indexOf('</body>');
+      const bodyContent = fullHtmlContent.substring(bodyStart, bodyEnd);
+      const htmlHead = fullHtmlContent.substring(0, bodyStart);
+      const htmlFoot = fullHtmlContent.substring(bodyEnd);
       
-      // Additional HTML validation
-      console.log('\n=== HTML VALIDATION ===');
-      console.log('HTML starts with DOCTYPE:', htmlContent.startsWith('\n    <!DOCTYPE html>'));
-      console.log('HTML ends with </html>:', htmlContent.endsWith('</html>'));
-      console.log('HTML contains <body>:', htmlContent.includes('<body>'));
-      console.log('HTML contains </body>:', htmlContent.includes('</body>'));
+      // Split content into chunks (50k characters each)
+      const CHUNK_SIZE = 50000;
+      const chunks: string[] = [];
+      let currentChunk = '';
       
-      // Check for potential problematic characters
-      const nullBytes = (htmlContent.match(/\x00/g) || []).length;
-      console.log('Null bytes found:', nullBytes);
+      // Split by major sections to avoid breaking in the middle of content
+      const sections = bodyContent.split(/<h1[^>]*>/);
       
-      // Check HTML structure
-      const bodyStart = htmlContent.indexOf('<body>');
-      const bodyEnd = htmlContent.indexOf('</body>');
-      console.log('Body tag positions - start:', bodyStart, 'end:', bodyEnd);
-      
-      if (bodyStart > -1 && bodyEnd > -1) {
-        const bodyContent = htmlContent.substring(bodyStart + 6, bodyEnd);
-        console.log('Body content length:', bodyContent.length);
-        console.log('Body contains Chapter 1:', bodyContent.includes('Chapter 1'));
-        console.log('Body contains Chapter 2:', bodyContent.includes('Chapter 2'));
+      for (let i = 0; i < sections.length; i++) {
+        const section = i === 0 ? sections[i] : '<h1>' + sections[i];
+        
+        if (currentChunk.length + section.length > CHUNK_SIZE && currentChunk.length > 0) {
+          chunks.push(currentChunk);
+          currentChunk = section;
+        } else {
+          currentChunk += section;
+        }
       }
       
-      const options = {
-        margin: [1, 1, 1, 1], // Changed from single number to array [top, right, bottom, left]
-        filename: `${book.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'book'}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          scale: 1,
-          useCORS: true
-        },
-        jsPDF: { 
-          unit: 'in', 
-          format: 'letter', 
-          orientation: 'portrait'
-        }
-      };
-      
-      console.log('\n=== PDF OPTIONS ===');
-      console.log('PDF options:', JSON.stringify(options, null, 2));
-
-      console.log('\n=== CREATING PDF ===');
-      console.log('Passing HTML to html2pdf...');
-      console.log('HTML null check:', htmlContent === null);
-      console.log('HTML undefined check:', htmlContent === undefined);
-      console.log('HTML empty check:', htmlContent === '');
-      console.log('HTML type:', typeof htmlContent);
-      
-      // Try different approaches to debug the issue
-      console.log('Creating html2pdf instance...');
-      
-      // Validate HTML content before attempting PDF generation
-      console.log('\n=== HTML CONTENT VALIDATION ===');
-      
-      // Check for potential problematic patterns
-      const problematicPatterns = [
-        { pattern: /<div[^>]*class="[^"]*key-points[^"]*"[^>]*>/gi, name: 'key-points divs' },
-        { pattern: /<style[^>]*>/gi, name: 'style tags' },
-        { pattern: /<script[^>]*>/gi, name: 'script tags' },
-        { pattern: /\x00/g, name: 'null bytes' },
-        { pattern: /[\u200B-\u200D\uFEFF]/g, name: 'zero-width characters' },
-        { pattern: /data:image/gi, name: 'data URLs' },
-        { pattern: /<svg/gi, name: 'SVG elements' },
-        { pattern: /\+\$\$\$\+/g, name: 'unreplaced key point markers' }
-      ];
-      
-      problematicPatterns.forEach(({ pattern, name }) => {
-        const matches = htmlContent.match(pattern);
-        if (matches) {
-          console.warn(`WARNING: Found ${matches.length} ${name} in HTML`);
-        }
-      });
-      
-      // Check if any chapters have suspiciously long content
-      const chapterMatches = htmlContent.match(/<h1[^>]*>Chapter \d+/gi);
-      console.log('Chapter headings found in HTML:', chapterMatches?.length || 0);
-      
-      // Extra safety: Check if HTML is too large
-      if (htmlContent.length > 500000) {
-        console.warn('WARNING: HTML content is very large:', htmlContent.length, 'characters');
-        console.warn('This might cause PDF generation issues');
+      if (currentChunk.length > 0) {
+        chunks.push(currentChunk);
       }
       
-      try {
-        // Method 1: Convert HTML string to DOM element (CORRECT APPROACH)
-        console.log('Creating DOM element from HTML string...');
+      console.log(`Split into ${chunks.length} chunks`);
+      
+      // Generate PDF for each chunk
+      const pdfBytes: Uint8Array[] = [];
+      
+      for (let i = 0; i < chunks.length; i++) {
+        const progress = Math.round(((i + 1) / chunks.length) * 90); // 90% for generation
+        setPdfProgress(progress);
+        
+        console.log(`Processing chunk ${i + 1}/${chunks.length} (${progress}%)`);
+        
+        // Create complete HTML for this chunk
+        const chunkHtml = htmlHead + chunks[i] + htmlFoot;
+        
+        // Create element for this chunk
         const element = document.createElement('div');
-        element.innerHTML = htmlContent;
-        console.log('DOM element created successfully');
-        console.log('Element children count:', element.children.length);
+        element.innerHTML = chunkHtml;
         
-        await html2pdf().set(options).from(element).save();
-        console.log('DOM element method succeeded');
-      } catch (e1) {
-        console.error('DOM element method failed:', (e1 as Error).message);
-        console.error('Full error object:', e1);
+        // Generate PDF for this chunk
+        const options = {
+          margin: [1, 1, 1, 1],
+          filename: `temp_chunk_${i}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { 
+            scale: 1,
+            useCORS: true,
+            logging: false // Reduce console noise
+          },
+          jsPDF: { 
+            unit: 'in', 
+            format: 'letter', 
+            orientation: 'portrait'
+          }
+        };
         
-        // Fallback: Add element to DOM temporarily
-        console.log('Attempting with element temporarily added to DOM...');
-        const element = document.createElement('div');
-        element.innerHTML = htmlContent;
-        element.style.position = 'absolute';
-        element.style.left = '-9999px';
-        element.style.top = '-9999px';
+        // Generate PDF and get the blob
+        const pdfBlob = await html2pdf().set(options).from(element).outputPdf('blob');
+        const arrayBuffer = await pdfBlob.arrayBuffer();
+        pdfBytes.push(new Uint8Array(arrayBuffer));
         
-        try {
-          document.body.appendChild(element);
-          console.log('Added element to DOM');
-          await html2pdf().set(options).from(element).save();
-          console.log('DOM-attached method succeeded');
-        } catch (e2) {
-          console.error('DOM-attached method also failed:', (e2 as Error).message);
-        } finally {
-          document.body.removeChild(element);
-          console.log('Removed element from DOM');
-        }
+        // Small delay to prevent UI freezing
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
       
-      console.log('PDF generation completed');
+      console.log('Merging PDFs...');
+      setPdfProgress(95);
+      
+      // Merge all PDFs
+      const mergedPdf = await PDFDocument.create();
+      
+      for (const pdfByte of pdfBytes) {
+        const pdf = await PDFDocument.load(pdfByte);
+        const pageIndices = Array.from({ length: pdf.getPageCount() }, (_, i) => i);
+        const pages = await mergedPdf.copyPages(pdf, pageIndices);
+        pages.forEach(page => mergedPdf.addPage(page));
+      }
+      
+      // Save the merged PDF
+      const mergedPdfBytes = await mergedPdf.save();
+      const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      
+      // Download the file
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${book.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'book'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      setPdfProgress(100);
+      console.log('PDF generation completed successfully');
+      
+      // Reset progress after a short delay
+      setTimeout(() => setPdfProgress(0), 1000);
+      
     } catch (e) {
-      console.error("\n=== PDF GENERATION ERROR ===");
       console.error("Error generating PDF:", e);
-      console.error("Error stack:", (e as Error).stack);
-      setError("Failed to generate PDF. Check console for details.");
+      setError("Failed to generate PDF. Please try again.");
     } finally {
-      setPdfLoading(false); 
-      console.log('=== PDF GENERATION END ===\n');
+      setPdfLoading(false);
+      console.log('=== CHUNKED PDF GENERATION END ===');
     }
   };
 
@@ -1269,7 +1208,7 @@ const BookPreviewPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full bg-white rounded-2xl shadow-md py-8 px-6">
+    <div className="w-full bg-white rounded-2xl shadow-md py-8 px-6 min-h-screen">
       <div className="mb-8 px-6">
         <button
           onClick={() => navigate('/book-library')}
@@ -1302,24 +1241,41 @@ const BookPreviewPage: React.FC = () => {
             >
               <FileText className="w-4 h-4 mr-2" /> Download MD
             </button>
-            <button
-              onClick={() => downloadPdfFile()}
-              disabled={pdfLoading}
-              className="px-4 py-2 rounded-lg bg-secondary text-white hover:bg-secondary-hover transition-colors flex items-center disabled:opacity-50"
-            >
-              {pdfLoading ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-              ) : (
-                <File className="w-4 h-4 mr-2" />
-              )}
-              {pdfLoading ? 'Generating...' : 'Download PDF'}
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => downloadPdfFile()}
+                disabled={pdfLoading}
+                className="px-4 py-2 rounded-lg bg-secondary text-white hover:bg-secondary-hover transition-colors flex items-center disabled:opacity-50 relative overflow-hidden"
+              >
+                {pdfLoading && pdfProgress > 0 && (
+                  <div
+                    className="absolute inset-0 bg-secondary-hover transition-all duration-300 ease-out"
+                    style={{ width: `${pdfProgress}%` }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center">
+                  {pdfLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                      {pdfProgress > 0 ? `${pdfProgress}%` : 'Preparing...'}
+                    </>
+                  ) : (
+                    <>
+                      <File className="w-4 h-4 mr-2" />
+                      Download PDF
+                    </>
+                  )}
+                </span>
+              </button>
+            </div>
           </div>
         </div>
-        {error && pdfLoading && <p className="text-sm text-red-500 mt-2 text-right">{error}</p>} 
+        <div className="h-6 mt-2">
+          {error && <p className="text-sm text-red-500 text-right">{error}</p>}
+        </div> 
       </div>
 
-      <div className="space-y-6 w-full ">
+      <div className="space-y-6 w-full relative" style={{ minHeight: '500px' }}>
         {book!.structure?.coverPageDetails && (
           <div className="p-6 bg-white rounded-lg shadow-sm text-center border-2 border-primary/70">
             <h1 className="text-4xl font-heading font-bold text-primary">{book!.structure.coverPageDetails.title}</h1>

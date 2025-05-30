@@ -7,7 +7,7 @@
         "dev": "vite",
         "dev:server": "cd server && npm run dev",
         "dev:all": "concurrently \"npm run dev\" \"npm run dev:server\"",
-    "build": "npx tsc --noEmit && npx vite build && echo '✅ Build completed'",
+        "build": "npx tsc --noEmit && npx vite build && echo '✅ Build completed'",
         "build:server": "cd server && npm run build",
         "build:all": "npm install && npm run build && npm run build:server",
         "build:no-pwa": "VITE_PLUGIN_PWA_DISABLED=true npm run build",
@@ -58,6 +58,7 @@
         "jspdf-autotable": "^5.0.2",
         "lucide-react": "^0.483.0",
         "marked": "^15.0.7",
+        "pdf-lib": "1.17.1",
         "postcss": "^8.4.32",
         "puppeteer": "^24.4.0",
         "react": "^18.2.0",
@@ -107,7 +108,6 @@
         "prettier": "^3.1.1",
         "terser": "^5.39.0",
         "ts-jest": "^29.1.1"
-       
     },
     "lint-staged": {
         "*.{ts,tsx}": [
