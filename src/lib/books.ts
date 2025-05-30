@@ -4,7 +4,7 @@ import type { Book, Chapter, Upload } from '../types/books'
 import { openRouter } from './openrouter'
 
 export const bookService = {
-  baseUrl: import.meta.env.VITE_BACKEND_URL || 'http://localhost:9998', // Temporarily changed from 9999
+  baseUrl: import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? '' : 'http://localhost:9998'),
 
   // Create a new book with market research and structure
   async createBook(

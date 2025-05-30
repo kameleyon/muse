@@ -29,7 +29,7 @@ import bookRoutes from './routes/book'; // Import book routes
 import bookAIRoutes from './routes/bookAI'; // Import book AI routes
 
 const app = express();
-const PORT = 9998; // Fixed port to avoid conflicts
+const PORT = process.env.PORT || 9998; // Use environment PORT for production, 9998 for development
 
 // Middleware
 app.use(helmet()); // Set security HTTP headers
@@ -70,6 +70,16 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/projects', projectRoutes); // Mount project routes
 app.use('/api', bookRoutes); // Mount book routes
 app.use('/api', bookAIRoutes); // Mount book AI routes
+
+// Serve static files from the frontend build
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../../dist')));
+  
+  // Handle React Router routes - send all non-API requests to index.html
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../dist/index.html'));
+  });
+}
 
 // Error handling middleware
 app.use(notFound);

@@ -2,12 +2,8 @@ services:
   - type: web
     name: magicmuse
     env: node
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+    buildCommand: npm install && npm run build:all
+    startCommand: npm run start:server
     envVars:
       - key: NODE_VERSION
         value: 24.0.2
@@ -23,9 +19,11 @@ services:
         value: "true"
       # Define default values for required environment variables
       - key: VITE_BACKEND_URL
-        value: "https://api.magicmuse.io"
+        value: ""
       - key: VITE_API_BASE_URL
-        value: "https://api.magicmuse.io/api"
+        value: "/api"
+      - key: NODE_ENV
+        value: "production"
       - key: VITE_SITE_URL
         value: "https://magicmuse.io"
       - key: VITE_APP_NAME
