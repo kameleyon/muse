@@ -196,3 +196,6 @@
 2025-05-29 14:57:32 [error]: OpenRouter client error: Cannot read properties of undefined (reading 'total_tokens')
 2025-05-29 20:54:02 [error]: OpenRouter client error: Cannot read properties of undefined (reading 'total_tokens')
 2025-05-29 22:58:41 [error]: OpenRouter client error: Cannot read properties of undefined (reading 'total_tokens')
+2025-05-30 00:00:08 [error]: OpenRouter client error: Cannot read properties of undefined (reading 'total_tokens')
+2025-05-30 00:29:38 [error]: OpenRouter client error: Cannot read properties of undefined (reading 'total_tokens')
+2025-05-30 00:32:51 [error]: OpenRouter API error: 401 - {"error":{"message":"Provider returned error","code":401,"metadata":{"raw":"{\n    \"error\": {\n        \"message\": \"Incorrect API key provided: sk-proj-********************************************************************************************************************************************************MnIA. You can find your API key at https://platform.openai.com/account/api-keys.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"invalid_api_key\"\n    }\n}\n","provider_name":"OpenAI"}},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}

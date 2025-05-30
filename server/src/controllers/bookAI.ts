@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { supabaseClient, supabaseAdmin } from '../services/supabase';
 import { executeOpenRouterRequest } from '../services/openrouter';
+import config from '../config';
 
 // Helper function to extract references from chapter content
 function extractReferencesFromContent(content: string): string[] {
@@ -463,9 +464,10 @@ You must respond with ONLY valid JSON in this exact format:
       { role: 'user', content: userPrompt }
     ];
 
-    const model = 'openai/gpt-4o-search-preview';
+    // Use the configured research model from config
+    const model = config.openRouter.defaultResearchModel || 'openai/gpt-4o-search-preview';
     
-    console.log(`Generating market research for topic: ${topic}`);
+    console.log(`Generating market research for topic: ${topic} using model: ${model}`);
     const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
     const completion = await executeOpenRouterRequest({
       model,
@@ -581,7 +583,10 @@ You must respond with ONLY valid JSON in this exact format:
       { role: 'user', content: userPrompt }
     ];
 
-    const model = 'anthropic/claude-sonnet-4'; 
+    // Use the configured book structure model from config
+    const model = config.openRouter.bookStructureModel || 'anthropic/claude-3.7-sonnet';
+    
+    console.log(`Using model: ${model} for book structure generation`);
     
     const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
     const completion = await executeOpenRouterRequest({
@@ -589,7 +594,7 @@ You must respond with ONLY valid JSON in this exact format:
       prompt,
       messages: messages as any,
       temperature: 0.7,
-      max_tokens: 50000 
+      max_tokens: 50000
     });
 
     // Log the first 500 characters of the response for debugging
@@ -900,8 +905,12 @@ Begin your research now.`;
     ];
 
     console.log('Step 1: Gathering supporting research data...');
+    // Use the configured research model for search
+    const searchModel = config.openRouter.defaultResearchModel || 'openai/gpt-4o-search-preview';
+    console.log(`Using search model: ${searchModel} for research data gathering`);
+    
     const searchResponse = await executeOpenRouterRequest({
-      model: 'openai/gpt-4o-search-preview',
+      model: searchModel,
       prompt: searchMessages.map(m => `${m.role}: ${m.content}`).join('\n'),
       messages: searchMessages as any,
       temperature: 0.4,
@@ -941,17 +950,20 @@ CHAPTER STRUCTURE REQUIREMENTS:
       { role: 'user', content: enhancedUserPrompt }
     ];
 
-    const model = 'anthropic/claude-3.7-sonnet';
+    // Use a more reliable model for chapter generation
+    const model = 'openai/gpt-4o';
     
     // Adjust temperature based on tone
     let temperature = 0.8;
-    if (book.structure?.tone?.toLowerCase().includes('creative') || 
+    if (book.structure?.tone?.toLowerCase().includes('creative') ||
         book.structure?.tone?.toLowerCase().includes('inspirational')) {
       temperature = 0.9;
-    } else if (book.structure?.tone?.toLowerCase().includes('academic') || 
+    } else if (book.structure?.tone?.toLowerCase().includes('academic') ||
                book.structure?.tone?.toLowerCase().includes('technical')) {
       temperature = 0.4;
     }
+    
+    console.log(`Using model: ${model} with temperature: ${temperature} for chapter generation`);
     
     // Configure chunked generation with overlapping
     const WORDS_PER_CHUNK = 875; // Generate in 750-1000 word chunks (875 average)
@@ -1031,22 +1043,40 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
       console.log(`Starting generation of chunk ${chunkIndex + 1}/${numChunks} (~${chunkWords} words)`);
       
       const prompt = chunkMessages.map(m => `${m.role}: ${m.content}`).join('\n');
-      const response = await executeOpenRouterRequest({
-        model,
-        prompt,
-        messages: chunkMessages,
-        temperature,
-        max_tokens: chunkMaxTokens
-      });
+      try {
+        const response = await executeOpenRouterRequest({
+          model,
+          prompt,
+          messages: chunkMessages,
+          temperature,
+          max_tokens: chunkMaxTokens
+        });
+        
+        const chunkContent = response.choices[0].message.content || '';
+        console.log(`Completed generation of chunk ${chunkIndex + 1}/${numChunks}`);
+        return chunkContent;
+      } catch (error) {
+        console.error(`Error generating chunk ${chunkIndex + 1}/${numChunks}:`, error);
+        // Fallback to a different model if the primary one fails
+        console.log(`Attempting fallback to alternative model for chunk ${chunkIndex + 1}/${numChunks}`);
+        const fallbackResponse = await executeOpenRouterRequest({
+          model: 'google/gemini-2.5-pro-exp-03-25:free',
+          prompt,
+          messages: chunkMessages,
+          temperature,
+          max_tokens: chunkMaxTokens
+        });
+        
+        const chunkContent = fallbackResponse.choices[0].message.content || '';
+        console.log(`Completed fallback generation of chunk ${chunkIndex + 1}/${numChunks}`);
+        return chunkContent;
+      }
       
-      const chunkContent = response.choices[0].message.content || '';
-      console.log(`Completed generation of chunk ${chunkIndex + 1}/${numChunks}`);
-      return chunkContent;
     };
 
     // Function to stream a chunk with typing effect
-    const streamChunk = async (chunkIndex: number, chunkContent: string) => {
-      if (!streamMode) return;
+    const streamChunk = async (chunkIndex: number, chunkContent: string): Promise<void> => {
+      if (!streamMode) return Promise.resolve();
 
       // Send progress update
       const progressPercentage = Math.round(((chunkIndex + 1) / numChunks) * 100);
@@ -1098,11 +1128,21 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
     // Start first chunk generation immediately
     chunkPromises[0] = generateChunk(0, '');
     
-    // Process chunks with overlapping generation and streaming
+    // Start first chunk generation immediately
+    chunkPromises[0] = generateChunk(0, '');
+    
+    // Create an array to track typing promises
+    const typingPromises: Promise<void>[] = [];
+    
+    // Process chunks with true overlapping generation and streaming
     for (let chunkIndex = 0; chunkIndex < numChunks; chunkIndex++) {
-      // Wait for current chunk to complete
+      console.log(`Waiting for generation of chunk ${chunkIndex + 1}/${numChunks}`);
+      
+      // Wait for current chunk to complete generation
       const chunkContent = await chunkPromises[chunkIndex];
       chunkResults[chunkIndex] = chunkContent;
+      
+      console.log(`Chunk ${chunkIndex + 1}/${numChunks} generation complete, starting typing`);
       
       // Update full content
       fullContent += (chunkIndex === 0 ? '' : '\n\n') + chunkContent;
@@ -1110,12 +1150,21 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
       
       // Start next chunk generation immediately (overlapping)
       if (chunkIndex + 1 < numChunks) {
+        console.log(`Starting generation of next chunk ${chunkIndex + 2}/${numChunks} in background`);
         chunkPromises[chunkIndex + 1] = generateChunk(chunkIndex + 1, previousContent);
-        console.log(`Started overlapping generation of chunk ${chunkIndex + 2}/${numChunks}`);
       }
       
-      // Stream current chunk with typing effect
-      await streamChunk(chunkIndex, chunkContent);
+      // Stream current chunk with typing effect WITHOUT awaiting its completion
+      // This allows the next chunk to start typing as soon as it's generated
+      typingPromises[chunkIndex] = streamChunk(chunkIndex, chunkContent).then(() => {
+        console.log(`Completed typing of chunk ${chunkIndex + 1}/${numChunks}`);
+      });
+    }
+    
+    // Wait for all typing to complete at the end
+    if (streamMode) {
+      console.log(`Waiting for all typing to complete`);
+      await Promise.all(typingPromises);
     }
     
     const content = fullContent;
@@ -1268,7 +1317,10 @@ Please revise the content accordingly, ensuring you meet the exact word count re
       { role: 'user', content: userPrompt }
     ];
 
-    const model = 'anthropic/claude-3.7-sonnet';
+    // Use the configured model for chapter revision
+    const model = config.openRouter.bookStructureModel || 'anthropic/claude-3.7-sonnet';
+    
+    console.log(`Using model: ${model} for chapter revision`);
     
     const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
     const response2 = await executeOpenRouterRequest({
