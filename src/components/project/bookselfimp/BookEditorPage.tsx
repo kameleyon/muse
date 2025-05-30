@@ -515,7 +515,7 @@ const BookEditorPage: React.FC = () => {
     );
   };
   
-  if (loading) return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>;
+  if (loading) return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12"></div></div>;
   if (!book) return <div className="text-center py-12"><AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" /><p className="text-xl text-neutral-dark mb-4">Book not found</p><button onClick={() => navigate('/new-book')} className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">Create New Book</button></div>;
 
   return (
@@ -658,13 +658,15 @@ const BookEditorPage: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex-1 p-4 md:p-6 overflow-y-auto h-auto bg-white ml-6 rounded-2xl border-2 border-neutral-light shadown-md shadow-primary mt-4">
+              <div className="flex-1 p-4 md:p-6 overflow-y-auto h-[600px] bg-white ml-6 rounded-2xl border-2 border-neutral-light shadow-md shadow-primary mt-4">
                 {generating && typingContent ? (
                   // Show typing content during generation with proper markdown rendering
-                  <TypingContentDisplay 
-                    content={typingContent}
-                    className="p-4"
-                  />
+                  <div className="h-full overflow-y-auto">
+                    <TypingContentDisplay
+                      content={typingContent}
+                      className="p-4"
+                    />
+                  </div>
                 ) : (
                   <MarkdownEditor
                     value={currentContent}

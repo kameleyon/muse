@@ -42,7 +42,7 @@ const TypingEffect: React.FC<TypingEffectProps> = ({
   }, [currentIndex, text, speed, isComplete, onComplete]);
 
   return (
-    <div className={className}>
+    <div className={`${className}`} style={{ minHeight: '1.5rem' }}>
       {displayedText}
       {currentIndex < text.length && (
         <span className="typing-cursor animate-pulse">|</span>

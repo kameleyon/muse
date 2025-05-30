@@ -560,6 +560,7 @@ const BookPreviewPage: React.FC = () => {
   </style>
 </head>
 <body>
+<div className="w-full">
     `;
 
     // Cover Page
@@ -741,7 +742,7 @@ const BookPreviewPage: React.FC = () => {
           console.log(`  Converting markdown to HTML...`);
           
           // Special debugging for chapters with issues
-          if (chapter.number === 2 || chapter.number === 6) {
+          /*if (chapter.number === 2 || chapter.number === 6) {
             console.log(`  *** SPECIAL DEBUG FOR CHAPTER ${chapter.number} (non-parts) ***`);
             console.log(`  Chapter ${chapter.number} content first 500 chars: ${chapter.content.substring(0, 500)}`);
             console.log(`  Chapter ${chapter.number} content last 500 chars: ${chapter.content.substring(chapter.content.length - 500)}`);
@@ -749,18 +750,18 @@ const BookPreviewPage: React.FC = () => {
             console.log(`  Chapter ${chapter.number} contains +$$$+ patterns: ${chapter.content.includes('+$$$+')}`);
             
             // Count patterns
-            const tripleAsterisks = (chapter.content.match(/\*\*\*/g) || []).length;
-            const dollarPatterns = (chapter.content.match(/\+\$\$\$\+/g) || []).length;
-            console.log(`  Chapter ${chapter.number} number of *** patterns: ${tripleAsterisks}`);
-            console.log(`  Chapter ${chapter.number} number of +$$$+ patterns: ${dollarPatterns}`);
+            const tripleAsterisks = (chapter.content.match(/\*\*\*///g) //|| []).length;
+            //const dollarPatterns = (chapter.content.match(/\+\$\$\$\+/g) || []).length;
+            //console.log(`  Chapter ${chapter.number} number of *** patterns: ${tripleAsterisks}`);
+            //console.log(`  Chapter ${chapter.number} number of +$$$+ patterns: ${dollarPatterns}`);*/
             
             // Check for invisible characters
-            const invisibleChars = chapter.content.match(/[\x00-\x1F\x7F-\x9F]/g);
+            /*const invisibleChars = chapter.content.match(/[\x00-\x1F\x7F-\x9F]/g);
             if (invisibleChars) {
               console.log(`  Chapter ${chapter.number} invisible characters found: ${invisibleChars.length}`);
               console.log(`  First few invisible char codes: ${invisibleChars.slice(0, 10).map(c => c.charCodeAt(0))}`);
             }
-          }
+          }*/
           
           const convertedHTML = markdownToHTML(chapter.content);
           console.log(`  Converted HTML length: ${convertedHTML.length}`);
@@ -772,7 +773,7 @@ const BookPreviewPage: React.FC = () => {
             console.log(`  Chapter ${chapter.number} converted HTML is whitespace only: ${convertedHTML.trim() === ''}`);
             
             // Check for problematic HTML patterns
-            const keyPointsDivs = (convertedHTML.match(/<div class="key-points">/g) || []).length;
+            const keyPointsDivs = (convertedHTML.match(/<div class="key-points mt-4">/g) || []).length;
             console.log(`  Chapter ${chapter.number} contains key-points divs: ${keyPointsDivs}`);
             
             // Check what the *** patterns were converted to
@@ -821,7 +822,7 @@ const BookPreviewPage: React.FC = () => {
       html += `<h1 >References</h1>${referencesHTML}`;
     }
 
-    html += `</body></html>`;
+    html += `</div></body></html>`;
     
     console.log('\n--- HTML GENERATION SUMMARY ---');
     console.log('Total HTML length:', html.length);
@@ -1180,22 +1181,22 @@ const BookPreviewPage: React.FC = () => {
 
   // Initial page loading, distinct from PDF generation loading
   if (loading && !pdfLoading) { 
-    return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>;
+    return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12"></div></div>;
   }
 
   if (error && !pdfLoading || (!book && !loading && !pdfLoading)) { // Show error if not related to PDF generation, or if book failed to load
-    return <div className="text-center py-12"><p className="text-xl text-neutral-dark">Book not found or an error occurred.</p>{error && <p className="text-sm text-red-500 mt-2">{error}</p>}</div>;
+    return <div className="flex justify-center py-12"><p className="text-xl text-neutral-dark">Book not found or an error occurred.</p>{error && <p className="text-sm text-red-500 mt-2">{error}</p>}</div>;
   }
   
   // If book is null and still loading the main page data, show main loader
   if (!book && loading) {
-    return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>;
+    return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12"></div></div>;
   }
 
   // If book is null after loading, it means it wasn't found or there was an error handled by the above.
   // This check is to satisfy TypeScript further down, though the above should catch it.
   if (!book) {
-    return <div className="text-center py-12"><p className="text-xl text-neutral-dark">Book data is not available.</p></div>;
+    return <div className="flex justify-center py-12"><p className="text-xl text-neutral-dark">Book data is not available.</p></div>;
   }
 
   const renderSectionContent = (content: string | undefined) => {

@@ -16,7 +16,7 @@ const TypingContentDisplay: React.FC<TypingContentDisplayProps> = ({ content, cl
     html = html.replace(/^#### (.+)$/gm, '<h4 class="text-lg font-heading font-semibold text-secondary mt-4 mb-2">$1</h4>')
 
     // Key Points 
-    html = html.replace(/\+\$\$\$\+([\s\S]+?)\+\$\$\$\+/gs,`<div class="rounded-xl border border-stone-400/70 bg-stone-300/15 p-4 my-12 font-medium text-stone-600 text-md">$1</div>`)
+    html = html.replace(/\+\$\$\$\+([\s\S]+?)\+\$\$\$\+/gs,`<div class="rounded-xl border border-stone-400/70 bg-stone-300/15 p-4 mt-8 mb-8 font-medium text-stone-600 text-md">$1</div>`)
     
     // Bold
     html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold">$1</strong>')
@@ -70,14 +70,16 @@ const TypingContentDisplay: React.FC<TypingContentDisplayProps> = ({ content, cl
   }
 
   return (
-    <div className={cn("prose prose-sm max-w-none", className)}>
-      <div 
+    <div className={cn("prose prose-sm max-w-none min-h-[400px] relative", className)}>
+      <div
         className="text-neutral-dark"
         dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
       />
-      <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-0.5" />
+      <div className="h-8 relative">
+        <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-0.5 absolute bottom-0" />
+      </div>
     </div>
-  )
+  );
 }
 
 export default TypingContentDisplay

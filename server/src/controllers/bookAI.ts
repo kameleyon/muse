@@ -965,8 +965,8 @@ CHAPTER STRUCTURE REQUIREMENTS:
     
     console.log(`Using model: ${model} with temperature: ${temperature} for chapter generation`);
     
-    // Configure chunked generation with overlapping
-    const WORDS_PER_CHUNK = 875; // Generate in 750-1000 word chunks (875 average)
+    // Configure chunked generation with overlapping - larger chunks for faster generation
+    const WORDS_PER_CHUNK = 1250; // Generate in larger chunks to reduce the number of API calls
     const numChunks = Math.ceil(targetWords / WORDS_PER_CHUNK);
     
     console.log(`Generating chapter in ${numChunks} chunks of ~${WORDS_PER_CHUNK} words each with overlapping generation`);
@@ -1093,8 +1093,8 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
       
       // Stream with typing effect - send words incrementally
       const words = chunkContent.split(/(\s+)/); // Keep whitespace
-      const WORDS_PER_BATCH = 3; // Increased from 2 to 3 for faster display
-      const BATCH_DELAY = 50; // Reduced from 75ms to 50ms for faster typing
+      const WORDS_PER_BATCH = 5; // Increased from 3 to 5 for faster display
+      const BATCH_DELAY = 10; // Reduced from 50ms to 10ms for much faster typing
       
       for (let i = 0; i < words.length; i += WORDS_PER_BATCH * 2) { // *2 because we're keeping whitespace
         const wordBatch = words.slice(i, i + WORDS_PER_BATCH * 2).join('');
@@ -1109,7 +1109,7 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
         
         res.write(`data: ${JSON.stringify(typingData)}\n\n`);
         
-        // Faster delay for smoother typing effect
+        // Minimal delay for faster typing effect
         await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
       }
       
@@ -1128,13 +1128,16 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
     // Start first chunk generation immediately
     chunkPromises[0] = generateChunk(0, '');
     
-    // Start first chunk generation immediately
-    chunkPromises[0] = generateChunk(0, '');
+    // Pre-generate the second chunk immediately to reduce waiting time
+    if (numChunks > 1) {
+      console.log('Pre-generating second chunk to reduce waiting time');
+      chunkPromises[1] = generateChunk(1, '');
+    }
     
     // Create an array to track typing promises
     const typingPromises: Promise<void>[] = [];
     
-    // Process chunks with true overlapping generation and streaming
+    // Process chunks with aggressive overlapping generation and streaming
     for (let chunkIndex = 0; chunkIndex < numChunks; chunkIndex++) {
       console.log(`Waiting for generation of chunk ${chunkIndex + 1}/${numChunks}`);
       
@@ -1148,10 +1151,17 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
       fullContent += (chunkIndex === 0 ? '' : '\n\n') + chunkContent;
       previousContent = fullContent;
       
-      // Start next chunk generation immediately (overlapping)
-      if (chunkIndex + 1 < numChunks) {
+      // Start next TWO chunks generation immediately for more aggressive overlapping
+      if (chunkIndex + 1 < numChunks && !chunkPromises[chunkIndex + 1]) {
         console.log(`Starting generation of next chunk ${chunkIndex + 2}/${numChunks} in background`);
         chunkPromises[chunkIndex + 1] = generateChunk(chunkIndex + 1, previousContent);
+      }
+      
+      // Pre-generate the chunk after next to maximize overlapping
+      if (chunkIndex + 2 < numChunks && !chunkPromises[chunkIndex + 2]) {
+        console.log(`Pre-generating chunk ${chunkIndex + 3}/${numChunks} for maximum overlapping`);
+        // Use empty content for pre-generation, will be updated with proper context when its turn comes
+        chunkPromises[chunkIndex + 2] = generateChunk(chunkIndex + 2, '');
       }
       
       // Stream current chunk with typing effect WITHOUT awaiting its completion
