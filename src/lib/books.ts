@@ -288,7 +288,7 @@ export const bookService = {
     if (error) throw error
 
     // Check if book was marked as completed and generate notification
-    if (currentBook && currentBook.status !== 'completed' && updates.status === 'completed') {
+    if (currentBook && currentBook.status !== 'complete' && updates.status === 'complete') {
       try {
         const { generateBookCompletionNotification, generateMilestoneNotification } = await import('../services/notificationService');
         await generateBookCompletionNotification(data.user_id, data.title, bookId);
@@ -298,7 +298,7 @@ export const bookService = {
           .from('books')
           .select('id')
           .eq('user_id', data.user_id)
-          .eq('status', 'completed');
+          .eq('status', 'complete');
         
         const completedCount = userBooks?.length || 0;
         if ([1, 5, 10, 25, 50, 100].includes(completedCount)) {
@@ -398,6 +398,13 @@ export const bookService = {
 
   // Update chapter
   async updateChapter(chapterId: string, updates: Partial<Chapter>): Promise<Chapter> {
+    // Get current chapter state first to detect status changes
+    const { data: currentChapter } = await supabase
+      .from('chapters')
+      .select('status, title, book_id')
+      .eq('id', chapterId)
+      .single()
+
     const { data, error } = await supabase
       .from('chapters')
       .update({
@@ -409,6 +416,49 @@ export const bookService = {
       .single()
 
     if (error) throw error
+
+    // Check if chapter was marked as completed and generate milestone notifications
+    if (currentChapter && currentChapter.status !== 'complete' && updates.status === 'complete') {
+      try {
+        // Get book details for user_id
+        const { data: book } = await supabase
+          .from('books')
+          .select('user_id, title')
+          .eq('id', currentChapter.book_id)
+          .single()
+
+        if (book) {
+          // Check if all chapters in this book are now completed
+          const { data: allChapters } = await supabase
+            .from('chapters')
+            .select('status')
+            .eq('book_id', currentChapter.book_id)
+
+          const allCompleted = allChapters?.every(ch => ch.status === 'complete')
+          
+          if (allCompleted) {
+            // Auto-mark book as completed
+            await this.updateBook(currentChapter.book_id, { status: 'complete' })
+          }
+
+          // Generate chapter milestone notification
+          const { data: userChapters } = await supabase
+            .from('chapters')
+            .select('id')
+            .eq('book_id', currentChapter.book_id)
+            .eq('status', 'complete')
+
+          const completedChapters = userChapters?.length || 0
+          if ([1, 5, 10, 25, 50].includes(completedChapters)) {
+            const { generateMilestoneNotification } = await import('../services/notificationService')
+            await generateMilestoneNotification(book.user_id, 'chapters_completed', completedChapters)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to generate chapter completion notifications:', error)
+        // Don't fail the chapter update if notification generation fails
+      }
+    }
 
     // Update book's updated_at timestamp
     const { book_id } = data
@@ -605,72 +655,6 @@ export const bookService = {
     }
   },
 
-  // Update chapter details
-  async updateChapter(chapterId: string, updates: Partial<Chapter>): Promise<Chapter> {
-    // Get current chapter state first to detect status changes
-    const { data: currentChapter } = await supabase
-      .from('chapters')
-      .select('status, title, book_id')
-      .eq('id', chapterId)
-      .single()
-
-    const { data, error } = await supabase
-      .from('chapters')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', chapterId)
-      .select()
-      .single()
-
-    if (error) throw error
-
-    // Check if chapter was marked as completed and generate milestone notifications
-    if (currentChapter && currentChapter.status !== 'completed' && updates.status === 'completed') {
-      try {
-        // Get book details for user_id
-        const { data: book } = await supabase
-          .from('books')
-          .select('user_id, title')
-          .eq('id', currentChapter.book_id)
-          .single()
-
-        if (book) {
-          // Check if all chapters in this book are now completed
-          const { data: allChapters } = await supabase
-            .from('chapters')
-            .select('status')
-            .eq('book_id', currentChapter.book_id)
-
-          const allCompleted = allChapters?.every(ch => ch.status === 'completed')
-          
-          if (allCompleted) {
-            // Auto-mark book as completed
-            await this.updateBook(currentChapter.book_id, { status: 'completed' })
-          }
-
-          // Generate chapter milestone notification
-          const { data: userChapters } = await supabase
-            .from('chapters')
-            .select('id')
-            .eq('book_id', currentChapter.book_id)
-            .eq('status', 'completed')
-
-          const completedChapters = userChapters?.length || 0
-          if ([1, 5, 10, 25, 50].includes(completedChapters)) {
-            const { generateMilestoneNotification } = await import('../services/notificationService')
-            await generateMilestoneNotification(book.user_id, 'chapters_completed', completedChapters)
-          }
-        }
-      } catch (error) {
-        console.error('Failed to generate chapter completion notifications:', error)
-        // Don't fail the chapter update if notification generation fails
-      }
-    }
-
-    return data
-  },
 
   // Upload reference file
   // Internal helper method to recreate chapters from book structure
