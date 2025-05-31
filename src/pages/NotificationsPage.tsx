@@ -2,12 +2,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { getNotificationsAPI, Notification, createNotificationAPI } from '@/services/notificationService';
 import { format, parseISO } from 'date-fns';
 import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { ArrowUpRight, Calendar, Clock, Filter } from 'lucide-react';
+import { Settings2 } from 'lucide-react';
 import { supabase } from '@/services/supabase';
 
 // Define filter types
-type FilterType = 'All' | 'Updates' | 'Features' | 'Announcements';
+type FilterType = 'All' | 'Announcements' | 'Information' | 'Changelog';
 
 const NotificationsPage: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -52,10 +51,10 @@ const NotificationsPage: React.FC = () => {
       // Create a sample notification
       await createNotificationAPI(
         session.user.id,
-        "Enhanced AI Generation Models",
-        "We've upgraded our core AI systems with improved narrative consistency and character development. The new models show significant improvements in dialogue quality and story pacing.\n\nGeneration speed has been increased by 35% while maintaining quality. These updates are now live across all book creation tools.",
-        "update",
-        "/new-book"
+        "Faster V7, ideas ranking party, and better moderation",
+        "Hi everyone! A few announcements today:\n\nNew feature ranking party!\n\nPlease help us rank what features should be on our roadmap and what's most important to you.\n\nHow does this work?\n\n• Go to magicmuse.com/ideas\n• You'll see 5 ideas and get 25 points\n• Allocate the 25 points among the 5 ideas based on what you think to be most valuable (if it's 2x more valuable to you, give it 2x more points)\n• Do it a bunch of times (more helps!)\n• Click leaderboard and see how the community's votes are ranking all the features together! (it should converge in a few days)\n\nMagicMuse V7 book generation is now ~40% faster!\n\n• Fast mode jobs render-time are reduced from 36 to 22 seconds\n• Turbo job render-time are reduced from 13 seconds to 9\n\nThis is part of our 'final optimization' pass before making V7 default for the whole community and are necessary to prevent us from running out of GPUs.\n\nAs always, if you want to make your model 'take more time' try --q 2 and --q 4 (more updates will be coming in the future to these settings.\n\nNote: Omni-reference jobs remain the same. Non-default settings may take longer (as before).\n\nWe've upgraded the AI moderation in the editor.",
+        "announcement",
+        "/ideas"
       );
     } catch (error) {
       console.error("Error creating sample notification:", error);
@@ -71,12 +70,12 @@ const NotificationsPage: React.FC = () => {
     return notifications.filter(notification => {
       const type = notification.type?.toLowerCase();
       switch (activeFilter) {
-        case 'Updates':
-          return type?.includes('update') || type?.includes('product');
-        case 'Features':
-          return type?.includes('feature') || type?.includes('new');
         case 'Announcements':
           return type?.includes('announcement') || type?.includes('news');
+        case 'Information':
+          return type?.includes('info') || type?.includes('tip');
+        case 'Changelog':
+          return type?.includes('changelog') || type?.includes('update');
         default:
           return true;
       }
@@ -91,133 +90,145 @@ const NotificationsPage: React.FC = () => {
     }
   };
 
-  const formatRelativeTime = (timestamp: string) => {
+  const formatDisplayTime = (timestamp: string) => {
     try {
-      const date = parseISO(timestamp);
-      const now = new Date();
-      const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-      
-      if (diffInHours < 1) return 'Just now';
-      if (diffInHours < 24) return `${diffInHours}h ago`;
-      if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}d ago`;
-      return formatDisplayDate(timestamp);
+      return format(parseISO(timestamp), 'h:mm aa');
     } catch {
-      return "Invalid Date";
+      return "Invalid Time";
+    }
+  };
+
+  const getTypeLabel = (type?: string) => {
+    switch (type?.toLowerCase()) {
+      case 'announcement':
+        return 'Announcement';
+      case 'info':
+      case 'information':
+        return 'Information';
+      case 'changelog':
+      case 'update':
+        return 'Changelog';
+      default:
+        return 'Announcement';
     }
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800">
-        <div className="max-w-5xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-medium text-white">Updates</h1>
-              <p className="text-zinc-400 text-sm mt-1">Latest announcements and improvements</p>
-            </div>
-            
-            {/* Filter Pills */}
-            <div className="flex items-center space-x-2">
-              {(['All', 'Updates', 'Features', 'Announcements'] as FilterType[]).map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setActiveFilter(filter)}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                    activeFilter === filter
-                      ? 'bg-white text-black'
-                      : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
+    <div className="min-h-screen bg-white">
+      {/* Header with navigation */}
+      <div className="max-w-4xl mx-auto px-6 pt-8 pb-6">
+        <div className="flex items-center justify-between mb-8">
+          {/* Filter Navigation */}
+          <div className="flex items-center space-x-8">
+            {(['All', 'Announcements', 'Information', 'Changelog'] as FilterType[]).map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setActiveFilter(filter)}
+                className={`text-sm font-medium transition-colors ${
+                  activeFilter === filter
+                    ? 'text-black border-b-2 border-black pb-1'
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
           </div>
+          
+          {/* Settings Icon */}
+          <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+            <Settings2 className="h-5 w-5" />
+          </button>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-6">
         {loading && (
           <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-            <span className="ml-3 text-zinc-400">Loading updates...</span>
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-300"></div>
+            <span className="ml-3 text-gray-500">Loading...</span>
           </div>
         )}
         
         {error && (
           <div className="text-center py-20">
-            <p className="text-red-400">{error}</p>
+            <p className="text-red-500">{error}</p>
           </div>
         )}
 
         {!loading && !error && (
-          <div className="space-y-1">
+          <div className="space-y-12">
             {filteredNotifications.map((notification, index) => (
-              <article
-                key={notification.id}
-                className="group relative bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800/50 hover:border-zinc-700 transition-all duration-200 overflow-hidden"
-              >
-                {/* Main Content */}
-                <div className="p-6">
-                  {/* Header with date and type */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-center text-zinc-500 text-xs font-mono">
-                        <Calendar className="h-3 w-3 mr-1.5" />
-                        {formatDisplayDate(notification.created_at)}
-                      </div>
-                      <div className="w-1 h-1 bg-zinc-600 rounded-full"></div>
-                      <div className="text-zinc-500 text-xs font-mono">
-                        {formatRelativeTime(notification.created_at)}
-                      </div>
-                    </div>
-                    
-                    {/* Unread indicator */}
+              <article key={notification.id} className="flex space-x-8">
+                {/* Left side - Date and metadata */}
+                <div className="flex-shrink-0 w-32 text-right">
+                  <div className="text-sm text-gray-500 mb-1">
+                    {formatDisplayDate(notification.created_at)}
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    {formatDisplayTime(notification.created_at)}
+                  </div>
+                  <div className="mt-2">
                     {!notification.read && (
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800">
+                        ✳ New
+                      </span>
                     )}
                   </div>
+                  <div className="mt-2">
+                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
+                      🌱 {getTypeLabel(notification.type)}
+                    </span>
+                  </div>
+                </div>
 
+                {/* Right side - Content */}
+                <div className="flex-1 min-w-0">
                   {/* Title */}
-                  <h2 className="text-xl font-medium text-white mb-3 group-hover:text-zinc-100">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
                     {notification.title}
                   </h2>
 
                   {/* Content */}
-                  <div className="text-zinc-300 text-sm leading-relaxed space-y-3">
+                  <div className="text-gray-700 text-sm leading-relaxed space-y-4">
                     {notification.message.split('\n').map((paragraph, pIndex) => {
                       if (paragraph.trim() === '') return null;
                       
                       if (paragraph.trim().startsWith('•')) {
                         return (
-                          <div key={pIndex} className="flex items-start pl-4">
-                            <span className="w-1 h-1 bg-zinc-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                            <span className="text-zinc-400">
-                              {paragraph.replace('•', '').trim()}
+                          <div key={pIndex} className="ml-4">
+                            <span className="text-gray-600">
+                              {paragraph}
                             </span>
                           </div>
                         );
                       }
                       
+                      if (paragraph.trim().endsWith('!') && paragraph.length < 50) {
+                        return (
+                          <div key={pIndex} className="font-semibold text-gray-900">
+                            {paragraph}
+                          </div>
+                        );
+                      }
+                      
                       return (
-                        <p key={pIndex} className={paragraph.trim().endsWith(':') ? 'text-zinc-200 font-medium' : ''}>
+                        <p key={pIndex} className="text-gray-700">
                           {paragraph}
                         </p>
                       );
                     })}
                   </div>
 
-                  {/* Action link */}
+                  {/* Link if present */}
                   {notification.link && (
-                    <div className="mt-6 pt-4 border-t border-zinc-800">
+                    <div className="mt-4">
                       <a
                         href={notification.link}
-                        className="inline-flex items-center text-sm text-white hover:text-zinc-300 transition-colors group/link"
+                        className="text-blue-600 hover:text-blue-800 text-sm underline"
                       >
-                        <span className="font-medium">Try it now</span>
-                        <ArrowUpRight className="ml-1 h-3 w-3 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
+                        {notification.link.includes('ideas') ? 'magicmuse.com/ideas' : 'Learn more'}
                       </a>
                     </div>
                   )}
@@ -227,16 +238,7 @@ const NotificationsPage: React.FC = () => {
             
             {filteredNotifications.length === 0 && (
               <div className="text-center py-20">
-                <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Filter className="h-5 w-5 text-zinc-500" />
-                </div>
-                <h3 className="text-lg font-medium text-white mb-2">No updates found</h3>
-                <p className="text-zinc-400">
-                  {activeFilter === 'All' 
-                    ? "You're all caught up."
-                    : `No ${activeFilter.toLowerCase()} to display.`
-                  }
-                </p>
+                <p className="text-gray-500">No notifications to display.</p>
               </div>
             )}
           </div>

@@ -46,7 +46,8 @@ app.use(
           'https://openrouter.ai',
         ],
         'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // 'unsafe-inline' and 'unsafe-eval' might be needed for some libraries or dev tools, review if they can be removed for stricter security
-        'style-src': ["'self'", "'unsafe-inline'"], // 'unsafe-inline' for styles, review if possible to remove
+        'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"], // Allow inline styles and Google Fonts
+        'font-src': ["'self'", "https://fonts.gstatic.com"], // Allow fonts from self and Google Fonts
         'img-src': ["'self'", "data:", "https://*", "*.supabase.co"], // Allow images from self, data URIs, and any Supabase domain
         'frame-src': ["'self'", "*.supabase.co"], // Allow framing from Supabase for things like captcha
       },
