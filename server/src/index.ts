@@ -32,7 +32,27 @@ const app = express();
 const PORT = process.env.PORT || 9998; // Use environment PORT for production, 9998 for development
 
 // Middleware
-app.use(helmet()); // Set security HTTP headers
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        'default-src': ["'self'"],
+        'connect-src': [
+          "'self'",
+          'https://azaiyskdyzdhtomcwrsw.supabase.co',
+          'wss://azaiyskdyzdhtomcwrsw.supabase.co',
+          // Add any other domains your frontend needs to connect to, e.g., for OpenRouter API
+          'https://openrouter.ai',
+        ],
+        'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // 'unsafe-inline' and 'unsafe-eval' might be needed for some libraries or dev tools, review if they can be removed for stricter security
+        'style-src': ["'self'", "'unsafe-inline'"], // 'unsafe-inline' for styles, review if possible to remove
+        'img-src': ["'self'", "data:", "https://*", "*.supabase.co"], // Allow images from self, data URIs, and any Supabase domain
+        'frame-src': ["'self'", "*.supabase.co"], // Allow framing from Supabase for things like captcha
+      },
+    },
+  })
+); // Set security HTTP headers
 app.use(express.json({ limit: '50mb' })); // Parse JSON request body
 app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Parse URL-encoded request body
 app.use(xss()); // Sanitize request data against XSS
@@ -117,6 +137,10 @@ const startServer = async () => {
       // Still run migrations to ensure all schema changes are applied
       logger.info('Running migrations to ensure schema is up to date...');
       await runMigrations();
+      
+      // Seed initial notifications after migrations
+      logger.info('Seeding sample notifications...');
+      await seedNotifications();
     }
     
     // Start server
