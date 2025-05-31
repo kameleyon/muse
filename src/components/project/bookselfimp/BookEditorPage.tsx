@@ -441,13 +441,13 @@ const BookEditorPage: React.FC = () => {
     items.push({ type: 'cover', id: 'cover', title: 'Cover Page', icon: <BookText /> , content: coverContent });
     
     // Acknowledgement, Prologue, Introduction
-    items.push({ type: 'acknowledgement', id: 'acknowledgement', title: 'Acknowledgement', icon: <Award className="w-5 h-5 mr-2" />, content: structure.acknowledgement || '' });
-    items.push({ type: 'prologue', id: 'prologue', title: 'Prologue', icon: <Feather className="w-5 h-5 mr-2" />, content: structure.prologue || '' });
-    items.push({ type: 'introduction', id: 'introduction', title: 'Introduction', icon: <BookOpen className="w-5 h-5 mr-2" />, content: structure.introduction || '' });
+    items.push({ type: 'acknowledgement', id: 'acknowledgement', title: 'Acknowledgement', icon: <Award />, content: structure.acknowledgement || '' });
+    items.push({ type: 'prologue', id: 'prologue', title: 'Prologue', icon: <Feather  />, content: structure.prologue || '' });
+    items.push({ type: 'introduction', id: 'introduction', title: 'Introduction', icon: <BookOpen  />, content: structure.introduction || '' });
 
     if (structure.parts && structure.parts.length > 0) {
       structure.parts.forEach(part => {
-        items.push({ type: 'part-header', id: `part-${part.partNumber}`, title: part.partTitle, icon: <BookOpen className="w-5 h-5 mr-2" /> });
+        items.push({ type: 'part-header', id: `part-${part.partNumber}`, title: part.partTitle, icon: <BookOpen  className="w-4 h-4"/> });
         part.chapters.forEach(chapInStructure => {
           const fullChapter = allChapters.find(c => c.number === chapInStructure.number);
           if (fullChapter) {
@@ -480,9 +480,9 @@ const BookEditorPage: React.FC = () => {
     }
     
     // Conclusion, Appendix, References
-    items.push({ type: 'conclusion', id: 'conclusion', title: 'Conclusion', icon: <ConclusionIcon className="w-5 h-5 mr-2" />, content: structure.conclusion || '' });
-    items.push({ type: 'appendix', id: 'appendix', title: 'Appendix', icon: <Paperclip className="w-5 h-5 mr-2" />, content: structure.appendix || 'A. Assessment Tools and Worksheets\nB. Book Recommendations for Further Reading\nC. Community Resources and Support Groups\nD. Daily Practice Templates\nE. Emergency Action Plans for Setbacks\nF. Frequently Asked Questions\nG. Goal-Setting Frameworks\nH. Habit Tracking Templates\nI. Implementation Checklists\nJ. Journal Prompts for Self-Reflection' });
-    items.push({ type: 'references', id: 'references', title: 'References', icon: <ListOrdered className="w-5 h-5 mr-2" />, content: structure.references || 'Brown, B. (2020). The Gifts of Imperfection. Hazelden Publishing.\nClear, J. (2018). Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones. Avery.\nDuckworth, A. (2016). Grit: The Power of Passion and Perseverance. Scribner.\nDweck, C. (2006). Mindset: The New Psychology of Success. Random House.\nFrankl, V. E. (1946). Man\'s Search for Meaning. Beacon Press.\nHeath, C., & Heath, D. (2010). Switch: How to Change Things When Change Is Hard. Broadway Books.\nKahneman, D. (2011). Thinking, Fast and Slow. Farrar, Straus and Giroux.\nPink, D. H. (2009). Drive: The Surprising Truth About What Motivates Us. Riverhead Books.\nSinek, S. (2009). Start with Why: How Great Leaders Inspire Everyone to Take Action. Portfolio.\nThaler, R. H., & Sunstein, C. R. (2008). Nudge: Improving Decisions About Health, Wealth, and Happiness. Yale University Press.' });
+    items.push({ type: 'conclusion', id: 'conclusion', title: 'Conclusion', icon: <ConclusionIcon  />, content: structure.conclusion || '' });
+    items.push({ type: 'appendix', id: 'appendix', title: 'Appendix', icon: <Paperclip />, content: structure.appendix || 'A. Assessment Tools and Worksheets\nB. Book Recommendations for Further Reading\nC. Community Resources and Support Groups\nD. Daily Practice Templates\nE. Emergency Action Plans for Setbacks\nF. Frequently Asked Questions\nG. Goal-Setting Frameworks\nH. Habit Tracking Templates\nI. Implementation Checklists\nJ. Journal Prompts for Self-Reflection' });
+    items.push({ type: 'references', id: 'references', title: 'References', icon: <ListOrdered  />, content: structure.references || 'Brown, B. (2020). The Gifts of Imperfection. Hazelden Publishing.\nClear, J. (2018). Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones. Avery.\nDuckworth, A. (2016). Grit: The Power of Passion and Perseverance. Scribner.\nDweck, C. (2006). Mindset: The New Psychology of Success. Random House.\nFrankl, V. E. (1946). Man\'s Search for Meaning. Beacon Press.\nHeath, C., & Heath, D. (2010). Switch: How to Change Things When Change Is Hard. Broadway Books.\nKahneman, D. (2011). Thinking, Fast and Slow. Farrar, Straus and Giroux.\nPink, D. H. (2009). Drive: The Surprising Truth About What Motivates Us. Riverhead Books.\nSinek, S. (2009). Start with Why: How Great Leaders Inspire Everyone to Take Action. Portfolio.\nThaler, R. H., & Sunstein, C. R. (2008). Nudge: Improving Decisions About Health, Wealth, and Happiness. Yale University Press.' });
 
     return (
       <ul className="space-y-1">
@@ -505,7 +505,7 @@ const BookEditorPage: React.FC = () => {
                 <div className="flex items-center pr-6">
                   {/* Render icon with specific size if not a chapter */}
                   {item.type !== 'chapter' && (
-                    <span className="w-4 h-4 mr-2 flex items-center justify-center">{item.icon}</span>
+                    <span className="w-4 h-4 mr-2 ">{item.icon}</span>
                   )}
                   <span className={cn(item.type !== 'chapter' ? "" : "ml-0")}>
                     {item.title}
