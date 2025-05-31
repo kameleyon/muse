@@ -88,6 +88,7 @@ app.use(errorHandler);
 // Import the Supabase initialization function
 import { initializeDatabase, supabaseAdmin } from './services/supabase';
 import { runMigrations } from './utils/run-migrations';
+import { seedNotifications } from './utils/seed-notifications';
 
 // Check Supabase connection before starting server
 const startServer = async () => {
