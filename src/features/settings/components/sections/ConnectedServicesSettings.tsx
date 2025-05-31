@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/Button';
 import { supabase } from '@/services/supabase';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
-import { Github, Slack, FileText, Dropbox, Cloud, Link, Check, X, ExternalLink } from 'lucide-react';
+import { Github, Slack, FileText, Cloud, Link, Check, X, ExternalLink } from 'lucide-react';
 
 interface ConnectedService {
   id: string;
@@ -72,7 +72,7 @@ const ConnectedServicesSettings: React.FC = () => {
     {
       id: 'dropbox',
       name: 'Dropbox',
-      icon: <Dropbox className="h-6 w-6" />,
+      icon: <Cloud className="h-6 w-6" />,
       description: 'Backup your content to Dropbox automatically',
       connected: false,
       status: 'disconnected'
