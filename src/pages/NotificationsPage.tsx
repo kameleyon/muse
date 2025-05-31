@@ -114,12 +114,12 @@ const NotificationsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white w-full rounded-2xl shadow-sm px-4 pb-16">
       {/* Header with navigation */}
       <div className="max-w-4xl mx-auto px-6 pt-8 pb-6">
         <div className="flex items-center justify-between mb-8">
           {/* Filter Navigation */}
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-8 pl-56 mt-16">
             {(['All', 'Announcements', 'Information', 'Changelog'] as FilterType[]).map((filter) => (
               <button
                 key={filter}
@@ -143,7 +143,7 @@ const NotificationsPage: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6">
         {loading && (
           <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-300"></div>
@@ -160,9 +160,9 @@ const NotificationsPage: React.FC = () => {
         {!loading && !error && (
           <div className="space-y-12">
             {filteredNotifications.map((notification, index) => (
-              <article key={notification.id} className="flex space-x-8">
+              <article key={notification.id} className="flex space-x-4">
                 {/* Left side - Date and metadata */}
-                <div className="flex-shrink-0 w-32 text-right">
+                <div className="flex-shrink-0 w-250 text-right space-x-36 border-r border-secondary/20 pr-36">
                   <div className="text-sm text-gray-500 mb-1">
                     {formatDisplayDate(notification.created_at)}
                   </div>
@@ -171,27 +171,27 @@ const NotificationsPage: React.FC = () => {
                   </div>
                   <div className="mt-2">
                     {!notification.read && (
-                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800">
+                      <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-secondary text-neutral-white">
                         ✳ New
                       </span>
                     )}
                   </div>
                   <div className="mt-2">
-                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
-                      🌱 {getTypeLabel(notification.type)}
+                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/70 text-neutral-light">
+                       {getTypeLabel(notification.type)}
                     </span>
                   </div>
                 </div>
 
                 {/* Right side - Content */}
-                <div className="flex-1 min-w-0">
+                <div className="w-full">
                   {/* Title */}
                   <h2 className="text-xl font-semibold text-gray-900 mb-4">
                     {notification.title}
                   </h2>
 
                   {/* Content */}
-                  <div className="text-gray-700 text-sm leading-relaxed space-y-4">
+                  <div className="text-gray-700 text-sm leading-relaxed space-y-4 ">
                     {notification.message.split('\n').map((paragraph, pIndex) => {
                       if (paragraph.trim() === '') return null;
                       
@@ -223,10 +223,10 @@ const NotificationsPage: React.FC = () => {
 
                   {/* Link if present */}
                   {notification.link && (
-                    <div className="mt-4">
+                    <div className="mt-4 mb-8">
                       <a
                         href={notification.link}
-                        className="text-blue-600 hover:text-blue-800 text-sm underline"
+                        className="text-secondary hover:text-primary text-sm"
                       >
                         {notification.link.includes('ideas') ? 'magicmuse.com/ideas' : 'Learn more'}
                       </a>

@@ -8,7 +8,7 @@ import {
   Lightbulb, Activity, AlertCircle, CheckCircle,
   BookOpen, Presentation, Edit, Clock, Bell
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '@/services/supabase';
 import { bookService } from '@/lib/books';
@@ -69,12 +69,33 @@ interface QuickStat {
 
 const DashboardMVP: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
+  const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(true);
   const [books, setBooks] = useState<Book[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [recentItems, setRecentItems] = useState<RecentItem[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  // Helper function to truncate content to first line or two and apply basic markdown
+  const formatNotificationContent = (message: string) => {
+    // Get first sentence or first line, whichever is shorter
+    const firstLine = message.split('\n')[0];
+    const firstSentence = message.split('.')[0] + '.';
+    
+    // Use the shorter of the two, but cap at 120 characters
+    let truncatedText = firstLine.length < firstSentence.length ? firstLine : firstSentence;
+    if (truncatedText.length > 120) {
+      truncatedText = truncatedText.substring(0, 120) + '...';
+    } else if (message.length > truncatedText.length) {
+      truncatedText += '...';
+    }
+    
+    // Apply basic markdown formatting (but keep it simple)
+    return truncatedText
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+      .replace(/\*(.*?)\*/g, '<em>$1</em>'); // Italic
+  };
 
   // Load books and projects data
   useEffect(() => {
@@ -386,13 +407,24 @@ const DashboardMVP: React.FC = () => {
             {/* Smart Notifications */}
             <div className="activity-section shadow-md bg-clay">
               <div className="card-header">
-                <h2 className="h2 text-neutral-light">Notifications</h2>
+                <div className="flex justify-between items-center">
+                  <h2 className="h2 text-neutral-light">Notifications</h2>
+                  <Link to="/notifications" className="text-neutral-light/70 hover:text-neutral-light text-sm">
+                    View all →
+                  </Link>
+                </div>
               </div>
               <div className="activity-list">
                 {displayNotifications.length > 0 ? (
                   displayNotifications.map((notification, idx) => (
-                    <div key={`notification-item-${notification.id}-${idx}`} className="activity-item">
-                      <div className="activity-icon text-neutral-light/80">
+                    <div 
+                      key={`notification-item-${notification.id}-${idx}`} 
+                      className="activity-item cursor-pointer hover:bg-[#3d3d3a]/10 transition-colors duration-200 p-2"
+                      onClick={() => navigate('/notifications')}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <div className="activity-icon text-neutral-light/80 mt-4 ">
                         {notification.type === 'success' && <CheckCircle size={16} />}
                         {notification.type === 'warning' && <AlertCircle size={16} />}
                         {notification.type === 'info' && <Activity size={16} />}
@@ -411,8 +443,13 @@ const DashboardMVP: React.FC = () => {
                             <div className="w-2 h-2 bg-[#ae5630] rounded-full"></div>
                           )}
                         </div>
-                        <p className="text-sm text-neutral-light/90 mt-1">{notification.message}</p>
-                        <p className="text-xs text-neutral-light/80 mt-1">
+                        <div 
+                          className="text-sm text-neutral-light/80 mt-1 leading-relaxed"
+                          dangerouslySetInnerHTML={{ 
+                            __html: formatNotificationContent(notification.message) 
+                          }}
+                        />
+                        <p className="text-xs text-neutral-light/70 mt-2">
                           {formatDistanceToNow(new Date(notification.created_at))} ago
                         </p>
                       </div>
