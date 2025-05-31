@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { getNotificationsAPI, Notification, createNotificationAPI } from '@/services/notificationService';
+import { getNotificationsAPI, Notification, createNotificationAPI, markNotificationAsReadAPI } from '@/services/notificationService';
 import { format, parseISO } from 'date-fns';
 import { Badge } from '@/components/ui/Badge';
 import { Settings2 } from 'lucide-react';
@@ -25,6 +25,19 @@ const NotificationsPage: React.FC = () => {
         const fetchedNotifications = await getNotificationsAPI();
         if (fetchedNotifications) {
           setNotifications(fetchedNotifications);
+          
+          // Mark all unread notifications as read when the page is viewed
+          const unreadNotifications = fetchedNotifications.filter(n => !n.read);
+          for (const notification of unreadNotifications) {
+            await markNotificationAsReadAPI(notification.id);
+          }
+          
+          // Update local state to reflect read status
+          if (unreadNotifications.length > 0) {
+            setNotifications(prev => 
+              prev.map(n => ({ ...n, read: true }))
+            );
+          }
         } else {
           setError("Failed to load notifications.");
         }
@@ -221,17 +234,7 @@ const NotificationsPage: React.FC = () => {
                     })}
                   </div>
 
-                  {/* Link if present */}
-                  {notification.link && (
-                    <div className="mt-4 mb-8">
-                      <a
-                        href={notification.link}
-                        className="text-secondary hover:text-primary text-sm"
-                      >
-                        {notification.link.includes('ideas') ? 'magicmuse.com/ideas' : 'Learn more'}
-                      </a>
-                    </div>
-                  )}
+                  {/* Remove link section - full content is displayed above */}
                 </div>
               </article>
             ))}

@@ -197,7 +197,7 @@ const AdminNotifications: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Notifications Admin</h1>
+          <h1 className="text-3xl font-bold text-secondary/90">Notifications Admin</h1>
           <p className="text-gray-600 mt-2">Manage system notifications and announcements</p>
         </div>
 
@@ -376,7 +376,7 @@ const AdminNotifications: React.FC = () => {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-3 mb-2">
-                            <h3 className="text-lg font-semibold text-gray-900">{notification.title}</h3>
+                            <h3 className="text-lg font-semibold text-secondary/90">{notification.title}</h3>
                             <Badge className={getTypeBadgeStyle(notification.type)}>
                               {notification.type || 'announcement'}
                             </Badge>

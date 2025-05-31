@@ -12,7 +12,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '@/services/supabase';
 import { bookService } from '@/lib/books';
-import { getNotificationsAPI, Notification } from '@/services/notificationService';
+import { getNotificationsAPI, Notification, markNotificationAsReadAPI } from '@/services/notificationService';
 //import MainLayout from '@/components/layout/MainLayout';
 import '@/styles/ProjectArea.css';
 import '@/styles/ProjectSetup.css';
@@ -95,6 +95,24 @@ const DashboardMVP: React.FC = () => {
     return truncatedText
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
       .replace(/\*(.*?)\*/g, '<em>$1</em>'); // Italic
+  };
+
+  // Handle notification click - mark as read and navigate
+  const handleNotificationClick = async (notification: Notification) => {
+    // Mark notification as read if it's unread
+    if (!notification.read) {
+      await markNotificationAsReadAPI(notification.id);
+      
+      // Update local state to reflect read status
+      setNotifications(prev => 
+        prev.map(n => 
+          n.id === notification.id ? { ...n, read: true } : n
+        )
+      );
+    }
+    
+    // Navigate to notifications page
+    navigate('/notifications');
   };
 
   // Load books and projects data
@@ -408,23 +426,23 @@ const DashboardMVP: React.FC = () => {
             <div className="activity-section shadow-md bg-clay">
               <div className="card-header">
                 <div className="flex justify-between items-center">
-                  <h2 className="h2 text-neutral-light">Notifications</h2>
-                  <Link to="/notifications" className="text-neutral-light/70 hover:text-neutral-light text-sm">
+                  <h2 className="h2 text-neutral-white/80">Notifications</h2>
+                  <Link to="/notifications" className="text-neutral-white/80 hover:text-neutral-white text-sm">
                     View all →
                   </Link>
                 </div>
               </div>
-              <div className="activity-list">
+              <div className="activity-list ">
                 {displayNotifications.length > 0 ? (
                   displayNotifications.map((notification, idx) => (
                     <div 
                       key={`notification-item-${notification.id}-${idx}`} 
-                      className="activity-item cursor-pointer hover:bg-[#3d3d3a]/10 transition-colors duration-200 p-2"
-                      onClick={() => navigate('/notifications')}
+                      className="activity-item cursor-pointer  transition-colors duration-200 p-2"
+                      onClick={() => handleNotificationClick(notification)}
                       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
-                      <div className="activity-icon text-neutral-light/80 mt-4 ">
+                      <div className="activity-icon text-neutral-light/80 hover:text-neutral-white text-sm">
                         {notification.type === 'success' && <CheckCircle size={16} />}
                         {notification.type === 'warning' && <AlertCircle size={16} />}
                         {notification.type === 'info' && <Activity size={16} />}
@@ -436,15 +454,15 @@ const DashboardMVP: React.FC = () => {
                         {notification.type === 'error' && <AlertCircle size={16} />}
                         {(!notification.type || notification.type === 'announcement') && <Bell size={16} />}
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-neutral-light/90 text-sm">{notification.title}</p>
+                      <div className="flex-1 text-neutral-white/80 text-sm hover:text-neutral-white hover:text-md">
+                        <div className="flex items-center gap-2 ">
+                          <p className="font-medium ">{notification.title}</p>
                           {!notification.read && (
                             <div className="w-2 h-2 bg-[#ae5630] rounded-full"></div>
                           )}
                         </div>
                         <div 
-                          className="text-sm text-neutral-light/80 mt-1 leading-relaxed"
+                          className="text-sm mt-1 leading-relaxed"
                           dangerouslySetInnerHTML={{ 
                             __html: formatNotificationContent(notification.message) 
                           }}

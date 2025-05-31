@@ -280,7 +280,7 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({
                 )}
                 
                 {template.id === 'bold-contrast' && (
-                  <div className="w-full h-full bg-gray-900 p-2 text-white">
+                  <div className="w-full h-full bg-secondary/90 p-2 text-white">
                     <div className="h-full flex flex-col justify-between">
                       <div className="text-[10px] font-bold">BOLD</div>
                       <div className="w-full h-px bg-white"></div>
