@@ -207,189 +207,31 @@ async function updateBookAppendix(bookId: string, chapterContent: string): Promi
 
 // Clean JSON response helper
 function cleanJsonResponse(response: string): any {
-  console.log("Received response from AI model, attempting to extract JSON...");
-  
+  console.log("Attempting to parse AI response as JSON...");
   try {
-    // First try direct JSON parse
+    // Attempt 1: Direct JSON parse
     return JSON.parse(response);
-  } catch (e: any) {
-    console.log("Failed to parse direct JSON, trying to extract from response:", e.message);
-    
+  } catch (e1: any) {
+    console.warn("Direct JSON.parse failed. Trying to extract from markdown code block. Error: " + e1.message);
     try {
-      // Extract JSON from markdown code blocks
+      // Attempt 2: Extract JSON from markdown code blocks
+      // Regex to find ```json ... ``` or ``` ... ```
       const jsonMatch = response.match(/```(?:json)?\s*([\s\S]*?)```/);
-      if (jsonMatch) {
-        try {
-          const json = JSON.parse(jsonMatch[1].trim());
-          console.log("Successfully extracted JSON from code block");
-          return json;
-        } catch (e2: any) {
-          console.log("Failed to parse JSON from code block:", e2.message);
-        }
-      }
-      
-      // Try to find JSON object in the response
-      const objectMatch = response.match(/\{[\s\S]*\}/);
-      if (objectMatch) {
-        try {
-          const extracted = objectMatch[0];
-          // Fix common JSON parsing issues
-          const cleanedJson = extracted
-            // Fix unquoted keys
-            .replace(/([{,]\s*)([a-zA-Z0-9_]+)(\s*:)/g, '$1"$2"$3')
-            // Fix trailing commas in arrays and objects
-            .replace(/,(\s*[\]}])/g, '$1')
-            // Fix missing quotes around string values
-            .replace(/:\s*([a-zA-Z][a-zA-Z0-9_]*)\s*([,}])/g, ':"$1"$2')
-            // Ensure consistent quotation
-            .replace(/:\s*'([^']*)'/g, ':"$1"');
-            
-          console.log("Cleaned JSON from regex match");
-          return JSON.parse(cleanedJson);
-        } catch (e3: any) {
-          console.log("Failed to parse cleaned JSON from regex match:", e3.message);
-        }
-      }
-      
-      // As a last resort, try to parse the entire response text as a fallback structure
-      console.log("Creating a fallback structure from the response text");
-      
-      // Look for a title in the response
-      const titleMatch = response.match(/title[:\s]+["']?([^"'\n,]+)["']?/i);
-      const title = titleMatch ? titleMatch[1].trim() : "Generated Book";
-      
-      // Look for a subtitle
-      const subtitleMatch = response.match(/subtitle[:\s]+["']?([^"'\n,]+)["']?/i);
-      const subtitle = subtitleMatch ? subtitleMatch[1].trim() : "A Comprehensive Guide";
-      
-      // Check if we can extract parts or sections from the response
-      const partsRegex = /Part\s+\w+:\s+([A-Z\s]+)/g;
-      const partMatches = [...response.matchAll(partsRegex)];
-      
-      // Extract chapters
-      const chapterRegex = /Chapter\s+(\d+):\s+([^\n]+)/g;
-      const chapterMatches = [...response.matchAll(chapterRegex)];
-      
-      // Group chapters by parts if possible
-      const parts = [];
-      
-      if (partMatches.length > 0) {
-        // We have parts, try to organize chapters under them
-        partMatches.forEach((partMatch, partIndex) => {
-          const partTitle = partMatch[1].trim();
-          const nextPartMatch = partMatches[partIndex + 1] || null;
-          const partStart = partMatch.index as number;
-          const partEnd = nextPartMatch ? nextPartMatch.index : response.length;
-          const partText = response.substring(partStart, partEnd);
-          
-          // Find chapters within this part text
-          const partChapters = [];
-          const chapterRegex = /Chapter\s+(\d+):\s+([^\n]+)/g;
-          let chapterMatch;
-          while ((chapterMatch = chapterRegex.exec(partText)) !== null) {
-            partChapters.push({
-              number: parseInt(chapterMatch[1]),
-              title: chapterMatch[2].trim(),
-              description: "Chapter extracted from AI response",
-              estimatedWords: 5000
-            });
-          }
-          
-          if (partChapters.length > 0) {
-            parts.push({
-              partNumber: partIndex + 1,
-              partTitle: partTitle,
-              chapters: partChapters
-            });
-          }
-        });
-      }
-      
-      // If we couldn't extract parts but have chapters, create a flat structure
-      if (parts.length === 0 && chapterMatches.length > 0) {
-        // Create a single part with all chapters
-        const flatChapters = chapterMatches.map(match => ({
-          number: parseInt(match[1]),
-          title: match[2].trim(),
-          description: "Chapter extracted from AI response",
-          estimatedWords: 5000
-        }));
-        
-        if (flatChapters.length > 0) {
-          parts.push({
-            partNumber: 1,
-            partTitle: "MAIN CONTENT",
-            chapters: flatChapters
-          });
-        }
-      }
-      
-      // Create a fallback structure with at least 32 chapters across 8 parts
-      let fallbackParts = [];
-      
-      if (parts.length > 0) {
-        // We have extracted some parts, use them
-        fallbackParts = parts;
-        
-        // Check if we have enough chapters (at least 30)
-        const totalChapters = parts.reduce((total, part) => total + part.chapters.length, 0);
-        if (totalChapters < 30) {
-          // Add more parts if needed
-          const additionalPartsNeeded = Math.ceil((30 - totalChapters) / 4);
-          for (let i = 0; i < additionalPartsNeeded; i++) {
-            const partNumber = parts.length + i + 1;
-            fallbackParts.push({
-              partNumber,
-              partTitle: `ADDITIONAL CONTENT PART ${partNumber}`,
-              chapters: Array.from({ length: 4 }, (_, j) => ({
-                number: totalChapters + (i * 4) + j + 1,
-                title: `Additional Chapter ${j + 1}`,
-                description: "Auto-generated chapter for comprehensive coverage",
-                estimatedWords: 5000
-              }))
-            });
-          }
-        }
+      if (jsonMatch && jsonMatch[1]) {
+        const extractedJson = jsonMatch[1].trim();
+        console.log("Extracted JSON from code block. Attempting to parse.");
+        return JSON.parse(extractedJson);
       } else {
-        // Create 8 parts with 4 chapters each
-        const partTitles = [
-          "FOUNDATIONS AND CORE CONCEPTS",
-          "ESSENTIAL STRATEGIES",
-          "PRACTICAL TECHNIQUES",
-          "ADVANCED APPLICATIONS",
-          "CASE STUDIES AND EXAMPLES",
-          "IMPLEMENTATION AND EXECUTION",
-          "OVERCOMING CHALLENGES",
-          "MASTERY AND FUTURE DIRECTIONS"
-        ];
-        
-        fallbackParts = partTitles.map((partTitle, partIndex) => ({
-          partNumber: partIndex + 1,
-          partTitle,
-          chapters: Array.from({ length: 4 }, (_, j) => ({
-            number: (partIndex * 4) + j + 1,
-            title: `${partTitle.split(' ')[0]} Chapter ${j + 1}`,
-            description: `Auto-generated chapter covering ${partTitle.toLowerCase()}`,
-            estimatedWords: 5000
-          }))
-        }));
+        console.warn("No JSON code block found in AI response.");
+        // Log the beginning of the response to help diagnose if the AI isn't complying
+        console.error("AI response (first 500 chars) that failed parsing: ", response.substring(0, 500));
+        throw new Error('AI response is not valid JSON and no JSON code block was found.');
       }
-      
-      const fallbackStructure = {
-        title,
-        subtitle,
-        parts: fallbackParts,
-        introduction: "Introduction to the topic - providing essential context and overview",
-        conclusion: "Concluding thoughts on the topic - integrating key insights and future directions",
-        marketPosition: "Comprehensive guide for practitioners and enthusiasts alike",
-        uniqueValue: "Combines theoretical foundations with practical applications in an accessible format"
-      };
-      
-      console.log("Created fallback structure with parts:", fallbackStructure.parts.length);
-      return fallbackStructure;
-    } catch (finalError: any) {
-      console.error("Failed all JSON parsing attempts:", finalError);
-      throw new Error('Failed to parse JSON response and could not create fallback structure');
+    } catch (e2: any) {
+      console.error("Failed to parse JSON from code block. Error: " + e2.message);
+      // Log the beginning of the response to help diagnose
+      console.error("Original AI response (first 500 chars) that failed parsing: ", response.substring(0, 500));
+      throw new Error('Failed to parse AI response as JSON after attempting direct and code block extraction.');
     }
   }
 }
