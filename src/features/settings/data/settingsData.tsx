@@ -47,6 +47,7 @@ export const settingsCategories: SettingsCategory[] = [
     label: 'Privacy & Data',
     icon: <Lock size={20} />,
     subcategories: [
+      { id: 'privacy-settings', label: 'Privacy & Data Settings', icon: <ShieldIcon size={16} /> },
       { id: 'content-privacy', label: 'Content Privacy', icon: <Lock size={16} /> },
       { id: 'collaboration', label: 'Collaboration Permissions', icon: <UsersIcon size={16} /> },
       { id: 'data-usage', label: 'Data Usage Preferences', icon: <Database size={16} /> }

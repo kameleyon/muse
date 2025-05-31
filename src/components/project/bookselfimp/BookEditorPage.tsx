@@ -385,46 +385,48 @@ const BookEditorPage: React.FC = () => {
   };
 
   const getStatusIcon = (status?: Chapter['status']) => {
-    let iconElement;
-    let statusText = status || 'draft'; // Default to 'draft' if status is undefined
-
+    let icon;
+    let statusText = status || 'draft';
+  
     switch (status) {
-      case 'complete': 
-        iconElement = <Check className="w-5 h-5 text-green-600" />; 
-        statusText = 'complete'; // MODIFIED: 'Complete' -> 'complete'
+      case 'complete':
+        icon = <Check className="text-secondary" />;
         break;
-      case 'in_progress': 
-        iconElement = <Clock className="w-5 h-5 text-yellow-600" />; 
-        statusText = 'in_progress'; // MODIFIED: 'In Progress' -> 'in_progress'
+      case 'in_progress':
+        icon = <Clock className="text-primary" />;
         break;
-      case 'generating': 
-        iconElement = <Sparkles className="w-5 h-5 text-blue-500 animate-pulse" />; 
-        statusText = 'generating'; // MODIFIED: 'Generating' -> 'generating'
+      case 'generating':
+        icon = <Sparkles className="text-primary animate-pulse" />;
         break;
       case 'pending':
-        iconElement = <FileText className="w-5 h-5 text-gray-400" />; 
-        statusText = 'pending'; // MODIFIED: 'Pending' -> 'pending'
+        icon = <FileText className="text-primary" />;
         break;
       case 'draft':
-      default: 
-        iconElement = <FileText className="w-5 h-5 text-gray-400" />; 
-        statusText = 'draft'; // MODIFIED: 'Draft' -> 'draft'
+      default:
+        icon = <FileText className="text-primary" />;
         break;
     }
-    // To display a more user-friendly status on hover, we can map the internal status to a display string.
+  
     const displayStatusText = {
-      'complete': 'Complete',
-      'in_progress': 'In Progress',
-      'generating': 'Generating',
-      'pending': 'Pending',
-      'draft': 'Draft',
-      'generated': 'Generated', // Added for completeness if this status is used
-      'approved': 'Approved' // Added for completeness if this status is used
-    }[statusText] || statusText.charAt(0).toUpperCase() + statusText.slice(1); // Default to capitalized if not in map
-
-    return <span title={displayStatusText}>{iconElement}</span>;
+      complete: 'Complete',
+      in_progress: 'In Progress',
+      generating: 'Generating',
+      pending: 'Pending',
+      draft: 'Draft',
+      generated: 'Generated',
+      approved: 'Approved',
+    }[statusText] || statusText.charAt(0).toUpperCase() + statusText.slice(1);
+  
+    return (
+      <span
+        title={displayStatusText}
+        className="w-4 h-4 mr-2 flex items-center justify-center"
+      >
+        {icon}
+      </span>
+    );
   };
-
+  
   const renderSidebarItems = () => {
     if (!book || !book.structure) return null;
     const structure = book.structure;
@@ -436,16 +438,16 @@ const BookEditorPage: React.FC = () => {
     const coverContent = structure.coverPageDetails 
       ? `Title: ${structure.coverPageDetails.title}\nSubtitle: ${structure.coverPageDetails.subtitle}\nAuthor: ${structure.coverPageDetails.authorName}`
       : `Title: ${book.title}\nSubtitle: \nAuthor: `; // Default placeholder
-    items.push({ type: 'cover', id: 'cover', title: 'Cover Page', icon: <BookText className="w-4 h-4 mr-2" />, content: coverContent });
+    items.push({ type: 'cover', id: 'cover', title: 'Cover Page', icon: <BookText /> , content: coverContent });
     
     // Acknowledgement, Prologue, Introduction
-    items.push({ type: 'acknowledgement', id: 'acknowledgement', title: 'Acknowledgement', icon: <Award className="w-4 h-4 mr-2" />, content: structure.acknowledgement || '' });
-    items.push({ type: 'prologue', id: 'prologue', title: 'Prologue', icon: <Feather className="w-4 h-4 mr-2" />, content: structure.prologue || '' });
-    items.push({ type: 'introduction', id: 'introduction', title: 'Introduction', icon: <BookOpen className="w-4 h-4 mr-2" />, content: structure.introduction || '' });
+    items.push({ type: 'acknowledgement', id: 'acknowledgement', title: 'Acknowledgement', icon: <Award className="w-5 h-5 mr-2" />, content: structure.acknowledgement || '' });
+    items.push({ type: 'prologue', id: 'prologue', title: 'Prologue', icon: <Feather className="w-5 h-5 mr-2" />, content: structure.prologue || '' });
+    items.push({ type: 'introduction', id: 'introduction', title: 'Introduction', icon: <BookOpen className="w-5 h-5 mr-2" />, content: structure.introduction || '' });
 
     if (structure.parts && structure.parts.length > 0) {
       structure.parts.forEach(part => {
-        items.push({ type: 'part-header', id: `part-${part.partNumber}`, title: part.partTitle, icon: <BookOpen className="w-4 h-4 mr-2" /> });
+        items.push({ type: 'part-header', id: `part-${part.partNumber}`, title: part.partTitle, icon: <BookOpen className="w-5 h-5 mr-2" /> });
         part.chapters.forEach(chapInStructure => {
           const fullChapter = allChapters.find(c => c.number === chapInStructure.number);
           if (fullChapter) {
@@ -478,9 +480,9 @@ const BookEditorPage: React.FC = () => {
     }
     
     // Conclusion, Appendix, References
-    items.push({ type: 'conclusion', id: 'conclusion', title: 'Conclusion', icon: <ConclusionIcon className="w-4 h-4 mr-2" />, content: structure.conclusion || '' });
-    items.push({ type: 'appendix', id: 'appendix', title: 'Appendix', icon: <Paperclip className="w-4 h-4 mr-2" />, content: structure.appendix || 'A. Assessment Tools and Worksheets\nB. Book Recommendations for Further Reading\nC. Community Resources and Support Groups\nD. Daily Practice Templates\nE. Emergency Action Plans for Setbacks\nF. Frequently Asked Questions\nG. Goal-Setting Frameworks\nH. Habit Tracking Templates\nI. Implementation Checklists\nJ. Journal Prompts for Self-Reflection' });
-    items.push({ type: 'references', id: 'references', title: 'References', icon: <ListOrdered className="w-4 h-4 mr-2" />, content: structure.references || 'Brown, B. (2020). The Gifts of Imperfection. Hazelden Publishing.\nClear, J. (2018). Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones. Avery.\nDuckworth, A. (2016). Grit: The Power of Passion and Perseverance. Scribner.\nDweck, C. (2006). Mindset: The New Psychology of Success. Random House.\nFrankl, V. E. (1946). Man\'s Search for Meaning. Beacon Press.\nHeath, C., & Heath, D. (2010). Switch: How to Change Things When Change Is Hard. Broadway Books.\nKahneman, D. (2011). Thinking, Fast and Slow. Farrar, Straus and Giroux.\nPink, D. H. (2009). Drive: The Surprising Truth About What Motivates Us. Riverhead Books.\nSinek, S. (2009). Start with Why: How Great Leaders Inspire Everyone to Take Action. Portfolio.\nThaler, R. H., & Sunstein, C. R. (2008). Nudge: Improving Decisions About Health, Wealth, and Happiness. Yale University Press.' });
+    items.push({ type: 'conclusion', id: 'conclusion', title: 'Conclusion', icon: <ConclusionIcon className="w-5 h-5 mr-2" />, content: structure.conclusion || '' });
+    items.push({ type: 'appendix', id: 'appendix', title: 'Appendix', icon: <Paperclip className="w-5 h-5 mr-2" />, content: structure.appendix || 'A. Assessment Tools and Worksheets\nB. Book Recommendations for Further Reading\nC. Community Resources and Support Groups\nD. Daily Practice Templates\nE. Emergency Action Plans for Setbacks\nF. Frequently Asked Questions\nG. Goal-Setting Frameworks\nH. Habit Tracking Templates\nI. Implementation Checklists\nJ. Journal Prompts for Self-Reflection' });
+    items.push({ type: 'references', id: 'references', title: 'References', icon: <ListOrdered className="w-5 h-5 mr-2" />, content: structure.references || 'Brown, B. (2020). The Gifts of Imperfection. Hazelden Publishing.\nClear, J. (2018). Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones. Avery.\nDuckworth, A. (2016). Grit: The Power of Passion and Perseverance. Scribner.\nDweck, C. (2006). Mindset: The New Psychology of Success. Random House.\nFrankl, V. E. (1946). Man\'s Search for Meaning. Beacon Press.\nHeath, C., & Heath, D. (2010). Switch: How to Change Things When Change Is Hard. Broadway Books.\nKahneman, D. (2011). Thinking, Fast and Slow. Farrar, Straus and Giroux.\nPink, D. H. (2009). Drive: The Surprising Truth About What Motivates Us. Riverhead Books.\nSinek, S. (2009). Start with Why: How Great Leaders Inspire Everyone to Take Action. Portfolio.\nThaler, R. H., & Sunstein, C. R. (2008). Nudge: Improving Decisions About Health, Wealth, and Happiness. Yale University Press.' });
 
     return (
       <ul className="space-y-1">
@@ -492,22 +494,28 @@ const BookEditorPage: React.FC = () => {
                 onClick={() => setSelectedSection(item)}
                 className={cn(
                   "w-full text-left px-3 py-2 rounded-lg transition-colors",
-                  "flex items-center justify-between text-sm",
+                  "flex items-center justify-between text-xs",
                   selectedSection?.id === item.id && selectedSection?.type === item.type
                     ? "bg-primary/10 text-primary font-medium"
                     : "hover:bg-neutral-light/50 text-neutral-darker",
                   isPartHeader ? "font-semibold mt-3 mb-1 text-neutral-darker uppercase text-xs tracking-wider" : ""
                 )}
-                disabled={isPartHeader} 
+                disabled={isPartHeader}
               >
-                <div className="flex items-center">
-                  {/* MODIFIED: Conditionally render item.icon, excluding for 'chapter' type */}
-                  {item.type !== 'chapter' && item.icon} 
-                  <span className={cn(item.type !== 'chapter' ? "" : "ml-0")}>{item.title}</span> {/* Ensure title is not indented if icon is removed */}
+                <div className="flex items-center pr-6">
+                  {/* Render icon with specific size if not a chapter */}
+                  {item.type !== 'chapter' && (
+                    <span className="w-4 h-4 mr-2 flex items-center justify-center">{item.icon}</span>
+                  )}
+                  <span className={cn(item.type !== 'chapter' ? "" : "ml-0")}>
+                    {item.title}
+                  </span>
                 </div>
-                <span className="text-xxs">
-                {item.type === 'chapter' && !isPartHeader && getStatusIcon(item.status)}</span> {/* MODIFIED: Removed item.status check as getStatusIcon handles undefined */}
+                <span>
+                  {item.type === 'chapter' && !isPartHeader && getStatusIcon(item.status)}
+                </span>
               </button>
+
             </li>
           );
         })}

@@ -15,6 +15,7 @@ const EditorSettings = React.lazy(() => import('./sections/EditorSettings'));
 const LayoutSettings = React.lazy(() => import('./sections/LayoutSettings'));
 const AccessibilitySettings = React.lazy(() => import('./sections/AccessibilitySettings'));
 const DataUsageSettings = React.lazy(() => import('./sections/DataUsageSettings'));
+const PrivacyDataSettings = React.lazy(() => import('./sections/PrivacyDataSettings'));
 const EmailNotificationSettings = React.lazy(() => import('./sections/EmailNotificationSettings'));
 const InAppNotificationSettings = React.lazy(() => import('./sections/InAppNotificationSettings'));
 const RemindersSettings = React.lazy(() => import('./sections/RemindersSettings'));
@@ -73,6 +74,8 @@ const SettingsContent: React.FC<SettingsContentProps> = ({ subcategoryId }): Rea
         return <Suspense fallback={fallback}><ContentPrivacySettings /></Suspense>;
       case 'collaboration':
         return <Suspense fallback={fallback}><CollaborationSettings /></Suspense>;
+      case 'privacy-settings':
+        return <Suspense fallback={fallback}><PrivacyDataSettings /></Suspense>;
       case 'data-usage':
         return <Suspense fallback={fallback}><DataUsageSettings /></Suspense>;
       case 'email-notifications':
