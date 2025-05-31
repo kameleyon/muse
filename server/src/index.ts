@@ -27,6 +27,7 @@ import aiRoutes from './routes/ai';
 import projectRoutes from './routes/projectRoutes'; // Import project routes
 import bookRoutes from './routes/book'; // Import book routes
 import bookAIRoutes from './routes/bookAI'; // Import book AI routes
+import adminNotificationsRoutes from './routes/adminNotifications'; // Import admin notifications routes
 
 const app = express();
 const PORT = process.env.PORT || 9998; // Use environment PORT for production, 9998 for development
@@ -91,6 +92,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/projects', projectRoutes); // Mount project routes
 app.use('/api', bookRoutes); // Mount book routes
 app.use('/api', bookAIRoutes); // Mount book AI routes
+app.use('/api', adminNotificationsRoutes); // Mount admin notifications routes
 
 // Serve static files from the frontend build
 if (process.env.NODE_ENV === 'production') {

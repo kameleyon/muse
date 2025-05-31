@@ -81,6 +81,11 @@ const routeConfig = [
     auth: true // Requires authentication
   },
   {
+    path: '/admin/notifications', // Admin route for managing notifications
+    element: lazy(() => import('./pages/AdminNotifications')),
+    auth: true // Requires authentication
+  },
+  {
     path: '/new-book',
     element: lazy(() => import('./pages/NewBookPage')),
     auth: true
