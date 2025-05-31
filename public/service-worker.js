@@ -23,6 +23,22 @@ self.addEventListener('install', event => {
 
 // Fetch event - serve from cache if available
 self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+
+  // Bypass for Vite-specific paths and other dev server assets
+  if (url.origin === self.location.origin) {
+    if (
+      url.pathname.startsWith('/@vite/') ||
+      url.pathname.startsWith('/@react-refresh') ||
+      url.pathname.startsWith('/src/') ||
+      url.pathname === '/register-sw.js'
+    ) {
+      // Optional: For debugging, you can uncomment the line below
+      // console.log('SW: Bypassing cache for dev URL:', event.request.url);
+      event.respondWith(fetch(event.request));
+      return;
+    }
+  }
   // Skip caching for API requests
   if (event.request.url.includes('/api/')) {
     event.respondWith(fetch(event.request));
@@ -42,7 +58,10 @@ self.addEventListener('fetch', event => {
         if (response) {
           return response;
         }
-        return fetch(event.request);
+        return fetch(event.request).catch(error => {
+            console.error('SW: Network fetch failed for:', event.request.url, error);
+            throw error; // Re-throw to ensure the fetch promise rejection is propagated
+        });
       })
   );
 });
