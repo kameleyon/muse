@@ -32,17 +32,17 @@ export const settingsCategories: SettingsCategory[] = [
       { id: 'api-access', label: 'API Access Settings', icon: <Key size={16} /> }
     ]
   },
-  {
-    id: 'ui-customization',
-    label: 'User Interface',
-    icon: <PaintBucket size={20} />,
-    subcategories: [
-      { id: 'theme', label: 'Theme Settings', icon: <PaintBucket size={16} /> },
-      { id: 'editor', label: 'Editor Preferences', icon: <Type size={16} /> },
-      { id: 'layout', label: 'Layout Customization', icon: <Layout size={16} /> },
-      { id: 'accessibility', label: 'Accessibility Settings', icon: <Accessibility size={16} /> }
-    ]
-  },
+  //{
+   // id: 'ui-customization',
+    //label: 'User Interface',
+   // icon: <PaintBucket size={20} />,
+   // subcategories: [
+      //{ id: 'theme', label: 'Theme Settings', icon: <PaintBucket size={16} /> },
+      //{ id: 'editor', label: 'Editor Preferences', icon: <Type size={16} /> },
+      //{ id: 'layout', label: 'Layout Customization', icon: <Layout size={16} /> },
+     // { id: 'accessibility', label: 'Accessibility Settings', icon: <Accessibility size={16} /> }
+    //]
+ // },
   {
     id: 'ai-behavior',
     label: 'AI Behavior',

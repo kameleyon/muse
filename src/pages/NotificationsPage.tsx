@@ -127,7 +127,16 @@ const NotificationsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white w-full rounded-2xl shadow-sm px-4 pb-16">
+    <div className="w-full mx-auto">
+    <div className="mb-8">
+      <h1 className="text-3xl font-bold font-heading mb-2 pl-4">Notifications</h1>
+      <p className="text-neutral-medium max-w-3xl pl-4">
+          Announcements, Updates, New Features, and all the latest news
+      </p>
+    </div>
+    <div className="min-h-screen bg-neutral-white w-full rounded-2xl shadow-sm px-4 pb-16">
+
+      
       {/* Header with navigation */}
       <div className="max-w-4xl mx-auto px-6 pt-8 pb-6">
         <div className="flex items-center justify-between mb-8">
@@ -247,6 +256,7 @@ const NotificationsPage: React.FC = () => {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 };

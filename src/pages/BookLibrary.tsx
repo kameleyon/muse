@@ -338,8 +338,8 @@ const BookLibraryPage: React.FC = () => {
   return (
     <div className="w-full mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold font-heading mb-2">My Creations</h1>
-        <p className="text-neutral-medium max-w-3xl">
+        <h1 className="text-3xl font-bold font-heading mb-2 pl-4">My Creations</h1>
+        <p className="text-neutral-medium max-w-3xl pl-4">
             Everything you created books, projects and so much more
         </p>
       </div>

@@ -257,7 +257,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           </Link>
           
           {/* Profile Link */}
-          <Link to="/profile" className="flex items-center gap-2 group">
+          <Link to="/settings" className="flex items-center gap-2 group">
              <span className="text-md text-white/70 font-heading inline group-hover:text-white transition-colors">{displayName}</span>
              <div className="w-8 h-8 rounded-full bg-[#ae5630] flex items-center justify-center group-hover:ring-2 group-hover:ring-primary transition-all">
                {profile?.avatar_url ? (
