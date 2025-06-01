@@ -6,6 +6,7 @@ import { bookService } from '../../../lib/books';
 import type { Book, Chapter, BookStructure } from '../../../types/books';
 import MarkdownEditor from '../../MarkdownEditor';
 import { jsPDF } from 'jspdf';
+import { MdTextRender } from 'jspdf-md-renderer';
 import html2canvas from 'html2canvas';
 
 const BookPreviewPage: React.FC = () => {
@@ -15,7 +16,16 @@ const BookPreviewPage: React.FC = () => {
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [pdfLoading, setPdfLoading] = useState(false);
-  const [pdfProgress, setPdfProgress] = useState(0);
+  const [pdfProgress, setPdfProgressRaw] = useState(0);
+  
+  // Safeguard to ensure progress never exceeds 100%
+  const setPdfProgress = (value: number) => {
+    const clampedValue = Math.max(0, Math.min(100, value));
+    if (value > 100) {
+      console.warn(`PDF progress attempted to set to ${value}%, clamped to 100%`);
+    }
+    setPdfProgressRaw(clampedValue);
+  };
   const [error, setError] = useState('');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [activeChapterId, setActiveChapterId] = useState<string | null>(null);
@@ -154,6 +164,7 @@ const BookPreviewPage: React.FC = () => {
       const h1FontSize = 17;
       const h2FontSize = 15;
       const h3FontSize = 13;
+      const h4FontSize = 12;
       const normalFontSize = 11;
       const lineHeight = 1.5;
 
@@ -193,17 +204,19 @@ const BookPreviewPage: React.FC = () => {
         return lines;
       };
 
-      const addText = (text: string, fontSize: number, options: { bold?: boolean; italic?: boolean; color?: string; indent?: number } = {}) => {
+      const addText = (text: string, fontSize: number, options: { bold?: boolean; italic?: boolean; color?: string; indent?: number; justify?: boolean; firstLineIndent?: boolean; font?: string } = {}) => {
         pdf.setFontSize(fontSize);
         
+        // Use specified font or default to Times
+        const fontFamily = options.font || 'times';
         if (options.bold && options.italic) {
-          pdf.setFont('georgia', 'bolditalic');
+          pdf.setFont(fontFamily, 'bolditalic');
         } else if (options.bold) {
-          pdf.setFont('georgia', 'bold');
+          pdf.setFont(fontFamily, 'bold');
         } else if (options.italic) {
-          pdf.setFont('georgia', 'italic');
+          pdf.setFont(fontFamily, 'italic');
         } else {
-          pdf.setFont('georgia', 'normal');
+          pdf.setFont(fontFamily, 'normal');
         }
 
         if (options.color) {
@@ -215,12 +228,44 @@ const BookPreviewPage: React.FC = () => {
           pdf.setTextColor(51, 51, 51); // #333
         }
 
-        const xPos = margin + (options.indent || 0);
+        const baseXPos = margin + (options.indent || 0);
         const lines = wrapText(text, contentWidth - (options.indent || 0));
         
-        lines.forEach(line => {
+        lines.forEach((line, index) => {
           checkPageBreak(fontSize * lineHeight);
-          pdf.text(line, xPos, yPosition);
+          
+          // Apply first line indent only to the first line if requested
+          const xPos = baseXPos + (options.firstLineIndent && index === 0 ? 36 : 0); // 0.5 inch first line indent
+          
+          if (options.justify && index < lines.length - 1) {
+            // Justify text (except last line)
+            const words = line.split(' ').filter(w => w.length > 0);
+            if (words.length > 1) {
+              // Calculate total width of all words
+              let totalWordWidth = 0;
+              words.forEach(word => {
+                totalWordWidth += pdf.getTextWidth(word);
+              });
+              
+              const availableWidth = contentWidth - (options.indent || 0) - (options.firstLineIndent && index === 0 ? 36 : 0);
+              const totalSpaceWidth = availableWidth - totalWordWidth;
+              const spaceWidth = totalSpaceWidth / (words.length - 1);
+              
+              let currentX = xPos;
+              words.forEach((word, wordIndex) => {
+                pdf.text(word, currentX, yPosition);
+                currentX += pdf.getTextWidth(word);
+                if (wordIndex < words.length - 1) {
+                  currentX += spaceWidth;
+                }
+              });
+            } else {
+              pdf.text(line, xPos, yPosition);
+            }
+          } else {
+            pdf.text(line, xPos, yPosition);
+          }
+          
           yPosition += fontSize * lineHeight;
         });
 
@@ -228,9 +273,9 @@ const BookPreviewPage: React.FC = () => {
         pdf.setTextColor(51, 51, 51);
       };
 
-      const addParagraph = (text: string, indent: number = 50) => {
+      const addParagraph = (text: string) => {
         yPosition += normalFontSize * 0.5; // Space before paragraph
-        addText(text, normalFontSize, { indent });
+        addText(text, normalFontSize, { justify: true, firstLineIndent: true });
         yPosition += normalFontSize * 0.5; // Space after paragraph
       };
 
@@ -283,31 +328,37 @@ const BookPreviewPage: React.FC = () => {
 
           // Headers
           if (line.startsWith('#### ')) {
-            checkPageBreak(h3FontSize * 2);
-            addText(line.substring(5), h3FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
-            yPosition += h3FontSize * 0.5;
+            yPosition += lineHeight * 0.5; // Add space above H4
+            checkPageBreak(h4FontSize * 2);
+            addText(line.substring(5), h4FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+            yPosition += lineHeight; // Space after H4
           } else if (line.startsWith('### ')) {
+            yPosition += lineHeight * 0.5; // Add space above H3
             checkPageBreak(h3FontSize * 2);
             addText(line.substring(4), h3FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
-            yPosition += h3FontSize * 0.5;
+            yPosition += lineHeight; // Space after H3
           } else if (line.startsWith('## ')) {
+            yPosition += lineHeight * 0.5; // Add space above H2
             checkPageBreak(h2FontSize * 2);
             addText(line.substring(3), h2FontSize, { bold: true });
-            yPosition += h2FontSize * 0.5;
+            yPosition += lineHeight; // Space after H2
           } else if (line.startsWith('# ')) {
-            checkPageBreak(h1FontSize * 2, true); // Force new page for h1
+            yPosition += lineHeight * 0.5; // Add space above H1
+            checkPageBreak(h1FontSize * 2, true); // Force new page for H1
             addText(line.substring(2), h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
-            yPosition += h1FontSize;
+            yPosition += h1FontSize; // Space after H1
           }
+
           // Lists
           else if (line.match(/^[-*+]\s+/)) {
             checkPageBreak(normalFontSize * 2);
             const bullet = '• ';
             const listText = line.replace(/^[-*+]\s+/, '');
             pdf.setFontSize(normalFontSize);
-            pdf.text(bullet, margin, yPosition);
+            const bulletIndent = 36; // 0.5 inch indent for bullets
+            pdf.text(bullet, margin + bulletIndent, yPosition);
             const bulletWidth = pdf.getTextWidth(bullet);
-            addText(listText, normalFontSize, { indent: bulletWidth + 10 });
+            addText(listText, normalFontSize, { indent: bulletIndent + bulletWidth + 6, justify: true });
           }
           // Numbered lists
           else if (line.match(/^\d+\.\s+/)) {
@@ -317,35 +368,85 @@ const BookPreviewPage: React.FC = () => {
               const number = match[1] + ' ';
               const listText = match[2];
               pdf.setFontSize(normalFontSize);
-              pdf.text(number, margin, yPosition);
+              const numberIndent = 36; // 0.5 inch indent for numbers
+              pdf.text(number, margin + numberIndent, yPosition);
               const numberWidth = pdf.getTextWidth(number);
-              addText(listText, normalFontSize, { indent: numberWidth + 10 });
+              addText(listText, normalFontSize, { indent: numberIndent + numberWidth + 6, justify: true });
             }
           }
-          // Key points (special handling)
+          // Key points (skip during normal content processing - they'll be handled at chapter end)
+          // Key Points Section
+          
           else if (line.includes('+$$$+')) {
-            // For key points, we'll need to render as HTML
-            const keyPointsMatch = normalizedContent.match(/\+\$\$\$\+([\s\S]+?)\+\$\$\$\+/);
-            if (keyPointsMatch) {
-              const keyPointsHtml = `
-                <div style="border-radius:0.75rem;border:1px solid rgba(120,113,108,.70);background:rgba(120,113,108,.15);padding:1rem;font-weight:500;color:#57534E;font-size:0.875rem;">
-                  <h4 style="margin:0 0 0.5rem 0;font-size:1rem;color:#57534E;">Key Points</h4>
-                  ${keyPointsMatch[1].split('\n').filter(p => p.trim()).map(point =>
-                    `<p style="margin:0.5rem 0;">• ${point.trim()}</p>`
-                  ).join('')}
-                </div>
-              `;
-              
-              await renderComplexElement(keyPointsHtml);
-              
-              // Force page break after key points
-              addNewPage();
-              
-              // Skip the lines that were part of key points
-              while (i < lines.length && !lines[i].includes('+$$$+')) i++;
-              i++; // Skip closing marker
+            let keyPointsContent = '';
+            i++;
+          
+            while (i < lines.length && !lines[i].includes('+$$$+')) {
+              keyPointsContent += lines[i] + '\n';
+              i++;
             }
+          
+            const keyLines = keyPointsContent.trim().split('\n');
+          
+            const boxX = margin;
+            const boxY = yPosition;
+            const boxWidth = pageWidth - margin * 2;
+            const boxPadding = 10;
+          
+            yPosition += boxPadding;
+          
+            const contentStartY = yPosition;
+          
+            for (const rawLine of keyLines) {
+              const line = rawLine.trim();
+              if (!line) {
+                yPosition += normalFontSize * 0.5;
+                continue;
+              }
+          
+              if (line.startsWith('#### ')) {
+                const header = line.substring(5);
+                pdf.setFont('georgia', 'bold');
+                pdf.setTextColor(174, 86, 48);
+                pdf.setFontSize(h4FontSize);
+                pdf.text(header, margin + 10, yPosition);
+                yPosition += h4FontSize * 1.1;
+              } else if (line.match(/^[-*+]\s+/)) {
+                const bullet = '• ';
+                const listText = line.replace(/^[-*+]\s+/, '');
+                const bulletIndent = 18;
+                const bulletX = margin + bulletIndent;
+                pdf.setFont('georgia', 'normal');
+                pdf.setFontSize(normalFontSize);
+                pdf.setTextColor(60, 60, 60);
+                pdf.text(bullet, bulletX, yPosition);
+                const bulletWidth = pdf.getTextWidth(bullet);
+                pdf.setFont('georgia', 'normal'); // set before
+                addText(listText, normalFontSize, {
+                  indent: bulletIndent + bulletWidth + 4,
+                  justify: true,
+                  font: 'georgia',
+                });
+                yPosition += normalFontSize * 1.3;
+              } else {
+                addParagraph(line);
+              }
+            }
+          
+            const contentEndY = yPosition;
+            const boxHeight = (contentEndY - contentStartY) + boxPadding * 2;
+          
+            // Draw the box AFTER content is rendered
+            pdf.setDrawColor(120, 113, 108);
+            pdf.setFillColor(245, 245, 245);
+            pdf.roundedRect(boxX, boxY, boxWidth, boxHeight, 8, 8, 'FD');
+          
+            yPosition = contentEndY + boxPadding;
           }
+          
+          
+          
+
           // Tables (render as HTML)
           else if (line.includes('|') && i + 1 < lines.length && lines[i + 1].includes('|') && lines[i + 1].includes('-')) {
             let tableHtml = '<table style="width:100%;border-collapse:collapse;border:1px solid #ccc;">';
@@ -386,7 +487,7 @@ const BookPreviewPage: React.FC = () => {
             pdf.setDrawColor(174, 86, 48);
             pdf.setLineWidth(2);
             pdf.line(margin - 10, yPosition - normalFontSize, margin - 10, yPosition + normalFontSize);
-            addText(quoteText, normalFontSize, { italic: true, indent: 20 });
+            addText(quoteText, normalFontSize, { italic: true, indent: 20, justify: true });
             yPosition += normalFontSize * 0.5;
           }
           // Regular paragraphs
@@ -395,6 +496,9 @@ const BookPreviewPage: React.FC = () => {
           }
         }
       };
+
+
+      
 
       // Start PDF generation
       setPdfProgress(10);
@@ -485,14 +589,49 @@ const BookPreviewPage: React.FC = () => {
 
       setPdfProgress(30);
 
+      // Prepare chapters data early
+      const allChapters = book.chapters || [];
+      const sortedChapters = [...allChapters].sort((a, b) => a.number - b.number);
+
       // Content sections with chunking
-      const totalSections = tocItems.filter(item => item.isSection).length;
+      // Count all sections that will trigger updateProgress
+      let totalSections = 0;
+      
+      // Count top-level sections
+      if (book.structure?.acknowledgement) totalSections++;
+      if (book.structure?.prologue) totalSections++;
+      if (book.structure?.introduction) totalSections++;
+      if (book.structure?.conclusion) totalSections++;
+      if (book.structure?.appendix) totalSections++;
+      if (book.structure?.references) totalSections++;
+      
+      // Count parts and chapters
+      if (book.structure?.parts && book.structure.parts.length > 0) {
+        book.structure.parts.forEach(part => {
+          totalSections++; // Part title
+          part.chapters.forEach(chapStruct => {
+            const chapter = sortedChapters.find(c =>
+              (c.number === chapStruct.number && c.title === chapStruct.title) ||
+              c.title === chapStruct.title ||
+              c.number === chapStruct.number
+            );
+            if (chapter?.content) totalSections++; // Chapter
+          });
+        });
+      } else {
+        // Count standalone chapters
+        sortedChapters.forEach(chapter => {
+          if (chapter.content) totalSections++;
+        });
+      }
+      
       let processedSections = 0;
 
       // Helper to update progress
       const updateProgress = () => {
         processedSections++;
-        const progress = 30 + Math.round((processedSections / totalSections) * 60);
+        // Ensure progress stays within bounds (30-90%)
+        const progress = Math.min(90, 30 + Math.round((processedSections / totalSections) * 60));
         setPdfProgress(progress);
       };
 
@@ -521,17 +660,14 @@ const BookPreviewPage: React.FC = () => {
         updateProgress();
       }
 
-      // Chapters
-      const allChapters = book.chapters || [];
-      const sortedChapters = [...allChapters].sort((a, b) => a.number - b.number);
-
+      // Chapters (already defined above)
       if (book.structure?.parts && book.structure.parts.length > 0) {
         for (const part of book.structure.parts) {
           // Part title page
           addNewPage();
           yPosition = pageHeight / 2 - 50;
           pdf.setFontSize(24);
-          pdf.setFont('georgia', 'bold');
+          pdf.setFont('times', 'bold');
           pdf.setTextColor(174, 86, 48);
           const partTitle = `Part ${part.partNumber}: ${part.partTitle}`;
           const textWidth = pdf.getTextWidth(partTitle);
@@ -557,6 +693,27 @@ const BookPreviewPage: React.FC = () => {
               }
 
               await processMarkdownContent(chapter.content);
+              
+              // Extract and render key points at end of chapter
+              const keyPointsMatch = chapter.content.match(/\+\$\$\$\+([\s\S]+?)\+\$\$\$\+/);
+              if (keyPointsMatch) {
+                yPosition += normalFontSize * 2; // Add space before key points
+                
+                const keyPointsHtml = `
+                  <div style="border-radius:0.75rem;border:1px solid rgba(120,113,108,.70);background:rgba(120,113,108,.15);padding:1rem;font-weight:500;color:#57534E;font-size:0.875rem;">
+                    <h4 style="margin:0 0 0.5rem 0;font-size:1rem;color:#57534E;">Key Points</h4>
+                    ${keyPointsMatch[1].split('\n').filter(p => p.trim()).map(point =>
+                      `<p style="margin:0.5rem 0;">• ${point.trim()}</p>`
+                    ).join('')}
+                  </div>
+                `;
+                
+                await renderComplexElement(keyPointsHtml);
+                
+                // Force page break after key points
+                addNewPage();
+              }
+              
               updateProgress();
             }
           }
@@ -575,6 +732,27 @@ const BookPreviewPage: React.FC = () => {
             }
 
             await processMarkdownContent(chapter.content);
+            
+            // Extract and render key points at end of chapter
+            const keyPointsMatch = chapter.content.match(/\+\$\$\$\+([\s\S]+?)\+\$\$\$\+/);
+            if (keyPointsMatch) {
+              yPosition += normalFontSize * 2; // Add space before key points
+              
+              const keyPointsHtml = `
+                <div style="border-radius:0.75rem;border:1px solid rgba(120,113,108,.70);background:rgba(120,113,108,.15);padding:1rem;font-weight:500;color:#57534E;font-size:0.875rem;">
+                  <h4 style="margin:0 0 0.5rem 0;font-size:1rem;color:#57534E;">Key Points</h4>
+                  ${keyPointsMatch[1].split('\n').filter(p => p.trim()).map(point =>
+                    `<p style="margin:0.5rem 0;">• ${point.trim()}</p>`
+                  ).join('')}
+                </div>
+              `;
+              
+              await renderComplexElement(keyPointsHtml);
+              
+              // Force page break after key points
+              addNewPage();
+            }
+            
             updateProgress();
           }
         }
@@ -864,6 +1042,7 @@ const BookPreviewPage: React.FC = () => {
       font-weight:500;
       color:#57534E;
       font-size:0.875rem;
+      font-family: 'Georgia', sans;
       page-break-after: always;
     }
 
