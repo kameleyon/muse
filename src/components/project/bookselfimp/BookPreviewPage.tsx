@@ -162,7 +162,7 @@ const BookPreviewPage: React.FC = () => {
       // Font settings
       const titleFontSize = 24;
       const h1FontSize = 17;
-      const h2FontSize = 15;
+      const h2FontSize = 13;
       const h3FontSize = 13;
       const h4FontSize = 12;
       const normalFontSize = 11;
@@ -235,7 +235,7 @@ const BookPreviewPage: React.FC = () => {
           checkPageBreak(fontSize * lineHeight);
           
           // Apply first line indent only to the first line if requested
-          const xPos = baseXPos + (options.firstLineIndent && index === 0 ? 36 : 0); // 0.5 inch first line indent
+          const xPos = baseXPos + (options.firstLineIndent && index === 0 ? 18 : 0); // 0.5 inch first line indent
           
           if (options.justify && index < lines.length - 1) {
             // Justify text (except last line)
@@ -247,7 +247,7 @@ const BookPreviewPage: React.FC = () => {
                 totalWordWidth += pdf.getTextWidth(word);
               });
               
-              const availableWidth = contentWidth - (options.indent || 0) - (options.firstLineIndent && index === 0 ? 36 : 0);
+              const availableWidth = contentWidth - (options.indent || 0) - (options.firstLineIndent && index === 0 ? 18 : 0);
               const totalSpaceWidth = availableWidth - totalWordWidth;
               const spaceWidth = totalSpaceWidth / (words.length - 1);
               
@@ -274,9 +274,9 @@ const BookPreviewPage: React.FC = () => {
       };
 
       const addParagraph = (text: string) => {
-        yPosition += normalFontSize * 0.5; // Space before paragraph
+        yPosition += lineHeight; // Space before paragraph
         addText(text, normalFontSize, { justify: true, firstLineIndent: true });
-        yPosition += normalFontSize * 0.5; // Space after paragraph
+        yPosition += lineHeight ; // Space after paragraph
       };
 
       const renderComplexElement = async (elementHtml: string, maxWidth: number = contentWidth) => {
@@ -322,31 +322,31 @@ const BookPreviewPage: React.FC = () => {
           const line = lines[i].trim();
           
           if (!line) {
-            yPosition += normalFontSize * 0.5;
+            yPosition += lineHeight;
             continue;
           }
 
           // Headers
           if (line.startsWith('#### ')) {
-            yPosition += lineHeight * 0.5; // Add space above H4
+            yPosition += h1FontSize; // Add space above H4
             checkPageBreak(h4FontSize * 2);
-            addText(line.substring(5), h4FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+            addText(line.substring(5), h4FontSize, { bold: true, color: 'rgb(174, 86, 48)', indent: 18 });
             yPosition += lineHeight; // Space after H4
           } else if (line.startsWith('### ')) {
-            yPosition += lineHeight * 0.5; // Add space above H3
+            yPosition += h1FontSize; // Add space above H3
             checkPageBreak(h3FontSize * 2);
-            addText(line.substring(4), h3FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+            addText(line.substring(4), h3FontSize, { bold: true, color: 'rgb(174, 86, 48)', indent: 18 });
             yPosition += lineHeight; // Space after H3
           } else if (line.startsWith('## ')) {
-            yPosition += lineHeight * 0.5; // Add space above H2
+            yPosition += h1FontSize;  // Add space above H2
             checkPageBreak(h2FontSize * 2);
-            addText(line.substring(3), h2FontSize, { bold: true });
+            addText(line.substring(3), h2FontSize, { bold: true, indent: 18 });
             yPosition += lineHeight; // Space after H2
           } else if (line.startsWith('# ')) {
-            yPosition += lineHeight * 0.5; // Add space above H1
+            yPosition += lineHeight; // Add space above H1
             checkPageBreak(h1FontSize * 2, true); // Force new page for H1
             addText(line.substring(2), h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
-            yPosition += h1FontSize; // Space after H1
+            yPosition += lineHeight * 0.7; // Space after H1
           }
 
           // Lists
@@ -374,74 +374,15 @@ const BookPreviewPage: React.FC = () => {
               addText(listText, normalFontSize, { indent: numberIndent + numberWidth + 6, justify: true });
             }
           }
-          // Key points (skip during normal content processing - they'll be handled at chapter end)
-          // Key Points Section
-          
+          // Skip key points sections completely
           else if (line.includes('+$$$+')) {
-            let keyPointsContent = '';
+            // Skip the opening line
             i++;
-          
+            // Skip all content until closing tag
             while (i < lines.length && !lines[i].includes('+$$$+')) {
-              keyPointsContent += lines[i] + '\n';
               i++;
             }
-          
-            const keyLines = keyPointsContent.trim().split('\n');
-          
-            const boxX = margin;
-            const boxY = yPosition;
-            const boxWidth = pageWidth - margin * 2;
-            const boxPadding = 10;
-          
-            yPosition += boxPadding;
-          
-            const contentStartY = yPosition;
-          
-            for (const rawLine of keyLines) {
-              const line = rawLine.trim();
-              if (!line) {
-                yPosition += normalFontSize * 0.5;
-                continue;
-              }
-          
-              if (line.startsWith('#### ')) {
-                const header = line.substring(5);
-                pdf.setFont('georgia', 'bold');
-                pdf.setTextColor(174, 86, 48);
-                pdf.setFontSize(h4FontSize);
-                pdf.text(header, margin + 10, yPosition);
-                yPosition += h4FontSize * 1.1;
-              } else if (line.match(/^[-*+]\s+/)) {
-                const bullet = '• ';
-                const listText = line.replace(/^[-*+]\s+/, '');
-                const bulletIndent = 18;
-                const bulletX = margin + bulletIndent;
-                pdf.setFont('georgia', 'normal');
-                pdf.setFontSize(normalFontSize);
-                pdf.setTextColor(60, 60, 60);
-                pdf.text(bullet, bulletX, yPosition);
-                const bulletWidth = pdf.getTextWidth(bullet);
-                pdf.setFont('georgia', 'normal'); // set before
-                addText(listText, normalFontSize, {
-                  indent: bulletIndent + bulletWidth + 4,
-                  justify: true,
-                  font: 'georgia',
-                });
-                yPosition += normalFontSize * 1.3;
-              } else {
-                addParagraph(line);
-              }
-            }
-          
-            const contentEndY = yPosition;
-            const boxHeight = (contentEndY - contentStartY) + boxPadding * 2;
-          
-            // Draw the box AFTER content is rendered
-            pdf.setDrawColor(120, 113, 108);
-            pdf.setFillColor(245, 245, 245);
-            pdf.roundedRect(boxX, boxY, boxWidth, boxHeight, 8, 8, 'FD');
-          
-            yPosition = contentEndY + boxPadding;
+            // Skip the closing line (will be incremented at end of loop)
           }
           
           
@@ -519,7 +460,7 @@ const BookPreviewPage: React.FC = () => {
           titleLines.forEach(line => {
             const textWidth = pdf.getTextWidth(line);
             pdf.text(line, (pageWidth - textWidth) / 2, yPosition);
-            yPosition += 36;
+            yPosition += 28;
           });
         }
         
@@ -553,7 +494,7 @@ const BookPreviewPage: React.FC = () => {
       // Table of Contents
       addNewPage();
       addText('Table of Contents', 18, { bold: true, color: 'rgb(174, 86, 48)' });
-      yPosition += 30;
+      yPosition += lineHeight * 0.5; 
 
       const tocItems: { title: string; isSection: boolean }[] = [];
       
@@ -639,7 +580,7 @@ const BookPreviewPage: React.FC = () => {
       if (book.structure?.acknowledgement) {
         addNewPage();
         addText('Acknowledgement', h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
-        yPosition += h1FontSize;
+        yPosition += lineHeight * 0.5; 
         await processMarkdownContent(book.structure.acknowledgement);
         updateProgress();
       }
@@ -647,7 +588,7 @@ const BookPreviewPage: React.FC = () => {
       if (book.structure?.prologue) {
         addNewPage();
         addText('Prologue', h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
-        yPosition += h1FontSize;
+        yPosition += lineHeight * 0.5; 
         await processMarkdownContent(book.structure.prologue);
         updateProgress();
       }
@@ -655,7 +596,7 @@ const BookPreviewPage: React.FC = () => {
       if (book.structure?.introduction) {
         addNewPage();
         addText('Introduction', h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
-        yPosition += h1FontSize;
+        yPosition += lineHeight * 0.5; 
         await processMarkdownContent(book.structure.introduction);
         updateProgress();
       }
@@ -684,35 +625,16 @@ const BookPreviewPage: React.FC = () => {
 
             if (chapter?.content) {
               addNewPage();
+              yPosition += lineHeight * 0.5; 
               addText(`Chapter ${chapStruct.number}: ${chapStruct.title}`, h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
               yPosition += h1FontSize;
 
               if (chapStruct.description) {
                 addText(chapStruct.description, normalFontSize, { italic: true });
-                yPosition += normalFontSize;
+                yPosition += h1FontSize; 
               }
 
               await processMarkdownContent(chapter.content);
-              
-              // Extract and render key points at end of chapter
-              const keyPointsMatch = chapter.content.match(/\+\$\$\$\+([\s\S]+?)\+\$\$\$\+/);
-              if (keyPointsMatch) {
-                yPosition += normalFontSize * 2; // Add space before key points
-                
-                const keyPointsHtml = `
-                  <div style="border-radius:0.75rem;border:1px solid rgba(120,113,108,.70);background:rgba(120,113,108,.15);padding:1rem;font-weight:500;color:#57534E;font-size:0.875rem;">
-                    <h4 style="margin:0 0 0.5rem 0;font-size:1rem;color:#57534E;">Key Points</h4>
-                    ${keyPointsMatch[1].split('\n').filter(p => p.trim()).map(point =>
-                      `<p style="margin:0.5rem 0;">• ${point.trim()}</p>`
-                    ).join('')}
-                  </div>
-                `;
-                
-                await renderComplexElement(keyPointsHtml);
-                
-                // Force page break after key points
-                addNewPage();
-              }
               
               updateProgress();
             }
@@ -723,6 +645,7 @@ const BookPreviewPage: React.FC = () => {
         for (const chapter of sortedChapters) {
           if (chapter.content) {
             addNewPage();
+            yPosition += lineHeight * 0.5; 
             addText(`Chapter ${chapter.number}: ${chapter.title}`, h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
             yPosition += h1FontSize;
 
@@ -732,26 +655,6 @@ const BookPreviewPage: React.FC = () => {
             }
 
             await processMarkdownContent(chapter.content);
-            
-            // Extract and render key points at end of chapter
-            const keyPointsMatch = chapter.content.match(/\+\$\$\$\+([\s\S]+?)\+\$\$\$\+/);
-            if (keyPointsMatch) {
-              yPosition += normalFontSize * 2; // Add space before key points
-              
-              const keyPointsHtml = `
-                <div style="border-radius:0.75rem;border:1px solid rgba(120,113,108,.70);background:rgba(120,113,108,.15);padding:1rem;font-weight:500;color:#57534E;font-size:0.875rem;">
-                  <h4 style="margin:0 0 0.5rem 0;font-size:1rem;color:#57534E;">Key Points</h4>
-                  ${keyPointsMatch[1].split('\n').filter(p => p.trim()).map(point =>
-                    `<p style="margin:0.5rem 0;">• ${point.trim()}</p>`
-                  ).join('')}
-                </div>
-              `;
-              
-              await renderComplexElement(keyPointsHtml);
-              
-              // Force page break after key points
-              addNewPage();
-            }
             
             updateProgress();
           }
@@ -1500,8 +1403,8 @@ const BookPreviewPage: React.FC = () => {
     html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
     html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
     
-    // Key Points - Using exact same syntax and styling as MarkdownEditor
-    html = html.replace(/\+\$\$\$\+([\s\S]+?)\+\$\$\$\+/gs, '<div class="key-points">$1</div>');
+    // Remove key points sections completely
+    html = html.replace(/\+\$\$\$\+([\s\S]+?)\+\$\$\$\+/gs, '');
     
     // Bold - PDF styling
     html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
