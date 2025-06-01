@@ -5,8 +5,8 @@ import { cn } from '../../../lib/utils';
 import { bookService } from '../../../lib/books';
 import type { Book, Chapter, BookStructure } from '../../../types/books';
 import MarkdownEditor from '../../MarkdownEditor';
-import html2pdf from 'html2pdf.js';
-import { PDFDocument } from 'pdf-lib';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const BookPreviewPage: React.FC = () => {
   const { bookId } = useParams<{ bookId: string }>();
@@ -124,7 +124,7 @@ const BookPreviewPage: React.FC = () => {
   };
 
   const downloadPdfFile = async () => {
-    console.log('=== CHUNKED PDF GENERATION START ===');
+    console.log('=== HYBRID PDF GENERATION START ===');
     
     if (!book) {
       console.error('No book object available');
@@ -135,123 +135,482 @@ const BookPreviewPage: React.FC = () => {
     setPdfProgress(0);
     setError('');
 
-    // Create an off-screen container for PDF generation
-    const offscreenContainer = document.createElement('div');
-    offscreenContainer.style.position = 'fixed';
-    offscreenContainer.style.left = '-9999px';
-    offscreenContainer.style.top = '-9999px';
-    offscreenContainer.style.width = '8.5in'; // Letter size width
-    offscreenContainer.style.height = '11in'; // Letter size height
-    offscreenContainer.style.overflow = 'hidden';
-    offscreenContainer.style.visibility = 'hidden';
-    document.body.appendChild(offscreenContainer);
-
     try {
-      // Generate the complete HTML content
-      const fullHtmlContent = generateBookHTML();
-      console.log('Total HTML length:', fullHtmlContent.length);
-      
-      // Extract body content for chunking
-      const bodyStart = fullHtmlContent.indexOf('<body>') + 6;
-      const bodyEnd = fullHtmlContent.indexOf('</body>');
-      const bodyContent = fullHtmlContent.substring(bodyStart, bodyEnd);
-      const htmlHead = fullHtmlContent.substring(0, bodyStart);
-      const htmlFoot = fullHtmlContent.substring(bodyEnd);
-      
-      // Split content into chunks (50k characters each)
-      const CHUNK_SIZE = 50000;
-      const chunks: string[] = [];
-      let currentChunk = '';
-      
-      // Split by major sections to avoid breaking in the middle of content
-      const sections = bodyContent.split(/<h1[^>]*>/);
-      
-      for (let i = 0; i < sections.length; i++) {
-        const section = i === 0 ? sections[i] : '<h1>' + sections[i];
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'pt',
+        format: 'letter'
+      });
+
+      // PDF dimensions
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 72; // 1 inch = 72 points
+      const contentWidth = pageWidth - (margin * 2);
+      let yPosition = margin;
+
+      // Font settings
+      const titleFontSize = 24;
+      const h1FontSize = 17;
+      const h2FontSize = 15;
+      const h3FontSize = 13;
+      const normalFontSize = 11;
+      const lineHeight = 1.5;
+
+      // Helper functions
+      const addNewPage = () => {
+        pdf.addPage();
+        yPosition = margin;
+      };
+
+      const checkPageBreak = (requiredSpace: number, forceNewPage: boolean = false) => {
+        if (forceNewPage || yPosition + requiredSpace > pageHeight - margin) {
+          addNewPage();
+        }
+      };
+
+      const wrapText = (text: string, maxWidth: number): string[] => {
+        const words = text.split(' ');
+        const lines: string[] = [];
+        let currentLine = '';
+
+        words.forEach(word => {
+          const testLine = currentLine ? `${currentLine} ${word}` : word;
+          const testWidth = pdf.getTextWidth(testLine);
+          
+          if (testWidth > maxWidth && currentLine) {
+            lines.push(currentLine);
+            currentLine = word;
+          } else {
+            currentLine = testLine;
+          }
+        });
         
-        if (currentChunk.length + section.length > CHUNK_SIZE && currentChunk.length > 0) {
-          chunks.push(currentChunk);
-          currentChunk = section;
+        if (currentLine) {
+          lines.push(currentLine);
+        }
+        
+        return lines;
+      };
+
+      const addText = (text: string, fontSize: number, options: { bold?: boolean; italic?: boolean; color?: string; indent?: number } = {}) => {
+        pdf.setFontSize(fontSize);
+        
+        if (options.bold && options.italic) {
+          pdf.setFont('georgia', 'bolditalic');
+        } else if (options.bold) {
+          pdf.setFont('georgia', 'bold');
+        } else if (options.italic) {
+          pdf.setFont('georgia', 'italic');
         } else {
-          currentChunk += section;
+          pdf.setFont('georgia', 'normal');
+        }
+
+        if (options.color) {
+          const rgb = options.color.match(/\d+/g);
+          if (rgb) {
+            pdf.setTextColor(parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]));
+          }
+        } else {
+          pdf.setTextColor(51, 51, 51); // #333
+        }
+
+        const xPos = margin + (options.indent || 0);
+        const lines = wrapText(text, contentWidth - (options.indent || 0));
+        
+        lines.forEach(line => {
+          checkPageBreak(fontSize * lineHeight);
+          pdf.text(line, xPos, yPosition);
+          yPosition += fontSize * lineHeight;
+        });
+
+        // Reset color
+        pdf.setTextColor(51, 51, 51);
+      };
+
+      const addParagraph = (text: string, indent: number = 50) => {
+        yPosition += normalFontSize * 0.5; // Space before paragraph
+        addText(text, normalFontSize, { indent });
+        yPosition += normalFontSize * 0.5; // Space after paragraph
+      };
+
+      const renderComplexElement = async (elementHtml: string, maxWidth: number = contentWidth) => {
+        checkPageBreak(100); // Ensure space for element
+        
+        // Create temporary container attached to DOM
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'fixed';
+        tempContainer.style.left = '-9999px';
+        tempContainer.style.top = '-9999px';
+        tempContainer.style.width = `${maxWidth}px`;
+        tempContainer.innerHTML = elementHtml;
+        document.body.appendChild(tempContainer);
+        
+        try {
+          const canvas = await html2canvas(tempContainer.firstElementChild as HTMLElement, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: null
+          });
+
+          const imgData = canvas.toDataURL('image/png');
+          const imgHeight = (canvas.height * maxWidth) / canvas.width;
+          
+          checkPageBreak(imgHeight);
+          pdf.addImage(imgData, 'PNG', margin, yPosition, maxWidth, imgHeight);
+          yPosition += imgHeight + 10;
+        } finally {
+          // Clean up
+          document.body.removeChild(tempContainer);
+        }
+      };
+
+      // Process book content
+      const processMarkdownContent = async (markdown: string) => {
+        if (!markdown) return;
+
+        const normalizedContent = normalizePastedContent(markdown);
+        const lines = normalizedContent.split('\n');
+        
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          
+          if (!line) {
+            yPosition += normalFontSize * 0.5;
+            continue;
+          }
+
+          // Headers
+          if (line.startsWith('#### ')) {
+            checkPageBreak(h3FontSize * 2);
+            addText(line.substring(5), h3FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+            yPosition += h3FontSize * 0.5;
+          } else if (line.startsWith('### ')) {
+            checkPageBreak(h3FontSize * 2);
+            addText(line.substring(4), h3FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+            yPosition += h3FontSize * 0.5;
+          } else if (line.startsWith('## ')) {
+            checkPageBreak(h2FontSize * 2);
+            addText(line.substring(3), h2FontSize, { bold: true });
+            yPosition += h2FontSize * 0.5;
+          } else if (line.startsWith('# ')) {
+            checkPageBreak(h1FontSize * 2, true); // Force new page for h1
+            addText(line.substring(2), h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+            yPosition += h1FontSize;
+          }
+          // Lists
+          else if (line.match(/^[-*+]\s+/)) {
+            checkPageBreak(normalFontSize * 2);
+            const bullet = '• ';
+            const listText = line.replace(/^[-*+]\s+/, '');
+            pdf.setFontSize(normalFontSize);
+            pdf.text(bullet, margin, yPosition);
+            const bulletWidth = pdf.getTextWidth(bullet);
+            addText(listText, normalFontSize, { indent: bulletWidth + 10 });
+          }
+          // Numbered lists
+          else if (line.match(/^\d+\.\s+/)) {
+            checkPageBreak(normalFontSize * 2);
+            const match = line.match(/^(\d+\.)\s+(.*)$/);
+            if (match) {
+              const number = match[1] + ' ';
+              const listText = match[2];
+              pdf.setFontSize(normalFontSize);
+              pdf.text(number, margin, yPosition);
+              const numberWidth = pdf.getTextWidth(number);
+              addText(listText, normalFontSize, { indent: numberWidth + 10 });
+            }
+          }
+          // Key points (special handling)
+          else if (line.includes('+$$$+')) {
+            // For key points, we'll need to render as HTML
+            const keyPointsMatch = normalizedContent.match(/\+\$\$\$\+([\s\S]+?)\+\$\$\$\+/);
+            if (keyPointsMatch) {
+              const keyPointsHtml = `
+                <div style="border-radius:0.75rem;border:1px solid rgba(120,113,108,.70);background:rgba(120,113,108,.15);padding:1rem;font-weight:500;color:#57534E;font-size:0.875rem;">
+                  <h4 style="margin:0 0 0.5rem 0;font-size:1rem;color:#57534E;">Key Points</h4>
+                  ${keyPointsMatch[1].split('\n').filter(p => p.trim()).map(point =>
+                    `<p style="margin:0.5rem 0;">• ${point.trim()}</p>`
+                  ).join('')}
+                </div>
+              `;
+              
+              await renderComplexElement(keyPointsHtml);
+              
+              // Force page break after key points
+              addNewPage();
+              
+              // Skip the lines that were part of key points
+              while (i < lines.length && !lines[i].includes('+$$$+')) i++;
+              i++; // Skip closing marker
+            }
+          }
+          // Tables (render as HTML)
+          else if (line.includes('|') && i + 1 < lines.length && lines[i + 1].includes('|') && lines[i + 1].includes('-')) {
+            let tableHtml = '<table style="width:100%;border-collapse:collapse;border:1px solid #ccc;">';
+            
+            // Header
+            const headers = line.split('|').filter(h => h.trim());
+            tableHtml += '<tr>';
+            headers.forEach(header => {
+              tableHtml += `<th style="border:1px solid #ccc;padding:8px;background:#f0f0f0;">${header.trim()}</th>`;
+            });
+            tableHtml += '</tr>';
+            
+            // Skip separator line
+            i += 2;
+            
+            // Body rows
+            while (i < lines.length && lines[i].includes('|')) {
+              const cells = lines[i].split('|').filter(c => c.trim());
+              tableHtml += '<tr>';
+              cells.forEach(cell => {
+                tableHtml += `<td style="border:1px solid #ccc;padding:8px;">${cell.trim()}</td>`;
+              });
+              tableHtml += '</tr>';
+              i++;
+            }
+            
+            tableHtml += '</table>';
+            
+            const tableContainer = `<div>${tableHtml}</div>`;
+            await renderComplexElement(tableContainer);
+            i--; // Adjust counter
+          }
+          // Blockquotes
+          else if (line.startsWith('> ')) {
+            checkPageBreak(normalFontSize * 3);
+            const quoteText = line.substring(2);
+            yPosition += normalFontSize * 0.5;
+            pdf.setDrawColor(174, 86, 48);
+            pdf.setLineWidth(2);
+            pdf.line(margin - 10, yPosition - normalFontSize, margin - 10, yPosition + normalFontSize);
+            addText(quoteText, normalFontSize, { italic: true, indent: 20 });
+            yPosition += normalFontSize * 0.5;
+          }
+          // Regular paragraphs
+          else {
+            addParagraph(line);
+          }
+        }
+      };
+
+      // Start PDF generation
+      setPdfProgress(10);
+
+      // Cover Page
+      if (book.structure?.coverPageDetails) {
+        checkPageBreak(pageHeight, true);
+        
+        // Center vertically
+        yPosition = pageHeight / 3;
+        
+        // Title
+        if (book.structure.coverPageDetails.title) {
+          pdf.setFontSize(30);
+          pdf.setFont('georgia', 'bold');
+          pdf.setTextColor(174, 86, 48);
+          const titleLines = wrapText(book.structure.coverPageDetails.title, contentWidth);
+          titleLines.forEach(line => {
+            const textWidth = pdf.getTextWidth(line);
+            pdf.text(line, (pageWidth - textWidth) / 2, yPosition);
+            yPosition += 36;
+          });
+        }
+        
+        // Subtitle
+        if (book.structure.coverPageDetails.subtitle) {
+          yPosition += 20;
+          pdf.setFontSize(18);
+          pdf.setFont('georgia', 'normal');
+          pdf.setTextColor(102, 102, 102);
+          const subtitleLines = wrapText(book.structure.coverPageDetails.subtitle, contentWidth);
+          subtitleLines.forEach(line => {
+            const textWidth = pdf.getTextWidth(line);
+            pdf.text(line, (pageWidth - textWidth) / 2, yPosition);
+            yPosition += 22;
+          });
+        }
+        
+        // Author
+        if (book.structure.coverPageDetails.authorName) {
+          yPosition += 40;
+          pdf.setFontSize(14);
+          pdf.setTextColor(174, 86, 48);
+          const authorText = `By ${book.structure.coverPageDetails.authorName}`;
+          const textWidth = pdf.getTextWidth(authorText);
+          pdf.text(authorText, (pageWidth - textWidth) / 2, yPosition);
         }
       }
+
+      setPdfProgress(20);
+
+      // Table of Contents
+      addNewPage();
+      addText('Table of Contents', 18, { bold: true, color: 'rgb(174, 86, 48)' });
+      yPosition += 30;
+
+      const tocItems: { title: string; isSection: boolean }[] = [];
       
-      if (currentChunk.length > 0) {
-        chunks.push(currentChunk);
+      if (book.structure?.acknowledgement) tocItems.push({ title: 'Acknowledgement', isSection: true });
+      if (book.structure?.prologue) tocItems.push({ title: 'Prologue', isSection: true });
+      if (book.structure?.introduction) tocItems.push({ title: 'Introduction', isSection: true });
+
+      if (book.structure?.parts && book.structure.parts.length > 0) {
+        book.structure.parts.forEach(part => {
+          tocItems.push({ title: `Part ${part.partNumber}: ${part.partTitle}`, isSection: true });
+          part.chapters.forEach(chapStruct => {
+            tocItems.push({ title: `Chapter ${chapStruct.number}: ${chapStruct.title}`, isSection: false });
+          });
+        });
+      } else if (book.chapters) {
+        book.chapters.sort((a, b) => a.number - b.number).forEach(chapter => {
+          tocItems.push({ title: `Chapter ${chapter.number}: ${chapter.title}`, isSection: true });
+        });
       }
-      
-      console.log(`Split into ${chunks.length} chunks`);
-      
-      // Generate PDF for each chunk
-      const pdfBytes: Uint8Array[] = [];
-      
-      for (let i = 0; i < chunks.length; i++) {
-        const progress = Math.round(((i + 1) / chunks.length) * 90); // 90% for generation
+
+      if (book.structure?.conclusion) tocItems.push({ title: 'Conclusion', isSection: true });
+      if (book.structure?.appendix) tocItems.push({ title: 'Appendix', isSection: true });
+      if (book.structure?.references) tocItems.push({ title: 'References', isSection: true });
+
+      tocItems.forEach(item => {
+        checkPageBreak(normalFontSize * 2);
+        if (item.isSection) {
+          addText(item.title, normalFontSize, { bold: true });
+        } else {
+          addText(item.title, normalFontSize, { indent: 20 });
+        }
+      });
+
+      setPdfProgress(30);
+
+      // Content sections with chunking
+      const totalSections = tocItems.filter(item => item.isSection).length;
+      let processedSections = 0;
+
+      // Helper to update progress
+      const updateProgress = () => {
+        processedSections++;
+        const progress = 30 + Math.round((processedSections / totalSections) * 60);
         setPdfProgress(progress);
-        
-        console.log(`Processing chunk ${i + 1}/${chunks.length} (${progress}%)`);
-        
-        // Create complete HTML for this chunk
-        const chunkHtml = htmlHead + chunks[i] + htmlFoot;
-        
-        // Create element for this chunk inside the off-screen container
-        const element = document.createElement('div');
-        element.innerHTML = chunkHtml;
-        element.style.width = '100%';
-        element.style.height = 'auto';
-        
-        // Clear and use the off-screen container
-        offscreenContainer.innerHTML = '';
-        offscreenContainer.appendChild(element);
-        
-        // Generate PDF for this chunk
-        const options = {
-          margin: [1, 1, 1, 1],
-          filename: `temp_chunk_${i}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { 
-            scale: 1,
-            useCORS: true,
-            logging: false, // Reduce console noise
-            windowWidth: 816, // 8.5in * 96dpi
-            windowHeight: 1056 // 11in * 96dpi
-          },
-          jsPDF: { 
-            unit: 'in', 
-            format: 'letter', 
-            orientation: 'portrait'
+      };
+
+      // Process sections
+      if (book.structure?.acknowledgement) {
+        addNewPage();
+        addText('Acknowledgement', h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+        yPosition += h1FontSize;
+        await processMarkdownContent(book.structure.acknowledgement);
+        updateProgress();
+      }
+
+      if (book.structure?.prologue) {
+        addNewPage();
+        addText('Prologue', h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+        yPosition += h1FontSize;
+        await processMarkdownContent(book.structure.prologue);
+        updateProgress();
+      }
+
+      if (book.structure?.introduction) {
+        addNewPage();
+        addText('Introduction', h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+        yPosition += h1FontSize;
+        await processMarkdownContent(book.structure.introduction);
+        updateProgress();
+      }
+
+      // Chapters
+      const allChapters = book.chapters || [];
+      const sortedChapters = [...allChapters].sort((a, b) => a.number - b.number);
+
+      if (book.structure?.parts && book.structure.parts.length > 0) {
+        for (const part of book.structure.parts) {
+          // Part title page
+          addNewPage();
+          yPosition = pageHeight / 2 - 50;
+          pdf.setFontSize(24);
+          pdf.setFont('georgia', 'bold');
+          pdf.setTextColor(174, 86, 48);
+          const partTitle = `Part ${part.partNumber}: ${part.partTitle}`;
+          const textWidth = pdf.getTextWidth(partTitle);
+          pdf.text(partTitle, (pageWidth - textWidth) / 2, yPosition);
+          updateProgress();
+
+          // Chapters in part
+          for (const chapStruct of part.chapters) {
+            const chapter = sortedChapters.find(c =>
+              (c.number === chapStruct.number && c.title === chapStruct.title) ||
+              c.title === chapStruct.title ||
+              c.number === chapStruct.number
+            );
+
+            if (chapter?.content) {
+              addNewPage();
+              addText(`Chapter ${chapStruct.number}: ${chapStruct.title}`, h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+              yPosition += h1FontSize;
+
+              if (chapStruct.description) {
+                addText(chapStruct.description, normalFontSize, { italic: true });
+                yPosition += normalFontSize;
+              }
+
+              await processMarkdownContent(chapter.content);
+              updateProgress();
+            }
           }
-        };
-        
-        // Generate PDF and get the blob
-        const pdfBlob = await html2pdf().set(options).from(element).outputPdf('blob');
-        const arrayBuffer = await pdfBlob.arrayBuffer();
-        pdfBytes.push(new Uint8Array(arrayBuffer));
-        
-        // Small delay to prevent UI freezing
-        await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      } else {
+        // No parts structure
+        for (const chapter of sortedChapters) {
+          if (chapter.content) {
+            addNewPage();
+            addText(`Chapter ${chapter.number}: ${chapter.title}`, h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+            yPosition += h1FontSize;
+
+            if (chapter.metadata?.description) {
+              addText(chapter.metadata.description, normalFontSize, { italic: true });
+              yPosition += normalFontSize;
+            }
+
+            await processMarkdownContent(chapter.content);
+            updateProgress();
+          }
+        }
       }
-      
-      console.log('Merging PDFs...');
+
+      if (book.structure?.conclusion) {
+        addNewPage();
+        addText('Conclusion', h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+        yPosition += h1FontSize;
+        await processMarkdownContent(book.structure.conclusion);
+        updateProgress();
+      }
+
+      if (book.structure?.appendix) {
+        addNewPage();
+        addText('Appendix', h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+        yPosition += h1FontSize;
+        await processMarkdownContent(book.structure.appendix);
+        updateProgress();
+      }
+
+      if (book.structure?.references) {
+        addNewPage();
+        addText('References', h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+        yPosition += h1FontSize;
+        await processMarkdownContent(book.structure.references);
+        updateProgress();
+      }
+
       setPdfProgress(95);
+
+      // Save PDF
+      const pdfBlob = pdf.output('blob');
+      const url = URL.createObjectURL(pdfBlob);
       
-      // Merge all PDFs
-      const mergedPdf = await PDFDocument.create();
-      
-      for (const pdfByte of pdfBytes) {
-        const pdf = await PDFDocument.load(pdfByte);
-        const pageIndices = Array.from({ length: pdf.getPageCount() }, (_, i) => i);
-        const pages = await mergedPdf.copyPages(pdf, pageIndices);
-        pages.forEach(page => mergedPdf.addPage(page));
-      }
-      
-      // Save the merged PDF
-      const mergedPdfBytes = await mergedPdf.save();
-      const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      
-      // Download the file
+      // Download
       const a = document.createElement('a');
       a.href = url;
       a.download = `${book.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'book'}.pdf`;
@@ -270,12 +629,8 @@ const BookPreviewPage: React.FC = () => {
       console.error("Error generating PDF:", e);
       setError("Failed to generate PDF. Please try again.");
     } finally {
-      // Clean up the off-screen container
-      if (offscreenContainer && offscreenContainer.parentNode) {
-        document.body.removeChild(offscreenContainer);
-      }
       setPdfLoading(false);
-      console.log('=== CHUNKED PDF GENERATION END ===');
+      console.log('=== HYBRID PDF GENERATION END ===');
     }
   };
 
