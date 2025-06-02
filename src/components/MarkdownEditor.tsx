@@ -21,36 +21,75 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
 }) => {
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit')
 
-  // Table cleaning utility function
+  // Enhanced table cleaning utility function
   const cleanMarkdownTable = (tableText: string): string => {
     const lines = tableText.split('\n').filter(line => line.trim());
     
     if (lines.length < 2) return tableText;
     
-    // Parse header and separator
-    const headerLine = lines[0];
-    const separatorLine = lines[1];
-    const dataLines = lines.slice(2);
+    // Find lines that contain pipe characters (potential table rows)
+    const tableLines = lines.filter(line => line.includes('|'));
     
-    // Extract headers
+    if (tableLines.length < 2) return tableText;
+    
+    // Identify separator lines (contain mostly dashes, pipes, and spaces)
+    const separatorPattern = /^[\s|:-]+$/;
+    const separatorIndices = tableLines.map((line, index) =>
+      separatorPattern.test(line) ? index : -1
+    ).filter(index => index !== -1);
+    
+    // Extract header (first non-separator line)
+    let headerIndex = 0;
+    while (headerIndex < tableLines.length && separatorPattern.test(tableLines[headerIndex])) {
+      headerIndex++;
+    }
+    
+    if (headerIndex >= tableLines.length) return tableText;
+    
+    const headerLine = tableLines[headerIndex];
+    
+    // Extract headers and normalize
     const headers = headerLine.split('|')
       .map(cell => cell.trim())
       .filter(cell => cell.length > 0);
     
-    // Extract data rows
-    const dataRows = dataLines.map(line =>
-      line.split('|')
-        .map(cell => cell.trim())
-        .filter(cell => cell.length > 0)
-    );
+    if (headers.length === 0) return tableText;
+    
+    // Extract data rows (skip separators and header)
+    const dataRows = tableLines
+      .filter((line, index) =>
+        index !== headerIndex &&
+        !separatorPattern.test(line) &&
+        line.trim().length > 0
+      )
+      .map(line => {
+        const cells = line.split('|').map(cell => cell.trim());
+        // Remove empty cells at start/end (common in malformed tables)
+        while (cells.length > 0 && cells[0] === '') cells.shift();
+        while (cells.length > 0 && cells[cells.length - 1] === '') cells.pop();
+        return cells;
+      })
+      .filter(row => row.length > 0);
+    
+    // Normalize column count (use header count as reference)
+    const normalizedDataRows = dataRows.map(row => {
+      const normalizedRow = [...row];
+      // Pad with empty strings if row is shorter than headers
+      while (normalizedRow.length < headers.length) {
+        normalizedRow.push('');
+      }
+      // Trim if row is longer than headers
+      return normalizedRow.slice(0, headers.length);
+    });
     
     // Calculate column widths
     const columnWidths = headers.map((header, index) => {
       const headerWidth = header.length;
       const maxDataWidth = Math.max(
-        ...dataRows.map(row => (row[index] || '').length)
+        ...normalizedDataRows.map(row => (row[index] || '').length),
+        0
       );
-      return Math.max(headerWidth, maxDataWidth, 3); // Minimum width of 3
+      return Math.max(headerWidth, maxDataWidth, 3);
     });
     
     // Format header row
@@ -64,9 +103,9 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     ).join('|') + '|';
     
     // Format data rows
-    const formattedDataRows = dataRows.map(row =>
-      '| ' + headers.map((_, index) =>
-        (row[index] || '').padEnd(columnWidths[index])
+    const formattedDataRows = normalizedDataRows.map(row =>
+      '| ' + row.map((cell, index) =>
+        (cell || '').padEnd(columnWidths[index])
       ).join(' | ') + ' |'
     );
     
@@ -75,11 +114,60 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
 
   // Function to clean all tables in the content
   const cleanTables = () => {
-    const tableRegex = /\|(.+)\|\n\|[-\s|:]+\|\n((?:\|.+\|\n?)*)/g;
-    const cleanedContent = value.replace(tableRegex, (match) => {
-      return cleanMarkdownTable(match);
-    });
-    onChange(cleanedContent);
+    let cleanedContent = value;
+    
+    // More flexible regex to catch various table formats
+    const tablePatterns = [
+      // Standard markdown tables
+      /\|(.+)\|\n\|[-\s|:]+\|\n((?:\|.+\|\n?)*)/g,
+      // Tables without proper separators
+      /^(.+\|.+)$\n^(.+\|.+)$/gm,
+      // Tables with broken pipe structure
+      /(?:^|\n)((?:[^|\n]*\|[^|\n]*)+)(?:\n|$)/g
+    ];
+    
+    // Try to find and clean table-like content
+    const lines = cleanedContent.split('\n');
+    const processedLines: string[] = [];
+    let i = 0;
+    
+    while (i < lines.length) {
+      const line = lines[i];
+      
+      // Check if this looks like the start of a table
+      if (line.includes('|') && line.trim().length > 0) {
+        // Collect consecutive lines that might be part of a table
+        const tableCandidate: string[] = [];
+        let j = i;
+        
+        while (j < lines.length) {
+          const currentLine = lines[j];
+          if (currentLine.includes('|') || (currentLine.trim() === '' && tableCandidate.length > 0)) {
+            tableCandidate.push(currentLine);
+            j++;
+          } else {
+            break;
+          }
+        }
+        
+        // If we found at least 2 lines with pipes, try to clean as table
+        const linesWithPipes = tableCandidate.filter(l => l.includes('|'));
+        if (linesWithPipes.length >= 2) {
+          const tableText = tableCandidate.join('\n');
+          const cleanedTable = cleanMarkdownTable(tableText);
+          processedLines.push(cleanedTable);
+          i = j;
+        } else {
+          processedLines.push(line);
+          i++;
+        }
+      } else {
+        processedLines.push(line);
+        i++;
+      }
+    }
+    
+    onChange(processedLines.join('\n'));
   };
 
   const renderMarkdown = (content: string) => {
