@@ -96,7 +96,43 @@ app.use('/api', adminNotificationsRoutes); // Mount admin notifications routes
 
 // Serve static files from the frontend build
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../../dist')));
+  // Configure proper MIME types for static assets
+  const staticOptions = {
+    setHeaders: (res: any, filePath: string) => {
+      if (filePath.endsWith('.js') || filePath.endsWith('.mjs')) {
+        res.setHeader('Content-Type', 'application/javascript');
+      } else if (filePath.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css');
+      } else if (filePath.endsWith('.json')) {
+        res.setHeader('Content-Type', 'application/json');
+      } else if (filePath.endsWith('.svg')) {
+        res.setHeader('Content-Type', 'image/svg+xml');
+      } else if (filePath.endsWith('.ico')) {
+        res.setHeader('Content-Type', 'image/x-icon');
+      } else if (filePath.endsWith('.png')) {
+        res.setHeader('Content-Type', 'image/png');
+      } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+        res.setHeader('Content-Type', 'image/jpeg');
+      } else if (filePath.endsWith('.webp')) {
+        res.setHeader('Content-Type', 'image/webp');
+      } else if (filePath.endsWith('.woff')) {
+        res.setHeader('Content-Type', 'font/woff');
+      } else if (filePath.endsWith('.woff2')) {
+        res.setHeader('Content-Type', 'font/woff2');
+      } else if (filePath.endsWith('.ttf')) {
+        res.setHeader('Content-Type', 'font/ttf');
+      } else if (filePath.endsWith('.otf')) {
+        res.setHeader('Content-Type', 'font/otf');
+      }
+      
+      // Set caching headers for static assets
+      if (filePath.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|otf)$/)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000'); // 1 year
+      }
+    }
+  };
+  
+  app.use(express.static(path.join(__dirname, '../../dist'), staticOptions));
   
   // Handle React Router routes - send all non-API requests to index.html
   app.get('*', (req, res) => {
