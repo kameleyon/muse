@@ -204,15 +204,15 @@ const BookPreviewPage: React.FC = () => {
         return lines;
       };
 
-      const addText = (text: string, fontSize: number, options: { bold?: boolean; italic?: boolean; color?: string; indent?: number; justify?: boolean; firstLineIndent?: boolean; font?: string } = {}) => {
+      const addText = (text: string, fontSize: number, options: { bold?: boolean; italic?: boolean; semibold?: boolean; color?: string; indent?: number; justify?: boolean; firstLineIndent?: boolean; font?: string } = {}) => {
         pdf.setFontSize(fontSize);
         
         // Use specified font or default to Times
         const fontFamily = options.font || 'times';
         if (options.bold && options.italic) {
           pdf.setFont(fontFamily, 'bolditalic');
-        } else if (options.bold) {
-          pdf.setFont(fontFamily, 'bold');
+        } else if (options.bold || options.semibold) {
+          pdf.setFont(fontFamily, 'bold'); // Use bold for semibold since jsPDF doesn't have semibold
         } else if (options.italic) {
           pdf.setFont(fontFamily, 'italic');
         } else {
@@ -225,7 +225,8 @@ const BookPreviewPage: React.FC = () => {
             pdf.setTextColor(parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]));
           }
         } else {
-          pdf.setTextColor(51, 51, 51); // #333
+          // Default body text color: #232321 with 80% opacity = rgba(35, 35, 33, 0.8)
+          pdf.setTextColor(35, 35, 33); // #232321
         }
 
         const baseXPos = margin + (options.indent || 0);
@@ -269,14 +270,89 @@ const BookPreviewPage: React.FC = () => {
           yPosition += fontSize * lineHeight;
         });
 
-        // Reset color
-        pdf.setTextColor(51, 51, 51);
+        // Reset color to body text color
+        pdf.setTextColor(35, 35, 33);
+      };
+
+      // Function to render text with mixed formatting (regular and semibold)
+      const addFormattedText = (text: string, fontSize: number, options: any = {}) => {
+        const parts = processSemibold(text);
+        
+        if (parts.length === 1 && !parts[0].semibold) {
+          // No formatting needed, use regular addText
+          addText(text, fontSize, options);
+          return;
+        }
+
+        // Handle mixed formatting by creating combined text with word wrapping
+        yPosition += (options.spaceAbove || 0);
+        checkPageBreak(fontSize * 1.5);
+
+        const baseXPos = margin + (options.indent || 0);
+        let currentX = baseXPos;
+        const lineHeightPt = fontSize * 1.5;
+        
+        // Apply first line indent if requested
+        if (options.firstLineIndent) {
+          currentX += 18;
+        }
+
+        // Process each part
+        parts.forEach((part, partIndex) => {
+          if (!part.text) return;
+
+          // Set font for this part based on context and semibold
+          pdf.setFontSize(fontSize);
+          pdf.setTextColor(35, 35, 33); // Body text color
+          
+          // Determine font style based on context and semibold
+          if (options.italic && part.semibold) {
+            pdf.setFont('times', 'bolditalic'); // Both italic context and semibold
+          } else if (part.semibold) {
+            pdf.setFont('times', 'bold'); // Just semibold
+          } else if (options.italic) {
+            pdf.setFont('times', 'italic'); // Just italic context
+          } else {
+            pdf.setFont('times', 'normal'); // Regular text
+          }
+
+          // Split part into words for wrapping
+          const words = part.text.split(' ');
+          
+          words.forEach((word, wordIndex) => {
+            if (wordIndex > 0) word = ' ' + word; // Add space before word (except first)
+            
+            const wordWidth = pdf.getTextWidth(word);
+            const maxWidth = contentWidth - (options.indent || 0);
+            
+            // Check if word fits on current line
+            if (currentX + wordWidth > margin + maxWidth && currentX > baseXPos) {
+              // Need to wrap to next line
+              yPosition += lineHeightPt;
+              checkPageBreak(lineHeightPt);
+              currentX = baseXPos; // Reset to base position (no first line indent on wrapped lines)
+              
+              // Remove leading space if we wrapped
+              if (word.startsWith(' ')) {
+                word = word.substring(1);
+              }
+            }
+            
+            // Render the word
+            pdf.text(word, currentX, yPosition);
+            currentX += pdf.getTextWidth(word);
+          });
+        });
+
+        yPosition += lineHeightPt + (options.spaceAfter || 0);
       };
 
       const addParagraph = (text: string) => {
-        yPosition += lineHeight; // Space before paragraph
-        addText(text, normalFontSize, { justify: true, firstLineIndent: true });
-        yPosition += lineHeight ; // Space after paragraph
+        addFormattedText(text, normalFontSize, { 
+          firstLineIndent: true, 
+          spaceAbove: lineHeight * normalFontSize * 0.5, 
+          spaceAfter: lineHeight * normalFontSize * 0.5 
+        });
       };
 
       const renderComplexElement = async (elementHtml: string, maxWidth: number = contentWidth) => {
@@ -311,6 +387,23 @@ const BookPreviewPage: React.FC = () => {
         }
       };
 
+      // Process **text** for semibold formatting
+      const processSemibold = (text: string) => {
+        const parts = text.split(/(\*\*[^*]+\*\*)/);
+        return parts.map(part => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return {
+              text: part.slice(2, -2), // Remove ** markers
+              semibold: true
+            };
+          }
+          return {
+            text: part,
+            semibold: false
+          };
+        }).filter(part => part.text); // Remove empty parts
+      };
+
       // Process book content
       const processMarkdownContent = async (markdown: string) => {
         if (!markdown) return;
@@ -329,12 +422,12 @@ const BookPreviewPage: React.FC = () => {
           // Headers
           if (line.startsWith('#### ')) {
             yPosition += h1FontSize; // Add space above H4
-            checkPageBreak(h4FontSize * 2);
+            checkPageBreak(h4FontSize );
             addText(line.substring(5), h4FontSize, { bold: true, color: 'rgb(174, 86, 48)', indent: 18 });
             yPosition += lineHeight; // Space after H4
           } else if (line.startsWith('### ')) {
             yPosition += h1FontSize; // Add space above H3
-            checkPageBreak(h3FontSize * 2);
+            checkPageBreak(h3FontSize );
             addText(line.substring(4), h3FontSize, { bold: true, color: 'rgb(174, 86, 48)', indent: 18 });
             yPosition += lineHeight; // Space after H3
           } else if (line.startsWith('## ')) {
@@ -355,10 +448,12 @@ const BookPreviewPage: React.FC = () => {
             const bullet = '• ';
             const listText = line.replace(/^[-*+]\s+/, '');
             pdf.setFontSize(normalFontSize);
+            pdf.setTextColor(35, 35, 33); // Body text color
+            pdf.setFont('times', 'normal');
             const bulletIndent = 36; // 0.5 inch indent for bullets
             pdf.text(bullet, margin + bulletIndent, yPosition);
             const bulletWidth = pdf.getTextWidth(bullet);
-            addText(listText, normalFontSize, { indent: bulletIndent + bulletWidth + 6, justify: true });
+            addFormattedText(listText, normalFontSize, { indent: bulletIndent + bulletWidth + 6 });
           }
           // Numbered lists
           else if (line.match(/^\d+\.\s+/)) {
@@ -368,10 +463,12 @@ const BookPreviewPage: React.FC = () => {
               const number = match[1] + ' ';
               const listText = match[2];
               pdf.setFontSize(normalFontSize);
+              pdf.setTextColor(35, 35, 33); // Body text color
+              pdf.setFont('times', 'normal');
               const numberIndent = 36; // 0.5 inch indent for numbers
               pdf.text(number, margin + numberIndent, yPosition);
               const numberWidth = pdf.getTextWidth(number);
-              addText(listText, normalFontSize, { indent: numberIndent + numberWidth + 6, justify: true });
+              addFormattedText(listText, normalFontSize, { indent: numberIndent + numberWidth + 6 });
             }
           }
           // Skip key points sections completely
@@ -422,15 +519,103 @@ const BookPreviewPage: React.FC = () => {
           }
           // Blockquotes
           else if (line.startsWith('> ')) {
-            checkPageBreak(normalFontSize * 3);
-            const quoteText = line.substring(2);
-            yPosition += normalFontSize * 0.5;
-            pdf.setDrawColor(174, 86, 48);
-            pdf.setLineWidth(2);
-            pdf.line(margin - 10, yPosition - normalFontSize, margin - 10, yPosition + normalFontSize);
-            addText(quoteText, normalFontSize, { italic: true, indent: 20, justify: true });
-            yPosition += normalFontSize * 0.5;
+            const quoteText = line.substring(2).trim();
+            // Break into chunks for formatting
+            const parts = quoteText.split(/(\*\*[^*]+\*\*)/g); // split into bold chunks
+
+            // Margin top for blockquote
+            const marginTop = normalFontSize * 1.5; // Adjust this value as needed
+            const marginBottom = normalFontSize * 2; // Adjust this value as needed
+            yPosition += marginTop;
+
+            // Set base quote style
+            pdf.setFontSize(normalFontSize);
+            pdf.setTextColor(60, 60, 60);
+
+            const indentLeft = 12;
+            const availableWidth = pageWidth - margin * 2 - indentLeft;
+            
+            // Process parts and reconstruct text for proper wrapping
+            let processedText = '';
+            for (let part of parts) {
+              if (part.trim()) {
+                if (/^\*\*.+\*\*$/.test(part)) {
+                  processedText += part.slice(2, -2); // Remove ** but keep the text
+                } else {
+                  processedText += part;
+                }
+              }
+            }
+
+            const wrappedLines = pdf.splitTextToSize(processedText, availableWidth);
+            const lineHeight = normalFontSize * 1.5;
+            const blockHeight = wrappedLines.length * lineHeight;
+
+            checkPageBreak(blockHeight + marginTop + marginBottom + 8);
+
+            // Draw red vertical line aligned exactly with text boundaries
+            pdf.setDrawColor(174, 86, 48);  // #ae5630 with 80% transparency
+            pdf.setLineWidth(1.5);
+            const lineX = margin + 2; // Position closer to the text
+            const lineTop = yPosition - 15; // Start exactly at text baseline
+            const lineBottom = yPosition + blockHeight; // End exactly at last line baseline
+            pdf.line(lineX, lineTop, lineX, lineBottom);
+
+            // Render each wrapped line with inline formatting
+            let currentY = yPosition;
+            wrappedLines.forEach((wrappedLine: string) => {
+              let currentX = margin + indentLeft;
+              
+              // Find which parts of the original text are in this wrapped line
+              let remainingLine = wrappedLine;
+              
+              for (let part of parts) {
+                if (part.trim() && remainingLine.length > 0) {
+                  let textToRender = '';
+                  let fontStyle: 'italic' | 'bolditalic' = 'italic';
+                  
+                  if (/^\*\*.+\*\*$/.test(part)) {
+                    textToRender = part.slice(2, -2); // Remove **
+                    fontStyle = 'bolditalic';
+                  } else {
+                    textToRender = part;
+                  }
+                  
+                  // Check if this part appears in the current wrapped line
+                  if (remainingLine.includes(textToRender)) {
+                    const beforeText = remainingLine.substring(0, remainingLine.indexOf(textToRender));
+                    
+                    // Render any text before this part (with italic)
+                    if (beforeText) {
+                      pdf.setFont('times', 'italic');
+                      pdf.text(beforeText, currentX, currentY);
+                      currentX += pdf.getTextWidth(beforeText);
+                      remainingLine = remainingLine.substring(beforeText.length);
+                    }
+                    
+                    // Render this part with proper formatting
+                    pdf.setFont('times', fontStyle);
+                    pdf.text(textToRender, currentX, currentY);
+                    currentX += pdf.getTextWidth(textToRender);
+                    remainingLine = remainingLine.substring(textToRender.length);
+                  }
+                }
+              }
+              
+              // Render any remaining text with italic
+              if (remainingLine.trim()) {
+                pdf.setFont('times', 'italic');
+                pdf.text(remainingLine, currentX, currentY);
+              }
+              
+              currentY += lineHeight;
+            });
+
+            // Update yPosition with margin bottom
+            yPosition += blockHeight + marginBottom;
           }
+          
+          
           // Regular paragraphs
           else {
             addParagraph(line);
@@ -928,10 +1113,7 @@ const BookPreviewPage: React.FC = () => {
     .attention,
     blockquote {
       font-style: italic;
-      border-left: 3px solid var(--primary-color);
-      background: var(--primary-light);
-      padding: 10px;
-      margin: 20px 0;
+      
     }
 
     /* ---------- 8) KEY-POINTS BOX ---------- */
