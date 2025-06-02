@@ -41,12 +41,33 @@ const executeOpenRouterRequest = async (params) => {
     }
     catch (error) {
         if (error.response) {
+            // Enhanced error logging with more details
             logger_1.default.error(`OpenRouter API error: ${error.response.status} - ${JSON.stringify(error.response.data)}`);
-            throw new Error(`OpenRouter API error: ${error.response.data.error?.message || 'Unknown error'}`);
+            logger_1.default.error(`Request was for model: ${params.model}`);
+            // Check for specific error types
+            if (error.response.status === 401 || error.response.status === 403) {
+                logger_1.default.error('Authentication error - check API key validity and permissions');
+                throw new Error(`OpenRouter API authentication error: ${error.response.data.error?.message || 'Invalid API key or insufficient permissions'}`);
+            }
+            else if (error.response.status === 404) {
+                logger_1.default.error(`Model not found: ${params.model}`);
+                throw new Error(`OpenRouter API error: Model "${params.model}" not found or not available`);
+            }
+            else if (error.response.status === 429) {
+                logger_1.default.error('Rate limit exceeded');
+                throw new Error('OpenRouter API rate limit exceeded. Please try again later.');
+            }
+            else if (error.response.status === 500) {
+                logger_1.default.error('OpenRouter internal server error');
+                throw new Error(`OpenRouter API server error: ${error.response.data.error?.message || 'Internal server error'}`);
+            }
+            else {
+                throw new Error(`OpenRouter API error: ${error.response.data.error?.message || 'Unknown error'}`);
+            }
         }
         else if (error.request) {
             logger_1.default.error(`OpenRouter API request error: ${error.message}`);
-            throw new Error('Could not connect to OpenRouter API');
+            throw new Error('Could not connect to OpenRouter API. Please check your network connection.');
         }
         else {
             logger_1.default.error(`OpenRouter client error: ${error.message}`);

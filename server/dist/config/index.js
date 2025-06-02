@@ -17,10 +17,11 @@ const config = {
     },
     // OpenRouter API
     openRouter: {
-        apiKey: process.env.OPENROUTER_API_KEY,
+        apiKey: process.env.OPENROUTER_API_KEY || process.env.VITE_OPENROUTER_API_KEY,
         baseUrl: 'https://openrouter.ai/api/v1',
-        defaultContentModel: process.env.DEFAULT_CONTENT_MODEL || 'google/gemini-2.5-pro-exp-03-25:free',
-        defaultResearchModel: process.env.DEFAULT_RESEARCH_MODEL || 'openai/gpt-4o-search-preview',
+        defaultContentModel: process.env.DEFAULT_CONTENT_MODEL || process.env.VITE_DEFAULT_CONTENT_MODEL || 'google/gemini-2.5-pro-exp-03-25:free',
+        defaultResearchModel: process.env.DEFAULT_RESEARCH_MODEL || process.env.VITE_DEFAULT_RESEARCH_MODEL || 'openai/gpt-4o-search-preview',
+        bookStructureModel: process.env.BOOK_STRUCTURE_MODEL || process.env.VITE_BOOK_STRUCTURE_MODEL || 'anthropic/claude-3.7-sonnet',
     },
     // JWT
     jwt: {

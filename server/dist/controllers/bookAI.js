@@ -1,177 +1,216 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reviseChapter = exports.generateChapter = exports.generateBookStructure = exports.generateMarketResearch = void 0;
+exports.generatePDF = exports.reviseChapter = exports.generateChapter = exports.generateBookStructure = exports.generateMarketResearch = void 0;
 const supabase_1 = require("../services/supabase");
 const openrouter_1 = require("../services/openrouter");
+const config_1 = __importDefault(require("../config"));
+// Helper function to extract references from chapter content
+function extractReferencesFromContent(content) {
+    const references = [];
+    // Extract citations in format (Source Name, Year)
+    const citationRegex = /\(([^,]+),\s*(\d{4})\)/g;
+    let match;
+    while ((match = citationRegex.exec(content)) !== null) {
+        const sourceName = match[1].trim();
+        const year = match[2];
+        const reference = `${sourceName} (${year})`;
+        if (!references.includes(reference)) {
+            references.push(reference);
+        }
+    }
+    return references;
+}
+// Helper function to update book's centralized references
+async function updateBookReferences(bookId, newReferences) {
+    try {
+        // Get current book structure
+        const { data: book, error: bookError } = await supabase_1.supabaseAdmin
+            .from('books')
+            .select('structure')
+            .eq('id', bookId)
+            .single();
+        if (bookError) {
+            console.error('Error fetching book for references update:', bookError);
+            return;
+        }
+        const currentStructure = book.structure || {};
+        const currentReferences = currentStructure.references || '';
+        // Parse existing references
+        const existingRefs = currentReferences.split('\n').filter((ref) => ref.trim().length > 0);
+        // Add new references that don't already exist
+        const allReferences = [...existingRefs];
+        newReferences.forEach(ref => {
+            if (!allReferences.includes(ref)) {
+                allReferences.push(ref);
+            }
+        });
+        // Sort references alphabetically
+        allReferences.sort();
+        // Update book structure with new references
+        const updatedStructure = {
+            ...currentStructure,
+            references: allReferences.join('\n')
+        };
+        const { error: updateError } = await supabase_1.supabaseAdmin
+            .from('books')
+            .update({ structure: updatedStructure })
+            .eq('id', bookId);
+        if (updateError) {
+            console.error('Error updating book references:', updateError);
+        }
+        else {
+            console.log(`Updated references for book ${bookId}: ${newReferences.length} new references added`);
+        }
+    }
+    catch (error) {
+        console.error('Error in updateBookReferences:', error);
+    }
+}
+// Helper function to auto-generate appendix content
+async function updateBookAppendix(bookId, chapterContent) {
+    try {
+        // Get current book structure and all chapters
+        const { data: book, error: bookError } = await supabase_1.supabaseAdmin
+            .from('books')
+            .select('structure, topic, title')
+            .eq('id', bookId)
+            .single();
+        if (bookError) {
+            console.error('Error fetching book for appendix update:', bookError);
+            return;
+        }
+        const { data: chapters, error: chaptersError } = await supabase_1.supabaseAdmin
+            .from('chapters')
+            .select('content')
+            .eq('book_id', bookId)
+            .not('content', 'is', null);
+        if (chaptersError) {
+            console.error('Error fetching chapters for appendix:', chaptersError);
+            return;
+        }
+        // Extract concepts and tools from all chapter content
+        const allContent = chapters?.map(ch => ch.content).join(' ') || '';
+        const concepts = new Set();
+        const tools = new Set();
+        const frameworks = new Set();
+        // Extract key concepts (common self-improvement terms)
+        const conceptMatches = allContent.match(/\b(framework|methodology|technique|strategy|approach|model|system|process|tool|template|checklist|worksheet|assessment|exercise|habit|practice|routine|mindset|principle|concept|theory|method|step|phase|stage|level)\b/gi);
+        if (conceptMatches) {
+            conceptMatches.forEach(match => concepts.add(match.toLowerCase()));
+        }
+        // Extract actionable tools/templates mentioned
+        const toolMatches = allContent.match(/\b(template|worksheet|checklist|planner|tracker|journal|assessment|evaluation|guide|roadmap|blueprint)\b/gi);
+        if (toolMatches) {
+            toolMatches.forEach(match => tools.add(match.toLowerCase()));
+        }
+        // Extract frameworks mentioned
+        const frameworkMatches = allContent.match(/\b([A-Z][a-z]+ (Framework|Method|System|Model|Approach))/g);
+        if (frameworkMatches) {
+            frameworkMatches.forEach(match => frameworks.add(match));
+        }
+        // Generate comprehensive appendix content
+        const appendixSections = [];
+        // Section A: Tools and Templates
+        if (tools.size > 0) {
+            appendixSections.push(`**A. Tools and Templates**
+- Daily Progress Tracker
+- Goal Setting Worksheet  
+- Habit Formation Checklist
+- Self-Assessment Template
+- Weekly Reflection Journal
+- Action Plan Template
+- Progress Monitoring Chart
+- Resource Planning Worksheet`);
+        }
+        // Section B: Frameworks and Methods
+        if (frameworks.size > 0 || concepts.size > 0) {
+            appendixSections.push(`**B. Frameworks and Methods Reference**
+- The ${book.topic} Implementation Framework
+- Step-by-Step Process Guide
+- Decision-Making Matrix
+- Progress Evaluation Methods
+- Common Challenges and Solutions
+- Best Practices Checklist`);
+        }
+        // Section C: Resources
+        appendixSections.push(`**C. Additional Resources**
+- Recommended Books for Further Reading
+- Online Communities and Support Groups
+- Professional Development Courses
+- Apps and Digital Tools
+- Websites and Blogs
+- Podcasts and Videos
+- Expert Networks and Mentorship Programs`);
+        // Section D: FAQ
+        appendixSections.push(`**D. Frequently Asked Questions**
+- How long does it typically take to see results?
+- What if I miss a day or fall off track?
+- How do I adapt this approach to my specific situation?
+- Where can I find additional support?
+- How do I measure my progress effectively?
+- What are the most common mistakes to avoid?`);
+        // Section E: Emergency Action Plans
+        appendixSections.push(`**E. Emergency Action Plans**
+- When You Feel Stuck: 5-Step Recovery Plan
+- Dealing with Setbacks: Resilience Strategy
+- Motivation Maintenance: Quick Wins List
+- Crisis Management: Emergency Contacts and Resources
+- Burnout Prevention: Warning Signs and Actions`);
+        const generatedAppendix = appendixSections.join('\n\n');
+        // Update book structure with generated appendix
+        const currentStructure = book.structure || {};
+        const updatedStructure = {
+            ...currentStructure,
+            appendix: generatedAppendix
+        };
+        const { error: updateError } = await supabase_1.supabaseAdmin
+            .from('books')
+            .update({ structure: updatedStructure })
+            .eq('id', bookId);
+        if (updateError) {
+            console.error('Error updating book appendix:', updateError);
+        }
+        else {
+            console.log(`Updated appendix for book ${bookId} with ${appendixSections.length} sections`);
+        }
+    }
+    catch (error) {
+        console.error('Error in updateBookAppendix:', error);
+    }
+}
 // Clean JSON response helper
 function cleanJsonResponse(response) {
-    console.log("Received response from AI model, attempting to extract JSON...");
+    console.log("Attempting to parse AI response as JSON...");
     try {
-        // First try direct JSON parse
+        // Attempt 1: Direct JSON parse
         return JSON.parse(response);
     }
-    catch (e) {
-        console.log("Failed to parse direct JSON, trying to extract from response:", e.message);
+    catch (e1) {
+        console.warn("Direct JSON.parse failed. Trying to extract from markdown code block. Error: " + e1.message);
         try {
-            // Extract JSON from markdown code blocks
+            // Attempt 2: Extract JSON from markdown code blocks
+            // Regex to find ```json ... ``` or ``` ... ```
             const jsonMatch = response.match(/```(?:json)?\s*([\s\S]*?)```/);
-            if (jsonMatch) {
-                try {
-                    const json = JSON.parse(jsonMatch[1].trim());
-                    console.log("Successfully extracted JSON from code block");
-                    return json;
-                }
-                catch (e2) {
-                    console.log("Failed to parse JSON from code block:", e2.message);
-                }
-            }
-            // Try to find JSON object in the response
-            const objectMatch = response.match(/\{[\s\S]*\}/);
-            if (objectMatch) {
-                try {
-                    const extracted = objectMatch[0];
-                    // Fix common JSON parsing issues
-                    const cleanedJson = extracted
-                        // Fix unquoted keys
-                        .replace(/([{,]\s*)([a-zA-Z0-9_]+)(\s*:)/g, '$1"$2"$3')
-                        // Fix trailing commas in arrays and objects
-                        .replace(/,(\s*[\]}])/g, '$1')
-                        // Fix missing quotes around string values
-                        .replace(/:\s*([a-zA-Z][a-zA-Z0-9_]*)\s*([,}])/g, ':"$1"$2')
-                        // Ensure consistent quotation
-                        .replace(/:\s*'([^']*)'/g, ':"$1"');
-                    console.log("Cleaned JSON from regex match");
-                    return JSON.parse(cleanedJson);
-                }
-                catch (e3) {
-                    console.log("Failed to parse cleaned JSON from regex match:", e3.message);
-                }
-            }
-            // As a last resort, try to parse the entire response text as a fallback structure
-            console.log("Creating a fallback structure from the response text");
-            // Look for a title in the response
-            const titleMatch = response.match(/title[:\s]+["']?([^"'\n,]+)["']?/i);
-            const title = titleMatch ? titleMatch[1].trim() : "Generated Book";
-            // Look for a subtitle
-            const subtitleMatch = response.match(/subtitle[:\s]+["']?([^"'\n,]+)["']?/i);
-            const subtitle = subtitleMatch ? subtitleMatch[1].trim() : "A Comprehensive Guide";
-            // Check if we can extract parts or sections from the response
-            const partsRegex = /Part\s+\w+:\s+([A-Z\s]+)/g;
-            const partMatches = [...response.matchAll(partsRegex)];
-            // Extract chapters
-            const chapterRegex = /Chapter\s+(\d+):\s+([^\n]+)/g;
-            const chapterMatches = [...response.matchAll(chapterRegex)];
-            // Group chapters by parts if possible
-            const parts = [];
-            if (partMatches.length > 0) {
-                // We have parts, try to organize chapters under them
-                partMatches.forEach((partMatch, partIndex) => {
-                    const partTitle = partMatch[1].trim();
-                    const nextPartMatch = partMatches[partIndex + 1] || null;
-                    const partStart = partMatch.index;
-                    const partEnd = nextPartMatch ? nextPartMatch.index : response.length;
-                    const partText = response.substring(partStart, partEnd);
-                    // Find chapters within this part text
-                    const partChapters = [];
-                    const chapterRegex = /Chapter\s+(\d+):\s+([^\n]+)/g;
-                    let chapterMatch;
-                    while ((chapterMatch = chapterRegex.exec(partText)) !== null) {
-                        partChapters.push({
-                            number: parseInt(chapterMatch[1]),
-                            title: chapterMatch[2].trim(),
-                            description: "Chapter extracted from AI response",
-                            estimatedWords: 3000
-                        });
-                    }
-                    if (partChapters.length > 0) {
-                        parts.push({
-                            partNumber: partIndex + 1,
-                            partTitle: partTitle,
-                            chapters: partChapters
-                        });
-                    }
-                });
-            }
-            // If we couldn't extract parts but have chapters, create a flat structure
-            if (parts.length === 0 && chapterMatches.length > 0) {
-                // Create a single part with all chapters
-                const flatChapters = chapterMatches.map(match => ({
-                    number: parseInt(match[1]),
-                    title: match[2].trim(),
-                    description: "Chapter extracted from AI response",
-                    estimatedWords: 3000
-                }));
-                if (flatChapters.length > 0) {
-                    parts.push({
-                        partNumber: 1,
-                        partTitle: "MAIN CONTENT",
-                        chapters: flatChapters
-                    });
-                }
-            }
-            // Create a fallback structure with at least 32 chapters across 8 parts
-            let fallbackParts = [];
-            if (parts.length > 0) {
-                // We have extracted some parts, use them
-                fallbackParts = parts;
-                // Check if we have enough chapters (at least 30)
-                const totalChapters = parts.reduce((total, part) => total + part.chapters.length, 0);
-                if (totalChapters < 30) {
-                    // Add more parts if needed
-                    const additionalPartsNeeded = Math.ceil((30 - totalChapters) / 4);
-                    for (let i = 0; i < additionalPartsNeeded; i++) {
-                        const partNumber = parts.length + i + 1;
-                        fallbackParts.push({
-                            partNumber,
-                            partTitle: `ADDITIONAL CONTENT PART ${partNumber}`,
-                            chapters: Array.from({ length: 4 }, (_, j) => ({
-                                number: totalChapters + (i * 4) + j + 1,
-                                title: `Additional Chapter ${j + 1}`,
-                                description: "Auto-generated chapter for comprehensive coverage",
-                                estimatedWords: 4000
-                            }))
-                        });
-                    }
-                }
+            if (jsonMatch && jsonMatch[1]) {
+                const extractedJson = jsonMatch[1].trim();
+                console.log("Extracted JSON from code block. Attempting to parse.");
+                return JSON.parse(extractedJson);
             }
             else {
-                // Create 8 parts with 4 chapters each
-                const partTitles = [
-                    "FOUNDATIONS AND CORE CONCEPTS",
-                    "ESSENTIAL STRATEGIES",
-                    "PRACTICAL TECHNIQUES",
-                    "ADVANCED APPLICATIONS",
-                    "CASE STUDIES AND EXAMPLES",
-                    "IMPLEMENTATION AND EXECUTION",
-                    "OVERCOMING CHALLENGES",
-                    "MASTERY AND FUTURE DIRECTIONS"
-                ];
-                fallbackParts = partTitles.map((partTitle, partIndex) => ({
-                    partNumber: partIndex + 1,
-                    partTitle,
-                    chapters: Array.from({ length: 4 }, (_, j) => ({
-                        number: (partIndex * 4) + j + 1,
-                        title: `${partTitle.split(' ')[0]} Chapter ${j + 1}`,
-                        description: `Auto-generated chapter covering ${partTitle.toLowerCase()}`,
-                        estimatedWords: 3000
-                    }))
-                }));
+                console.warn("No JSON code block found in AI response.");
+                // Log the beginning of the response to help diagnose if the AI isn't complying
+                console.error("AI response (first 500 chars) that failed parsing: ", response.substring(0, 500));
+                throw new Error('AI response is not valid JSON and no JSON code block was found.');
             }
-            const fallbackStructure = {
-                title,
-                subtitle,
-                parts: fallbackParts,
-                introduction: "Introduction to the topic - providing essential context and overview",
-                conclusion: "Concluding thoughts on the topic - integrating key insights and future directions",
-                marketPosition: "Comprehensive guide for practitioners and enthusiasts alike",
-                uniqueValue: "Combines theoretical foundations with practical applications in an accessible format"
-            };
-            console.log("Created fallback structure with parts:", fallbackStructure.parts.length);
-            return fallbackStructure;
         }
-        catch (finalError) {
-            console.error("Failed all JSON parsing attempts:", finalError);
-            throw new Error('Failed to parse JSON response and could not create fallback structure');
+        catch (e2) {
+            console.error("Failed to parse JSON from code block. Error: " + e2.message);
+            // Log the beginning of the response to help diagnose
+            console.error("Original AI response (first 500 chars) that failed parsing: ", response.substring(0, 500));
+            throw new Error('Failed to parse AI response as JSON after attempting direct and code block extraction.');
         }
     }
 }
@@ -190,6 +229,8 @@ Please conduct thorough market research and provide:
 5. Suggested color schemes for book cover that would attract target audience
 6. Key pain points and desires of the target audience
 7. Pricing strategy recommendations
+8. Reading level and content specifications
+9. Design and formatting requirements
 
 You must respond with ONLY valid JSON in this exact format:
 {
@@ -197,7 +238,8 @@ You must respond with ONLY valid JSON in this exact format:
     "demographics": "detailed demographics",
     "psychographics": "interests, values, behaviors",
     "painPoints": ["pain point 1", "pain point 2"],
-    "desires": ["desire 1", "desire 2"]
+    "desires": ["desire 1", "desire 2"],
+    "dailyLife": "specific examples of daily life scenarios this audience faces"
   },
   "marketAnalysis": {
     "size": "market size estimate",
@@ -218,14 +260,29 @@ You must respond with ONLY valid JSON in this exact format:
       "suggested": "$XX.XX",
       "reasoning": "pricing rationale"
     }
+  },
+  "readingLevel": "Flesch Reading Ease score (e.g., Standard 60-69)",
+  "gradeLevel": "target grade level (e.g., 8th-9th grade)",
+  "sentenceLength": "preferred sentence length (e.g., short, medium, long)",
+  "vocabularyLevel": "vocabulary complexity (e.g., accessible but varied, technical, simple)",
+  "design": {
+    "colors": "primary: #hexcode, secondary: #hexcode, accent: #hexcode",
+    "visualElements": "recommended number of charts/visuals per chapter",
+    "formatting": "specific formatting preferences for target audience"
+  },
+  "contentSpecs": {
+    "examplesPerChapter": "recommended number of real-world examples",
+    "exerciseInclusion": "true/false - whether to include exercises",
+    "specialInstructions": "any specific content requirements"
   }
 }`;
         const messages = [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
         ];
-        const model = 'openai/gpt-4o-search-preview';
-        console.log(`Generating market research for topic: ${topic}`);
+        // Use the configured research model from config
+        const model = config_1.default.openRouter.defaultResearchModel || 'openai/gpt-4o-search-preview';
+        console.log(`Generating market research for topic: ${topic} using model: ${model}`);
         const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
         const completion = await (0, openrouter_1.executeOpenRouterRequest)({
             model,
@@ -260,13 +317,13 @@ CRITICAL JSON FORMAT REQUIREMENTS:
 
 CONTENT REQUIREMENTS:
 1. Create a book structure with multiple parts. Each part should contain 4-7 thematically related chapters. These are the main content chapters.
-2. The total estimated word count for the entire book (including Prologue, Introduction, main chapters, and Conclusion) should be between 125,000 and 184,000 words.
+2. The total estimated word count for the entire book (including Prologue, Introduction, main chapters, and Conclusion) should be between 110,000 and 145,000 words.
 3. Each main chapter (within the 'parts' array) must have a creative and descriptive title, a detailed explanation/description of its content and purpose, an estimated word count, key topics to be covered, and 3-5 key points the reader should take away. Chapter numbering should be sequential for these main chapters, starting from 1.
 4. Generate content for 'prologue', 'introduction', and 'conclusion' as top-level string fields in the JSON. These are NOT chapters within the 'parts' array and should NOT be numbered as chapters.
-   - The 'prologue' string should contain compelling content (approx. 3000 words) that hooks the reader, including its own context and key points formatted within the markdown.
-   - The 'introduction' string should contain detailed content (approx. 3000 words) explaining the book's premise, scope, what the reader will gain, and a roadmap. It should include its own context and key points formatted within the markdown.
-   - The 'conclusion' string should contain meaningful content (approx. 3000 words) summarizing key takeaways, reiterating the core message, and offering final thoughts. It should include its own context and key points formatted within the markdown.
-5. The 'acknowledgement', 'appendix', and 'references' fields should be brief top-level strings. 'coverPageDetails' is also a top-level object. These are not part of the main chapter flow or word count intensive sections like Prologue/Intro/Conclusion.
+   - The 'prologue' string should contain a prologue (1,500-2,500 words) that immediately engages readers by: Opening with a vivid scene, surprising statement, or relatable problem; Establishing the book's core premise or conflict within the first 500 words; Including specific sensory details and concrete examples; Creating emotional connection through personal anecdote or universal experience; Ending with a clear promise of what the book will deliver; Matching the book's specified tone and target audience. MUST end with "+$$$+\n#### Key Points from Prologue\n- Point 1\n- Point 2\n- Point 3\n- Point 4\n- Point 5\n+$$$+"
+   - The 'introduction' string should contain a comprehensive introduction (2,500-4,000 words) that: Opens with a clear, engaging heading that captures the book's essence; Includes 3-5 substantial sections that progressively build the book's foundation; Establishes the problem/opportunity this book addresses; Shares why this book exists now and why the author is uniquely qualified; Provides a roadmap of what readers will learn/gain from each section; Includes 2-3 specific examples or mini-case studies; Addresses common misconceptions or objections; Ends with clear instructions on how to use this book; Uses subheadings to break up text every 400-600 words; Matches the book's specified tone and speaks directly to target audience pain points. MUST end with "+$$$+\n#### Key Points from Introduction\n- Point 1\n- Point 2\n- Point 3\n- Point 4\n- Point 5\n+$$$+"
+   - The 'conclusion' string should contain a powerful conclusion (2,500-4,000 words) that: Opens with an evocative heading that signals completion and new beginning; Synthesizes key insights without merely repeating chapter summaries; Includes 3-5 substantial sections that build toward a crescendo; Addresses the 'what now?' question with concrete next steps; Acknowledges the reader's journey and growth through the book; Paints a vivid picture of the reader's potential future state; Includes a memorable final message or call-to-action; Provides additional resources or community connections; Uses subheadings to structure the conclusion's narrative arc; Circles back to opening themes while showing transformation; Matches book's tone while adding inspirational elevation. MUST end with "+$$$+\n#### Key Points from Conclusion\n- Point 1\n- Point 2\n- Point 3\n- Point 4\n- Point 5\n+$$$+"
+5. The 'acknowledgement' field should contain a concise acknowledgement section (100-200 words) that: Thanks 2-3 key individuals or groups who made the book possible; Includes specific contributions rather than generic thanks; Mentions early readers, mentors, or community members who shaped the work; Acknowledges family/personal support briefly but genuinely; References any organizations, platforms, or communities integral to the book; Maintains professional warmth without excessive sentimentality; Ends with a forward-looking note about the book's intended impact; Matches the book's tone while being slightly more personal. The 'appendix' and 'references' fields should be brief top-level strings. 'coverPageDetails' is also a top-level object. These are not part of the main chapter flow or word count intensive sections like Prologue/Intro/Conclusion.
 6. Be creative with part titles and actual chapter titles based on the topic and market research.
 7. Ensure the JSON format is strictly followed as per the example.
 
@@ -281,6 +338,10 @@ Market Research Findings:
 - Market Gaps: ${marketResearch.marketAnalysis.gaps.join(', ')}
 - Recommended Tone: ${marketResearch.recommendations.tone}
 - Recommended Style: ${marketResearch.recommendations.style}
+- Recommended Reading Level: ${marketResearch.readingLevel}
+- Recommended Grade Level: ${marketResearch.gradeLevel}
+- Recommended Sentence Length: ${marketResearch.sentenceLength}
+- Recommended Vocabulary Level: ${marketResearch.vocabularyLevel}
 
 
 
@@ -291,12 +352,12 @@ You must respond with ONLY valid JSON in this exact format:
   "audience": "refined target audience description",
   "style": "specific writing style based on research",
   "tone": "specific tone based on research",
-  "marketPosition": "how to position this book in the market",
-  "uniqueValue": "what makes this book different",
-  "acknowledgement": "Brief acknowledgement text (e.g., 100-200 words).",
-  "prologue": "## Prologue Title Chosen by AI\\n\\nRich markdown content for the prologue (approx. 3000 words)...\\n\\n### Key Points from Prologue\\n- Point 1\\n- Point 2",
-  "introduction": "## Introduction Title Chosen by AI\\n\\nDetailed markdown content for the introduction (approx. 3000 words)...\\n\\n### Key Points from Introduction\\n- Point 1\\n- Point 2",
-  "conclusion": "## Conclusion Title Chosen by AI\\n\\nMeaningful markdown content for the conclusion (approx. 3000 words)...\\n\\n### Key Points from Conclusion\\n- Point 1\\n- Point 2",
+  "marketPosition": "Define market position (75-150 words) using this framework: Primary category/shelf placement; 2-3 successful comp titles and how this book differs; Target retailer categories; Price point positioning (premium/accessible/budget) with justification; Format priorities (hardcover/paperback/audio/digital); One-sentence elevator pitch for booksellers.",
+  "uniqueValue": "Write a compelling unique value proposition (50-100 words) that identifies ONE primary differentiator from existing books in this category, states a specific benefit readers get here they can't find elsewhere, uses concrete language rather than abstract claims, avoids overused terms like 'comprehensive,' 'ultimate,' or 'revolutionary,' includes a measurable outcome or transformation when possible, formatted as 2-3 punchy sentences that could work as back-cover copy.",
+  "acknowledgement": "Concise acknowledgement section (100-200 words) that thanks 2-3 key individuals or groups who made the book possible, includes specific contributions rather than generic thanks, mentions early readers, mentors, or community members who shaped the work, acknowledges family/personal support briefly but genuinely, references any organizations, platforms, or communities integral to the book, maintains professional warmth without excessive sentimentality, ends with a forward-looking note about the book's intended impact, and matches the book's tone while being slightly more personal.",
+  "prologue": "## Prologue Title Chosen by AI\\n\\nPrologue content (1,500-2,500 words) that immediately engages readers by opening with a vivid scene, surprising statement, or relatable problem, establishing the book's core premise or conflict within the first 500 words, including specific sensory details and concrete examples, creating emotional connection through personal anecdote or universal experience, ending with a clear promise of what the book will deliver, and matching the book's specified tone and target audience...\\n\\n+$$$+\\n#### Key Points from Prologue\\n- Point 1\\n- Point 2\\n- Point 3\\n- Point 4\\n- Point 5\\n+$$$+",
+  "introduction": "# Introduction Title Chosen by AI\\n\\nComprehensive introduction content (2,500-4,000 words) that establishes the problem/opportunity this book addresses, shares why this book exists now and why the author is uniquely qualified, addresses common misconceptions or objections, ends with clear instructions on how to use this book, uses subheadings to break up text every 400-600 words, and matches the book's specified tone and speaks directly to target audience pain points...\\n\\n+$$$+\\n#### Key Points from Introduction\\n- Point 1\\n- Point 2\\n- Point 3\\n- Point 4\\n- Point 5\\n+$$$+",
+  "conclusion": "# Evocative Conclusion Title Chosen by AI\\n\\nPowerful conclusion content (2,500-4,000 words) that synthesizes key insights without merely repeating chapter summaries, addresses the 'what now?' question with concrete next steps, acknowledges the reader's journey and growth through the book, paints a vivid picture of the reader's potential future state, includes a memorable final message or call-to-action, provides additional resources or community connections, uses subheadings to structure the conclusion's narrative arc, circles back to opening themes while showing transformation, and matches book's tone while adding inspirational elevation...\\n\\n+$$$+\\n#### Key Points from Conclusion\\n- Point 1\\n- Point 2\\n- Point 3\\n- Point 4\\n- Point 5\\n+$$$+",
   "appendix": "Optional: Brief appendix content, if applicable.",
   "references": "Optional: Brief references or bibliography, if applicable.",
   "coverPageDetails": {
@@ -317,12 +378,12 @@ You must respond with ONLY valid JSON in this exact format:
           "keyPoints": ["Key takeaway 1 for Ch1", "Key takeaway 2 for Ch1", "Key takeaway 3 for Ch1"],
           "keyTopics": ["Main topic of Ch1", "Sub-topic A for Ch1", "Sub-topic B for Ch1"]
         }
-        // ... AI to add 3-6 more chapters to this part, with sequential numbering ...
+        // ... AI to add 4-7 more chapters to this part, with sequential numbering ...
       ]
     }
     // ... AI to add more parts, each with 4-7 chapters and sequential part numbers ...
   ],
-  "totalWords": 184000, // AI calculates this sum from all chapter estimatedWords + prologue + intro + conclusion, aiming for 125k-184k.
+  "totalWords": 145000, // AI calculates this sum from all chapter estimatedWords + prologue + intro + conclusion, aiming for 110k-145k.
   "colorScheme": {
     "primary": "${marketResearch.recommendations.colors.primary}",
     "secondary": "${marketResearch.recommendations.colors.secondary}",
@@ -333,14 +394,16 @@ You must respond with ONLY valid JSON in this exact format:
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
         ];
-        const model = 'anthropic/claude-3.7-sonnet';
+        // Use the configured book structure model from config
+        const model = config_1.default.openRouter.bookStructureModel || 'anthropic/claude-3.7-sonnet';
+        console.log(`Using model: ${model} for book structure generation`);
         const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
         const completion = await (0, openrouter_1.executeOpenRouterRequest)({
             model,
             prompt,
-            messages,
+            messages: messages,
             temperature: 0.7,
-            max_tokens: 16000
+            max_tokens: 50000
         });
         // Log the first 500 characters of the response for debugging
         // Extract content from the response
@@ -358,7 +421,7 @@ You must respond with ONLY valid JSON in this exact format:
 exports.generateBookStructure = generateBookStructure;
 const generateChapter = async (req, res) => {
     try {
-        const { chapterId } = req.body;
+        const { chapterId, streamMode = false } = req.body;
         console.log(`Attempting to generate chapter with ID: ${chapterId}`);
         // Get chapter details with explicit error handling
         console.log(`Looking for chapter with ID: ${chapterId}`);
@@ -448,7 +511,7 @@ const generateChapter = async (req, res) => {
             console.log(`No chapter details found in book structure, creating minimal details`);
             // Safely access metadata, which might not exist yet in the database schema
             let description = 'No description available';
-            let estimatedWords = 4000;
+            let estimatedWords = 5000;
             try {
                 if (typeof chapter.metadata === 'object' && chapter.metadata !== null) {
                     description = chapter.metadata.description || description;
@@ -479,7 +542,75 @@ const generateChapter = async (req, res) => {
         // Check if we have a metadata column in the database
         // If not, we'll need to adapt our update strategy later
         const hasMetadataColumn = Object.prototype.hasOwnProperty.call(chapter, 'metadata');
-        const systemPrompt = `You are an expert book writer specializing in creating content that resonates with specific target audiences. Write in the exact tone and style specified, addressing the audience's pain points and desires.`;
+        // Enforce 5K maximum word limit
+        const MAX_WORDS = 5000;
+        const targetWords = Math.min(chapterDetails?.estimatedWords || 4000, MAX_WORDS);
+        const systemPrompt = `You are an expert book writer specializing in creating content that resonates with specific target audiences. Write in the exact tone and style specified, addressing the audience's pain points and desires and ALWAYS MEET EXACTLY ${targetWords} words (±25 words maximum) .
+
+CRITICAL MISSION: Your primary objective is to write EXACTLY ${targetWords} words. This is non-negotiable. Every successful chapter must hit this precise word count target.
+
+NEVER ASK QUESTIONS: Do not ask for confirmation, clarification, or permission to continue. Write the content directly without any meta-commentary about the writing process.
+
+KEY POINTS RULE: Include ONLY ONE "Key Points" section at the very end of the chapter. Do NOT include key points in the middle of content. The key points MUST be in this exact format:
+
++$$$+
+#### Key Points to takeaway from this chapter
+- [Key takeaway 1 from this chapter]
+- [Key takeaway 2 from this chapter]
+- [Key takeaway 3 from this chapter]
+- [Key takeaway 4 from this chapter]
+- [Key takeaway 5 from this chapter]
++$$$+
+
+Write this chapter following these STRICT guidelines:
+
+**CONTENT QUALITY & VOICE:**
+1. Write at a ${book.marketResearch?.readingLevel || 'Standard (60-69)'} Flesch Reading Ease level (${book.marketResearch?.gradeLevel || '8th-9th grade'})
+2. Use ${book.structure?.tone || 'conversational'} tone with ${book.marketResearch?.sentenceLength || 'medium'} sentence lengths
+3. Vocabulary complexity: ${book.marketResearch?.vocabularyLevel || 'accessible but varied'}
+4. FORBIDDEN PHRASES: Never use "picture this", "imagine", "celestial", "buckle up", "let's dive in", "journey", "unlock", "transform your life", "game-changer", "revolutionary", "ultimate guide"
+5. AVOID: Starting sections with questions, excessive metaphors, emoji, exclamation points (max 1 per 1000 words)
+6. DO: Vary sentence openings, use specific examples from ${book.marketResearch?.targetAudience?.dailyLife || 'everyday modern life'}, ground abstract concepts in concrete scenarios
+
+**CONSISTENCY REQUIREMENTS:**
+7. Review previous chapters to ensure NO repeated: examples, case studies, anecdotes, or conceptual explanations
+8. Unique examples only - flag if similar territory covered in: ${previousChapters.length > 0 ? previousChapters.join(', ') : 'N/A'}
+9. Maintain consistent terminology established in: ${book.glossary || 'chapter 1'}
+
+**FORMATTING SPECIFICATIONS:**
+10. DO NOT repeat the chapter title (already provided in structure)
+11. START with captivating first sentence - no throat-clearing or preview
+12. Paragraph indentation: Use 2 spaces at start of each paragraph
+13. Line spacing: Single space between all elements (including between bullet point titles and lists)
+14. Format the content as proper markdown:
+   - Use ## for the main chapter title
+   - Use ### for subsections
+   - Use #### for important point in subsctions
+   - Use **bold** for emphasis
+   - Use - or * for bullet points
+   - Use > for blockquotes
+   - Use +$$$+ Your key-point text goes here +$$$+
+   - Ensure proper paragraph spacing (empty line between paragraphs)
+   - Use numbered lists where appropriate
+   - Use backticks for inline code or technical terms
+15. Include ${book.marketResearch?.design?.visualElements || chapterDetails?.visualElements || '1-2'} data visualizations using markdown tables or ASCII-style simple graphs when data supports it
+16. Color palette references: ${book.marketResearch?.design?.colors || book.design?.colors || 'primary: purple, secondary: gold, accent: white'}
+
+**CHAPTER SPECIFICATIONS:**
+17. **ABSOLUTE CRITICAL REQUIREMENT - Word count: EXACTLY ${targetWords} words**
+    - This is MANDATORY - do NOT deliver content that is shorter or longer
+    - If you fall short, add more examples, explanations, case studies, or detailed analysis
+    - If you exceed the target, condense while maintaining quality
+    - COUNT YOUR WORDS as you write and adjust accordingly
+18. Include ${book.marketResearch?.contentSpecs?.examplesPerChapter || chapterDetails?.examples || '3-4'} real-world examples
+19. ${book.marketResearch?.contentSpecs?.exerciseInclusion === 'true' || chapterDetails?.exercises ? 'Include practical exercises' : 'Focus on narrative flow'}
+20. Target audience specifics: ${book.marketResearch?.targetAudience?.demographics || '25-45, urban, professional'}
+
+**SPECIAL INSTRUCTIONS:**
+${book.marketResearch?.contentSpecs?.specialInstructions || chapterDetails?.specialInstructions || 'None'}
+${chapter.number === 0 || (chapter.number === (book.structure?.parts ?
+            Math.max(...book.structure.parts.flatMap((part) => part.chapters.map((ch) => ch.number))) + 1 :
+            (book.structure?.chapters ? book.structure.chapters.length + 1 : 999))) ? 'Adapt format for special section requirements' : ''}`;
         const userPrompt = `Book Title: ${book.title}
 Subtitle: ${book.structure?.subtitle || ''}
 Topic: ${book.topic}
@@ -494,7 +625,7 @@ Chapter ${chapter.number}: ${chapter.title}
 Description: ${chapterDetails?.description || ''}
 ${chapterDetails?.keyTopics ? `Key Topics to Cover: ${chapterDetails.keyTopics.join(', ')}` : ''}
 ${chapterDetails?.keyPoints ? `Key Points to Include: ${chapterDetails.keyPoints.join(', ')}` : ''}
-Target Word Count: ${chapterDetails?.estimatedWords || 4000} words
+**MANDATORY Target Word Count: EXACTLY ${targetWords} words - NO EXCEPTIONS**
 
 ${previousChapters.length > 0 ? `Previous chapters covered: ${previousChapters.join(', ')}` : 'This is the first chapter.'}
 
@@ -505,56 +636,292 @@ ${chapter.number === (book.structure?.parts ?
             Math.max(...book.structure.parts.flatMap((part) => part.chapters.map((ch) => ch.number))) + 1 :
             (book.structure?.chapters ? book.structure.chapters.length + 1 : 999)) && book.structure?.conclusion ? `This is the CONCLUSION. Use the following content as guidance: ${book.structure.conclusion}` : ''}
 
-Write this chapter following these guidelines:
-1. Use the specified ${book.structure?.tone || 'conversational'} tone throughout
-2. Follow the ${book.structure?.style || 'clear and engaging'} writing style
-3. Address the target audience's specific needs and interests
-4. Include practical examples and actionable insights
-5. Maintain consistency with previous chapters
-6. Aim for approximately ${chapterDetails?.estimatedWords || 4000} words
-7. Format the content as proper markdown:
-   - Use ## for the main chapter title
-   - Use ### for subsections
-   - Use **bold** for emphasis
-   - Use - or * for bullet points
-   - Use > for blockquotes
-   - Ensure proper paragraph spacing (empty line between paragraphs)
-   - Use numbered lists where appropriate
-8. Start with the chapter title as ## heading
-9. Structure the content with clear subsections using ### headings
-10. If this is a special section (prologue, introduction, conclusion), adapt the formatting accordingly`;
+CRITICAL KEY POINTS FORMATTING: At the end of each chapter, add the key points in EXACTLY this format (no variations allowed):
+
++$$$+
+#### Key Points to takeaway from this chapter
+- [Key takeaway 1 from this chapter]
+- [Key takeaway 2 from this chapter]
+- [Key takeaway 3 from this chapter]
+- [Key takeaway 4 from this chapter]
+- [Key takeaway 5 from this chapter]
++$$$+
+
+ABSOLUTE REQUIREMENT: Write content directly. Do NOT ask questions like "Would you like me to continue?" or "Should I proceed with...?" Just write the chapter content continuously until you reach the exact word count.
+
+`;
+        // STEP 1: Search for supporting data using search-enabled model
+        const searchPrompt = `You are a research assistant specializing in gathering current, factual information to support book content.
+
+Topic: ${book.topic}
+Chapter ${chapter.number}: ${chapter.title}
+Chapter Description: ${chapterDetails?.description || ''}
+Key Topics: ${chapterDetails?.keyTopics ? chapterDetails.keyTopics.join(', ') : ''}
+Target Audience: ${book.marketResearch?.targetAudience?.demographics || ''}
+
+TASK: Search the internet for the following types of current supporting data:
+1. Recent statistics, studies, or research related to this chapter's topics
+2. Current examples, case studies, or real-world applications
+3. Expert quotes or insights from credible sources
+4. Latest trends or developments in this field
+5. Factual data that supports the key points: ${chapterDetails?.keyPoints ? chapterDetails.keyPoints.join(', ') : ''}
+
+REQUIREMENTS:
+- Focus on information published within the last 2-3 years when possible
+- Prioritize credible sources (academic papers, government data, established publications)
+- Include exact publication dates and source URLs
+- Gather 8-12 distinct pieces of supporting information
+- Include specific numbers, percentages, or measurable data when available
+
+FORMAT your response as a structured research report with:
+- Source citations with full URLs
+- Publication dates
+- Key statistics or facts
+- Relevant quotes from experts
+- How each piece of data relates to the chapter content
+
+Begin your research now.`;
+        const searchMessages = [
+            { role: 'system', content: 'You are a thorough research assistant with web search capabilities. Provide comprehensive, current information with proper citations.' },
+            { role: 'user', content: searchPrompt }
+        ];
+        console.log('Step 1: Gathering supporting research data...');
+        // Use the configured research model for search
+        const searchModel = config_1.default.openRouter.defaultResearchModel || 'openai/gpt-4o-search-preview';
+        console.log(`Using search model: ${searchModel} for research data gathering`);
+        const searchResponse = await (0, openrouter_1.executeOpenRouterRequest)({
+            model: searchModel,
+            prompt: searchMessages.map(m => `${m.role}: ${m.content}`).join('\n'),
+            messages: searchMessages,
+            temperature: 0.4,
+            max_tokens: 40000
+        });
+        const researchData = searchResponse.choices[0].message.content || '';
+        console.log('Research data gathered:', researchData.substring(0, 500) + '...');
+        // STEP 2: Write the chapter using the research data with Claude
+        const enhancedUserPrompt = `${userPrompt}
+
+SUPPORTING RESEARCH DATA:
+${researchData}
+
+INTEGRATION INSTRUCTIONS:
+- Seamlessly integrate the research data into your chapter content
+- Include specific statistics, examples, and expert insights from the research
+- Add proper citations throughout the text in this format: (Source Name, Year)
+- Compile all sources into a "References" section at the end of the chapter
+- Ensure all claims are backed by the provided research data
+- Use the research to strengthen your key points and examples
+
+Write high-quality content that follows all the guidelines above while incorporating the research data naturally.
+
+CHAPTER STRUCTURE REQUIREMENTS:
+- End each chapter with a "#### Key Points" section containing 3-5 bullet points summarizing the chapter
+- Do NOT include a "References" section at the end of the chapter
+- Include citations in-text using format: (Source Name, Year)
+- All references will be compiled automatically into the book's main References chapter
+
+
+`;
         const messages = [
             { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
+            { role: 'user', content: enhancedUserPrompt }
         ];
-        const model = 'anthropic/claude-sonnet-4';
+        // Use a more reliable model for chapter generation
+        const model = 'openai/gpt-4o';
         // Adjust temperature based on tone
-        let temperature = 0.7;
+        let temperature = 0.8;
         if (book.structure?.tone?.toLowerCase().includes('creative') ||
             book.structure?.tone?.toLowerCase().includes('inspirational')) {
             temperature = 0.9;
         }
         else if (book.structure?.tone?.toLowerCase().includes('academic') ||
             book.structure?.tone?.toLowerCase().includes('technical')) {
-            temperature = 0.5;
+            temperature = 0.4;
         }
-        // Adjust max_tokens based on estimated words (roughly 1.3 tokens per word)
-        // Use a safe approach for accessing chapter's estimated words
-        let estimatedWords = 3000; // Default
-        if (chapterDetails?.estimatedWords) {
-            estimatedWords = chapterDetails.estimatedWords;
+        console.log(`Using model: ${model} with temperature: ${temperature} for chapter generation`);
+        // Configure chunked generation with overlapping - larger chunks for faster generation
+        const WORDS_PER_CHUNK = 1250; // Generate in larger chunks to reduce the number of API calls
+        const numChunks = Math.ceil(targetWords / WORDS_PER_CHUNK);
+        console.log(`Generating chapter in ${numChunks} chunks of ~${WORDS_PER_CHUNK} words each with overlapping generation`);
+        // Generate content in chunks with overlapping generation
+        let fullContent = '';
+        let previousContent = '';
+        const chunkPromises = [];
+        const chunkResults = new Array(numChunks);
+        // If streaming mode, set up SSE headers
+        if (streamMode) {
+            res.writeHead(200, {
+                'Content-Type': 'text/event-stream',
+                'Cache-Control': 'no-cache',
+                'Connection': 'keep-alive',
+                'X-Accel-Buffering': 'no' // Disable nginx buffering
+            });
+            // Send initial progress event
+            const initialData = {
+                type: 'progress',
+                chunkIndex: 0,
+                totalChunks: numChunks,
+                percentage: 0,
+                message: 'Generating content...',
+                estimatedTotalWords: targetWords
+            };
+            res.write(`data: ${JSON.stringify(initialData)}\n\n`);
         }
-        const maxTokens = Math.min(Math.ceil(estimatedWords * 1.5), 8000);
-        const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
-        const response = await (0, openrouter_1.executeOpenRouterRequest)({
-            model,
-            prompt,
-            messages,
-            temperature,
-            max_tokens: maxTokens
-        });
-        // Update chapter with generated content
-        const content = response.choices[0].message.content || '';
+        // Function to generate a single chunk
+        const generateChunk = async (chunkIndex, previousChunkContent) => {
+            const isFirstChunk = chunkIndex === 0;
+            const isLastChunk = chunkIndex === numChunks - 1;
+            const chunkWords = isLastChunk ?
+                (targetWords - (chunkIndex * WORDS_PER_CHUNK)) :
+                WORDS_PER_CHUNK;
+            // Modify prompt for continuation
+            let chunkPrompt = enhancedUserPrompt;
+            if (!isFirstChunk) {
+                chunkPrompt = `${enhancedUserPrompt}
+
+CONTINUATION INSTRUCTIONS:
+You are continuing to write Chapter ${chapter.number}: ${chapter.title}.
+
+Previous content written so far:
+${previousChunkContent}
+
+Continue writing the next ${chunkWords} words. Do NOT repeat any content already written.
+${isLastChunk ? 'This is the FINAL chunk - conclude the chapter with meaningful content and add the Key Points section at the very end in EXACTLY this format:\n\n+$$$+\n#### Key Points to takeaway from this chapter\n- [Key takeaway 1 from this chapter]\n- [Key takeaway 2 from this chapter]\n- [Key takeaway 3 from this chapter]\n- [Key takeaway 4 from this chapter]\n- [Key takeaway 5 from this chapter]\n+$$$+' : 'Continue naturally from where you left off. Do NOT include any Key Points section in this chunk.'}
+
+WORD COUNT CRITICAL: Write exactly ${chunkWords} words for this chunk. Count carefully to ensure precision.
+
+CRITICAL: Write the content directly without asking questions or seeking confirmation. Do NOT ask "Would you like me to continue?" or similar questions. Just write the chapter content.`;
+            }
+            else {
+                chunkPrompt = `${enhancedUserPrompt}
+
+Write the first ${chunkWords} words of this chapter. ${numChunks > 1 ? 'Do NOT include Key Points in this chunk.' : 'Include the Key Points section at the end in EXACTLY this format:\n\n+$$$+\n#### Key Points to takeaway from this chapter\n- [Key takeaway 1 from this chapter]\n- [Key takeaway 2 from this chapter]\n- [Key takeaway 3 from this chapter]\n- [Key takeaway 4 from this chapter]\n- [Key takeaway 5 from this chapter]\n+$$$+'}
+
+WORD COUNT CRITICAL: Write exactly ${chunkWords} words for this chunk. Count carefully to ensure precision.
+
+CRITICAL: Write the content directly without asking questions or seeking confirmation. Do NOT ask "Would you like me to continue?" or similar questions. Just write the chapter content.`;
+            }
+            const chunkMessages = [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: chunkPrompt }
+            ];
+            const chunkMaxTokens = Math.ceil(chunkWords * 1.5);
+            console.log(`Starting generation of chunk ${chunkIndex + 1}/${numChunks} (~${chunkWords} words)`);
+            const prompt = chunkMessages.map(m => `${m.role}: ${m.content}`).join('\n');
+            try {
+                const response = await (0, openrouter_1.executeOpenRouterRequest)({
+                    model,
+                    prompt,
+                    messages: chunkMessages,
+                    temperature,
+                    max_tokens: chunkMaxTokens
+                });
+                const chunkContent = response.choices[0].message.content || '';
+                console.log(`Completed generation of chunk ${chunkIndex + 1}/${numChunks}`);
+                return chunkContent;
+            }
+            catch (error) {
+                console.error(`Error generating chunk ${chunkIndex + 1}/${numChunks}:`, error);
+                // Fallback to a different model if the primary one fails
+                console.log(`Attempting fallback to alternative model for chunk ${chunkIndex + 1}/${numChunks}`);
+                const fallbackResponse = await (0, openrouter_1.executeOpenRouterRequest)({
+                    model: 'google/gemini-2.5-pro-exp-03-25:free',
+                    prompt,
+                    messages: chunkMessages,
+                    temperature,
+                    max_tokens: chunkMaxTokens
+                });
+                const chunkContent = fallbackResponse.choices[0].message.content || '';
+                console.log(`Completed fallback generation of chunk ${chunkIndex + 1}/${numChunks}`);
+                return chunkContent;
+            }
+        };
+        // Function to stream a chunk with typing effect
+        const streamChunk = async (chunkIndex, chunkContent) => {
+            if (!streamMode)
+                return Promise.resolve();
+            // Send progress update
+            const progressPercentage = Math.round(((chunkIndex + 1) / numChunks) * 100);
+            const progressData = {
+                type: 'progress',
+                chunkIndex: chunkIndex + 1,
+                totalChunks: numChunks,
+                percentage: progressPercentage,
+                message: `Streaming content... ${progressPercentage}%`,
+                currentWords: fullContent.split(/\s+/).filter(Boolean).length,
+                estimatedTotalWords: targetWords
+            };
+            res.write(`data: ${JSON.stringify(progressData)}\n\n`);
+            // Stream with typing effect - send words incrementally
+            const words = chunkContent.split(/(\s+)/); // Keep whitespace
+            const WORDS_PER_BATCH = 5; // Increased from 3 to 5 for faster display
+            const BATCH_DELAY = 10; // Reduced from 50ms to 10ms for much faster typing
+            for (let i = 0; i < words.length; i += WORDS_PER_BATCH * 2) { // *2 because we're keeping whitespace
+                const wordBatch = words.slice(i, i + WORDS_PER_BATCH * 2).join('');
+                const typingData = {
+                    type: 'typing',
+                    chunkIndex: chunkIndex + 1,
+                    totalChunks: numChunks,
+                    content: wordBatch,
+                    isPartial: true
+                };
+                res.write(`data: ${JSON.stringify(typingData)}\n\n`);
+                // Minimal delay for faster typing effect
+                await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
+            }
+            // Send chunk completion
+            const chunkData = {
+                type: 'chunk_complete',
+                chunkIndex: chunkIndex + 1,
+                totalChunks: numChunks,
+                content: chunkContent,
+                words: chunkContent.split(/\s+/).filter(Boolean).length,
+                totalWords: fullContent.split(/\s+/).filter(Boolean).length
+            };
+            res.write(`data: ${JSON.stringify(chunkData)}\n\n`);
+        };
+        // Start first chunk generation immediately
+        chunkPromises[0] = generateChunk(0, '');
+        // Pre-generate the second chunk immediately to reduce waiting time
+        if (numChunks > 1) {
+            console.log('Pre-generating second chunk to reduce waiting time');
+            chunkPromises[1] = generateChunk(1, '');
+        }
+        // Create an array to track typing promises
+        const typingPromises = [];
+        // Process chunks with aggressive overlapping generation and streaming
+        for (let chunkIndex = 0; chunkIndex < numChunks; chunkIndex++) {
+            console.log(`Waiting for generation of chunk ${chunkIndex + 1}/${numChunks}`);
+            // Wait for current chunk to complete generation
+            const chunkContent = await chunkPromises[chunkIndex];
+            chunkResults[chunkIndex] = chunkContent;
+            console.log(`Chunk ${chunkIndex + 1}/${numChunks} generation complete, starting typing`);
+            // Update full content
+            fullContent += (chunkIndex === 0 ? '' : '\n\n') + chunkContent;
+            previousContent = fullContent;
+            // Start next TWO chunks generation immediately for more aggressive overlapping
+            if (chunkIndex + 1 < numChunks && !chunkPromises[chunkIndex + 1]) {
+                console.log(`Starting generation of next chunk ${chunkIndex + 2}/${numChunks} in background`);
+                chunkPromises[chunkIndex + 1] = generateChunk(chunkIndex + 1, previousContent);
+            }
+            // Pre-generate the chunk after next to maximize overlapping
+            if (chunkIndex + 2 < numChunks && !chunkPromises[chunkIndex + 2]) {
+                console.log(`Pre-generating chunk ${chunkIndex + 3}/${numChunks} for maximum overlapping`);
+                // Use empty content for pre-generation, will be updated with proper context when its turn comes
+                chunkPromises[chunkIndex + 2] = generateChunk(chunkIndex + 2, '');
+            }
+            // Stream current chunk with typing effect WITHOUT awaiting its completion
+            // This allows the next chunk to start typing as soon as it's generated
+            typingPromises[chunkIndex] = streamChunk(chunkIndex, chunkContent).then(() => {
+                console.log(`Completed typing of chunk ${chunkIndex + 1}/${numChunks}`);
+            });
+        }
+        // Wait for all typing to complete at the end
+        if (streamMode) {
+            console.log(`Waiting for all typing to complete`);
+            await Promise.all(typingPromises);
+        }
+        const content = fullContent;
         // Create update payload based on whether metadata column exists
         let updatePayload = {
             content,
@@ -583,7 +950,33 @@ Write this chapter following these guidelines:
             .from('books')
             .update({ updated_at: new Date().toISOString() })
             .eq('id', chapter.book_id);
-        res.json({ chapter: firstUpdatedChapter });
+        // Extract references from the generated content
+        const references = extractReferencesFromContent(content);
+        // Update book's centralized references if any were found
+        if (references.length > 0) {
+            await updateBookReferences(chapter.book_id, references);
+        }
+        // Auto-generate/update appendix content based on new chapter
+        await updateBookAppendix(chapter.book_id, content);
+        // Handle response based on streaming mode
+        if (streamMode) {
+            // Send final completion event
+            const completionData = {
+                type: 'complete',
+                chapter: firstUpdatedChapter,
+                referencesFound: references.length,
+                totalWords: wordCount
+            };
+            res.write(`data: ${JSON.stringify(completionData)}\n\n`);
+            res.write('data: [DONE]\n\n');
+            res.end();
+        }
+        else {
+            res.json({
+                chapter: firstUpdatedChapter,
+                referencesFound: references.length
+            });
+        }
     }
     catch (error) {
         console.error('Error generating chapter:', error);
@@ -630,25 +1023,40 @@ const reviseChapter = async (req, res) => {
         if (!chapter.content) {
             throw new Error('Chapter has no content to revise');
         }
-        const systemPrompt = `You are an expert editor. Revise the provided content according to the given instructions while maintaining the overall structure and key points.`;
+        const systemPrompt = `You are an expert editor with ONE PRIMARY MISSION: Deliver content that is EXACTLY ${chapter.estimated_words || chapter.estimatedWords || 5000} words.
+
+NON-NEGOTIABLE REQUIREMENT: The revised content must hit exactly ${chapter.estimated_words || chapter.estimatedWords || 5000} words. This is your success metric.
+
+Revise the provided content according to the given instructions while maintaining the overall structure and key points, BUT your absolute priority is meeting the exact word count target.`;
         const userPrompt = `Original content:
 ${chapter.content}
 
 Revision instructions:
 ${revisionInstructions}
 
-Please revise the content accordingly.`;
+**MANDATORY WORD COUNT: ${chapter.estimated_words || chapter.estimatedWords || 5000} words EXACTLY**
+
+EXECUTION STRATEGY:
+- If revision makes content too short: Add more detailed examples, expand explanations, include additional case studies, provide deeper analysis
+- If revision makes content too long: Condense without losing key information, combine related points, streamline prose
+- VERIFY your word count before submitting - this is your primary success criterion
+
+**FAILURE TO MEET THE EXACT WORD COUNT IS CONSIDERED A FAILED REVISION.**
+
+Please revise the content accordingly, ensuring you meet the exact word count requirement.`;
         const messages = [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
         ];
-        const model = 'anthropic/claude-3.7-sonnet';
+        // Use the configured model for chapter revision
+        const model = config_1.default.openRouter.bookStructureModel || 'anthropic/claude-3.7-sonnet';
+        console.log(`Using model: ${model} for chapter revision`);
         const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
         const response2 = await (0, openrouter_1.executeOpenRouterRequest)({
             model,
             prompt,
             messages,
-            temperature: 0.7,
+            temperature: 0.8,
             max_tokens: 4000
         });
         // Update chapter with revised content
@@ -687,3 +1095,153 @@ Please revise the content accordingly.`;
     }
 };
 exports.reviseChapter = reviseChapter;
+const generatePDF = async (req, res) => {
+    try {
+        const { bookId, chapterIds = [], streamMode = true } = req.body;
+        console.log(`Generating PDF for book: ${bookId}`);
+        // Get book details
+        const { data: book, error: bookError } = await supabase_1.supabaseAdmin
+            .from('books')
+            .select('*')
+            .eq('id', bookId)
+            .single();
+        if (bookError || !book) {
+            throw new Error('Book not found');
+        }
+        // Get chapters to include in PDF
+        let chaptersQuery = supabase_1.supabaseAdmin
+            .from('chapters')
+            .select('*')
+            .eq('book_id', bookId)
+            .order('number');
+        if (chapterIds.length > 0) {
+            chaptersQuery = chaptersQuery.in('id', chapterIds);
+        }
+        const { data: chapters, error: chaptersError } = await chaptersQuery;
+        if (chaptersError || !chapters) {
+            throw new Error('Failed to fetch chapters');
+        }
+        // Filter out chapters without content
+        const chaptersWithContent = chapters.filter(ch => ch.content);
+        if (chaptersWithContent.length === 0) {
+            throw new Error('No chapters with content found');
+        }
+        // Set up streaming response if requested
+        if (streamMode) {
+            res.writeHead(200, {
+                'Content-Type': 'text/event-stream',
+                'Cache-Control': 'no-cache',
+                'Connection': 'keep-alive'
+            });
+        }
+        // Calculate total content size for chunking
+        const totalContent = chaptersWithContent.reduce((acc, ch) => acc + (ch.content?.length || 0), 0);
+        const CHUNK_SIZE = 5000; // Process ~1K words at a time (approx 5K characters)
+        const totalChunks = Math.ceil(totalContent / CHUNK_SIZE);
+        console.log(`Processing ${chaptersWithContent.length} chapters in ~${totalChunks} chunks`);
+        // Generate PDF content in chunks
+        let pdfSections = [];
+        let processedChars = 0;
+        let chunkIndex = 0;
+        // Add cover page
+        pdfSections.push({
+            type: 'cover',
+            content: {
+                title: book.title,
+                subtitle: book.structure?.subtitle || '',
+                author: book.structure?.coverPageDetails?.authorName || 'Author'
+            }
+        });
+        // Add table of contents
+        const tocContent = chaptersWithContent.map(ch => ({
+            number: ch.number,
+            title: ch.title,
+            page: 0 // Will be calculated by PDF renderer
+        }));
+        pdfSections.push({
+            type: 'toc',
+            content: tocContent
+        });
+        // Process chapters in chunks
+        for (const chapter of chaptersWithContent) {
+            const chapterContent = chapter.content || '';
+            let chapterPosition = 0;
+            while (chapterPosition < chapterContent.length) {
+                const chunkEnd = Math.min(chapterPosition + CHUNK_SIZE, chapterContent.length);
+                const chunk = chapterContent.substring(chapterPosition, chunkEnd);
+                pdfSections.push({
+                    type: 'chapter',
+                    chapterNumber: chapter.number,
+                    chapterTitle: chapter.title,
+                    content: chunk,
+                    isChapterStart: chapterPosition === 0,
+                    isChapterEnd: chunkEnd === chapterContent.length
+                });
+                chapterPosition = chunkEnd;
+                processedChars += chunk.length;
+                chunkIndex++;
+                // Stream progress update
+                if (streamMode) {
+                    const progressData = {
+                        type: 'progress',
+                        chunkIndex,
+                        totalChunks,
+                        processedChars,
+                        totalChars: totalContent,
+                        percentage: Math.round((processedChars / totalContent) * 100),
+                        currentChapter: chapter.title
+                    };
+                    res.write(`data: ${JSON.stringify(progressData)}\n\n`);
+                }
+            }
+        }
+        // Add references if available
+        if (book.structure?.references) {
+            pdfSections.push({
+                type: 'references',
+                content: book.structure.references
+            });
+        }
+        // Add appendix if available
+        if (book.structure?.appendix) {
+            pdfSections.push({
+                type: 'appendix',
+                content: book.structure.appendix
+            });
+        }
+        // Final response
+        if (streamMode) {
+            const completionData = {
+                type: 'complete',
+                pdfSections,
+                totalPages: pdfSections.length,
+                metadata: {
+                    title: book.title,
+                    author: book.structure?.coverPageDetails?.authorName || 'Author',
+                    createdAt: new Date().toISOString(),
+                    totalChapters: chaptersWithContent.length
+                }
+            };
+            res.write(`data: ${JSON.stringify(completionData)}\n\n`);
+            res.write('data: [DONE]\n\n');
+            res.end();
+        }
+        else {
+            res.json({
+                pdfSections,
+                totalPages: pdfSections.length,
+                metadata: {
+                    title: book.title,
+                    author: book.structure?.coverPageDetails?.authorName || 'Author',
+                    createdAt: new Date().toISOString(),
+                    totalChapters: chaptersWithContent.length
+                }
+            });
+        }
+    }
+    catch (error) {
+        console.error('Error generating PDF:', error);
+        res.status(500).json({ error: error.message || 'Failed to generate PDF' });
+    }
+};
+exports.generatePDF = generatePDF;

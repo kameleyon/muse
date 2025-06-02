@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { cn } from '../lib/utils'
-import { Eye, Edit2 } from 'lucide-react'
+import { Eye, Edit2, Table } from 'lucide-react'
 
 interface MarkdownEditorProps {
   value: string
@@ -20,6 +20,67 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   readOnly = false
 }) => {
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit')
+
+  // Table cleaning utility function
+  const cleanMarkdownTable = (tableText: string): string => {
+    const lines = tableText.split('\n').filter(line => line.trim());
+    
+    if (lines.length < 2) return tableText;
+    
+    // Parse header and separator
+    const headerLine = lines[0];
+    const separatorLine = lines[1];
+    const dataLines = lines.slice(2);
+    
+    // Extract headers
+    const headers = headerLine.split('|')
+      .map(cell => cell.trim())
+      .filter(cell => cell.length > 0);
+    
+    // Extract data rows
+    const dataRows = dataLines.map(line =>
+      line.split('|')
+        .map(cell => cell.trim())
+        .filter(cell => cell.length > 0)
+    );
+    
+    // Calculate column widths
+    const columnWidths = headers.map((header, index) => {
+      const headerWidth = header.length;
+      const maxDataWidth = Math.max(
+        ...dataRows.map(row => (row[index] || '').length)
+      );
+      return Math.max(headerWidth, maxDataWidth, 3); // Minimum width of 3
+    });
+    
+    // Format header row
+    const formattedHeader = '| ' + headers.map((header, index) =>
+      header.padEnd(columnWidths[index])
+    ).join(' | ') + ' |';
+    
+    // Format separator row
+    const formattedSeparator = '|' + columnWidths.map(width =>
+      '-'.repeat(width + 2)
+    ).join('|') + '|';
+    
+    // Format data rows
+    const formattedDataRows = dataRows.map(row =>
+      '| ' + headers.map((_, index) =>
+        (row[index] || '').padEnd(columnWidths[index])
+      ).join(' | ') + ' |'
+    );
+    
+    return [formattedHeader, formattedSeparator, ...formattedDataRows].join('\n');
+  };
+
+  // Function to clean all tables in the content
+  const cleanTables = () => {
+    const tableRegex = /\|(.+)\|\n\|[-\s|:]+\|\n((?:\|.+\|\n?)*)/g;
+    const cleanedContent = value.replace(tableRegex, (match) => {
+      return cleanMarkdownTable(match);
+    });
+    onChange(cleanedContent);
+  };
 
   const renderMarkdown = (content: string) => {
     // Basic markdown rendering
@@ -98,33 +159,44 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   return (
     <div className={cn("h-full flex flex-col", className)}>
       {!readOnly && (
-        <div className="flex items-center justify-end mb-2 space-x-2">
+        <div className="flex items-center justify-between mb-2">
           <button
             type="button"
-            onClick={() => setViewMode('edit')}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-sm flex items-center",
-              viewMode === 'edit' 
-                ? "bg-primary text-white" 
-                : "bg-neutral-lightest text-neutral-medium hover:bg-neutral-light"
-            )}
+            onClick={cleanTables}
+            className="px-3 py-1.5 rounded-lg text-sm flex items-center bg-neutral-lightest text-neutral-medium hover:bg-neutral-light"
+            title="Clean and format all tables in the content"
           >
-            <Edit2 className="w-4 h-4 mr-1" />
-            Edit
+            <Table className="w-4 h-4 mr-1" />
+            Clean Tables
           </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('preview')}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-sm flex items-center",
-              viewMode === 'preview' 
-                ? "bg-primary text-white" 
-                : "bg-neutral-lightest text-neutral-medium hover:bg-neutral-light"
-            )}
-          >
-            <Eye className="w-4 h-4 mr-1" />
-            Preview
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={() => setViewMode('edit')}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-sm flex items-center",
+                viewMode === 'edit'
+                  ? "bg-primary text-white"
+                  : "bg-neutral-lightest text-neutral-medium hover:bg-neutral-light"
+              )}
+            >
+              <Edit2 className="w-4 h-4 mr-1" />
+              Edit
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('preview')}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-sm flex items-center",
+                viewMode === 'preview'
+                  ? "bg-primary text-white"
+                  : "bg-neutral-lightest text-neutral-medium hover:bg-neutral-light"
+              )}
+            >
+              <Eye className="w-4 h-4 mr-1" />
+              Preview
+            </button>
+          </div>
         </div>
       )}
 
