@@ -349,10 +349,11 @@ const BookPreviewPage: React.FC = () => {
       };
 
       const addParagraph = (text: string) => {
-        addFormattedText(text, normalFontSize, { 
-          firstLineIndent: true, 
-          spaceAbove: lineHeight * normalFontSize * 0.5, 
-          spaceAfter: lineHeight * normalFontSize * 0.5 
+        addFormattedText(text, normalFontSize, {
+          firstLineIndent: true,
+          spaceAbove: lineHeight * normalFontSize * 0.5,
+          spaceAfter: lineHeight * normalFontSize * 0.5,
+          justify: true // Enable justification for paragraphs
         });
       };
 
@@ -514,10 +515,11 @@ const BookPreviewPage: React.FC = () => {
 
             const cellPadding = 7;
             const tableContentWidth = contentWidth;
-            const cornerRadius = 10; // Radius for rounded corners
+            //const cornerRadius = 10; // Radius for rounded corners
             const HEADER_ROW_VERTICAL_MARGIN = 5; // pt, for top and bottom margin of the header row itself
             const DATA_ROW_VERTICAL_MARGIN = 3;   // pt, for top and bottom margin of a data row itself
-            const MIN_COLUMN_WIDTH_PT = 70; // Minimum width for any column in points
+            const MIN_COLUMN_WIDTH_PT = 90; // Increased Minimum width for any column in points
+            const cornerRadius = 10; // Radius for rounded corners
 
             const colWidths: number[] = [];
             pdf.setFontSize(normalFontSize);
@@ -539,7 +541,7 @@ const BookPreviewPage: React.FC = () => {
               for (let col = 0; col < numCols; col++) {
                 colWidths[col] *= scaleFactor;
                 // Ensure column does not go below a minimal practical width after scaling
-                colWidths[col] = Math.max(colWidths[col], MIN_COLUMN_WIDTH_PT * 0.5); // Example: allow shrinking but not too extremely
+                colWidths[col] = Math.max(colWidths[col], MIN_COLUMN_WIDTH_PT * 0.75); // Adjusted shrinking floor
               }
               // Recalculate total width after scaling to be precise for drawing
               totalCalculatedWidth = colWidths.reduce((sum, w) => sum + w, 0);
@@ -575,7 +577,7 @@ const BookPreviewPage: React.FC = () => {
             const drawStyledRow = (rowData: string[], isHeader: boolean, currentDrawY: number, isFirstRowOfPage: boolean, isLastRowOfTable: boolean): number => {
               let maxHeightInRow = 0; // This will be recalculated with current font settings
               const rowCellWrappedLines: string[][] = [];
-              const currentFontSize = isHeader ? h4FontSize : normalFontSize; // Corrected: h4 for header
+              const currentFontSize = isHeader ? normalFontSize : normalFontSize; // Corrected: h4 for header
               const currentLineHeight = currentFontSize * 1.2;
 
               pdf.setFont('times', isHeader ? 'bold' : 'normal');
@@ -623,18 +625,18 @@ const BookPreviewPage: React.FC = () => {
               // Draw header background with rounded top corners
               if (isHeader && isFirstRowOfPage) {
                 pdf.setFillColor(headerBgColor[0], headerBgColor[1], headerBgColor[2]);
-                if (finalTableDrawWidth > 2 * cornerRadius) { // Ensure width is enough for rounded corners
-                    // Use roundedRect for the background fill
-                    pdf.roundedRect(currentX, currentDrawY, finalTableDrawWidth, maxHeightInRow, cornerRadius, cornerRadius, 'F');
-                    // Correct the bottom part of the roundedRect fill if it's only for the header
-                    pdf.rect(currentX, currentDrawY + cornerRadius, finalTableDrawWidth, maxHeightInRow - cornerRadius, 'F');
-                } else { // Fallback to sharp corners if too narrow
-                    pdf.rect(currentX, currentDrawY, finalTableDrawWidth, maxHeightInRow, 'F');
-                }
-              } else if (isHeader) { // Header on subsequent page (straight corners)
+                // Always attempt roundedRect for the first header on a page.
+                // jsPDF's roundedRect should handle narrow widths by adjusting the radius.
+                pdf.roundedRect(currentX, currentDrawY, finalTableDrawWidth, maxHeightInRow, cornerRadius, cornerRadius, 'F');
+                // Correct the bottom part of the roundedRect fill if it's only for the header
+                // to ensure only top corners are rounded.
+                pdf.rect(currentX, currentDrawY + cornerRadius, finalTableDrawWidth, maxHeightInRow - cornerRadius, 'F');
+              } else if (isHeader) {
                 pdf.setFillColor(headerBgColor[0], headerBgColor[1], headerBgColor[2]);
-                pdf.rect(currentX, currentDrawY, finalTableDrawWidth, maxHeightInRow, 'F');
+                pdf.roundedRect(currentX, currentDrawY, finalTableDrawWidth, maxHeightInRow, cornerRadius, cornerRadius, 'F');
+                pdf.rect(currentX, currentDrawY + cornerRadius, finalTableDrawWidth, maxHeightInRow - cornerRadius, 'F');
               }
+              
 
               // Draw borders
               pdf.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
