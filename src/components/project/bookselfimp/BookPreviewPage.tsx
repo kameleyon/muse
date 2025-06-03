@@ -515,6 +515,9 @@ const BookPreviewPage: React.FC = () => {
             const cellPadding = 7;
             const tableContentWidth = contentWidth;
             const cornerRadius = 10; // Radius for rounded corners
+            const HEADER_ROW_VERTICAL_MARGIN = 5; // pt, for top and bottom margin of the header row itself
+            const DATA_ROW_VERTICAL_MARGIN = 3;   // pt, for top and bottom margin of a data row itself
+            const MIN_COLUMN_WIDTH_PT = 70; // Minimum width for any column in points
 
             const colWidths: number[] = [];
             pdf.setFontSize(normalFontSize);
@@ -524,18 +527,24 @@ const BookPreviewPage: React.FC = () => {
               dataRowsContent.forEach(row => {
                 maxW = Math.max(maxW, pdf.getTextWidth(row[col] || ''));
               });
-              colWidths.push(maxW + (2 * cellPadding));
+              const initialColWidth = maxW + (2 * cellPadding);
+              colWidths.push(Math.max(initialColWidth, MIN_COLUMN_WIDTH_PT)); // Apply min width
             }
             
-            const totalCalculatedWidth = colWidths.reduce((sum, w) => sum + w, 0);
-            const actualTableWidth = Math.min(totalCalculatedWidth, tableContentWidth);
+            let totalCalculatedWidth = colWidths.reduce((sum, w) => sum + w, 0);
+            const actualTableWidth = tableContentWidth; // Target width for the table
 
             if (totalCalculatedWidth > actualTableWidth) {
               const scaleFactor = actualTableWidth / totalCalculatedWidth;
               for (let col = 0; col < numCols; col++) {
                 colWidths[col] *= scaleFactor;
+                // Ensure column does not go below a minimal practical width after scaling
+                colWidths[col] = Math.max(colWidths[col], MIN_COLUMN_WIDTH_PT * 0.5); // Example: allow shrinking but not too extremely
               }
+              // Recalculate total width after scaling to be precise for drawing
+              totalCalculatedWidth = colWidths.reduce((sum, w) => sum + w, 0);
             }
+            const finalTableDrawWidth = totalCalculatedWidth; // Use the sum of final column widths for drawing
             
             const borderColor = [35, 35, 33, 0.10]; // Using the updated RGB values
             const headerBgColor = [35, 35, 33]; // Using the updated RGB values
@@ -545,11 +554,28 @@ const BookPreviewPage: React.FC = () => {
             const tableStartX = margin;
             let tableCurrentY = yPosition;
 
+            const calculateRowHeight = (rowData: string[], isHeaderCalc: boolean): number => {
+              let calcMaxHeightInRow = 0;
+              const calcFontSize = isHeaderCalc ? h4FontSize : normalFontSize;
+              const calcLineHeight = calcFontSize * 1.2;
+              pdf.setFont('times', isHeaderCalc ? 'bold' : 'normal'); // Set font for getTextWidth
+              pdf.setFontSize(calcFontSize);
+
+              for (let col = 0; col < numCols; col++) {
+                const text = rowData[col] || '';
+                const effectiveColWidth = Math.max(1, colWidths[col] - (2 * cellPadding));
+                const wrapped = pdf.splitTextToSize(text, effectiveColWidth);
+                calcMaxHeightInRow = Math.max(calcMaxHeightInRow, wrapped.length * calcLineHeight);
+              }
+              const rowSpecificVerticalMargin = isHeaderCalc ? HEADER_ROW_VERTICAL_MARGIN : DATA_ROW_VERTICAL_MARGIN;
+              return calcMaxHeightInRow + (2 * cellPadding) + (2 * rowSpecificVerticalMargin);
+            };
+            
             // Function to draw a row with specified styling
             const drawStyledRow = (rowData: string[], isHeader: boolean, currentDrawY: number, isFirstRowOfPage: boolean, isLastRowOfTable: boolean): number => {
-              let maxHeightInRow = 0;
+              let maxHeightInRow = 0; // This will be recalculated with current font settings
               const rowCellWrappedLines: string[][] = [];
-              const currentFontSize = isHeader ? normalFontSize : normalFontSize; // Corrected: h4 for header, normal for cells
+              const currentFontSize = isHeader ? h4FontSize : normalFontSize; // Corrected: h4 for header
               const currentLineHeight = currentFontSize * 1.2;
 
               pdf.setFont('times', isHeader ? 'bold' : 'normal');
@@ -557,21 +583,39 @@ const BookPreviewPage: React.FC = () => {
 
               for (let col = 0; col < numCols; col++) {
                 const text = rowData[col] || '';
-                // Ensure column width for splitTextToSize is positive
                 const effectiveColWidth = Math.max(1, colWidths[col] - (2 * cellPadding));
                 const wrapped = pdf.splitTextToSize(text, effectiveColWidth);
                 rowCellWrappedLines.push(wrapped);
                 maxHeightInRow = Math.max(maxHeightInRow, wrapped.length * currentLineHeight);
               }
-              maxHeightInRow += (2 * cellPadding); // Add top/bottom padding to calculated height
+              const rowSpecificVerticalMarginForDraw = isHeader ? HEADER_ROW_VERTICAL_MARGIN : DATA_ROW_VERTICAL_MARGIN;
+              maxHeightInRow += (2 * cellPadding) + (2 * rowSpecificVerticalMarginForDraw);
 
-              // Page break check
-              if (currentDrawY + maxHeightInRow > pageHeight - margin) {
-                addNewPage();
-                currentDrawY = yPosition; // yPosition is updated by addNewPage
-                if (!isHeader) { // Redraw header on new page if it's a data row continuing
-                  currentDrawY = drawStyledRow(headerCellsContent, true, currentDrawY, true, false);
+              // Improved Page break check
+              if (isHeader && isFirstRowOfPage) { // Special check for the very first header of a table
+                let firstDataRowHeight = 0;
+                if (dataRowsContent.length > 0) {
+                  firstDataRowHeight = calculateRowHeight(dataRowsContent[0], false);
                 }
+                // If header + first data row (if exists) OR just header (if no data rows) doesn't fit
+                if ((currentDrawY + maxHeightInRow + (dataRowsContent.length > 0 ? firstDataRowHeight : 0) > pageHeight - margin && dataRowsContent.length > 0) ||
+                    (currentDrawY + maxHeightInRow > pageHeight - margin && dataRowsContent.length === 0) ) {
+                  addNewPage();
+                  currentDrawY = yPosition; // yPosition is updated by addNewPage
+                  // Header will be drawn on the new page, isFirstRowOfPage remains true for this call
+                }
+              } else if (!isHeader && (currentDrawY + maxHeightInRow > pageHeight - margin)) {
+                // Page break for subsequent data rows
+                addNewPage();
+                currentDrawY = yPosition;
+                // Redraw header on the new page before this data row
+                currentDrawY = drawStyledRow(headerCellsContent, true, currentDrawY, true, false);
+              }
+              // Note: A header that is not isFirstRowOfPage (i.e., a re-drawn header)
+              // will not trigger the lookahead for firstDataRow, it will just check if itself fits.
+              else if (isHeader && !isFirstRowOfPage && (currentDrawY + maxHeightInRow > pageHeight - margin)) {
+                 addNewPage();
+                 currentDrawY = yPosition;
               }
               
               let currentX = tableStartX;
@@ -579,17 +623,17 @@ const BookPreviewPage: React.FC = () => {
               // Draw header background with rounded top corners
               if (isHeader && isFirstRowOfPage) {
                 pdf.setFillColor(headerBgColor[0], headerBgColor[1], headerBgColor[2]);
-                if (actualTableWidth > 2 * cornerRadius) { // Ensure width is enough for rounded corners
+                if (finalTableDrawWidth > 2 * cornerRadius) { // Ensure width is enough for rounded corners
                     // Use roundedRect for the background fill
-                    pdf.roundedRect(currentX, currentDrawY, actualTableWidth, maxHeightInRow, cornerRadius, cornerRadius, 'F');
+                    pdf.roundedRect(currentX, currentDrawY, finalTableDrawWidth, maxHeightInRow, cornerRadius, cornerRadius, 'F');
                     // Correct the bottom part of the roundedRect fill if it's only for the header
-                    pdf.rect(currentX, currentDrawY + cornerRadius, actualTableWidth, maxHeightInRow - cornerRadius, 'F');
+                    pdf.rect(currentX, currentDrawY + cornerRadius, finalTableDrawWidth, maxHeightInRow - cornerRadius, 'F');
                 } else { // Fallback to sharp corners if too narrow
-                    pdf.rect(currentX, currentDrawY, actualTableWidth, maxHeightInRow, 'F');
+                    pdf.rect(currentX, currentDrawY, finalTableDrawWidth, maxHeightInRow, 'F');
                 }
               } else if (isHeader) { // Header on subsequent page (straight corners)
                 pdf.setFillColor(headerBgColor[0], headerBgColor[1], headerBgColor[2]);
-                pdf.rect(currentX, currentDrawY, actualTableWidth, maxHeightInRow, 'F');
+                pdf.rect(currentX, currentDrawY, finalTableDrawWidth, maxHeightInRow, 'F');
               }
 
               // Draw borders
@@ -600,7 +644,7 @@ const BookPreviewPage: React.FC = () => {
               
               // Draw bottom border for ALL rows (header and data)
               // This line acts as the separator below the header and between data rows.
-              pdf.line(currentX, currentDrawY + maxHeightInRow, currentX + actualTableWidth, currentDrawY + maxHeightInRow);
+              pdf.line(currentX, currentDrawY + maxHeightInRow, currentX + finalTableDrawWidth, currentDrawY + maxHeightInRow);
 
               // Draw cell text
               for (let col = 0; col < numCols; col++) {
@@ -612,12 +656,15 @@ const BookPreviewPage: React.FC = () => {
                 
                 const linesToDraw = rowCellWrappedLines[col];
                 const textBlockHeight = linesToDraw.length * currentLineHeight;
-                // Calculate starting Y for vertically centered text within the cell's drawable area (maxHeightInRow - 2*cellPadding)
-                const drawableCellHeight = maxHeightInRow - ( cellPadding);
-                let textY = currentDrawY + cellPadding + (drawableCellHeight - textBlockHeight) / 2;
+                // Calculate starting Y for vertically centered text.
+                // maxHeightInRow is the total row height including its own margins and cell padding.
+                // textBlockHeight is the height of the wrapped text lines.
+                // The space available for the text block itself, within cell padding and row margins:
+                const textBlockAreaHeight = maxHeightInRow - (2 * rowSpecificVerticalMarginForDraw) - (2 * cellPadding);
+                let textY = currentDrawY + rowSpecificVerticalMarginForDraw + cellPadding; // Top of the text content box
+                textY += (textBlockAreaHeight - textBlockHeight) / 2; // Center within that box
                 // Add ascent approximation for the first line.
-                // Note: A more precise ascent calculation would require deeper font metrics access.
-                textY += currentFontSize * 0.85;
+                textY += currentFontSize * 0.85; // jsPDF draws from baseline
 
 
                 linesToDraw.forEach(lineText => {
@@ -633,8 +680,32 @@ const BookPreviewPage: React.FC = () => {
               return currentDrawY + maxHeightInRow;
             };
 
+            // New pre-emptive page break logic: Try to keep whole table together if it fits on one page.
+            const fullTableHeight = calculateRowHeight(headerCellsContent, true) +
+              dataRowsContent.reduce((sum, rowData) => sum + calculateRowHeight(rowData, false), 0);
+
+            const drawablePageHeight = pageHeight - (2 * margin); // Total drawable height of a full page
+
+            // Condition 1: Can the entire table theoretically fit on a single new page?
+            const canFitOnOneFullPage = fullTableHeight <= drawablePageHeight;
+
+            // Condition 2: Does the table, if drawn starting at tableCurrentY, exceed the current page's remaining space?
+            const overflowsCurrentPage = tableCurrentY + fullTableHeight > pageHeight - margin;
+
+            if (canFitOnOneFullPage && overflowsCurrentPage) {
+              // It's a short table that would break, so move it to a new page entirely.
+              addNewPage(); // This updates global yPosition
+              tableCurrentY = yPosition; // Reset table's drawing Y to the start of the new page
+            }
+            // If it's a long table (cannotFitOnOneFullPage), or if it fits on the current page without overflowing,
+            // then the existing row-by-row break logic within drawStyledRow will handle it.
+
             // Draw header
-            tableCurrentY = drawStyledRow(headerCellsContent, true, tableCurrentY, true, dataRowsContent.length === 0);
+            // The `isFirstRowOfPage` for this initial drawStyledRow call needs to be accurate.
+            // If a pre-emptive break happened, it IS the first on the page.
+            // If no pre-emptive break, it depends on tableCurrentY vs margin.
+            const isHeaderFirstOnActualPage = tableCurrentY === margin;
+            tableCurrentY = drawStyledRow(headerCellsContent, true, tableCurrentY, isHeaderFirstOnActualPage, dataRowsContent.length === 0);
 
             // Draw data rows
             dataRowsContent.forEach((row, rowIndex) => {
