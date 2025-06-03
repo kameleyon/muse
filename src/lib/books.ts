@@ -579,7 +579,18 @@ export const bookService = {
                       accumulatedContent
                     });
                   } else if (parsedData.type === 'complete') {
-                    finalChapter = parsedData.chapter;
+                    // The 'chapter' field from the server now only contains metadata.
+                    // We need to combine it with the accumulated content.
+                    if (parsedData.chapter) {
+                      finalChapter = {
+                        ...parsedData.chapter, // Spread the metadata
+                        content: accumulatedContent // Add the assembled content
+                      };
+                    } else {
+                      // Fallback or error if chapter metadata is missing in complete event
+                      console.error("SSE 'complete' event missing chapter metadata.");
+                      // Potentially throw an error or handle as appropriate
+                    }
                   } else {
                     onProgress(parsedData);
                   }

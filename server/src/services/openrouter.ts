@@ -8,8 +8,15 @@ interface OpenRouterRequestParams {
   max_tokens?: number;
   temperature?: number;
   top_p?: number;
-  frequency_penalty?: number;
-  presence_penalty?: number;
+  frequency_penalty?: number; // Often similar to repetition_penalty
+  presence_penalty?: number;  // Often similar to repetition_penalty
+  repetition_penalty?: number; // As requested by user
+  length_penalty?: number;     // As requested by user
+  // style_guidance and text_guidance are less common standard LLM params,
+  // they might be specific to certain models or custom interpretations.
+  // We'll pass them through if OpenRouter/models support them.
+  style_guidance?: number;     // As requested by user
+  text_guidance?: number;      // As requested by user
   stop?: string[];
   messages?: Array<{role: string; content: string}>;
 }
@@ -47,11 +54,16 @@ export const executeOpenRouterRequest = async (params: OpenRouterRequestParams):
       model: params.model,
       messages,
       max_tokens: params.max_tokens || 1000,
-      temperature: params.temperature || 0.7,
-      top_p: params.top_p || 1,
-      frequency_penalty: params.frequency_penalty || 0,
-      presence_penalty: params.presence_penalty || 0,
+      temperature: params.temperature !== undefined ? params.temperature : 0.7,
+      top_p: params.top_p !== undefined ? params.top_p : 1,
+      frequency_penalty: params.frequency_penalty !== undefined ? params.frequency_penalty : 0,
+      presence_penalty: params.presence_penalty !== undefined ? params.presence_penalty : 0,
       stop: params.stop || null,
+      // Add new parameters, ensuring they are only included if defined in params
+      ...(params.repetition_penalty !== undefined && { repetition_penalty: params.repetition_penalty }),
+      ...(params.length_penalty !== undefined && { length_penalty: params.length_penalty }),
+      ...(params.style_guidance !== undefined && { style_guidance: params.style_guidance }),
+      ...(params.text_guidance !== undefined && { text_guidance: params.text_guidance }),
     };
 
     logger.info(`Making OpenRouter request to model: ${params.model}`);

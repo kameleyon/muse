@@ -358,7 +358,7 @@ You must respond with ONLY valid JSON in this exact format:
       prompt,
       messages: messages as any,
       temperature: 0.7,
-      max_tokens: 3000
+      max_tokens: 4000
     });
 
     const marketResearch = cleanJsonResponse(completion.choices[0].message.content || '');
@@ -638,12 +638,20 @@ export const generateChapter = async (req: Request, res: Response) => {
     const hasMetadataColumn = Object.prototype.hasOwnProperty.call(chapter, 'metadata');
 
     // Enforce 5K maximum word limit
-    const MAX_WORDS = 5000;
-    const targetWords = Math.min(chapterDetails?.estimatedWords || 4000, MAX_WORDS);
+    // const MAX_WORDS = 5000; // User request: Use estimatedWords from book structure directly
+    const targetWords = chapterDetails?.estimatedWords || 8000; // Default to 8000 if not specified
+    const maxTargetWords = targetWords + 2000;
+    const idealConclusionStart = maxTargetWords - 500;
     
-    const systemPrompt = `You are an expert book writer specializing in creating content that resonates with specific target audiences. Write in the exact tone and style specified, addressing the audience's pain points and desires and ALWAYS MEET EXACTLY ${targetWords} words (±25 words maximum) .
+    const systemPrompt = `You are an expert book writer specializing in creating content that resonates with specific target audiences. Write in the exact tone and style specified, addressing the audience's pain points and desires.
+    
+Your target word count range for this chapter is between ${targetWords - 100} (minimum) and ${maxTargetWords} (maximum).
+Aim for a total word count near ${targetWords}, but prioritize natural flow and complete thoughts.
+It is acceptable to go over ${targetWords} up to ${maxTargetWords}.
+Begin to conclude the chapter content naturally when you are around ${idealConclusionStart} words, ensuring a satisfying wrap-up by ${maxTargetWords}.
+Do NOT truncate content abruptly.
 
-CRITICAL MISSION: Your primary objective is to write EXACTLY ${targetWords} words. This is non-negotiable. Every successful chapter must hit this precise word count target.
+CRITICAL MISSION: Your primary objective is to write high-quality, coherent content that falls within the range of ${targetWords - 100} to ${maxTargetWords} words.
 
 NEVER ASK QUESTIONS: Do not ask for confirmation, clarification, or permission to continue. Write the content directly without any meta-commentary about the writing process.
 
@@ -685,11 +693,14 @@ Write this chapter following these STRICT guidelines:
 16. Color palette references: ${book.marketResearch?.design?.colors || book.design?.colors || 'primary: purple, secondary: gold, accent: white'}
 
 **CHAPTER SPECIFICATIONS:**
-17. **ABSOLUTE CRITICAL REQUIREMENT - Word count: EXACTLY ${targetWords} words**
-    - This is MANDATORY - do NOT deliver content that is shorter or longer
-    - If you fall short, add more examples, explanations, case studies, or detailed analysis
-    - If you exceed the target, condense while maintaining quality
-    - COUNT YOUR WORDS as you write and adjust accordingly
+17. **CRITICAL WORD COUNT GUIDELINES:**
+    - Minimum total words: ${targetWords - 100}.
+    - Ideal total words: Around ${targetWords}.
+    - Maximum total words: ${maxTargetWords}.
+    - Start concluding the chapter around ${idealConclusionStart} words.
+    - Prioritize completing thoughts naturally over hitting an exact number. It is PREFERRED to go slightly over ${targetWords} (up to ${maxTargetWords}) rather than cutting content short.
+    - If content is naturally shorter, ensure it still meets the minimum of ${targetWords - 100} words by adding relevant details, examples, or explanations.
+    - Do NOT abruptly truncate sentences or paragraphs.
 18. Include ${book.marketResearch?.contentSpecs?.examplesPerChapter || chapterDetails?.examples || '3-4'} real-world examples
 19. ${book.marketResearch?.contentSpecs?.exerciseInclusion === 'true' || chapterDetails?.exercises ? 'Include practical exercises' : 'Focus on narrative flow'}
 20. Target audience specifics: ${book.marketResearch?.targetAudience?.demographics || '25-45, urban, professional'}
@@ -715,7 +726,7 @@ Chapter ${chapter.number}: ${chapter.title}
 Description: ${chapterDetails?.description || ''}
 ${chapterDetails?.keyTopics ? `Key Topics to Cover: ${chapterDetails.keyTopics.join(', ')}` : ''}
 
-**MANDATORY Target Word Count: EXACTLY ${targetWords} words - NO EXCEPTIONS**
+**Target Word Count Range: ${targetWords - 100} (min) to ${maxTargetWords} (max). Aim for ~${targetWords}. Start concluding around ${idealConclusionStart} words.**
 
 ${previousChapters.length > 0 ? `Previous chapters covered: ${previousChapters.join(', ')}` : 'This is the first chapter.'}
 
@@ -822,19 +833,53 @@ CHAPTER STRUCTURE REQUIREMENTS:
     ];
 
     // Use a more reliable model for chapter generation
-    const model = 'anthropic/claude-3.7-sonnet';
+    const model = 'google/gemini-2.5-flash-preview';
     
-    // Adjust temperature based on tone
-    let temperature = 0.8;
-    if (book.structure?.tone?.toLowerCase().includes('creative') ||
-        book.structure?.tone?.toLowerCase().includes('inspirational')) {
-      temperature = 0.9;
-    } else if (book.structure?.tone?.toLowerCase().includes('academic') ||
-               book.structure?.tone?.toLowerCase().includes('technical')) {
-      temperature = 0.4;
+    // Define parameter profiles for different tones
+    const creativeProfile = {
+      temperature: 0.9,
+      top_p: 0.7,
+      repetition_penalty: 2.5, // Note: OpenRouter uses frequency_penalty and presence_penalty.
+                               // We might need to map this or use one of those if 'repetition_penalty' isn't directly supported by the chosen model via OpenRouter.
+                               // For now, we pass it as is. Some models might support it.
+      length_penalty: 1.0,
+      style_guidance: 0.7, // Custom param, might be ignored if not supported
+      text_guidance: 0.85, // Custom param, might be ignored if not supported
+      // frequency_penalty: 0.5, // Example if mapping repetition_penalty
+      // presence_penalty: 0.5,  // Example if mapping repetition_penalty
+    };
+
+    const academicProfile = {
+      temperature: 0.4,
+      top_p: 0.6,
+      repetition_penalty: 1.2,
+      length_penalty: 1.0,
+      style_guidance: 0.2,
+      text_guidance: 0.9,
+      // frequency_penalty: 0.1,
+      // presence_penalty: 0.1,
+    };
+
+    const defaultProfile = {
+      temperature: 0.8, // Default temperature
+      top_p: 1.0,       // Default top_p
+      // repetition_penalty, length_penalty, style_guidance, text_guidance will use OpenRouter defaults if not set
+    };
+
+    let selectedProfile = defaultProfile;
+    const tone = book.structure?.tone?.toLowerCase() || '';
+
+    if (tone.includes('creative') || tone.includes('inspirational')) {
+      selectedProfile = creativeProfile;
+      console.log('Using Creative generation profile.');
+    } else if (tone.includes('academic') || tone.includes('technical') || tone.includes('formal')) {
+      selectedProfile = academicProfile;
+      console.log('Using Academic generation profile.');
+    } else {
+      console.log('Using Default generation profile.');
     }
     
-    console.log(`Using model: ${model} with temperature: ${temperature} for chapter generation`);
+    console.log(`Using model: ${model} with profile: ${JSON.stringify(selectedProfile)} for chapter generation`);
     
     // Configure chunked generation with overlapping - larger chunks for faster generation
     const WORDS_PER_CHUNK = 1250; // Generate in larger chunks to reduce the number of API calls
@@ -873,9 +918,23 @@ CHAPTER STRUCTURE REQUIREMENTS:
     const generateChunk = async (chunkIndex: number, previousChunkContent: string): Promise<string> => {
       const isFirstChunk = chunkIndex === 0;
       const isLastChunk = chunkIndex === numChunks - 1;
-      const chunkWords = isLastChunk ?
-        (targetWords - (chunkIndex * WORDS_PER_CHUNK)) :
+      let chunkWords = isLastChunk ?
+        (targetWords - (chunkIndex * WORDS_PER_CHUNK)) : // Initial estimate for remaining words
         WORDS_PER_CHUNK;
+
+      if (isLastChunk) {
+        // For the last chunk, ensure it's prompted for enough words to conclude,
+        // but not excessively more than WORDS_PER_CHUNK unless necessary to reach min target.
+        // Also, consider the maxTargetWords.
+        const wordsSoFar = chunkIndex * WORDS_PER_CHUNK;
+        const minWordsNeededForChapter = Math.max(0, (targetWords - 100) - wordsSoFar);
+        const maxWordsAllowedForChapter = Math.max(0, maxTargetWords - wordsSoFar);
+        
+        // Aim for at least a decent chunk size, or what's needed for min, capped by max.
+        chunkWords = Math.min(maxWordsAllowedForChapter, Math.max(WORDS_PER_CHUNK / 2, minWordsNeededForChapter, chunkWords));
+        // Ensure chunkWords is not negative if already over max.
+        chunkWords = Math.max(0, chunkWords);
+      }
       
       // Modify prompt for continuation
       let chunkPrompt = enhancedUserPrompt;
@@ -885,13 +944,17 @@ CHAPTER STRUCTURE REQUIREMENTS:
 CONTINUATION INSTRUCTIONS:
 You are continuing to write Chapter ${chapter.number}: ${chapter.title}.
 
-Previous content written so far:
-${previousChunkContent}
+Previous content written so far (last ~200 words to provide context):
+...${previousChunkContent.slice(-1200)}
 
-Continue writing the next ${chunkWords} words. Do NOT repeat any content already written.
-${isLastChunk ? 'This is the FINAL chunk - conclude the chapter with meaningful content'  : 'Continue naturally from where you left off.'}
+CAREFULLY REVIEW THE END OF THE PREVIOUS CONTENT. Your task is to SEAMLESSLY continue with NEW information.
+DO NOT REPEAT, REPHRASE, OR SUMMARIZE what was just written in the 'Previous content written so far'.
+Your response should be the *next* logical section of the chapter.
 
-WORD COUNT CRITICAL: Write exactly ${chunkWords} words for this chunk. Count carefully to ensure precision.
+Continue writing the next part of the chapter, aiming for approximately ${chunkWords} words for this chunk.
+${isLastChunk ? `This is the ABSOLUTE FINAL CHUNK of Chapter ${chapter.number}: ${chapter.title}. Your primary goal for this chunk is to bring the entire chapter to a satisfying and complete conclusion. Ensure all main points are resolved and the narrative arc is finished. The total chapter word count MUST be between ${targetWords - 100} and ${maxTargetWords}. You should be actively concluding the chapter's themes and arguments now. Write approximately ${chunkWords} words to achieve this full conclusion.` : 'Continue naturally from where you left off, introducing new material.'}
+
+WORD COUNT GUIDELINE FOR THIS CHUNK: Aim for approximately ${chunkWords} words. Prioritize natural flow, completing thoughts, and introducing NEW content over hitting an exact number for this specific chunk. Keep the overall chapter target range (${targetWords - 100} to ${maxTargetWords}) in mind.
 
 CRITICAL: Write the content directly without asking questions or seeking confirmation. Do NOT ask "Would you like me to continue?" or similar questions. Just write the chapter content.
 
@@ -905,7 +968,7 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
 
 
 
-WORD COUNT CRITICAL: Write exactly ${chunkWords} words for this chunk. Count carefully to ensure precision.
+WORD COUNT GUIDELINE FOR THIS CHUNK: Aim for approximately ${chunkWords} words. Prioritize natural flow, completing thoughts, and introducing NEW content over hitting an exact number for this specific chunk. Keep the overall chapter target range (${targetWords - 100} to ${maxTargetWords}) in mind.
 
 CRITICAL: Write the content directly without asking questions or seeking confirmation. Do NOT ask "Would you like me to continue?" or similar questions. Just write the chapter content.
 
@@ -921,7 +984,11 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
         { role: 'user', content: chunkPrompt }
       ];
       
-      const chunkMaxTokens = Math.ceil(chunkWords * 1.5);
+      let chunkMaxTokens = Math.ceil(chunkWords * 1.5); // Standard buffer
+      if (isLastChunk) {
+        // Significantly larger buffer for the final chunk to ensure full conclusion and allow for natural sentence endings.
+        chunkMaxTokens = Math.ceil(chunkWords * 2.5);
+      }
       
       console.log(`Starting generation of chunk ${chunkIndex + 1}/${numChunks} (~${chunkWords} words)`);
       
@@ -931,27 +998,89 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
           model,
           prompt,
           messages: chunkMessages,
-          temperature,
+          ...selectedProfile, // Spread the selected profile parameters
           max_tokens: chunkMaxTokens
         });
         
-        const chunkContent = response.choices[0].message.content || '';
+        let chunkContent = response.choices[0].message.content || '';
         console.log(`Completed generation of chunk ${chunkIndex + 1}/${numChunks}`);
+
+        if (isLastChunk && chunkContent.length > 0) {
+          // Attempt to clean up truncated sentence at the end of the very last chunk
+          const trimmedContent = chunkContent.trimRight();
+          // Regex to find the last occurrence of a sentence-ending punctuation mark (. ! ?)
+          // optionally followed by closing quotes (single or double) and then whitespace or end of string.
+          const sentenceEndRegex = /[\.\!\?]['"]?\s*$/;
+          
+          if (!sentenceEndRegex.test(trimmedContent)) {
+            console.warn(`Last chunk (index ${chunkIndex}) may have ended mid-sentence. Original ending: "...${trimmedContent.slice(-50)}"`);
+            let lastPunctuationIndex = -1;
+            const punctuationMarks = ['.', '!', '?'];
+            for (const mark of punctuationMarks) {
+              let index = trimmedContent.lastIndexOf(mark);
+              // Check if the punctuation is followed by a quote
+              if (index !== -1 && index < trimmedContent.length - 1 && (trimmedContent[index+1] === '"' || trimmedContent[index+1] === "'")) {
+                index++; // Include the quote
+              }
+              if (index > lastPunctuationIndex) {
+                lastPunctuationIndex = index;
+              }
+            }
+
+            if (lastPunctuationIndex !== -1) {
+              chunkContent = trimmedContent.slice(0, lastPunctuationIndex + 1);
+              console.log(`Sanitized last chunk. New ending: "...${chunkContent.slice(-50)}"`);
+            } else {
+              // If no sentence-ending punctuation found at all, it might be a very short, cut-off fragment.
+              // In this case, it might be better to keep it as is, or decide on a different strategy.
+              // For now, we'll log and keep it, as aggressive truncation could lose meaning.
+              console.warn(`Could not find a suitable sentence end to sanitize last chunk. Keeping as is.`);
+            }
+          }
+        }
         return chunkContent;
       } catch (error) {
         console.error(`Error generating chunk ${chunkIndex + 1}/${numChunks}:`, error);
         // Fallback to a different model if the primary one fails
         console.log(`Attempting fallback to alternative model for chunk ${chunkIndex + 1}/${numChunks}`);
         const fallbackResponse = await executeOpenRouterRequest({
-          model: 'anthropic/claude-3.7-sonnet',
+          model: 'anthropic/claude-3.7-sonnet', // Consider if fallback model should also be configurable or use a default profile
           prompt,
           messages: chunkMessages,
-          temperature,
+          ...selectedProfile, // Spread the selected profile parameters for fallback too
           max_tokens: chunkMaxTokens
         });
         
-        const chunkContent = fallbackResponse.choices[0].message.content || '';
+        let chunkContent = fallbackResponse.choices[0].message.content || '';
         console.log(`Completed fallback generation of chunk ${chunkIndex + 1}/${numChunks}`);
+
+        if (isLastChunk && chunkContent.length > 0) {
+          // Attempt to clean up truncated sentence at the end of the very last chunk (for fallback too)
+          const trimmedContent = chunkContent.trimRight();
+          const sentenceEndRegex = /[\.\!\?]['"]?\s*$/;
+          
+          if (!sentenceEndRegex.test(trimmedContent)) {
+            console.warn(`Fallback: Last chunk (index ${chunkIndex}) may have ended mid-sentence. Original ending: "...${trimmedContent.slice(-50)}"`);
+            let lastPunctuationIndex = -1;
+            const punctuationMarks = ['.', '!', '?'];
+            for (const mark of punctuationMarks) {
+              let index = trimmedContent.lastIndexOf(mark);
+              if (index !== -1 && index < trimmedContent.length - 1 && (trimmedContent[index+1] === '"' || trimmedContent[index+1] === "'")) {
+                index++;
+              }
+              if (index > lastPunctuationIndex) {
+                lastPunctuationIndex = index;
+              }
+            }
+
+            if (lastPunctuationIndex !== -1) {
+              chunkContent = trimmedContent.slice(0, lastPunctuationIndex + 1);
+              console.log(`Fallback: Sanitized last chunk. New ending: "...${chunkContent.slice(-50)}"`);
+            } else {
+              console.warn(`Fallback: Could not find a suitable sentence end to sanitize last chunk. Keeping as is.`);
+            }
+          }
+        }
         return chunkContent;
       }
       
@@ -976,8 +1105,8 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
       
       // Stream with typing effect - send words incrementally
       const words = chunkContent.split(/(\s+)/); // Keep whitespace
-      const WORDS_PER_BATCH = 5; // Increased from 3 to 5 for faster display
-      const BATCH_DELAY = 10; // Reduced from 50ms to 10ms for much faster typing
+      const WORDS_PER_BATCH = 5;
+      const BATCH_DELAY = 30; // Increased from 10ms to 20ms to slow typing by half
       
       for (let i = 0; i < words.length; i += WORDS_PER_BATCH * 2) { // *2 because we're keeping whitespace
         const wordBatch = words.slice(i, i + WORDS_PER_BATCH * 2).join('');
@@ -1001,9 +1130,9 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
         type: 'chunk_complete',
         chunkIndex: chunkIndex + 1,
         totalChunks: numChunks,
-        content: chunkContent,
-        words: chunkContent.split(/\s+/).filter(Boolean).length,
-        totalWords: fullContent.split(/\s+/).filter(Boolean).length
+        // content: chunkContent, // Removed: Client accumulates content from 'typing' events
+        wordsInChunk: chunkContent.split(/\s+/).filter(Boolean).length,
+        totalWordsSoFar: fullContent.split(/\s+/).filter(Boolean).length
       };
       res.write(`data: ${JSON.stringify(chunkData)}\n\n`);
     };
@@ -1113,9 +1242,11 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
     // Handle response based on streaming mode
     if (streamMode) {
       // Send final completion event
+      // Send only essential metadata, not the full content, as client has assembled it.
+      const { content: _content, ...chapterMetadata } = firstUpdatedChapter;
       const completionData = {
         type: 'complete',
-        chapter: firstUpdatedChapter,
+        chapter: chapterMetadata, // Send metadata only
         referencesFound: references.length,
         totalWords: wordCount
       };
