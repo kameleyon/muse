@@ -208,6 +208,8 @@ async function updateBookAppendix(bookId: string, chapterContent: string): Promi
 // Clean JSON response helper
 function cleanJsonResponse(response: string): any {
   console.log("Attempting to parse AI response as JSON...");
+  console.log("Response length:", response.length);
+  
   try {
     // Attempt 1: Direct JSON parse
     return JSON.parse(response);
@@ -223,14 +225,54 @@ function cleanJsonResponse(response: string): any {
         return JSON.parse(extractedJson);
       } else {
         console.warn("No JSON code block found in AI response.");
-        // Log the beginning of the response to help diagnose if the AI isn't complying
-        console.error("AI response (first 500 chars) that failed parsing: ", response.substring(0, 500));
+        
+        // Attempt 3: Try to fix truncated JSON
+        try {
+          // Check if response looks like truncated JSON
+          if (response.trim().startsWith('{')) {
+            console.log("Response looks like JSON but might be truncated. Attempting to fix...");
+            
+            // Try to find where the JSON might be cut off
+            let fixedJson = response.trim();
+            
+            // Count opening and closing braces/brackets
+            const openBraces = (fixedJson.match(/{/g) || []).length;
+            const closeBraces = (fixedJson.match(/}/g) || []).length;
+            const openBrackets = (fixedJson.match(/\[/g) || []).length;
+            const closeBrackets = (fixedJson.match(/\]/g) || []).length;
+            
+            console.log(`Brace count - Open: ${openBraces}, Close: ${closeBraces}`);
+            console.log(`Bracket count - Open: ${openBrackets}, Close: ${closeBrackets}`);
+            
+            // If we're missing closing brackets/braces, try to add them
+            if (openBrackets > closeBrackets || openBraces > closeBraces) {
+              // Add missing closing brackets
+              for (let i = 0; i < openBrackets - closeBrackets; i++) {
+                fixedJson += ']';
+              }
+              // Add missing closing braces
+              for (let i = 0; i < openBraces - closeBraces; i++) {
+                fixedJson += '}';
+              }
+              
+              console.log("Attempting to parse fixed JSON...");
+              return JSON.parse(fixedJson);
+            }
+          }
+        } catch (fixError: any) {
+          console.error("Failed to fix truncated JSON:", fixError.message);
+        }
+        
+        // Log the beginning and end of the response to help diagnose
+        console.error("AI response (first 500 chars):", response.substring(0, 500));
+        console.error("AI response (last 500 chars):", response.substring(response.length - 500));
         throw new Error('AI response is not valid JSON and no JSON code block was found.');
       }
     } catch (e2: any) {
       console.error("Failed to parse JSON from code block. Error: " + e2.message);
       // Log the beginning of the response to help diagnose
-      console.error("Original AI response (first 500 chars) that failed parsing: ", response.substring(0, 500));
+      console.error("Original AI response (first 500 chars):", response.substring(0, 500));
+      console.error("Original AI response (last 500 chars):", response.substring(response.length - 500));
       throw new Error('Failed to parse AI response as JSON after attempting direct and code block extraction.');
     }
   }
@@ -383,10 +425,10 @@ You must respond with ONLY valid JSON in this exact format:
   "tone": "specific tone based on research",
   "marketPosition": "Define market position (75-150 words) using this framework: Primary category/shelf placement; 2-3 successful comp titles and how this book differs; Target retailer categories; Price point positioning (premium/accessible/budget) with justification; Format priorities (hardcover/paperback/audio/digital); One-sentence elevator pitch for booksellers.",
   "uniqueValue": "Write a compelling unique value proposition (50-100 words) that identifies ONE primary differentiator from existing books in this category, states a specific benefit readers get here they can't find elsewhere, uses concrete language rather than abstract claims, avoids overused terms like 'comprehensive,' 'ultimate,' or 'revolutionary,' includes a measurable outcome or transformation when possible, formatted as 2-3 punchy sentences that could work as back-cover copy.",
-  "acknowledgement": "Concise acknowledgement section (100-200 words) that thanks 2-3 key individuals or groups who made the book possible, includes specific contributions rather than generic thanks, mentions early readers, mentors, or community members who shaped the work, acknowledges family/personal support briefly but genuinely, references any organizations, platforms, or communities integral to the book, maintains professional warmth without excessive sentimentality, ends with a forward-looking note about the book's intended impact, and matches the book's tone while being slightly more personal.",
-  "prologue": "## Prologue Title Chosen by AI\\n\\nPrologue content (1,500-2,500 words) that immediately engages readers by opening with a vivid scene, surprising statement, or relatable problem, establishing the book's core premise or conflict within the first 500 words, including specific sensory details and concrete examples, creating emotional connection through personal anecdote or universal experience, ending with a clear promise of what the book will deliver, and matching the book's specified tone and target audience...\\n\\n+$$$+\\n#### Key Points from Prologue\\n- Point 1\\n- Point 2\\n- Point 3\\n- Point 4\\n- Point 5\\n+$$$+",
-  "introduction": "# Introduction Title Chosen by AI\\n\\nComprehensive introduction content (2,500-4,000 words) that establishes the problem/opportunity this book addresses, shares why this book exists now and why the author is uniquely qualified, addresses common misconceptions or objections, ends with clear instructions on how to use this book, uses subheadings to break up text every 400-600 words, and matches the book's specified tone and speaks directly to target audience pain points...\\n\\n+$$$+\\n#### Key Points from Introduction\\n- Point 1\\n- Point 2\\n- Point 3\\n- Point 4\\n- Point 5\\n+$$$+",
-  "conclusion": "# Evocative Conclusion Title Chosen by AI\\n\\nPowerful conclusion content (2,500-4,000 words) that synthesizes key insights without merely repeating chapter summaries, addresses the 'what now?' question with concrete next steps, acknowledges the reader's journey and growth through the book, paints a vivid picture of the reader's potential future state, includes a memorable final message or call-to-action, provides additional resources or community connections, uses subheadings to structure the conclusion's narrative arc, circles back to opening themes while showing transformation, and matches book's tone while adding inspirational elevation...\\n\\n+$$$+\\n#### Key Points from Conclusion\\n- Point 1\\n- Point 2\\n- Point 3\\n- Point 4\\n- Point 5\\n+$$$+",
+  "acknowledgement": "Brief acknowledgement outline (50-100 words) describing who to thank and why",
+  "prologue": "## Prologue Title\\n\\nBrief prologue outline (100-200 words) describing the opening scene or hook that will engage readers\\n\\n+$$$+\\n#### Key Points\\n- Point 1\\n- Point 2\\n- Point 3\\n+$$$+",
+  "introduction": "# Introduction Title\\n\\nBrief introduction outline (100-200 words) describing what will be covered\\n\\n+$$$+\\n#### Key Points\\n- Point 1\\n- Point 2\\n- Point 3\\n+$$$+",
+  "conclusion": "# Conclusion Title\\n\\nBrief conclusion outline (100-200 words) describing the wrap-up and call to action\\n\\n+$$$+\\n#### Key Points\\n- Point 1\\n- Point 2\\n- Point 3\\n+$$$+",
   "appendix": "Optional: Brief appendix content, if applicable.",
   "references": "Optional: Brief references or bibliography, if applicable.",
   "coverPageDetails": {
