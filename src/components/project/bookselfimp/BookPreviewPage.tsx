@@ -512,7 +512,7 @@ const BookPreviewPage: React.FC = () => {
               continue;
             }
 
-            const cellPadding = 9;
+            const cellPadding = 7;
             const tableContentWidth = contentWidth;
             const cornerRadius = 10; // Radius for rounded corners
 
@@ -549,7 +549,7 @@ const BookPreviewPage: React.FC = () => {
             const drawStyledRow = (rowData: string[], isHeader: boolean, currentDrawY: number, isFirstRowOfPage: boolean, isLastRowOfTable: boolean): number => {
               let maxHeightInRow = 0;
               const rowCellWrappedLines: string[][] = [];
-              const currentFontSize = isHeader ? h4FontSize : normalFontSize; // h4 for header, normal for cells
+              const currentFontSize = isHeader ? normalFontSize : normalFontSize; // Corrected: h4 for header, normal for cells
               const currentLineHeight = currentFontSize * 1.2;
 
               pdf.setFont('times', isHeader ? 'bold' : 'normal');
@@ -611,7 +611,15 @@ const BookPreviewPage: React.FC = () => {
                                  isHeader ? headerTextColor[2] : cellTextColor[2]);
                 
                 const linesToDraw = rowCellWrappedLines[col];
-                let textY = currentDrawY + cellPadding + currentFontSize * 0.8; // Adjusted for better vertical alignment
+                const textBlockHeight = linesToDraw.length * currentLineHeight;
+                // Calculate starting Y for vertically centered text within the cell's drawable area (maxHeightInRow - 2*cellPadding)
+                const drawableCellHeight = maxHeightInRow - ( cellPadding);
+                let textY = currentDrawY + cellPadding + (drawableCellHeight - textBlockHeight) / 2;
+                // Add ascent approximation for the first line.
+                // Note: A more precise ascent calculation would require deeper font metrics access.
+                textY += currentFontSize * 0.85;
+
+
                 linesToDraw.forEach(lineText => {
                   pdf.text(lineText, currentX + cellPadding, textY);
                   textY += currentLineHeight;
