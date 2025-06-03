@@ -508,103 +508,132 @@ const BookPreviewPage: React.FC = () => {
 
             const numCols = headerCellsContent.length;
             if (numCols === 0) {
-              i = currentTableLineIndex -1; // Adjust main loop counter
-              continue; // Skip if table is malformed
+              i = currentTableLineIndex -1;
+              continue;
             }
 
-            const cellPadding = 9; // 9pt padding
-            const tableContentWidth = contentWidth; // Use full content width for the table
+            const cellPadding = 9;
+            const tableContentWidth = contentWidth;
+            const cornerRadius = 10; // Radius for rounded corners
 
-            // Calculate column widths
             const colWidths: number[] = [];
-            pdf.setFontSize(normalFontSize); // Use normalFontSize for width calculation base
+            pdf.setFontSize(normalFontSize);
+            pdf.setFont('times', 'normal'); // Ensure correct font for width calculation
             for (let col = 0; col < numCols; col++) {
               let maxW = pdf.getTextWidth(headerCellsContent[col] || '');
               dataRowsContent.forEach(row => {
                 maxW = Math.max(maxW, pdf.getTextWidth(row[col] || ''));
               });
-              colWidths.push(maxW + (2 * cellPadding)); // Add padding to width
+              colWidths.push(maxW + (2 * cellPadding));
             }
             
-            // Adjust column widths to fit tableContentWidth if they exceed it
             const totalCalculatedWidth = colWidths.reduce((sum, w) => sum + w, 0);
-            if (totalCalculatedWidth > tableContentWidth) {
-              const scaleFactor = tableContentWidth / totalCalculatedWidth;
+            const actualTableWidth = Math.min(totalCalculatedWidth, tableContentWidth);
+
+            if (totalCalculatedWidth > actualTableWidth) {
+              const scaleFactor = actualTableWidth / totalCalculatedWidth;
               for (let col = 0; col < numCols; col++) {
                 colWidths[col] *= scaleFactor;
               }
             }
             
-            const borderColor = [35, 35, 33, 1]; // stone-700
-            const headerBgColor = [35, 35, 33, 1]; // stone-850
+            const borderColor = [35, 35, 33, 0.10]; // Using the updated RGB values
+            const headerBgColor = [35, 35, 33]; // Using the updated RGB values
             const headerTextColor = [255, 255, 255];
-            const cellTextColor = [35, 35, 33, 1]; // stone-850 (text)
+            const cellTextColor = [35, 35, 33]; // Using the updated RGB values
 
-            const drawRow = (rowData: string[], isHeader: boolean, startY: number): number => {
+            const tableStartX = margin;
+            let tableCurrentY = yPosition;
+
+            // Function to draw a row with specified styling
+            const drawStyledRow = (rowData: string[], isHeader: boolean, currentDrawY: number, isFirstRowOfPage: boolean, isLastRowOfTable: boolean): number => {
               let maxHeightInRow = 0;
               const rowCellWrappedLines: string[][] = [];
+              const currentFontSize = isHeader ? h4FontSize : normalFontSize; // h4 for header, normal for cells
+              const currentLineHeight = currentFontSize * 1.2;
 
-              // First pass: wrap text and determine max height for the row
-              pdf.setFontSize(isHeader ? h4FontSize : normalFontSize); // Header: 12pt, Cell: 11pt
               pdf.setFont('times', isHeader ? 'bold' : 'normal');
+              pdf.setFontSize(currentFontSize);
 
               for (let col = 0; col < numCols; col++) {
                 const text = rowData[col] || '';
-                const wrapped = pdf.splitTextToSize(text, colWidths[col] - (2 * cellPadding));
+                // Ensure column width for splitTextToSize is positive
+                const effectiveColWidth = Math.max(1, colWidths[col] - (2 * cellPadding));
+                const wrapped = pdf.splitTextToSize(text, effectiveColWidth);
                 rowCellWrappedLines.push(wrapped);
-                maxHeightInRow = Math.max(maxHeightInRow, wrapped.length * (isHeader ? h4FontSize : normalFontSize) * 1.2); // 1.2 line spacing
+                maxHeightInRow = Math.max(maxHeightInRow, wrapped.length * currentLineHeight);
               }
-              maxHeightInRow += (2 * cellPadding); // Add top/bottom padding
+              maxHeightInRow += (2 * cellPadding); // Add top/bottom padding to calculated height
 
-              checkPageBreak(maxHeightInRow);
-              if (startY + maxHeightInRow > pageHeight - margin) { // Double check after checkPageBreak
-                 addNewPage();
-                 startY = yPosition; // yPosition is updated by addNewPage
-                 // Optionally re-draw headers on new page if it's a data row
-                 if (!isHeader) {
-                    startY = drawRow(headerCellsContent, true, startY);
-                 }
+              // Page break check
+              if (currentDrawY + maxHeightInRow > pageHeight - margin) {
+                addNewPage();
+                currentDrawY = yPosition; // yPosition is updated by addNewPage
+                if (!isHeader) { // Redraw header on new page if it's a data row continuing
+                  currentDrawY = drawStyledRow(headerCellsContent, true, currentDrawY, true, false);
+                }
               }
               
-              let currentX = margin;
-              for (let col = 0; col < numCols; col++) {
-                // Draw cell background for header
-                if (isHeader) {
-                  pdf.setFillColor(headerBgColor[0], headerBgColor[1], headerBgColor[2]);
-                  pdf.rect(currentX, startY, colWidths[col], maxHeightInRow, 'F');
+              let currentX = tableStartX;
+
+              // Draw header background with rounded top corners
+              if (isHeader && isFirstRowOfPage) {
+                pdf.setFillColor(headerBgColor[0], headerBgColor[1], headerBgColor[2]);
+                if (actualTableWidth > 2 * cornerRadius) { // Ensure width is enough for rounded corners
+                    // Use roundedRect for the background fill
+                    pdf.roundedRect(currentX, currentDrawY, actualTableWidth, maxHeightInRow, cornerRadius, cornerRadius, 'F');
+                    // Correct the bottom part of the roundedRect fill if it's only for the header
+                    pdf.rect(currentX, currentDrawY + cornerRadius, actualTableWidth, maxHeightInRow - cornerRadius, 'F');
+                } else { // Fallback to sharp corners if too narrow
+                    pdf.rect(currentX, currentDrawY, actualTableWidth, maxHeightInRow, 'F');
                 }
+              } else if (isHeader) { // Header on subsequent page (straight corners)
+                pdf.setFillColor(headerBgColor[0], headerBgColor[1], headerBgColor[2]);
+                pdf.rect(currentX, currentDrawY, actualTableWidth, maxHeightInRow, 'F');
+              }
 
-                // Draw cell borders
-                pdf.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
-                pdf.rect(currentX, startY, colWidths[col], maxHeightInRow);
+              // Draw borders
+              pdf.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
+              
+              // No top border for the header.
+              // No outer left or right borders for any row.
+              
+              // Draw bottom border for ALL rows (header and data)
+              // This line acts as the separator below the header and between data rows.
+              pdf.line(currentX, currentDrawY + maxHeightInRow, currentX + actualTableWidth, currentDrawY + maxHeightInRow);
 
-                // Draw text
-                pdf.setFontSize(isHeader ? h4FontSize : normalFontSize);
+              // Draw cell text
+              for (let col = 0; col < numCols; col++) {
                 pdf.setFont('times', isHeader ? 'bold' : 'normal');
+                pdf.setFontSize(currentFontSize);
                 pdf.setTextColor(isHeader ? headerTextColor[0] : cellTextColor[0],
                                  isHeader ? headerTextColor[1] : cellTextColor[1],
                                  isHeader ? headerTextColor[2] : cellTextColor[2]);
                 
                 const linesToDraw = rowCellWrappedLines[col];
-                let textY = startY + cellPadding + (isHeader ? h4FontSize : normalFontSize); // Start text after padding
+                let textY = currentDrawY + cellPadding + currentFontSize * 0.8; // Adjusted for better vertical alignment
                 linesToDraw.forEach(lineText => {
                   pdf.text(lineText, currentX + cellPadding, textY);
-                  textY += (isHeader ? h4FontSize : normalFontSize) * 1.2;
+                  textY += currentLineHeight;
                 });
                 currentX += colWidths[col];
               }
-              return startY + maxHeightInRow;
+              
+              // Bottom border was drawn before text rendering to be under text.
+              // No separate vertical borders for data rows needed as per new requirement.
+              
+              return currentDrawY + maxHeightInRow;
             };
 
             // Draw header
-            yPosition = drawRow(headerCellsContent, true, yPosition);
+            tableCurrentY = drawStyledRow(headerCellsContent, true, tableCurrentY, true, dataRowsContent.length === 0);
 
             // Draw data rows
-            dataRowsContent.forEach(row => {
-              yPosition = drawRow(row, false, yPosition);
+            dataRowsContent.forEach((row, rowIndex) => {
+              tableCurrentY = drawStyledRow(row, false, tableCurrentY, false, rowIndex === dataRowsContent.length - 1);
             });
             
-            yPosition += normalFontSize; // Add some space after the table
+            yPosition = tableCurrentY + normalFontSize * 3; // Further Increased margin-bottom (3 lines of normal text)
             i = currentTableLineIndex - 1; // Adjust main loop counter to continue after the table block
           }
           // Blockquotes
