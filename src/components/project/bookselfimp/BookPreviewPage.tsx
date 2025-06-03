@@ -5,6 +5,7 @@ import { cn } from '../../../lib/utils';
 import { bookService } from '../../../lib/books';
 import type { Book, Chapter, BookStructure } from '../../../types/books';
 import MarkdownEditor from '../../MarkdownEditor';
+import { cleanMarkdown, formatMarkdownTable } from '../../../lib/markdownCleaner'; // Added formatMarkdownTable
 import { jsPDF } from 'jspdf';
 import { MdTextRender } from 'jspdf-md-renderer';
 import html2canvas from 'html2canvas';
@@ -485,37 +486,126 @@ const BookPreviewPage: React.FC = () => {
           
           
 
-          // Tables (render as HTML)
+          // Tables (render natively with jsPDF)
           else if (line.includes('|') && i + 1 < lines.length && lines[i + 1].includes('|') && lines[i + 1].includes('-')) {
-            let tableHtml = '<table style="width:100%;border-collapse:collapse;border:1px solid #ccc;">';
-            
-            // Header
-            const headers = line.split('|').filter(h => h.trim());
-            tableHtml += '<tr>';
-            headers.forEach(header => {
-              tableHtml += `<th style="border:1px solid #ccc;padding:8px;background:#f0f0f0;">${header.trim()}</th>`;
-            });
-            tableHtml += '</tr>';
-            
-            // Skip separator line
-            i += 2;
-            
-            // Body rows
-            while (i < lines.length && lines[i].includes('|')) {
-              const cells = lines[i].split('|').filter(c => c.trim());
-              tableHtml += '<tr>';
-              cells.forEach(cell => {
-                tableHtml += `<td style="border:1px solid #ccc;padding:8px;">${cell.trim()}</td>`;
+            const rawTableLines: string[] = [];
+            let currentTableLineIndex = i;
+            // Collect all lines of the current table block
+            while (currentTableLineIndex < lines.length && lines[currentTableLineIndex].includes('|')) {
+              rawTableLines.push(lines[currentTableLineIndex]);
+              currentTableLineIndex++;
+            }
+            // If the line after the pipe-containing lines is a separator-like line (common in some raw inputs before cleaning)
+            // and it wasn't captured because it might not have a pipe, check and add if necessary.
+            // However, formatMarkdownTable should handle this.
+
+            const rawTableMarkdown = rawTableLines.join('\n');
+            const cleanedTableMarkdown = formatMarkdownTable(rawTableMarkdown); // Clean the specific table block
+
+            const tableRows = cleanedTableMarkdown.split('\n');
+            const headerCellsContent = tableRows[0].split('|').slice(1, -1).map(cell => cell.trim());
+            const dataRowsContent = tableRows.slice(2).map(row => row.split('|').slice(1, -1).map(cell => cell.trim()));
+
+            const numCols = headerCellsContent.length;
+            if (numCols === 0) {
+              i = currentTableLineIndex -1; // Adjust main loop counter
+              continue; // Skip if table is malformed
+            }
+
+            const cellPadding = 9; // 9pt padding
+            const tableContentWidth = contentWidth; // Use full content width for the table
+
+            // Calculate column widths
+            const colWidths: number[] = [];
+            pdf.setFontSize(normalFontSize); // Use normalFontSize for width calculation base
+            for (let col = 0; col < numCols; col++) {
+              let maxW = pdf.getTextWidth(headerCellsContent[col] || '');
+              dataRowsContent.forEach(row => {
+                maxW = Math.max(maxW, pdf.getTextWidth(row[col] || ''));
               });
-              tableHtml += '</tr>';
-              i++;
+              colWidths.push(maxW + (2 * cellPadding)); // Add padding to width
             }
             
-            tableHtml += '</table>';
+            // Adjust column widths to fit tableContentWidth if they exceed it
+            const totalCalculatedWidth = colWidths.reduce((sum, w) => sum + w, 0);
+            if (totalCalculatedWidth > tableContentWidth) {
+              const scaleFactor = tableContentWidth / totalCalculatedWidth;
+              for (let col = 0; col < numCols; col++) {
+                colWidths[col] *= scaleFactor;
+              }
+            }
             
-            const tableContainer = `<div>${tableHtml}</div>`;
-            await renderComplexElement(tableContainer);
-            i--; // Adjust counter
+            const borderColor = [35, 35, 33, 1]; // stone-700
+            const headerBgColor = [35, 35, 33, 1]; // stone-850
+            const headerTextColor = [255, 255, 255];
+            const cellTextColor = [35, 35, 33, 1]; // stone-850 (text)
+
+            const drawRow = (rowData: string[], isHeader: boolean, startY: number): number => {
+              let maxHeightInRow = 0;
+              const rowCellWrappedLines: string[][] = [];
+
+              // First pass: wrap text and determine max height for the row
+              pdf.setFontSize(isHeader ? h4FontSize : normalFontSize); // Header: 12pt, Cell: 11pt
+              pdf.setFont('times', isHeader ? 'bold' : 'normal');
+
+              for (let col = 0; col < numCols; col++) {
+                const text = rowData[col] || '';
+                const wrapped = pdf.splitTextToSize(text, colWidths[col] - (2 * cellPadding));
+                rowCellWrappedLines.push(wrapped);
+                maxHeightInRow = Math.max(maxHeightInRow, wrapped.length * (isHeader ? h4FontSize : normalFontSize) * 1.2); // 1.2 line spacing
+              }
+              maxHeightInRow += (2 * cellPadding); // Add top/bottom padding
+
+              checkPageBreak(maxHeightInRow);
+              if (startY + maxHeightInRow > pageHeight - margin) { // Double check after checkPageBreak
+                 addNewPage();
+                 startY = yPosition; // yPosition is updated by addNewPage
+                 // Optionally re-draw headers on new page if it's a data row
+                 if (!isHeader) {
+                    startY = drawRow(headerCellsContent, true, startY);
+                 }
+              }
+              
+              let currentX = margin;
+              for (let col = 0; col < numCols; col++) {
+                // Draw cell background for header
+                if (isHeader) {
+                  pdf.setFillColor(headerBgColor[0], headerBgColor[1], headerBgColor[2]);
+                  pdf.rect(currentX, startY, colWidths[col], maxHeightInRow, 'F');
+                }
+
+                // Draw cell borders
+                pdf.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
+                pdf.rect(currentX, startY, colWidths[col], maxHeightInRow);
+
+                // Draw text
+                pdf.setFontSize(isHeader ? h4FontSize : normalFontSize);
+                pdf.setFont('times', isHeader ? 'bold' : 'normal');
+                pdf.setTextColor(isHeader ? headerTextColor[0] : cellTextColor[0],
+                                 isHeader ? headerTextColor[1] : cellTextColor[1],
+                                 isHeader ? headerTextColor[2] : cellTextColor[2]);
+                
+                const linesToDraw = rowCellWrappedLines[col];
+                let textY = startY + cellPadding + (isHeader ? h4FontSize : normalFontSize); // Start text after padding
+                linesToDraw.forEach(lineText => {
+                  pdf.text(lineText, currentX + cellPadding, textY);
+                  textY += (isHeader ? h4FontSize : normalFontSize) * 1.2;
+                });
+                currentX += colWidths[col];
+              }
+              return startY + maxHeightInRow;
+            };
+
+            // Draw header
+            yPosition = drawRow(headerCellsContent, true, yPosition);
+
+            // Draw data rows
+            dataRowsContent.forEach(row => {
+              yPosition = drawRow(row, false, yPosition);
+            });
+            
+            yPosition += normalFontSize; // Add some space after the table
+            i = currentTableLineIndex - 1; // Adjust main loop counter to continue after the table block
           }
           // Blockquotes
           else if (line.startsWith('> ')) {
@@ -1081,32 +1171,53 @@ const BookPreviewPage: React.FC = () => {
       line-height: 1.6;
     }
 
-    /* ---------- 6) TABLES ---------- */
-    table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      font-size: 10pt;
-      margin: 20px 0;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid rgba(120, 113, 108, 0.7);
+    /* ---------- 6) TABLES (Styled to match MarkdownEditor) ---------- */
+    .markdown-table-wrapper {
+      overflow-x: auto;
+      margin: 24px 0; /* my-6 */
     }
 
-    th, td {
-      padding: 10px 10px;
+    .markdown-table {
+      width: 100%;
+      border-collapse: collapse; /* Changed from separate for better border handling */
+      border-radius: 0.75rem; /* rounded-xl */
+      overflow: hidden; /* Ensures border-radius is respected by children */
+      border: 1px solid rgba(120, 113, 108, 0.7); /* border-stone/70 */
+      font-size: 10pt; /* Base font size for table content */
+    }
+
+    .markdown-table th,
+    .markdown-table td {
+      padding: 12px; /* px-3 py-3 (approx) */
       text-align: left;
       vertical-align: top;
-      border-bottom: 1px solid rgba(120, 113, 108, 0.7);
-      border-right: 1px solid rgba(120, 113, 108, 0.7);
-      color: rgba(120, 113, 108, 0.9);
+      /* border-right is handled by individual cell styling if needed, but typically not for this design */
     }
 
-    th:last-child,
-    td:last-child        { border-right: none; }
-    tr:last-child  td    { border-bottom: none; }
-    th                   { background: rgba(120, 113, 108, 0.85); color: #ffffff; font-size: 10pt; font-weight: regular;}
-    tr:nth-child(even)   { background: rgba(120, 113, 108, 0.05); rgba(120, 113, 108, 0.9); font-size: 9pt; font-weight: regular;}
+    .markdown-table th { /* .markdown-table-th */
+      color: white;
+      background-color: rgba(120, 113, 108, 0.85); /* bg-stone/85 */
+      font-weight: normal; /* font-regular */
+      font-size: 1rem; /* text-md (assuming 16px base) */
+      border-bottom: 1px solid rgba(120, 113, 108, 0.7); /* border-stone/70 */
+    }
+    
+    .markdown-table td { /* .markdown-table-td */
+      color: rgba(120, 113, 108, 0.85); /* text-stone/85 */
+      font-size: 0.875rem; /* text-sm (assuming 16px base) */
+      border-bottom: 1px solid rgba(120, 113, 108, 0.7); /* border-stone/70 */
+    }
+
+    .markdown-table tr:last-child td {
+      border-bottom: none; /* Remove bottom border for the last row's cells */
+    }
+    
+    /* Optional: if you need alternating row colors, though not in the original MarkdownEditor spec */
+    /*
+    .markdown-table tbody tr:nth-child(even) td {
+      background-color: rgba(120, 113, 108, 0.05);
+    }
+    */
 
     /* ---------- 7) CALLOUTS / BLOCKQUOTES ---------- */
     .quote,
@@ -1522,13 +1633,15 @@ const BookPreviewPage: React.FC = () => {
     if (!markdown) return '';
   
     // Apply aggressive normalization FIRST
-    const normalizedMarkdown = normalizePastedContent(markdown);
+    let processedMarkdown = normalizePastedContent(markdown);
+    // Then apply standard markdown cleaning, including table formatting
+    processedMarkdown = cleanMarkdown(processedMarkdown);
   
     // Debug logging for external content issues
     console.log('=== MARKDOWN TO HTML DEBUG ===');
     console.log('Input markdown length:', markdown.length);
-    console.log('After normalization length:', normalizedMarkdown.length);
-    console.log('First 200 chars of normalized:', normalizedMarkdown.substring(0, 200));
+    console.log('After normalization length:', processedMarkdown.length); // Use processedMarkdown
+    console.log('First 200 chars of normalized:', processedMarkdown.substring(0, 200)); // Use processedMarkdown
     
     // Check for problematic characters in the ORIGINAL markdown (for logging)
     const invisibleChars = markdown.match(/[\u200B-\u200D\uFEFF]/g);
@@ -1545,8 +1658,8 @@ const BookPreviewPage: React.FC = () => {
       console.log('Sample non-ASCII characters:', nonAscii.slice(0, 10).map(c => `${c} (U+${c.charCodeAt(0).toString(16).toUpperCase()})`));
     }
   
-    // Use the normalized markdown for all processing
-    let html = normalizedMarkdown;
+    // Use the processed markdown for all processing
+    let html = processedMarkdown;
   
     // HTML entity encoding for security
     const escapeHtml = (text: string): string => {
@@ -1657,25 +1770,27 @@ const BookPreviewPage: React.FC = () => {
     // Tables - Enhanced styling with rounded corners and custom colors (same as MarkdownEditor)
     html = html.replace(/\|(.+)\|\n\|[-\s|:]+\|\n((?:\|.+\|\n?)*)/g, (match, header, rows) => {
       // Process header
-      const headerCells = header.split('|').map((cell: string) => cell.trim()).filter((cell: string) => cell.length > 0)
-      const headerHtml = headerCells.map((cell: string) => `<th>${cell}</th>`).join('')
+      const headerCells = header.split('|').map((cell: string) => cell.trim()).filter((cell: string) => cell.length > 0);
+      const headerHtml = headerCells.map((cell: string) => `<th class="markdown-table-th">${cell}</th>`).join('');
       
       // Process body rows
-      const bodyRows = rows.trim().split('\n').filter((row: string) => row.trim().length > 0)
+      const bodyRows = rows.trim().split('\n').filter((row: string) => row.trim().length > 0);
       const bodyHtml = bodyRows.map((row: string) => {
-        const cells = row.split('|').map((cell: string) => cell.trim()).filter((cell: string) => cell.length > 0)
-        const cellsHtml = cells.map((cell: string) => `<td>${cell}</td>`).join('')
-        return `<tr>${cellsHtml}</tr>`
-      }).join('')
+        const cells = row.split('|').map((cell: string) => cell.trim()).filter((cell: string) => cell.length > 0);
+        const cellsHtml = cells.map((cell: string) => `<td class="markdown-table-td">${cell}</td>`).join('');
+        return `<tr>${cellsHtml}</tr>`;
+      }).join('');
       
-      return `<table>
-          <thead>
-            <tr>${headerHtml}</tr>
-          </thead>
-          <tbody>
-            ${bodyHtml}
-          </tbody>
-        </table>`
+      return `<div class="markdown-table-wrapper">
+          <table class="markdown-table">
+            <thead>
+              <tr>${headerHtml}</tr>
+            </thead>
+            <tbody>
+              ${bodyHtml}
+            </tbody>
+          </table>
+        </div>`;
     })
     
     // Paragraphs - Simplified handling for better PDF formatting
