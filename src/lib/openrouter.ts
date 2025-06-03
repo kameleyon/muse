@@ -111,7 +111,7 @@ You must respond with ONLY valid JSON in this exact format:
       { role: 'user', content: userPrompt }
     ]
 
-    const model = import.meta.env.VITE_MARKET_RESEARCH_MODEL || 'openai/gpt-4o-mini'
+    const model = import.meta.env.VITE_MARKET_RESEARCH_MODEL || 'openai/gpt-4o-search-preview'
     
     const response = await this.generateCompletion({
       model,
@@ -284,7 +284,7 @@ Write this chapter following these guidelines:
    - Use **bold** for emphasis
    - Use - or * for bullet points
    - Use > for blockquotes
-   - Use +$$$+ Your key-point text goes here +$$$+
+  
    - Ensure proper paragraph spacing (empty line between paragraphs)
    - Use numbered lists where appropriate
    - Use backticks for inline code or technical terms
@@ -338,7 +338,7 @@ Please revise the content accordingly.`
       { role: 'user', content: userPrompt }
     ]
 
-    const model = 'anthropic/claude-3.5-sonnet'
+    const model = 'anthropic/claude-3.7-sonnet'
     
     return await this.generateCompletion({
       model,

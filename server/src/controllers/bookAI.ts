@@ -390,9 +390,9 @@ CONTENT REQUIREMENTS:
 2. The total estimated word count for the entire book (including Prologue, Introduction, main chapters, and Conclusion) should be between 110,000 and 145,000 words.
 3. Each main chapter (within the 'parts' array) must have a creative and descriptive title, a detailed explanation/description of its content and purpose, an estimated word count, key topics to be covered, and 3-5 key points the reader should take away. Chapter numbering should be sequential for these main chapters, starting from 1.
 4. Generate content for 'prologue', 'introduction', and 'conclusion' as top-level string fields in the JSON. These are NOT chapters within the 'parts' array and should NOT be numbered as chapters.
-   - The 'prologue' string should contain a prologue (1,500-2,500 words) that immediately engages readers by: Opening with a vivid scene, surprising statement, or relatable problem; Establishing the book's core premise or conflict within the first 500 words; Including specific sensory details and concrete examples; Creating emotional connection through personal anecdote or universal experience; Ending with a clear promise of what the book will deliver; Matching the book's specified tone and target audience. MUST end with "+$$$+\n#### Key Points from Prologue\n- Point 1\n- Point 2\n- Point 3\n- Point 4\n- Point 5\n+$$$+"
-   - The 'introduction' string should contain a comprehensive introduction (2,500-4,000 words) that: Opens with a clear, engaging heading that captures the book's essence; Includes 3-5 substantial sections that progressively build the book's foundation; Establishes the problem/opportunity this book addresses; Shares why this book exists now and why the author is uniquely qualified; Provides a roadmap of what readers will learn/gain from each section; Includes 2-3 specific examples or mini-case studies; Addresses common misconceptions or objections; Ends with clear instructions on how to use this book; Uses subheadings to break up text every 400-600 words; Matches the book's specified tone and speaks directly to target audience pain points. MUST end with "+$$$+\n#### Key Points from Introduction\n- Point 1\n- Point 2\n- Point 3\n- Point 4\n- Point 5\n+$$$+"
-   - The 'conclusion' string should contain a powerful conclusion (2,500-4,000 words) that: Opens with an evocative heading that signals completion and new beginning; Synthesizes key insights without merely repeating chapter summaries; Includes 3-5 substantial sections that build toward a crescendo; Addresses the 'what now?' question with concrete next steps; Acknowledges the reader's journey and growth through the book; Paints a vivid picture of the reader's potential future state; Includes a memorable final message or call-to-action; Provides additional resources or community connections; Uses subheadings to structure the conclusion's narrative arc; Circles back to opening themes while showing transformation; Matches book's tone while adding inspirational elevation. MUST end with "+$$$+\n#### Key Points from Conclusion\n- Point 1\n- Point 2\n- Point 3\n- Point 4\n- Point 5\n+$$$+"
+   - The 'prologue' string should contain a prologue (1,500-2,500 words) that immediately engages readers by: Opening with a vivid scene, surprising statement, or relatable problem; Establishing the book's core premise or conflict within the first 500 words; Including specific sensory details and concrete examples; Creating emotional connection through personal anecdote or universal experience; Ending with a clear promise of what the book will deliver; Matching the book's specified tone and target audience. 
+   - The 'introduction' string should contain a comprehensive introduction (2,500-4,000 words) that: Opens with a clear, engaging heading that captures the book's essence; Includes 3-5 substantial sections that progressively build the book's foundation; Establishes the problem/opportunity this book addresses; Shares why this book exists now and why the author is uniquely qualified; Provides a roadmap of what readers will learn/gain from each section; Includes 2-3 specific examples or mini-case studies; Addresses common misconceptions or objections; Ends with clear instructions on how to use this book; Uses subheadings to break up text every 400-600 words; Matches the book's specified tone and speaks directly to target audience pain points. 
+   - The 'conclusion' string should contain a powerful conclusion (2,500-4,000 words) that: Opens with an evocative heading that signals completion and new beginning; Synthesizes key insights without merely repeating chapter summaries; Includes 3-5 substantial sections that build toward a crescendo; Addresses the 'what now?' question with concrete next steps; Acknowledges the reader's journey and growth through the book; Paints a vivid picture of the reader's potential future state; Includes a memorable final message or call-to-action; Provides additional resources or community connections; Uses subheadings to structure the conclusion's narrative arc; Circles back to opening themes while showing transformation; Matches book's tone while adding inspirational elevation. MUST end with 
 5. The 'acknowledgement' field should contain a concise acknowledgement section (100-200 words) that: Thanks 2-3 key individuals or groups who made the book possible; Includes specific contributions rather than generic thanks; Mentions early readers, mentors, or community members who shaped the work; Acknowledges family/personal support briefly but genuinely; References any organizations, platforms, or communities integral to the book; Maintains professional warmth without excessive sentimentality; Ends with a forward-looking note about the book's intended impact; Matches the book's tone while being slightly more personal. The 'appendix' and 'references' fields should be brief top-level strings. 'coverPageDetails' is also a top-level object. These are not part of the main chapter flow or word count intensive sections like Prologue/Intro/Conclusion.
 6. Be creative with part titles and actual chapter titles based on the topic and market research.
 7. Ensure the JSON format is strictly followed as per the example.
@@ -426,9 +426,9 @@ You must respond with ONLY valid JSON in this exact format:
   "marketPosition": "Define market position (75-150 words) using this framework: Primary category/shelf placement; 2-3 successful comp titles and how this book differs; Target retailer categories; Price point positioning (premium/accessible/budget) with justification; Format priorities (hardcover/paperback/audio/digital); One-sentence elevator pitch for booksellers.",
   "uniqueValue": "Write a compelling unique value proposition (50-100 words) that identifies ONE primary differentiator from existing books in this category, states a specific benefit readers get here they can't find elsewhere, uses concrete language rather than abstract claims, avoids overused terms like 'comprehensive,' 'ultimate,' or 'revolutionary,' includes a measurable outcome or transformation when possible, formatted as 2-3 punchy sentences that could work as back-cover copy.",
   "acknowledgement": "Brief acknowledgement outline (50-100 words) describing who to thank and why",
-  "prologue": "## Prologue Title\\n\\nBrief prologue outline (100-200 words) describing the opening scene or hook that will engage readers\\n\\n+$$$+\\n#### Key Points\\n- Point 1\\n- Point 2\\n- Point 3\\n+$$$+",
-  "introduction": "# Introduction Title\\n\\nBrief introduction outline (100-200 words) describing what will be covered\\n\\n+$$$+\\n#### Key Points\\n- Point 1\\n- Point 2\\n- Point 3\\n+$$$+",
-  "conclusion": "# Conclusion Title\\n\\nBrief conclusion outline (100-200 words) describing the wrap-up and call to action\\n\\n+$$$+\\n#### Key Points\\n- Point 1\\n- Point 2\\n- Point 3\\n+$$$+",
+  "prologue": "## Prologue Title\\n\\nBrief prologue outline (100-200 words) describing the opening scene or hook that will engage readers",
+  "introduction": "# Introduction Title\\n\\nBrief introduction outline (100-200 words) describing what will be covered",
+  "conclusion": "# Conclusion Title\\n\\nBrief conclusion outline (100-200 words) describing the wrap-up and call to action",
   "appendix": "Optional: Brief appendix content, if applicable.",
   "references": "Optional: Brief references or bibliography, if applicable.",
   "coverPageDetails": {
@@ -446,7 +446,6 @@ You must respond with ONLY valid JSON in this exact format:
           "title": "Creative Title for Chapter 1 (Generated by AI)",
           "description": "Detailed description of Chapter 1's content, purpose, and relevance to the part's theme and audience needs.",
           "estimatedWords": 5000, // Example, AI to distribute words to meet total
-          "keyPoints": ["Key takeaway 1 for Ch1", "Key takeaway 2 for Ch1", "Key takeaway 3 for Ch1"],
           "keyTopics": ["Main topic of Ch1", "Sub-topic A for Ch1", "Sub-topic B for Ch1"]
         }
         // ... AI to add 4-7 more chapters to this part, with sequential numbering ...
@@ -477,7 +476,7 @@ You must respond with ONLY valid JSON in this exact format:
       model,
       prompt,
       messages: messages as any,
-      temperature: 0.7,
+      temperature: 0.8,
       max_tokens: 50000
     });
 
@@ -648,16 +647,7 @@ CRITICAL MISSION: Your primary objective is to write EXACTLY ${targetWords} word
 
 NEVER ASK QUESTIONS: Do not ask for confirmation, clarification, or permission to continue. Write the content directly without any meta-commentary about the writing process.
 
-KEY POINTS RULE: Include ONLY ONE "Key Points" section at the very end of the chapter. Do NOT include key points in the middle of content. The key points MUST be in this exact format:
 
-+$$$+
-#### Key Points to takeaway from this chapter
-- [Key takeaway 1 from this chapter]
-- [Key takeaway 2 from this chapter]
-- [Key takeaway 3 from this chapter]
-- [Key takeaway 4 from this chapter]
-- [Key takeaway 5 from this chapter]
-+$$$+
 
 Write this chapter following these STRICT guidelines:
 
@@ -665,9 +655,10 @@ Write this chapter following these STRICT guidelines:
 1. Write at a ${book.marketResearch?.readingLevel || 'Standard (60-69)'} Flesch Reading Ease level (${book.marketResearch?.gradeLevel || '8th-9th grade'})
 2. Use ${book.structure?.tone || 'conversational'} tone with ${book.marketResearch?.sentenceLength || 'medium'} sentence lengths
 3. Vocabulary complexity: ${book.marketResearch?.vocabularyLevel || 'accessible but varied'}
-4. FORBIDDEN PHRASES: Never use "picture this", "imagine", "celestial", "buckle up", "let's dive in", "journey", "unlock", "transform your life", "game-changer", "revolutionary", "ultimate guide"
+4. FORBIDDEN PHRASES: Never use "picture this", "imagine", "celestial", "buckle up", "let's dive in", "journey", "unlock", "transform your life", "game-changer", "revolutionary", "ultimate guide", "Picture this", "Let's dive", "mystical", or any other terms or expressions that known and unknown AI Jargon and makes the content not legit or unserious. NO EMOJI!
 5. AVOID: Starting sections with questions, excessive metaphors, emoji, exclamation points (max 1 per 1000 words)
 6. DO: Vary sentence openings, use specific examples from ${book.marketResearch?.targetAudience?.dailyLife || 'everyday modern life'}, ground abstract concepts in concrete scenarios
+7. ABSOLUTELY FORBIDDEN: Never include "Key Points" sections, bullet point summaries, word count notifications, or any meta-commentary about the content structure
 
 **CONSISTENCY REQUIREMENTS:**
 7. Review previous chapters to ensure NO repeated: examples, case studies, anecdotes, or conceptual explanations
@@ -686,7 +677,7 @@ Write this chapter following these STRICT guidelines:
    - Use **bold** for emphasis
    - Use - or * for bullet points
    - Use > for blockquotes
-   - Use +$$$+ Your key-point text goes here +$$$+
+   
    - Ensure proper paragraph spacing (empty line between paragraphs)
    - Use numbered lists where appropriate
    - Use backticks for inline code or technical terms
@@ -723,7 +714,7 @@ ${partTitle ? `Part: ${partTitle}` : ''}
 Chapter ${chapter.number}: ${chapter.title}
 Description: ${chapterDetails?.description || ''}
 ${chapterDetails?.keyTopics ? `Key Topics to Cover: ${chapterDetails.keyTopics.join(', ')}` : ''}
-${chapterDetails?.keyPoints ? `Key Points to Include: ${chapterDetails.keyPoints.join(', ')}` : ''}
+
 **MANDATORY Target Word Count: EXACTLY ${targetWords} words - NO EXCEPTIONS**
 
 ${previousChapters.length > 0 ? `Previous chapters covered: ${previousChapters.join(', ')}` : 'This is the first chapter.'}
@@ -736,18 +727,15 @@ ${chapter.number === (book.structure?.parts ?
   (book.structure?.chapters ? book.structure.chapters.length + 1 : 999)
 ) && book.structure?.conclusion ? `This is the CONCLUSION. Use the following content as guidance: ${book.structure.conclusion}` : ''}
 
-CRITICAL KEY POINTS FORMATTING: At the end of each chapter, add the key points in EXACTLY this format (no variations allowed):
 
-+$$$+
-#### Key Points to takeaway from this chapter
-- [Key takeaway 1 from this chapter]
-- [Key takeaway 2 from this chapter]
-- [Key takeaway 3 from this chapter]
-- [Key takeaway 4 from this chapter]
-- [Key takeaway 5 from this chapter]
-+$$$+
 
-ABSOLUTE REQUIREMENT: Write content directly. Do NOT ask questions like "Would you like me to continue?" or "Should I proceed with...?" Just write the chapter content continuously until you reach the exact word count.
+ABSOLUTE REQUIREMENTS: 
+- Write content directly. Do NOT ask questions like "Would you like me to continue?" or "Should I proceed with...?" 
+- Just write the chapter content continuously until you reach the exact word count
+- NEVER include "Key Points" bullet sections or summaries at the end of sections
+- NEVER include word count notifications in your output like "(Word count: 1250)"
+- NEVER add meta-commentary about content structure or organization
+- Focus solely on delivering engaging, continuous prose without structural annotations
 
 `;
 
@@ -821,7 +809,6 @@ INTEGRATION INSTRUCTIONS:
 Write high-quality content that follows all the guidelines above while incorporating the research data naturally.
 
 CHAPTER STRUCTURE REQUIREMENTS:
-- End each chapter with a "#### Key Points" section containing 3-5 bullet points summarizing the chapter
 - Do NOT include a "References" section at the end of the chapter
 - Include citations in-text using format: (Source Name, Year)
 - All references will be compiled automatically into the book's main References chapter
@@ -835,7 +822,7 @@ CHAPTER STRUCTURE REQUIREMENTS:
     ];
 
     // Use a more reliable model for chapter generation
-    const model = 'openai/gpt-4o';
+    const model = 'anthropic/claude-3.7-sonnet';
     
     // Adjust temperature based on tone
     let temperature = 0.8;
@@ -902,19 +889,31 @@ Previous content written so far:
 ${previousChunkContent}
 
 Continue writing the next ${chunkWords} words. Do NOT repeat any content already written.
-${isLastChunk ? 'This is the FINAL chunk - conclude the chapter with meaningful content and add the Key Points section at the very end in EXACTLY this format:\n\n+$$$+\n#### Key Points to takeaway from this chapter\n- [Key takeaway 1 from this chapter]\n- [Key takeaway 2 from this chapter]\n- [Key takeaway 3 from this chapter]\n- [Key takeaway 4 from this chapter]\n- [Key takeaway 5 from this chapter]\n+$$$+' : 'Continue naturally from where you left off. Do NOT include any Key Points section in this chunk.'}
+${isLastChunk ? 'This is the FINAL chunk - conclude the chapter with meaningful content'  : 'Continue naturally from where you left off.'}
 
 WORD COUNT CRITICAL: Write exactly ${chunkWords} words for this chunk. Count carefully to ensure precision.
 
-CRITICAL: Write the content directly without asking questions or seeking confirmation. Do NOT ask "Would you like me to continue?" or similar questions. Just write the chapter content.`;
+CRITICAL: Write the content directly without asking questions or seeking confirmation. Do NOT ask "Would you like me to continue?" or similar questions. Just write the chapter content.
+
+ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
+- Do NOT include "Key Points" sections or bullet point summaries
+- Do NOT include word count notifications like "(Word count: 1250)"
+- Do NOT include any meta-commentary about the content or structure
+- Just write the actual chapter content continuously`;
       } else {
         chunkPrompt = `${enhancedUserPrompt}
 
-Write the first ${chunkWords} words of this chapter. ${numChunks > 1 ? 'Do NOT include Key Points in this chunk.' : 'Include the Key Points section at the end in EXACTLY this format:\n\n+$$$+\n#### Key Points to takeaway from this chapter\n- [Key takeaway 1 from this chapter]\n- [Key takeaway 2 from this chapter]\n- [Key takeaway 3 from this chapter]\n- [Key takeaway 4 from this chapter]\n- [Key takeaway 5 from this chapter]\n+$$$+'}
+
 
 WORD COUNT CRITICAL: Write exactly ${chunkWords} words for this chunk. Count carefully to ensure precision.
 
-CRITICAL: Write the content directly without asking questions or seeking confirmation. Do NOT ask "Would you like me to continue?" or similar questions. Just write the chapter content.`;
+CRITICAL: Write the content directly without asking questions or seeking confirmation. Do NOT ask "Would you like me to continue?" or similar questions. Just write the chapter content.
+
+ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
+- Do NOT include "Key Points" sections or bullet point summaries
+- Do NOT include word count notifications like "(Word count: 1250)"
+- Do NOT include any meta-commentary about the content or structure
+- Just write the actual chapter content continuously`;
       }
       
       const chunkMessages = [
@@ -944,7 +943,7 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
         // Fallback to a different model if the primary one fails
         console.log(`Attempting fallback to alternative model for chunk ${chunkIndex + 1}/${numChunks}`);
         const fallbackResponse = await executeOpenRouterRequest({
-          model: 'google/gemini-2.5-pro-exp-03-25:free',
+          model: 'anthropic/claude-3.7-sonnet',
           prompt,
           messages: chunkMessages,
           temperature,
@@ -1187,7 +1186,7 @@ export const reviseChapter = async (req: Request, res: Response) => {
 
 NON-NEGOTIABLE REQUIREMENT: The revised content must hit exactly ${chapter.estimated_words || chapter.estimatedWords || 5000} words. This is your success metric.
 
-Revise the provided content according to the given instructions while maintaining the overall structure and key points, BUT your absolute priority is meeting the exact word count target.`;
+Revise the provided content according to the given instructions while maintaining the overall structure, BUT your absolute priority is meeting the exact word count target.`;
     
     const userPrompt = `Original content:
 ${chapter.content}
