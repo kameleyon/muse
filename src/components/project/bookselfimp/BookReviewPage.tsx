@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 
-import { ChevronLeft, Check, Edit, Palette, Target, FileText } from 'lucide-react'
+import { ChevronLeft, Check, Edit, Palette, Target, FileText, Type } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 
 const BookReviewPage: React.FC = () => {
@@ -148,6 +148,74 @@ const BookReviewPage: React.FC = () => {
                   {marketResearch.recommendations.colors.reasoning}
                 </p>
               </div>
+              
+              {/* Font Recommendations */}
+              {marketResearch.design && marketResearch.design.fonts && (
+                <div className="mt-6 pt-4 border-t border-neutral-light">
+                  <div className="flex items-center mb-3">
+                    <Type className="w-5 h-5 text-primary mr-2" />
+                    <strong className="text-neutral-dark">Typography Recommendations:</strong>
+                  </div>
+                  <div className="space-y-4">
+                    {/* Primary Font */}
+                    <div className="bg-neutral-light/50 rounded-xl shadow-sm p-4">
+                      <p className="font-medium text-secondary text-xl mb-1">Best Font </p>
+                      <p className="text-md font-semibold text-primary/80 mb-1">
+                        {marketResearch.design.fonts.primary.name}
+                      </p>
+                      <p className="text-sm text-neutral-medium mb-1">
+                        {marketResearch.design.fonts.primary.reasoning}
+                      </p>
+                      <a 
+                        href={marketResearch.design.fonts.primary.googleFontUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary hover:text-primary-hover"
+                      >
+                        View on Google Fonts →
+                      </a>
+                    </div>
+                    
+                    {/* Secondary Font */}
+                    <div className="bg-neutral-light/50 rounded-xl shadow-sm p-4">
+                      <h4 className="font-medium text-secondary text-xl mb-1">Secondary Font</h4>
+                      <p className="text-md font-semibold text-primary/80 mb-1">
+                        {marketResearch.design.fonts.secondary.name}
+                      </p>
+                      <p className="text-sm text-neutral-medium mb-1">
+                        {marketResearch.design.fonts.secondary.reasoning}
+                      </p>
+                      <a 
+                        href={marketResearch.design.fonts.secondary.googleFontUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary hover:text-primary-hover"
+                      >
+                        View on Google Fonts →
+                      </a>
+                    </div>
+                    
+                    {/* Alternative Font */}
+                    <div className="bg-neutral-light/50 rounded-xl shadow-sm p-4">
+                      <h4 className="font-medium text-secondary text-xl mb-1">Alternative Font</h4>
+                      <p className="text-md font-semibold text-primary/80 mb-1">
+                        {marketResearch.design.fonts.alternative.name}
+                      </p>
+                      <p className="text-sm text-neutral-medium mb-1">
+                        {marketResearch.design.fonts.alternative.reasoning}
+                      </p>
+                      <a 
+                        href={marketResearch.design.fonts.alternative.googleFontUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary hover:text-primary-hover"
+                      >
+                        View on Google Fonts →
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
               {marketResearch.recommendations.pricing && (
                 <div className="mt-4 pt-4 border-t border-neutral-light">
                   <strong className="text-neutral-dark">Pricing Strategy:</strong>

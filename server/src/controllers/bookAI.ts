@@ -282,7 +282,16 @@ export const generateMarketResearch = async (req: Request, res: Response) => {
   try {
     const { topic, references = [] } = req.body;
 
-    const systemPrompt = `You are an expert market researcher specializing in book publishing. Analyze the given topic and provide comprehensive market research to guide the book creation process. Your response MUST be valid JSON that can be parsed directly with JSON.parse().`;
+    const systemPrompt = `You are an expert market researcher specializing in book publishing and typography psychology. Analyze the given topic and provide comprehensive market research to guide the book creation process. 
+
+When recommending fonts, consider:
+- Readability and eye strain for the target reading level
+- Genre conventions and reader expectations
+- Psychological impact on the target audience
+- Compatibility between heading and body fonts
+- Free availability on Google Fonts
+
+Your response MUST be valid JSON that can be parsed directly with JSON.parse().`;
     
     const userPrompt = `Topic: ${topic}
 ${references.length > 0 ? `\nReference materials provided: ${references.join(', ')}` : ''}
@@ -297,6 +306,7 @@ Please conduct thorough market research and provide:
 7. Pricing strategy recommendations
 8. Reading level and content specifications
 9. Design and formatting requirements
+10. Top 3 free Google Fonts that would make the book successful based on the target audience psychology, reading habits, and genre expectations
 
 You must respond with ONLY valid JSON in this exact format:
 {
@@ -334,7 +344,24 @@ You must respond with ONLY valid JSON in this exact format:
   "design": {
     "colors": "primary: #hexcode, secondary: #hexcode, accent: #hexcode",
     "visualElements": "recommended number of charts/visuals per chapter",
-    "formatting": "specific formatting preferences for target audience"
+    "formatting": "specific formatting preferences for target audience",
+    "fonts": {
+      "primary": {
+        "name": "Font name (e.g., Open Sans)",
+        "googleFontUrl": "https://fonts.google.com/specimen/Font+Name",
+        "reasoning": "why this font is perfect for the target audience"
+      },
+      "secondary": {
+        "name": "Font name (e.g., Merriweather)",
+        "googleFontUrl": "https://fonts.google.com/specimen/Font+Name",
+        "reasoning": "why this font complements the primary font"
+      },
+      "alternative": {
+        "name": "Font name (e.g., Source Sans Pro)",
+        "googleFontUrl": "https://fonts.google.com/specimen/Font+Name",
+        "reasoning": "why this is a good alternative option"
+      }
+    }
   },
   "contentSpecs": {
     "examplesPerChapter": "recommended number of real-world examples",
@@ -660,18 +687,18 @@ NEVER ASK QUESTIONS: Do not ask for confirmation, clarification, or permission t
 Write this chapter following these STRICT guidelines:
 
 **CONTENT QUALITY & VOICE:**
-1. Write at a ${book.marketResearch?.readingLevel || 'Standard (60-69)'} Flesch Reading Ease level (${book.marketResearch?.gradeLevel || '8th-9th grade'})
-2. Use ${book.structure?.tone || 'conversational'} tone with ${book.marketResearch?.sentenceLength || 'medium'} sentence lengths
-3. Vocabulary complexity: ${book.marketResearch?.vocabularyLevel || 'accessible but varied'}
+1. Write at a ${book.marketResearch?.readingLevel} Flesch Reading Ease level (${book.marketResearch?.gradeLevel})
+2. Use ${book.structure?.tone} tone with ${book.marketResearch?.sentenceLength} sentence lengths
+3. Vocabulary complexity: ${book.marketResearch?.vocabularyLevel}
 4. FORBIDDEN PHRASES: Never use "picture this", "imagine", "celestial", "buckle up", "let's dive in", "journey", "unlock", "transform your life", "game-changer", "revolutionary", "ultimate guide", "Picture this", "Let's dive", "mystical", or any other terms or expressions that known and unknown AI Jargon and makes the content not legit or unserious. NO EMOJI!
 5. AVOID: Starting sections with questions, excessive metaphors, emoji, exclamation points (max 1 per 1000 words)
-6. DO: Vary sentence openings, use specific examples from ${book.marketResearch?.targetAudience?.dailyLife || 'everyday modern life'}, ground abstract concepts in concrete scenarios
+6. DO: Vary sentence openings, use specific examples from ${book.marketResearch?.targetAudience?.dailyLife}, ground abstract concepts in concrete scenarios
 7. ABSOLUTELY FORBIDDEN: Never include "Key Points" sections, bullet point summaries, word count notifications, or any meta-commentary about the content structure
 
 **CONSISTENCY REQUIREMENTS:**
 7. Review previous chapters to ensure NO repeated: examples, case studies, anecdotes, or conceptual explanations
 8. Unique examples only - flag if similar territory covered in: ${previousChapters.length > 0 ? previousChapters.join(', ') : 'N/A'}
-9. Maintain consistent terminology established in: ${book.glossary || 'chapter 1'}
+9. Maintain consistent terminology established in: ${book.glossary}
 
 **FORMATTING SPECIFICATIONS:**
 10. DO NOT repeat the chapter title (already provided in structure)
@@ -689,8 +716,8 @@ Write this chapter following these STRICT guidelines:
    - Ensure proper paragraph spacing (empty line between paragraphs)
    - Use numbered lists where appropriate
    - Use backticks for inline code or technical terms
-15. Include ${book.marketResearch?.design?.visualElements || chapterDetails?.visualElements || '1-2'} data visualizations using markdown tables or ASCII-style simple graphs when data supports it
-16. Color palette references: ${book.marketResearch?.design?.colors || book.design?.colors || 'primary: purple, secondary: gold, accent: white'}
+15. Include ${book.marketResearch?.design?.visualElements || chapterDetails?.visualElements} data visualizations using markdown tables or ASCII-style simple graphs when data supports it
+16. Color palette references: ${book.marketResearch?.design?.colors || book.design?.colors}
 
 **CHAPTER SPECIFICATIONS:**
 17. **CRITICAL WORD COUNT GUIDELINES:**
@@ -701,29 +728,29 @@ Write this chapter following these STRICT guidelines:
     - Prioritize completing thoughts naturally over hitting an exact number. It is PREFERRED to go slightly over ${targetWords} (up to ${maxTargetWords}) rather than cutting content short.
     - If content is naturally shorter, ensure it still meets the minimum of ${targetWords - 100} words by adding relevant details, examples, or explanations.
     - Do NOT abruptly truncate sentences or paragraphs.
-18. Include ${book.marketResearch?.contentSpecs?.examplesPerChapter || chapterDetails?.examples || '3-4'} real-world examples
+18. Include ${book.marketResearch?.contentSpecs?.examplesPerChapter || chapterDetails?.examples} real-world examples
 19. ${book.marketResearch?.contentSpecs?.exerciseInclusion === 'true' || chapterDetails?.exercises ? 'Include practical exercises' : 'Focus on narrative flow'}
-20. Target audience specifics: ${book.marketResearch?.targetAudience?.demographics || '25-45, urban, professional'}
+20. Target audience specifics: ${book.marketResearch?.targetAudience?.demographics}
 
 **SPECIAL INSTRUCTIONS:**
-${book.marketResearch?.contentSpecs?.specialInstructions || chapterDetails?.specialInstructions || 'None'}
+${book.marketResearch?.contentSpecs?.specialInstructions || chapterDetails?.specialInstructions}
 ${chapter.number === 0 || (chapter.number === (book.structure?.parts ? 
   Math.max(...book.structure.parts.flatMap((part: any) => part.chapters.map((ch: any) => ch.number))) + 1 : 
   (book.structure?.chapters ? book.structure.chapters.length + 1 : 999)
 )) ? 'Adapt format for special section requirements' : ''}`;
     
     const userPrompt = `Book Title: ${book.title}
-Subtitle: ${book.structure?.subtitle || ''}
+Subtitle: ${book.structure?.subtitle}
 Topic: ${book.topic}
-Target Audience: ${book.structure?.audience || ''}
-Writing Style: ${book.structure?.style || 'Clear and engaging'}
-Tone: ${book.structure?.tone || 'Conversational'}
-Market Position: ${book.structure?.marketPosition || ''}
-Unique Value: ${book.structure?.uniqueValue || ''}
+Target Audience: ${book.structure?.audience}
+Writing Style: ${book.structure?.style}
+Tone: ${book.structure?.tone}
+Market Position: ${book.structure?.marketPosition}
+Unique Value: ${book.structure?.uniqueValue}
 
 ${partTitle ? `Part: ${partTitle}` : ''}
 Chapter ${chapter.number}: ${chapter.title}
-Description: ${chapterDetails?.description || ''}
+Description: ${chapterDetails?.description}
 ${chapterDetails?.keyTopics ? `Key Topics to Cover: ${chapterDetails.keyTopics.join(', ')}` : ''}
 
 **Target Word Count Range: ${targetWords - 100} (min) to ${maxTargetWords} (max). Aim for ~${targetWords}. Start concluding around ${idealConclusionStart} words.**
