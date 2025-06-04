@@ -860,7 +860,7 @@ CHAPTER STRUCTURE REQUIREMENTS:
     ];
 
     // Use a more reliable model for chapter generation
-    const model = 'anthropic/claude-3.7-sonnet';
+    const model = 'google/gemini-2.5-flash-preview';
     
     // Define parameter profiles for different tones
     const creativeProfile = {
@@ -1066,7 +1066,7 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
         // Fallback to a different model if the primary one fails
         console.log(`Attempting fallback to alternative model for chunk ${chunkIndex + 1}/${numChunks}`);
         const fallbackResponse = await executeOpenRouterRequest({
-          model: 'anthropic/claude-3.7-sonnet', // Consider if fallback model should also be configurable or use a default profile
+          model: 'google/gemini-2.5-flash-preview', // Consider if fallback model should also be configurable or use a default profile
           prompt,
           messages: chunkMessages,
           ...selectedProfile, // Spread the selected profile parameters for fallback too
