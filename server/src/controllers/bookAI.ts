@@ -1033,35 +1033,30 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
         console.log(`Completed generation of chunk ${chunkIndex + 1}/${numChunks}`);
 
         if (isLastChunk && chunkContent.length > 0) {
-          // Attempt to clean up truncated sentence at the end of the very last chunk
-          const trimmedContent = chunkContent.trimRight();
-          // Regex to find the last occurrence of a sentence-ending punctuation mark (. ! ?)
-          // optionally followed by closing quotes (single or double) and then whitespace or end of string.
-          const sentenceEndRegex = /[\.\!\?]['"]?\s*$/;
-          
-          if (!sentenceEndRegex.test(trimmedContent)) {
-            console.warn(`Last chunk (index ${chunkIndex}) may have ended mid-sentence. Original ending: "...${trimmedContent.slice(-50)}"`);
-            let lastPunctuationIndex = -1;
-            const punctuationMarks = ['.', '!', '?'];
-            for (const mark of punctuationMarks) {
-              let index = trimmedContent.lastIndexOf(mark);
-              // Check if the punctuation is followed by a quote
-              if (index !== -1 && index < trimmedContent.length - 1 && (trimmedContent[index+1] === '"' || trimmedContent[index+1] === "'")) {
-                index++; // Include the quote
-              }
-              if (index > lastPunctuationIndex) {
-                lastPunctuationIndex = index;
-              }
+          const originalChunkContentForLog = chunkContent.slice(-50);
+          let bestCutOffPoint = -1;
+
+          const punctuationMarks = ['.', '!', '?'];
+          for (const mark of punctuationMarks) {
+            const lastIndex = chunkContent.lastIndexOf(mark);
+            if (lastIndex > bestCutOffPoint) {
+              bestCutOffPoint = lastIndex;
+            }
+          }
+
+          if (bestCutOffPoint > 0) {
+            const potentialNewEnd = bestCutOffPoint + 1;
+            let actualNewEnd = potentialNewEnd;
+
+            if (potentialNewEnd < chunkContent.length && (chunkContent[potentialNewEnd] === '"' || chunkContent[potentialNewEnd] === "'")) {
+                actualNewEnd = potentialNewEnd + 1;
             }
 
-            if (lastPunctuationIndex !== -1) {
-              chunkContent = trimmedContent.slice(0, lastPunctuationIndex + 1);
-              console.log(`Sanitized last chunk. New ending: "...${chunkContent.slice(-50)}"`);
+            if (chunkContent.substring(actualNewEnd).trim() !== '') {
+                chunkContent = chunkContent.slice(0, actualNewEnd);
+                console.warn(`Last chunk ended mid-sentence. Original: "...${originalChunkContentForLog}". Sanitized to: "...${chunkContent.slice(-50)}"`);
             } else {
-              // If no sentence-ending punctuation found at all, it might be a very short, cut-off fragment.
-              // In this case, it might be better to keep it as is, or decide on a different strategy.
-              // For now, we'll log and keep it, as aggressive truncation could lose meaning.
-              console.warn(`Could not find a suitable sentence end to sanitize last chunk. Keeping as is.`);
+                chunkContent = chunkContent.slice(0, actualNewEnd);
             }
           }
         }
@@ -1082,29 +1077,30 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
         console.log(`Completed fallback generation of chunk ${chunkIndex + 1}/${numChunks}`);
 
         if (isLastChunk && chunkContent.length > 0) {
-          // Attempt to clean up truncated sentence at the end of the very last chunk (for fallback too)
-          const trimmedContent = chunkContent.trimRight();
-          const sentenceEndRegex = /[\.\!\?]['"]?\s*$/;
-          
-          if (!sentenceEndRegex.test(trimmedContent)) {
-            console.warn(`Fallback: Last chunk (index ${chunkIndex}) may have ended mid-sentence. Original ending: "...${trimmedContent.slice(-50)}"`);
-            let lastPunctuationIndex = -1;
-            const punctuationMarks = ['.', '!', '?'];
-            for (const mark of punctuationMarks) {
-              let index = trimmedContent.lastIndexOf(mark);
-              if (index !== -1 && index < trimmedContent.length - 1 && (trimmedContent[index+1] === '"' || trimmedContent[index+1] === "'")) {
-                index++;
-              }
-              if (index > lastPunctuationIndex) {
-                lastPunctuationIndex = index;
-              }
+          const originalChunkContentForLog = chunkContent.slice(-50);
+          let bestCutOffPoint = -1;
+
+          const punctuationMarks = ['.', '!', '?'];
+          for (const mark of punctuationMarks) {
+            const lastIndex = chunkContent.lastIndexOf(mark);
+            if (lastIndex > bestCutOffPoint) {
+              bestCutOffPoint = lastIndex;
+            }
+          }
+
+          if (bestCutOffPoint > 0) {
+            const potentialNewEnd = bestCutOffPoint + 1;
+            let actualNewEnd = potentialNewEnd;
+
+            if (potentialNewEnd < chunkContent.length && (chunkContent[potentialNewEnd] === '"' || chunkContent[potentialNewEnd] === "'")) {
+                actualNewEnd = potentialNewEnd + 1;
             }
 
-            if (lastPunctuationIndex !== -1) {
-              chunkContent = trimmedContent.slice(0, lastPunctuationIndex + 1);
-              console.log(`Fallback: Sanitized last chunk. New ending: "...${chunkContent.slice(-50)}"`);
+            if (chunkContent.substring(actualNewEnd).trim() !== '') {
+                chunkContent = chunkContent.slice(0, actualNewEnd);
+                console.warn(`Fallback: Last chunk ended mid-sentence. Original: "...${originalChunkContentForLog}". Sanitized to: "...${chunkContent.slice(-50)}"`);
             } else {
-              console.warn(`Fallback: Could not find a suitable sentence end to sanitize last chunk. Keeping as is.`);
+                chunkContent = chunkContent.slice(0, actualNewEnd);
             }
           }
         }
