@@ -376,7 +376,7 @@ You must respond with ONLY valid JSON in this exact format:
     ];
 
     // Use the configured research model from config
-    const model = config.openRouter.defaultResearchModel || 'openai/gpt-4o-search-preview';
+    const model = config.openRouter.defaultResearchModel || 'google/gemini-2.0-flash-001';
     
     console.log(`Generating market research for topic: ${topic} using model: ${model}`);
     const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
@@ -687,18 +687,18 @@ NEVER ASK QUESTIONS: Do not ask for confirmation, clarification, or permission t
 Write this chapter following these STRICT guidelines:
 
 **CONTENT QUALITY & VOICE:**
-1. Write at a ${book.marketResearch?.readingLevel} Flesch Reading Ease level (${book.marketResearch?.gradeLevel})
-2. Use ${book.structure?.tone} tone with ${book.marketResearch?.sentenceLength} sentence lengths
-3. Vocabulary complexity: ${book.marketResearch?.vocabularyLevel}
+1. Write at a ${book.marketResearch?.readingLevel || 'Standard (60-69)'} Flesch Reading Ease level (${book.marketResearch?.gradeLevel || '8th-9th grade'})
+2. Use ${book.structure?.tone || 'conversational'} tone with ${book.marketResearch?.sentenceLength || 'medium'} sentence lengths
+3. Vocabulary complexity: ${book.marketResearch?.vocabularyLevel || 'accessible but varied'}
 4. FORBIDDEN PHRASES: Never use "picture this", "imagine", "celestial", "buckle up", "let's dive in", "journey", "unlock", "transform your life", "game-changer", "revolutionary", "ultimate guide", "Picture this", "Let's dive", "mystical", or any other terms or expressions that known and unknown AI Jargon and makes the content not legit or unserious. NO EMOJI!
 5. AVOID: Starting sections with questions, excessive metaphors, emoji, exclamation points (max 1 per 1000 words)
-6. DO: Vary sentence openings, use specific examples from ${book.marketResearch?.targetAudience?.dailyLife}, ground abstract concepts in concrete scenarios
+6. DO: Vary sentence openings, use specific examples from ${book.marketResearch?.targetAudience?.dailyLife || 'everyday modern life'}, ground abstract concepts in concrete scenarios
 7. ABSOLUTELY FORBIDDEN: Never include "Key Points" sections, bullet point summaries, word count notifications, or any meta-commentary about the content structure
 
 **CONSISTENCY REQUIREMENTS:**
 7. Review previous chapters to ensure NO repeated: examples, case studies, anecdotes, or conceptual explanations
 8. Unique examples only - flag if similar territory covered in: ${previousChapters.length > 0 ? previousChapters.join(', ') : 'N/A'}
-9. Maintain consistent terminology established in: ${book.glossary}
+9. Maintain consistent terminology established in: ${book.glossary || 'chapter 1'}
 
 **FORMATTING SPECIFICATIONS:**
 10. DO NOT repeat the chapter title (already provided in structure)
@@ -716,8 +716,8 @@ Write this chapter following these STRICT guidelines:
    - Ensure proper paragraph spacing (empty line between paragraphs)
    - Use numbered lists where appropriate
    - Use backticks for inline code or technical terms
-15. Include ${book.marketResearch?.design?.visualElements || chapterDetails?.visualElements} data visualizations using markdown tables or ASCII-style simple graphs when data supports it
-16. Color palette references: ${book.marketResearch?.design?.colors || book.design?.colors}
+15. Include ${book.marketResearch?.design?.visualElements || chapterDetails?.visualElements || '1-2'} data visualizations using markdown tables or ASCII-style simple graphs when data supports it
+16. Color palette references: ${book.marketResearch?.design?.colors || book.design?.colors || 'primary: purple, secondary: gold, accent: white'}
 
 **CHAPTER SPECIFICATIONS:**
 17. **CRITICAL WORD COUNT GUIDELINES:**
@@ -728,12 +728,12 @@ Write this chapter following these STRICT guidelines:
     - Prioritize completing thoughts naturally over hitting an exact number. It is PREFERRED to go slightly over ${targetWords} (up to ${maxTargetWords}) rather than cutting content short.
     - If content is naturally shorter, ensure it still meets the minimum of ${targetWords - 100} words by adding relevant details, examples, or explanations.
     - Do NOT abruptly truncate sentences or paragraphs.
-18. Include ${book.marketResearch?.contentSpecs?.examplesPerChapter || chapterDetails?.examples} real-world examples
+18. Include ${book.marketResearch?.contentSpecs?.examplesPerChapter || chapterDetails?.examples || '3-4'} real-world examples
 19. ${book.marketResearch?.contentSpecs?.exerciseInclusion === 'true' || chapterDetails?.exercises ? 'Include practical exercises' : 'Focus on narrative flow'}
-20. Target audience specifics: ${book.marketResearch?.targetAudience?.demographics}
+20. Target audience specifics: ${book.marketResearch?.targetAudience?.demographics || '25-45, urban, professional'}
 
 **SPECIAL INSTRUCTIONS:**
-${book.marketResearch?.contentSpecs?.specialInstructions || chapterDetails?.specialInstructions}
+${book.marketResearch?.contentSpecs?.specialInstructions || chapterDetails?.specialInstructions || 'None'}
 ${chapter.number === 0 || (chapter.number === (book.structure?.parts ? 
   Math.max(...book.structure.parts.flatMap((part: any) => part.chapters.map((ch: any) => ch.number))) + 1 : 
   (book.structure?.chapters ? book.structure.chapters.length + 1 : 999)
@@ -784,7 +784,7 @@ Topic: ${book.topic}
 Chapter ${chapter.number}: ${chapter.title}
 Chapter Description: ${chapterDetails?.description || ''}
 Key Topics: ${chapterDetails?.keyTopics ? chapterDetails.keyTopics.join(', ') : ''}
-Target Audience: ${book.marketResearch?.targetAudience?.demographics || ''}
+Target Audience: ${book.marketResearch?.targetAudience?.demographics || 'General audience'}
 
 TASK: Search the internet for the following types of current supporting data:
 1. Recent statistics, studies, or research related to this chapter's topics
@@ -816,7 +816,7 @@ Begin your research now.`;
 
     console.log('Step 1: Gathering supporting research data...');
     // Use the configured research model for search
-    const searchModel = config.openRouter.defaultResearchModel || 'openai/gpt-4o-search-preview';
+    const searchModel = config.openRouter.defaultResearchModel || 'google/gemini-2.0-flash-001';
     console.log(`Using search model: ${searchModel} for research data gathering`);
     
     const searchResponse = await executeOpenRouterRequest({
@@ -860,7 +860,7 @@ CHAPTER STRUCTURE REQUIREMENTS:
     ];
 
     // Use a more reliable model for chapter generation
-    const model = 'google/gemini-2.5-flash-preview';
+    const model = 'anthropic/claude-3.7-sonnet';
     
     // Define parameter profiles for different tones
     const creativeProfile = {
