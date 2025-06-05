@@ -153,6 +153,24 @@ const BookPreviewPage: React.FC = () => {
         format: 'letter'
       });
 
+      // Custom font weight configuration
+      // NOTE: To use custom font weights (300, 450, 600), you need to:
+      // 1. Add georgia font files with different weights (e.g., georgia-Light.ttf, georgia-Medium.ttf, georgia-Semibold.ttf)
+      // 2. Convert them to base64 and add them to jsPDF:
+      //    pdf.addFileToVFS('georgia-Light.ttf', georgiaLightBase64);
+      //    pdf.addFont('georgia-Light.ttf', 'georgia-light', 'normal');
+      //    pdf.addFileToVFS('georgia-Medium.ttf', georgiaMediumBase64);
+      //    pdf.addFont('georgia-Medium.ttf', 'georgia-medium', 'normal');
+      //    pdf.addFileToVFS('georgia-Semibold.ttf', georgiaSemiboldBase64);
+      //    pdf.addFont('georgia-Semibold.ttf', 'georgia-semibold', 'normal');
+      
+      // Font weight mapping
+      const fontWeights = {
+        light: 300,      // For normal text
+        medium: 450,     // For semibold text
+        semibold: 600    // For bold text
+      };
+
       // PDF dimensions
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
@@ -162,12 +180,12 @@ const BookPreviewPage: React.FC = () => {
 
       // Font settings
       const titleFontSize = 24;
-      const h1FontSize = 17;
+      const h1FontSize = 16;
       const h2FontSize = 13;
-      const h3FontSize = 13;
+      const h3FontSize = 12;
       const h4FontSize = 12;
-      const normalFontSize = 11;
-      const lineHeight = 1.5;
+      const normalFontSize = 12;
+      const lineHeight = 1.9;
 
       // Helper functions
       const addNewPage = () => {
@@ -208,15 +226,33 @@ const BookPreviewPage: React.FC = () => {
       const addText = (text: string, fontSize: number, options: { bold?: boolean; italic?: boolean; semibold?: boolean; color?: string; indent?: number; justify?: boolean; firstLineIndent?: boolean; font?: string } = {}) => {
         pdf.setFontSize(fontSize);
         
-        // Use specified font or default to Times
-        const fontFamily = options.font || 'futura';
+        // Font selection logic with custom weights
+        const fontFamily = options.font || 'georgia';
+        
+        // If custom fonts are loaded, use them based on weight requirements
+        // Otherwise fall back to standard jsPDF fonts
         if (options.bold && options.italic) {
+          // For bold+italic, use standard bolditalic (no custom weight available)
           pdf.setFont(fontFamily, 'bolditalic');
-        } else if (options.bold || options.semibold) {
-          pdf.setFont(fontFamily, 'bold'); // Use bold for semibold since jsPDF doesn't have semibold
+        } else if (options.bold) {
+          // Bold text should use weight 600
+          // If custom fonts loaded: pdf.setFont('georgia-semibold', 'normal');
+          // Fallback:
+          pdf.setFont(fontFamily, 'bold');
+        } else if (options.semibold) {
+          // Semibold text should use weight 450
+          // If custom fonts loaded: pdf.setFont('georgia-medium', 'normal');
+          // Fallback:
+          pdf.setFont(fontFamily, 'bold');
         } else if (options.italic) {
+          // Italic with weight 300
+          // If custom fonts loaded: pdf.setFont('georgia-light', 'italic');
+          // Fallback:
           pdf.setFont(fontFamily, 'italic');
         } else {
+          // Normal text should use weight 300
+          // If custom fonts loaded: pdf.setFont('georgia-light', 'normal');
+          // Fallback:
           pdf.setFont(fontFamily, 'normal');
         }
 
@@ -286,12 +322,12 @@ const BookPreviewPage: React.FC = () => {
         }
 
         // Handle mixed formatting by creating combined text with word wrapping
-        yPosition += (options.spaceAbove || 0);
-        checkPageBreak(fontSize * 1.5);
+        yPosition += lineHeight;
+        checkPageBreak(fontSize * 2);
 
         const baseXPos = margin + (options.indent || 0);
         let currentX = baseXPos;
-        const lineHeightPt = fontSize * 1.5;
+        const lineHeightPt = fontSize * 2;
         
         // Apply first line indent if requested
         if (options.firstLineIndent) {
@@ -303,18 +339,34 @@ const BookPreviewPage: React.FC = () => {
           if (!part.text) return;
 
           // Set font for this part based on context and semibold
+          // Ensure consistent font size for all text weights
+          // Note: Bold text may appear slightly smaller due to font metrics
+          // If needed, you can add a small adjustment: part.semibold ? fontSize * 1.02 : fontSize
           pdf.setFontSize(fontSize);
-          pdf.setTextColor(35, 35, 33); // Body text color
+          pdf.setTextColor(35, 35, 33, 0.6); // Body text color
           
           // Determine font style based on context and semibold
+          // Using custom font weights when available
           if (options.italic && part.semibold) {
-            pdf.setFont('futura', 'bolditalic'); // Both italic context and semibold
+            // Semibold+italic should use weight 450 with italic
+            // If custom fonts loaded: pdf.setFont('georgia-medium', 'italic');
+            // Fallback:
+            pdf.setFont('georgia', 'bolditalic');
           } else if (part.semibold) {
-            pdf.setFont('futura', 'bold'); // Just semibold
+            // Semibold text should use weight 450
+            // If custom fonts loaded: pdf.setFont('georgia-medium', 'normal');
+            // Fallback:
+            pdf.setFont('georgia', 'bold');
           } else if (options.italic) {
-            pdf.setFont('futura', 'italic'); // Just italic context
+            // Italic text with weight 300
+            // If custom fonts loaded: pdf.setFont('georgia-light', 'italic');
+            // Fallback:
+            pdf.setFont('georgia', 'italic');
           } else {
-            pdf.setFont('futura', 'normal'); // Regular text
+            // Regular text should use weight 300
+            // If custom fonts loaded: pdf.setFont('georgia-light', 'normal');
+            // Fallback:
+            pdf.setFont('georgia', 'normal');
           }
 
           // Split part into words for wrapping
@@ -340,12 +392,13 @@ const BookPreviewPage: React.FC = () => {
             }
             
             // Render the word
+            // Ensure proper positioning for all font weights
             pdf.text(word, currentX, yPosition);
             currentX += pdf.getTextWidth(word);
           });
         });
 
-        yPosition += lineHeightPt + (options.spaceAfter || 0);
+        yPosition += lineHeightPt ;
       };
 
       const addParagraph = (text: string) => {
@@ -397,6 +450,7 @@ const BookPreviewPage: React.FC = () => {
             return {
               text: part.slice(2, -2), // Remove ** markers
               semibold: true
+              
             };
           }
           return {
@@ -425,12 +479,12 @@ const BookPreviewPage: React.FC = () => {
           if (line.startsWith('#### ')) {
             yPosition += h1FontSize; // Add space above H4
             checkPageBreak(h4FontSize );
-            addText(line.substring(5), h4FontSize, { bold: true, color: 'rgb(174, 86, 48)', indent: 18 });
+            addText(line.substring(5), h4FontSize, { bold: true, color: 'rgb(35, 35, 33, 0.85)', indent: 18 });
             yPosition += lineHeight; // Space after H4
           } else if (line.startsWith('### ')) {
             yPosition += h1FontSize; // Add space above H3
             checkPageBreak(h3FontSize );
-            addText(line.substring(4), h3FontSize, { bold: true, color: 'rgb(174, 86, 48)', indent: 18 });
+            addText(line.substring(4), h3FontSize, { bold: true, color: 'rgb(35, 35, 33, 0.85)', indent: 18 });
             yPosition += lineHeight; // Space after H3
           } else if (line.startsWith('## ')) {
             yPosition += h1FontSize;  // Add space above H2
@@ -440,7 +494,7 @@ const BookPreviewPage: React.FC = () => {
           } else if (line.startsWith('# ')) {
             yPosition += lineHeight; // Add space above H1
             checkPageBreak(h1FontSize * 2, true); // Force new page for H1
-            addText(line.substring(2), h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+            addText(line.substring(2), h1FontSize, { bold: true, color: 'rgb(35, 35, 33, 0.85)' });
             yPosition += lineHeight * 0.7; // Space after H1
           }
 
@@ -451,7 +505,7 @@ const BookPreviewPage: React.FC = () => {
             const listText = line.replace(/^[-*+]\s+/, '');
             pdf.setFontSize(normalFontSize);
             pdf.setTextColor(35, 35, 33); // Body text color
-            pdf.setFont('futura', 'normal');
+            pdf.setFont('georgia', 'normal');
             const bulletIndent = 36; // 0.5 inch indent for bullets
             pdf.text(bullet, margin + bulletIndent, yPosition);
             const bulletWidth = pdf.getTextWidth(bullet);
@@ -466,7 +520,7 @@ const BookPreviewPage: React.FC = () => {
               const listText = match[2];
               pdf.setFontSize(normalFontSize);
               pdf.setTextColor(35, 35, 33); // Body text color
-              pdf.setFont('futura', 'normal');
+              pdf.setFont('georgia', 'normal');
               const numberIndent = 36; // 0.5 inch indent for numbers
               pdf.text(number, margin + numberIndent, yPosition);
               const numberWidth = pdf.getTextWidth(number);
@@ -523,7 +577,7 @@ const BookPreviewPage: React.FC = () => {
 
             const colWidths: number[] = [];
             pdf.setFontSize(normalFontSize);
-            pdf.setFont('futura', 'normal'); // Ensure correct font for width calculation
+            pdf.setFont('georgia', 'normal'); // Ensure correct font for width calculation
             for (let col = 0; col < numCols; col++) {
               let maxW = pdf.getTextWidth(headerCellsContent[col] || '');
               dataRowsContent.forEach(row => {
@@ -560,7 +614,7 @@ const BookPreviewPage: React.FC = () => {
               let calcMaxHeightInRow = 0;
               const calcFontSize = isHeaderCalc ? h4FontSize : normalFontSize;
               const calcLineHeight = calcFontSize * 1.2;
-              pdf.setFont('futura', isHeaderCalc ? 'bold' : 'normal'); // Set font for getTextWidth
+              pdf.setFont('georgia', isHeaderCalc ? 'bold' : 'normal'); // Set font for getTextWidth
               pdf.setFontSize(calcFontSize);
 
               for (let col = 0; col < numCols; col++) {
@@ -580,7 +634,7 @@ const BookPreviewPage: React.FC = () => {
               const currentFontSize = isHeader ? normalFontSize : normalFontSize; // Corrected: h4 for header
               const currentLineHeight = currentFontSize * 1.2;
 
-              pdf.setFont('futura', isHeader ? 'bold' : 'normal');
+              pdf.setFont('georgia', isHeader ? 'bold' : 'normal');
               pdf.setFontSize(currentFontSize);
 
               for (let col = 0; col < numCols; col++) {
@@ -650,7 +704,7 @@ const BookPreviewPage: React.FC = () => {
 
               // Draw cell text
               for (let col = 0; col < numCols; col++) {
-                pdf.setFont('futura', isHeader ? 'bold' : 'normal');
+                pdf.setFont('georgia', isHeader ? 'bold' : 'normal');
                 pdf.setFontSize(currentFontSize);
                 pdf.setTextColor(isHeader ? headerTextColor[0] : cellTextColor[0],
                                  isHeader ? headerTextColor[1] : cellTextColor[1],
@@ -741,8 +795,10 @@ const BookPreviewPage: React.FC = () => {
               if (part.trim()) {
                 if (/^\*\*.+\*\*$/.test(part)) {
                   processedText += part.slice(2, -2); // Remove ** but keep the text
+                  yPosition += 1.9;
                 } else {
                   processedText += part;
+                  yPosition += 1.9 ;
                 }
               }
             }
@@ -754,7 +810,7 @@ const BookPreviewPage: React.FC = () => {
             checkPageBreak(blockHeight + marginTop + marginBottom + 8);
 
             // Draw red vertical line aligned exactly with text boundaries
-            pdf.setDrawColor(174, 86, 48);  // #ae5630 with 80% transparency
+            pdf.setDrawColor(35, 35, 33, 0.6);  // #ae5630 with 80% transparency
             pdf.setLineWidth(1.5);
             const lineX = margin + 2; // Position closer to the text
             const lineTop = yPosition - 15; // Start exactly at text baseline
@@ -777,8 +833,10 @@ const BookPreviewPage: React.FC = () => {
                   if (/^\*\*.+\*\*$/.test(part)) {
                     textToRender = part.slice(2, -2); // Remove **
                     fontStyle = 'bolditalic';
+                    yPosition += lineHeight;
                   } else {
                     textToRender = part;
+                    yPosition += lineHeight;
                   }
                   
                   // Check if this part appears in the current wrapped line
@@ -787,14 +845,14 @@ const BookPreviewPage: React.FC = () => {
                     
                     // Render any text before this part (with italic)
                     if (beforeText) {
-                      pdf.setFont('futura', 'italic');
+                      pdf.setFont('georgia', 'italic');
                       pdf.text(beforeText, currentX, currentY);
                       currentX += pdf.getTextWidth(beforeText);
                       remainingLine = remainingLine.substring(beforeText.length);
                     }
                     
                     // Render this part with proper formatting
-                    pdf.setFont('futura', fontStyle);
+                    pdf.setFont('georgia', fontStyle);
                     pdf.text(textToRender, currentX, currentY);
                     currentX += pdf.getTextWidth(textToRender);
                     remainingLine = remainingLine.substring(textToRender.length);
@@ -804,7 +862,7 @@ const BookPreviewPage: React.FC = () => {
               
               // Render any remaining text with italic
               if (remainingLine.trim()) {
-                pdf.setFont('futura', 'italic');
+                pdf.setFont('georgia', 'italic');
                 pdf.text(remainingLine, currentX, currentY);
               }
               
@@ -838,9 +896,9 @@ const BookPreviewPage: React.FC = () => {
         
         // Title
         if (book.structure.coverPageDetails.title) {
-          pdf.setFontSize(30);
-          pdf.setFont('futura', 'bold');
-          pdf.setTextColor(174, 86, 48);
+          pdf.setFontSize(27);
+          pdf.setFont('georgia', 'bold');
+          pdf.setTextColor(35, 35, 33, 0.6);
           const titleLines = wrapText(book.structure.coverPageDetails.title, contentWidth);
           titleLines.forEach(line => {
             const textWidth = pdf.getTextWidth(line);
@@ -853,8 +911,8 @@ const BookPreviewPage: React.FC = () => {
         if (book.structure.coverPageDetails.subtitle) {
           yPosition += 20;
           pdf.setFontSize(18);
-          pdf.setFont('futura', 'normal');
-          pdf.setTextColor(102, 102, 102);
+          pdf.setFont('georgia', 'normal');
+          pdf.setTextColor(35, 35, 33, 0.6);
           const subtitleLines = wrapText(book.structure.coverPageDetails.subtitle, contentWidth);
           subtitleLines.forEach(line => {
             const textWidth = pdf.getTextWidth(line);
@@ -866,8 +924,8 @@ const BookPreviewPage: React.FC = () => {
         // Author
         if (book.structure.coverPageDetails.authorName) {
           yPosition += 40;
-          pdf.setFontSize(14);
-          pdf.setTextColor(174, 86, 48);
+          pdf.setFontSize(15);
+          pdf.setTextColor(35, 35, 33, 0.6);
           const authorText = `By ${book.structure.coverPageDetails.authorName}`;
           const textWidth = pdf.getTextWidth(authorText);
           pdf.text(authorText, (pageWidth - textWidth) / 2, yPosition);
@@ -878,7 +936,7 @@ const BookPreviewPage: React.FC = () => {
 
       // Table of Contents
       addNewPage();
-      addText('Table of Contents', 18, { bold: true, color: 'rgb(174, 86, 48)' });
+      addText('Table of Contents', 18, { bold: true, color: 'rgb(35, 35, 33, 0.85)' });
       yPosition += lineHeight * 0.5; 
 
       const tocItems: { title: string; isSection: boolean }[] = [];
@@ -964,7 +1022,7 @@ const BookPreviewPage: React.FC = () => {
       // Process sections
       if (book.structure?.acknowledgement) {
         addNewPage();
-        addText('Acknowledgement', h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+        addText('Acknowledgement', h1FontSize, { bold: true, color: 'rgb(35, 35, 33, 0.85)' });
         yPosition += lineHeight * 0.5; 
         await processMarkdownContent(book.structure.acknowledgement);
         updateProgress();
@@ -972,7 +1030,7 @@ const BookPreviewPage: React.FC = () => {
 
       if (book.structure?.prologue) {
         addNewPage();
-        addText('Prologue', h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+        addText('Prologue', h1FontSize, { bold: true, color: 'rgb(35, 35, 33, 0.85)' });
         yPosition += lineHeight * 0.5; 
         await processMarkdownContent(book.structure.prologue);
         updateProgress();
@@ -980,7 +1038,7 @@ const BookPreviewPage: React.FC = () => {
 
       if (book.structure?.introduction) {
         addNewPage();
-        addText('Introduction', h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+        addText('Introduction', h1FontSize, { bold: true, color: 'rgb(35, 35, 33, 0.85)' });
         yPosition += lineHeight * 0.5; 
         await processMarkdownContent(book.structure.introduction);
         updateProgress();
@@ -993,8 +1051,8 @@ const BookPreviewPage: React.FC = () => {
           addNewPage();
           yPosition = pageHeight / 2 - 50;
           pdf.setFontSize(24);
-          pdf.setFont('futura', 'bold');
-          pdf.setTextColor(174, 86, 48);
+          pdf.setFont('georgia', 'bold');
+          pdf.setTextColor(35, 35, 33, 0.85);
           const partTitle = `Part ${part.partNumber}: ${part.partTitle}`;
           const textWidth = pdf.getTextWidth(partTitle);
           // Check if text exceeds content width and wrap if necessary
@@ -1063,7 +1121,7 @@ const BookPreviewPage: React.FC = () => {
             if (chapter?.content) {
               addNewPage();
               yPosition += lineHeight * 0.5; 
-              addText(`Chapter ${chapStruct.number}: ${chapStruct.title}`, h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+              addText(`Chapter ${chapStruct.number}: ${chapStruct.title}`, h1FontSize, { bold: true, color: 'rgb(35, 35, 33, 0.85)' });
               yPosition += h1FontSize;
 
               if (chapStruct.description) {
@@ -1083,7 +1141,7 @@ const BookPreviewPage: React.FC = () => {
           if (chapter.content) {
             addNewPage();
             yPosition += lineHeight * 0.5; 
-            addText(`Chapter ${chapter.number}: ${chapter.title}`, h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+            addText(`Chapter ${chapter.number}: ${chapter.title}`, h1FontSize, { bold: true, color: 'rgb(35, 35, 33, 0.85)' });
             yPosition += h1FontSize;
 
             if (chapter.metadata?.description) {
@@ -1100,7 +1158,7 @@ const BookPreviewPage: React.FC = () => {
 
       if (book.structure?.conclusion) {
         addNewPage();
-        addText('Conclusion', h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+        addText('Conclusion', h1FontSize, { bold: true, color: 'rgb(35, 35, 33, 0.85)' });
         yPosition += h1FontSize;
         await processMarkdownContent(book.structure.conclusion);
         updateProgress();
@@ -1108,7 +1166,7 @@ const BookPreviewPage: React.FC = () => {
 
       if (book.structure?.appendix) {
         addNewPage();
-        addText('Appendix', h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+        addText('Appendix', h1FontSize, { bold: true, color: 'rgb(35, 35, 33, 0.85)' });
         yPosition += h1FontSize;
         await processMarkdownContent(book.structure.appendix);
         updateProgress();
@@ -1116,7 +1174,7 @@ const BookPreviewPage: React.FC = () => {
 
       if (book.structure?.references) {
         addNewPage();
-        addText('References', h1FontSize, { bold: true, color: 'rgb(174, 86, 48)' });
+        addText('References', h1FontSize, { bold: true, color: 'rgb(35, 35, 33, 0.85)' });
         yPosition += h1FontSize;
         await processMarkdownContent(book.structure.references);
         updateProgress();
@@ -1400,7 +1458,7 @@ const BookPreviewPage: React.FC = () => {
       font-weight:500;
       color:#57534E;
       font-size:0.875rem;
-      font-family: 'futura', sans;
+      font-family: 'georgia', sans;
       page-break-after: always;
     }
 
