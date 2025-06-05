@@ -521,6 +521,118 @@ You must respond with ONLY valid JSON in this exact format:
   }
 };
 
+// Helper function to validate and clean up content for complete sentences
+function validateAndCleanContent(content: string, shouldRetry: boolean = true): { 
+  cleanedContent: string; 
+  isComplete: boolean; 
+  needsRetry: boolean;
+} {
+  const trimmedContent = content.trim();
+  
+  if (!trimmedContent) {
+    return { cleanedContent: '', isComplete: false, needsRetry: shouldRetry };
+  }
+  
+  // Check if content ends with proper sentence punctuation
+  const sentenceEndRegex = /[.!?]['"]?$/;
+  const isComplete = sentenceEndRegex.test(trimmedContent);
+  
+  if (isComplete) {
+    return { cleanedContent: trimmedContent, isComplete: true, needsRetry: false };
+  }
+  
+  // Try to find the last complete sentence
+  const punctuationMarks = ['.', '!', '?'];
+  let bestCutOffPoint = -1;
+  
+  for (const mark of punctuationMarks) {
+    const lastIndex = trimmedContent.lastIndexOf(mark);
+    if (lastIndex > bestCutOffPoint) {
+      bestCutOffPoint = lastIndex;
+    }
+  }
+  
+  if (bestCutOffPoint > 0) {
+    let cutOffPoint = bestCutOffPoint + 1;
+    
+    // Include closing quotes if present
+    if (cutOffPoint < trimmedContent.length && 
+        (trimmedContent[cutOffPoint] === '"' || trimmedContent[cutOffPoint] === "'")) {
+      cutOffPoint++;
+    }
+    
+    const cleanedContent = trimmedContent.slice(0, cutOffPoint).trim();
+    const removedText = trimmedContent.slice(cutOffPoint).trim();
+    
+    if (removedText) {
+      console.warn(`Content ended mid-sentence. Removed: "${removedText.slice(0, 100)}..."`);
+    }
+    
+    return { 
+      cleanedContent, 
+      isComplete: true, 
+      needsRetry: shouldRetry && removedText.length > 50 // Only retry if significant content was lost
+    };
+  }
+  
+  // If no sentence ending found, return as-is but mark for retry
+  console.warn(`No complete sentences found in content. Content ends with: "${trimmedContent.slice(-100)}"`);
+  return { 
+    cleanedContent: trimmedContent, 
+    isComplete: false, 
+    needsRetry: shouldRetry
+  };
+}
+
+// Enhanced function to generate completion for incomplete content
+async function generateCompletion(
+  incompleteContent: string, 
+  systemPrompt: string, 
+  chapterContext: any,
+  selectedProfile: any,
+  model: string
+): Promise<string> {
+  
+  // Get the last 500 characters for context
+  const contextContent = incompleteContent.slice(-500);
+  
+  const completionPrompt = `You are continuing to write Chapter ${chapterContext.number}: ${chapterContext.title}.
+
+Context from the end of the chapter:
+...${contextContent}
+
+The chapter appears to have ended mid-sentence or mid-thought. Your task is to:
+1. COMPLETE the current sentence/thought naturally
+2. Bring the chapter to a proper conclusion with 1-2 additional sentences maximum
+3. Ensure the chapter ends with proper punctuation
+
+DO NOT:
+- Start a new paragraph or section
+- Add extensive new content
+- Include meta-commentary or questions
+
+Simply complete the current thought and conclude the chapter naturally. Write only what is needed to finish the chapter properly.`;
+
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: completionPrompt }
+  ];
+
+  try {
+    const response = await executeOpenRouterRequest({
+      model,
+      messages,
+      ...selectedProfile,
+      max_tokens: 150 // Keep it short - just for completion
+    });
+
+    return response.choices[0].message.content || '';
+  } catch (error) {
+    console.error('Error generating completion:', error);
+    return ''; // Return empty if completion fails
+  }
+}
+
 export const generateChapter = async (req: Request, res: Response) => {
   try {
     const { chapterId, streamMode = false } = req.body;
@@ -1014,7 +1126,10 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
       let chunkMaxTokens = Math.ceil(chunkWords * 1.5); // Standard buffer
       if (isLastChunk) {
         // Significantly larger buffer for the final chunk to ensure full conclusion and allow for natural sentence endings.
-        chunkMaxTokens = Math.ceil(chunkWords * 2.5);
+        // Increase buffer even more to prevent mid-sentence cutoff
+        chunkMaxTokens = Math.ceil(chunkWords * 3.0); // Increased from 2.5 to 3.0
+        // Ensure minimum buffer for completion
+        chunkMaxTokens = Math.max(chunkMaxTokens, 500);
       }
       
       console.log(`Starting generation of chunk ${chunkIndex + 1}/${numChunks} (~${chunkWords} words)`);
@@ -1032,32 +1147,12 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
         let chunkContent = response.choices[0].message.content || '';
         console.log(`Completed generation of chunk ${chunkIndex + 1}/${numChunks}`);
 
+        // Validate and clean chunk content, especially for the last chunk
         if (isLastChunk && chunkContent.length > 0) {
-          const originalChunkContentForLog = chunkContent.slice(-50);
-          let bestCutOffPoint = -1;
-
-          const punctuationMarks = ['.', '!', '?'];
-          for (const mark of punctuationMarks) {
-            const lastIndex = chunkContent.lastIndexOf(mark);
-            if (lastIndex > bestCutOffPoint) {
-              bestCutOffPoint = lastIndex;
-            }
-          }
-
-          if (bestCutOffPoint > 0) {
-            const potentialNewEnd = bestCutOffPoint + 1;
-            let actualNewEnd = potentialNewEnd;
-
-            if (potentialNewEnd < chunkContent.length && (chunkContent[potentialNewEnd] === '"' || chunkContent[potentialNewEnd] === "'")) {
-                actualNewEnd = potentialNewEnd + 1;
-            }
-
-            if (chunkContent.substring(actualNewEnd).trim() !== '') {
-                chunkContent = chunkContent.slice(0, actualNewEnd);
-                console.warn(`Last chunk ended mid-sentence. Original: "...${originalChunkContentForLog}". Sanitized to: "...${chunkContent.slice(-50)}"`);
-            } else {
-                chunkContent = chunkContent.slice(0, actualNewEnd);
-            }
+          const chunkValidation = validateAndCleanContent(chunkContent, false);
+          if (chunkContent !== chunkValidation.cleanedContent) {
+            console.warn(`Last chunk cleaned: "${chunkContent.slice(-50)}" -> "${chunkValidation.cleanedContent.slice(-50)}"`);
+            chunkContent = chunkValidation.cleanedContent;
           }
         }
         return chunkContent;
@@ -1076,32 +1171,12 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
         let chunkContent = fallbackResponse.choices[0].message.content || '';
         console.log(`Completed fallback generation of chunk ${chunkIndex + 1}/${numChunks}`);
 
+        // Validate and clean fallback chunk content, especially for the last chunk
         if (isLastChunk && chunkContent.length > 0) {
-          const originalChunkContentForLog = chunkContent.slice(-50);
-          let bestCutOffPoint = -1;
-
-          const punctuationMarks = ['.', '!', '?'];
-          for (const mark of punctuationMarks) {
-            const lastIndex = chunkContent.lastIndexOf(mark);
-            if (lastIndex > bestCutOffPoint) {
-              bestCutOffPoint = lastIndex;
-            }
-          }
-
-          if (bestCutOffPoint > 0) {
-            const potentialNewEnd = bestCutOffPoint + 1;
-            let actualNewEnd = potentialNewEnd;
-
-            if (potentialNewEnd < chunkContent.length && (chunkContent[potentialNewEnd] === '"' || chunkContent[potentialNewEnd] === "'")) {
-                actualNewEnd = potentialNewEnd + 1;
-            }
-
-            if (chunkContent.substring(actualNewEnd).trim() !== '') {
-                chunkContent = chunkContent.slice(0, actualNewEnd);
-                console.warn(`Fallback: Last chunk ended mid-sentence. Original: "...${originalChunkContentForLog}". Sanitized to: "...${chunkContent.slice(-50)}"`);
-            } else {
-                chunkContent = chunkContent.slice(0, actualNewEnd);
-            }
+          const chunkValidation = validateAndCleanContent(chunkContent, false);
+          if (chunkContent !== chunkValidation.cleanedContent) {
+            console.warn(`Fallback: Last chunk cleaned: "${chunkContent.slice(-50)}" -> "${chunkValidation.cleanedContent.slice(-50)}"`);
+            chunkContent = chunkValidation.cleanedContent;
           }
         }
         return chunkContent;
@@ -1212,7 +1287,57 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
       await Promise.all(typingPromises);
     }
     
-    const content = fullContent;
+    // Validate and clean the final content for completeness
+    console.log('Validating final content for sentence completion...');
+    const validation = validateAndCleanContent(fullContent);
+    let finalContent = validation.cleanedContent;
+    
+    // If content is incomplete and needs retry, attempt to generate completion
+    if (validation.needsRetry && !validation.isComplete) {
+      console.log('Content appears incomplete. Attempting to generate completion...');
+      
+      try {
+        const completion = await generateCompletion(
+          finalContent,
+          systemPrompt,
+          chapter,
+          selectedProfile,
+          model
+        );
+        
+        if (completion && completion.trim()) {
+          // Clean any leading connecting words that might duplicate context
+          const cleanedCompletion = completion.replace(/^(and|but|however|therefore|thus|so|then)\s+/i, '').trim();
+          
+          if (cleanedCompletion) {
+            finalContent += cleanedCompletion;
+            console.log(`Added completion: "${cleanedCompletion.slice(0, 100)}..."`);
+            
+            // Validate the completed content
+            const finalValidation = validateAndCleanContent(finalContent, false);
+            finalContent = finalValidation.cleanedContent;
+            
+            // Stream the completion if in stream mode
+            if (streamMode) {
+              res.write(`data: ${JSON.stringify({
+                type: 'completion',
+                content: cleanedCompletion
+              })}\n\n`);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to generate completion:', error);
+        // Continue with the cleaned content even if completion fails
+      }
+    }
+    
+    if (validation.isComplete || finalContent !== fullContent) {
+      const statusMsg = validation.isComplete ? 'Content validation passed' : 'Content cleaned and completed';
+      console.log(`${statusMsg}. Final word count: ${finalContent.split(/\s+/).filter(Boolean).length}`);
+    }
+    
+    const content = finalContent;
     
     // Create update payload based on whether metadata column exists
     let updatePayload: any = {

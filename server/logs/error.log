@@ -212,3 +212,4 @@
 2025-06-03 23:11:27 [error]: Request was for model: google/gemini-2.0-flash-thinking-exp:free
 2025-06-03 23:12:15 [error]: OpenRouter API error: 400 - {"error":{"message":"google/gemini-2.0-flash-thinking-exp:free is not a valid model ID","code":400},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
 2025-06-03 23:12:15 [error]: Request was for model: google/gemini-2.0-flash-thinking-exp:free
+2025-06-05 09:44:18 [error]: OpenRouter client error: Cannot read properties of undefined (reading 'total_tokens')

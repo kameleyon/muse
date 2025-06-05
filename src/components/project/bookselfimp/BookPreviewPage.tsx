@@ -2388,7 +2388,7 @@ const BookPreviewPage: React.FC = () => {
                       {activeChapterId === chapter.id && (
                         <div className="mt-3 pl-4 space-y-3">
                           {chapter.metadata?.description && (
-                            <p className="text-sm text-neutral-medium italic">{chapter.metadata.description}</p>
+                            <p className="text-xs text-neutral-medium italic">{chapter.metadata.description}</p>
                           )}
                           {chapter.metadata?.keyTopics && chapter.metadata.keyTopics.length > 0 && ( // Using keyTopics as fallback
                             <div>
