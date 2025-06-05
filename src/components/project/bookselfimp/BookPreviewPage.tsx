@@ -209,7 +209,7 @@ const BookPreviewPage: React.FC = () => {
         pdf.setFontSize(fontSize);
         
         // Use specified font or default to Times
-        const fontFamily = options.font || 'times';
+        const fontFamily = options.font || 'futura';
         if (options.bold && options.italic) {
           pdf.setFont(fontFamily, 'bolditalic');
         } else if (options.bold || options.semibold) {
@@ -227,7 +227,7 @@ const BookPreviewPage: React.FC = () => {
           }
         } else {
           // Default body text color: #232321 with 80% opacity = rgba(35, 35, 33, 0.8)
-          pdf.setTextColor(35, 35, 33); // #232321
+          pdf.setTextColor(35, 35, 33, 0.6); // #232321
         }
 
         const baseXPos = margin + (options.indent || 0);
@@ -272,7 +272,7 @@ const BookPreviewPage: React.FC = () => {
         });
 
         // Reset color to body text color
-        pdf.setTextColor(35, 35, 33);
+        pdf.setTextColor(35, 35, 33, 0.6);
       };
 
       // Function to render text with mixed formatting (regular and semibold)
@@ -308,13 +308,13 @@ const BookPreviewPage: React.FC = () => {
           
           // Determine font style based on context and semibold
           if (options.italic && part.semibold) {
-            pdf.setFont('times', 'bolditalic'); // Both italic context and semibold
+            pdf.setFont('futura', 'bolditalic'); // Both italic context and semibold
           } else if (part.semibold) {
-            pdf.setFont('times', 'bold'); // Just semibold
+            pdf.setFont('futura', 'bold'); // Just semibold
           } else if (options.italic) {
-            pdf.setFont('times', 'italic'); // Just italic context
+            pdf.setFont('futura', 'italic'); // Just italic context
           } else {
-            pdf.setFont('times', 'normal'); // Regular text
+            pdf.setFont('futura', 'normal'); // Regular text
           }
 
           // Split part into words for wrapping
@@ -451,7 +451,7 @@ const BookPreviewPage: React.FC = () => {
             const listText = line.replace(/^[-*+]\s+/, '');
             pdf.setFontSize(normalFontSize);
             pdf.setTextColor(35, 35, 33); // Body text color
-            pdf.setFont('times', 'normal');
+            pdf.setFont('futura', 'normal');
             const bulletIndent = 36; // 0.5 inch indent for bullets
             pdf.text(bullet, margin + bulletIndent, yPosition);
             const bulletWidth = pdf.getTextWidth(bullet);
@@ -466,7 +466,7 @@ const BookPreviewPage: React.FC = () => {
               const listText = match[2];
               pdf.setFontSize(normalFontSize);
               pdf.setTextColor(35, 35, 33); // Body text color
-              pdf.setFont('times', 'normal');
+              pdf.setFont('futura', 'normal');
               const numberIndent = 36; // 0.5 inch indent for numbers
               pdf.text(number, margin + numberIndent, yPosition);
               const numberWidth = pdf.getTextWidth(number);
@@ -523,7 +523,7 @@ const BookPreviewPage: React.FC = () => {
 
             const colWidths: number[] = [];
             pdf.setFontSize(normalFontSize);
-            pdf.setFont('times', 'normal'); // Ensure correct font for width calculation
+            pdf.setFont('futura', 'normal'); // Ensure correct font for width calculation
             for (let col = 0; col < numCols; col++) {
               let maxW = pdf.getTextWidth(headerCellsContent[col] || '');
               dataRowsContent.forEach(row => {
@@ -560,7 +560,7 @@ const BookPreviewPage: React.FC = () => {
               let calcMaxHeightInRow = 0;
               const calcFontSize = isHeaderCalc ? h4FontSize : normalFontSize;
               const calcLineHeight = calcFontSize * 1.2;
-              pdf.setFont('times', isHeaderCalc ? 'bold' : 'normal'); // Set font for getTextWidth
+              pdf.setFont('futura', isHeaderCalc ? 'bold' : 'normal'); // Set font for getTextWidth
               pdf.setFontSize(calcFontSize);
 
               for (let col = 0; col < numCols; col++) {
@@ -580,7 +580,7 @@ const BookPreviewPage: React.FC = () => {
               const currentFontSize = isHeader ? normalFontSize : normalFontSize; // Corrected: h4 for header
               const currentLineHeight = currentFontSize * 1.2;
 
-              pdf.setFont('times', isHeader ? 'bold' : 'normal');
+              pdf.setFont('futura', isHeader ? 'bold' : 'normal');
               pdf.setFontSize(currentFontSize);
 
               for (let col = 0; col < numCols; col++) {
@@ -650,7 +650,7 @@ const BookPreviewPage: React.FC = () => {
 
               // Draw cell text
               for (let col = 0; col < numCols; col++) {
-                pdf.setFont('times', isHeader ? 'bold' : 'normal');
+                pdf.setFont('futura', isHeader ? 'bold' : 'normal');
                 pdf.setFontSize(currentFontSize);
                 pdf.setTextColor(isHeader ? headerTextColor[0] : cellTextColor[0],
                                  isHeader ? headerTextColor[1] : cellTextColor[1],
@@ -787,14 +787,14 @@ const BookPreviewPage: React.FC = () => {
                     
                     // Render any text before this part (with italic)
                     if (beforeText) {
-                      pdf.setFont('times', 'italic');
+                      pdf.setFont('futura', 'italic');
                       pdf.text(beforeText, currentX, currentY);
                       currentX += pdf.getTextWidth(beforeText);
                       remainingLine = remainingLine.substring(beforeText.length);
                     }
                     
                     // Render this part with proper formatting
-                    pdf.setFont('times', fontStyle);
+                    pdf.setFont('futura', fontStyle);
                     pdf.text(textToRender, currentX, currentY);
                     currentX += pdf.getTextWidth(textToRender);
                     remainingLine = remainingLine.substring(textToRender.length);
@@ -804,7 +804,7 @@ const BookPreviewPage: React.FC = () => {
               
               // Render any remaining text with italic
               if (remainingLine.trim()) {
-                pdf.setFont('times', 'italic');
+                pdf.setFont('futura', 'italic');
                 pdf.text(remainingLine, currentX, currentY);
               }
               
@@ -839,7 +839,7 @@ const BookPreviewPage: React.FC = () => {
         // Title
         if (book.structure.coverPageDetails.title) {
           pdf.setFontSize(30);
-          pdf.setFont('georgia', 'bold');
+          pdf.setFont('futura', 'bold');
           pdf.setTextColor(174, 86, 48);
           const titleLines = wrapText(book.structure.coverPageDetails.title, contentWidth);
           titleLines.forEach(line => {
@@ -853,7 +853,7 @@ const BookPreviewPage: React.FC = () => {
         if (book.structure.coverPageDetails.subtitle) {
           yPosition += 20;
           pdf.setFontSize(18);
-          pdf.setFont('georgia', 'normal');
+          pdf.setFont('futura', 'normal');
           pdf.setTextColor(102, 102, 102);
           const subtitleLines = wrapText(book.structure.coverPageDetails.subtitle, contentWidth);
           subtitleLines.forEach(line => {
@@ -993,11 +993,63 @@ const BookPreviewPage: React.FC = () => {
           addNewPage();
           yPosition = pageHeight / 2 - 50;
           pdf.setFontSize(24);
-          pdf.setFont('times', 'bold');
+          pdf.setFont('futura', 'bold');
           pdf.setTextColor(174, 86, 48);
           const partTitle = `Part ${part.partNumber}: ${part.partTitle}`;
           const textWidth = pdf.getTextWidth(partTitle);
-          pdf.text(partTitle, (pageWidth - textWidth) / 2, yPosition);
+          // Check if text exceeds content width and wrap if necessary
+          if (textWidth > contentWidth) {
+            // Split the title for better wrapping
+            const partPrefix = `Part ${part.partNumber}:`;
+            const partTitleText = part.partTitle;
+            
+            // Render Part X: centered
+            const prefixWidth = pdf.getTextWidth(partPrefix);
+            pdf.text(partPrefix, (pageWidth - prefixWidth) / 2, yPosition);
+            
+            // Render the title on the next line, also centered
+            yPosition += 30; // Move down for the title
+            const titleWidth = pdf.getTextWidth(partTitleText);
+            
+            // If title is still too wide, we need to wrap it
+            if (titleWidth > contentWidth) {
+              const words = partTitleText.split(' ');
+              let lines = [];
+              let currentLine = '';
+              
+              for (const word of words) {
+                const testLine = currentLine ? `${currentLine} ${word}` : word;
+                const testWidth = pdf.getTextWidth(testLine);
+                
+                if (testWidth > contentWidth) {
+                  if (currentLine) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                  } else {
+                    // Single word is too long, force it
+                    lines.push(word);
+                  }
+                } else {
+                  currentLine = testLine;
+                }
+              }
+              if (currentLine) {
+                lines.push(currentLine);
+              }
+              
+              // Render each line centered
+              for (const line of lines) {
+                const lineWidth = pdf.getTextWidth(line);
+                pdf.text(line, (pageWidth - lineWidth) / 2, yPosition);
+                yPosition += 25;
+              }
+            } else {
+              pdf.text(partTitleText, (pageWidth - titleWidth) / 2, yPosition);
+            }
+          } else {
+            // Original behavior if it fits
+            pdf.text(partTitle, (pageWidth - textWidth) / 2, yPosition);
+          }
           updateProgress();
 
           // Chapters in part
@@ -1348,7 +1400,7 @@ const BookPreviewPage: React.FC = () => {
       font-weight:500;
       color:#57534E;
       font-size:0.875rem;
-      font-family: 'Georgia', sans;
+      font-family: 'futura', sans;
       page-break-after: always;
     }
 
