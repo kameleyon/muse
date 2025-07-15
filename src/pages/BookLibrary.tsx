@@ -83,11 +83,31 @@ const BookLibraryPage: React.FC = () => {
         throw new Error(projectsResult.error.message);
       }
       
-      // Add type property to differentiate between books and projects
-      const booksWithType = userBooks.map(book => ({
-        ...book,
-        itemType: 'book' as const
-      }));
+      // Load chapters for each book
+      const booksWithChapters = await Promise.all(
+        userBooks.map(async (book) => {
+          try {
+            const { data: chapters } = await supabase
+              .from('chapters')
+              .select('*')
+              .eq('book_id', book.id)
+              .order('number');
+            
+            return {
+              ...book,
+              chapters: chapters || [],
+              itemType: 'book' as const
+            };
+          } catch (error) {
+            console.error(`Failed to load chapters for book ${book.id}:`, error);
+            return {
+              ...book,
+              chapters: [],
+              itemType: 'book' as const
+            };
+          }
+        })
+      );
       
       // Add status to projects that don't have one
       const projectsWithStatus = (projectsResult.data || []).map(project => ({
@@ -97,7 +117,7 @@ const BookLibraryPage: React.FC = () => {
       }));
       
       // Combine books and projects
-      const combinedItems = [...booksWithType, ...projectsWithStatus];
+      const combinedItems = [...booksWithChapters, ...projectsWithStatus];
       setItems(combinedItems);
     } catch (err: any) {
       setError(err.message || `Failed to load content`)
@@ -205,6 +225,13 @@ const BookLibraryPage: React.FC = () => {
   const getContentPreview = (item: BookType | Project) => {
     if ('itemType' in item && item.itemType === 'book') {
       const book = item as BookType;
+      
+      // First check for acknowledgement in structure
+      if (book.structure?.acknowledgement) {
+        return book.structure.acknowledgement.substring(0, 150) + "...";
+      }
+      
+      // Then check chapters
       if (!book.chapters || book.chapters.length === 0) {
         return "No content yet";
       }
@@ -215,11 +242,11 @@ const BookLibraryPage: React.FC = () => {
         return "No content yet";
       }
       
-      // Return first 100 characters of the content
-      return chapterWithContent.content.substring(0, 100) + "...";
+      // Return first 150 characters of the content
+      return chapterWithContent.content.substring(0, 150) + "...";
     } else {
       // For projects
-      return (item as Project).description?.substring(0, 100) + "..." || "No content yet";
+      return (item as Project).description?.substring(0, 150) + "..." || "No content yet";
     }
   }
 
@@ -227,12 +254,41 @@ const BookLibraryPage: React.FC = () => {
     if ('itemType' in item && item.itemType === 'book') {
       const book = item as BookType;
       if (!book.chapters || book.chapters.length === 0) return 0;
-      const completedChapters = book.chapters.filter(ch => ch.status === 'complete').length;
+      const completedChapters = book.chapters.filter(ch => {
+        // Check if chapter has actual content (not just empty string)
+        const hasContent = ch.content && ch.content.trim().length > 0;
+        // Check if status indicates completion
+        const hasCompletedStatus = ch.status === 'complete' || ch.status === 'approved' ||
+                                  ch.status === 'generated' || ch.status === 'in_progress';
+        return hasContent || hasCompletedStatus;
+      }).length;
       return Math.round((completedChapters / book.chapters.length) * 100);
     }
     
-    // For projects, return a default value (you could implement based on project progress if needed)
-    return 50;
+    // For projects, calculate based on status
+    const project = item as Project;
+    if (project.status === 'complete') return 100;
+    if (project.status === 'in_progress') return 50;
+    return 10; // draft
+  }
+  
+  const getChapterStats = (book: BookType) => {
+    if (!book.chapters || book.chapters.length === 0) {
+      // Check if there's structure with chapters
+      if (book.structure?.chapters && book.structure.chapters.length > 0) {
+        return { written: 0, total: book.structure.chapters.length };
+      }
+      return { written: 0, total: 0 };
+    }
+    const written = book.chapters.filter(ch => {
+      // Check if chapter has actual content (not just empty string)
+      const hasContent = ch.content && ch.content.trim().length > 0;
+      // Check if status indicates it's written
+      const hasWrittenStatus = ch.status === 'complete' || ch.status === 'approved' ||
+                              ch.status === 'generated' || ch.status === 'in_progress';
+      return hasContent || hasWrittenStatus;
+    }).length;
+    return { written, total: book.chapters.length };
   }
 
   const handleSortChange = (field: SortField) => {
@@ -570,29 +626,33 @@ const BookLibraryPage: React.FC = () => {
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-lg font-semibold text-secondary truncate">
-                            {getItemName(item)}
-                          </h3>
-                          <div className="flex items-center">
-                            <span className={cn(
-                              "px-2 py-1 text-xs rounded-full mr-2 inline-flex items-center whitespace-nowrap text-neutral-light bg-primary/10",
-                            )}>
-                              {getItemType(item)}
-                            </span>
-                            <span className={cn(
-                              "px-3 py-1 text-xs rounded-full border inline-flex items-center whitespace-nowrap",
-                              getStatusColor(item.status || 'in_progress')
-                            )}>
-                              {(item.status || 'in_progress').replace('_', ' ')}
-                            </span>
-                          </div>
+                        <h3 className="text-lg font-semibold text-secondary truncate">
+                          {getItemName(item)}
+                        </h3>
+                        <div className="flex items-center gap-2">
+                          <span className={cn(
+                            "px-2 py-1 text-xs font-medium rounded-full inline-flex items-center whitespace-nowrap",
+                            isBook ? "text-white bg-secondary/30" : "text-white bg-primary/30"
+                          )}>
+                            {isBook ? <BookOpen className="w-3 h-3 mr-1.5" /> : <Presentation className="w-3 h-3 mr-1.5" />}
+                            {getItemType(item)}
+                          </span>
+                          <span className={cn(
+                            "px-3 py-1 text-xs rounded-full border inline-flex items-center whitespace-nowrap",
+                            getStatusColor(item.status || 'in_progress')
+                          )}>
+                            {(item.status || 'in_progress').replace('_', ' ')}
+                          </span>
                         </div>
+                      </div>
                         
                         <p className="mt-1 text-sm text-gray-600 line-clamp-2">{getItemDescription(item)}</p>
                         
-                        <div className="mt-3 bg-gray-50 p-3 rounded-md">
-                          <p className="text-xs text-gray-500 mb-1">Content Preview:</p>
-                          <p className="text-sm text-gray-700 italic line-clamp-2">{getContentPreview(item)}</p>
+                        <div className="mt-3 bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg border border-gray-200">
+                          <p className="text-xs font-medium text-gray-600 mb-1.5 uppercase tracking-wider">
+                            {isBook && (item as BookType).structure?.acknowledgement ? 'Acknowledgement Preview' : 'Content Preview'}:
+                          </p>
+                          <p className="text-sm text-gray-700 leading-relaxed line-clamp-3">{getContentPreview(item)}</p>
                         </div>
                         
                         <div className="mt-3 flex items-center text-xs text-gray-500 space-x-4">
@@ -607,7 +667,10 @@ const BookLibraryPage: React.FC = () => {
                           {isBook ? (
                             <div className="flex items-center">
                               <File className="w-3.5 h-3.5 mr-1 text-gray-400" />
-                              {(item as BookType).chapters?.length ? `${(item as BookType).chapters?.length} chapters` : 'No chapters'}
+                              {(() => {
+                                const stats = getChapterStats(item as BookType);
+                                return `${stats.written} of ${stats.total} chapters written`;
+                              })()}
                             </div>
                           ) : (
                             <div className="flex items-center">
@@ -620,15 +683,25 @@ const BookLibraryPage: React.FC = () => {
                         {/* Progress bar */}
                         <div className="mt-3">
                           <div className="flex items-center justify-between text-xs mb-1">
-                            <span className="text-gray-500">Progress</span>
-                            <span className="text-gray-700 font-medium">{getProgressPercent(item)}%</span>
+                            <span className="text-gray-600 font-medium">
+                              {isBook ? 'Writing Progress' : 'Project Progress'}
+                            </span>
+                            <span className="text-gray-700 font-semibold">{getProgressPercent(item)}%</span>
                           </div>
-                          <div className="w-full bg-gray-200 rounded-full h-1.5">
+                          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                             <div
-                              className="bg-primary rounded-full h-1.5 transition-all duration-300"
+                              className="bg-gradient-to-r from-primary to-primary-hover rounded-full h-2 transition-all duration-500 ease-out"
                               style={{ width: `${getProgressPercent(item)}%` }}
                             />
                           </div>
+                          {isBook && (
+                            <div className="mt-1 text-xs text-gray-500">
+                              {(() => {
+                                const stats = getChapterStats(item as BookType);
+                                return `${stats.written} chapters completed`;
+                              })()}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

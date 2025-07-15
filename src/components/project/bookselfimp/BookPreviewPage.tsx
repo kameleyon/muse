@@ -1833,7 +1833,7 @@ const BookPreviewPage: React.FC = () => {
       .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '');     // Remove ALL invisible chars
     
     // Second pass: REMOVE ALL remaining non-ASCII characters (no exceptions)
-    normalized = normalized.replace(/[^\x20-\x7E\n\r\t]/g, '');
+    // normalized = normalized.replace(/[^\x20-\x7E\u2660\u2663\u2665\u2666\n\r\t]/g, ''); // Commented out for testing symbol rendering
     
     // Clean up any resulting issues
     normalized = normalized
