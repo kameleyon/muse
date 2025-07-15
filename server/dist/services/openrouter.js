@@ -20,11 +20,16 @@ const executeOpenRouterRequest = async (params) => {
             model: params.model,
             messages,
             max_tokens: params.max_tokens || 1000,
-            temperature: params.temperature || 0.7,
-            top_p: params.top_p || 1,
-            frequency_penalty: params.frequency_penalty || 0,
-            presence_penalty: params.presence_penalty || 0,
+            temperature: params.temperature !== undefined ? params.temperature : 0.7,
+            top_p: params.top_p !== undefined ? params.top_p : 1,
+            frequency_penalty: params.frequency_penalty !== undefined ? params.frequency_penalty : 0,
+            presence_penalty: params.presence_penalty !== undefined ? params.presence_penalty : 0,
             stop: params.stop || null,
+            // Add new parameters, ensuring they are only included if defined in params
+            ...(params.repetition_penalty !== undefined && { repetition_penalty: params.repetition_penalty }),
+            ...(params.length_penalty !== undefined && { length_penalty: params.length_penalty }),
+            ...(params.style_guidance !== undefined && { style_guidance: params.style_guidance }),
+            ...(params.text_guidance !== undefined && { text_guidance: params.text_guidance }),
         };
         logger_1.default.info(`Making OpenRouter request to model: ${params.model}`);
         const response = await axios_1.default.post(`${config_1.default.openRouter.baseUrl}/chat/completions`, requestData, {

@@ -27,10 +27,10 @@ function extractReferencesFromContent(content: string): string[] {
 // Helper function to update book's centralized references
 async function updateBookReferences(bookId: string, newReferences: string[]): Promise<void> {
   try {
-    // Get current book structure
+    // Get current book structure and metadata
     const { data: book, error: bookError } = await supabaseAdmin
       .from('books')
-      .select('structure')
+      .select('structure, topic, title')
       .eq('id', bookId)
       .single();
     
@@ -41,36 +41,100 @@ async function updateBookReferences(bookId: string, newReferences: string[]): Pr
     
     const currentStructure = book.structure || {};
     const currentReferences = currentStructure.references || '';
+    const currentRawRefs = currentStructure.rawReferences || [];
     
-    // Parse existing references
-    const existingRefs = currentReferences.split('\n').filter((ref: string) => ref.trim().length > 0);
-    
-    // Add new references that don't already exist
-    const allReferences = [...existingRefs];
+    // Combine existing raw references with new ones
+    const allRawRefs = [...currentRawRefs];
     newReferences.forEach(ref => {
-      if (!allReferences.includes(ref)) {
-        allReferences.push(ref);
+      if (!allRawRefs.includes(ref)) {
+        allRawRefs.push(ref);
       }
     });
     
-    // Sort references alphabetically
-    allReferences.sort();
+    // Only generate formatted references if we have enough references (at least 5)
+    if (allRawRefs.length < 5) {
+      console.log('Not enough references to generate formatted bibliography yet');
+      const updatedStructure = {
+        ...currentStructure,
+        rawReferences: allRawRefs,
+        references: allRawRefs.sort().join('\n')
+      };
+      
+      await supabaseAdmin
+        .from('books')
+        .update({ structure: updatedStructure })
+        .eq('id', bookId);
+      return;
+    }
     
-    // Update book structure with new references
-    const updatedStructure = {
-      ...currentStructure,
-      references: allReferences.join('\n')
-    };
-    
-    const { error: updateError } = await supabaseAdmin
-      .from('books')
-      .update({ structure: updatedStructure })
-      .eq('id', bookId);
-    
-    if (updateError) {
-      console.error('Error updating book references:', updateError);
-    } else {
-      console.log(`Updated references for book ${bookId}: ${newReferences.length} new references added`);
+    // Generate properly formatted references using AI
+    const referencesPrompt = `You are formatting a professional bibliography/references section for a book about ${book.topic}.
+
+These are the raw citations extracted from the book's chapters:
+${allRawRefs.join('\n')}
+
+Create a properly formatted References section following these guidelines:
+
+1. Convert each citation into proper academic format (APA style preferred)
+2. For sources that appear to be books, format as: Author, A. A. (Year). Title of work. Publisher.
+3. For sources that appear to be articles/papers, format as: Author, A. A. (Year). Title of article. Journal Name, volume(issue), pages.
+4. For web sources, include the URL and access date
+5. If a citation lacks information (like year), make a reasonable inference based on the source name
+6. Sort all references alphabetically by author's last name
+7. Ensure each reference is complete and professional
+8. If a source appears to be made up or fictional, still format it professionally
+9. Group similar types of sources if there are many (e.g., Books, Articles, Web Resources)
+
+Format the output as a clean, professional bibliography that would appear at the end of a published book. Use proper markdown formatting.`;
+
+    try {
+      const referencesMessages = [
+        { 
+          role: 'system', 
+          content: 'You are an expert academic editor specializing in formatting bibliographies and references for published books. You ensure all citations follow proper academic standards.'
+        },
+        { role: 'user', content: referencesPrompt }
+      ];
+
+      const response = await executeOpenRouterRequest({
+        model: 'google/gemini-2.0-flash-001',
+        messages: referencesMessages,
+        temperature: 0.3,
+        max_tokens: 3000
+      });
+
+      const formattedReferences = response.choices[0].message.content || allRawRefs.sort().join('\n');
+
+      // Update book structure with formatted references
+      const updatedStructure = {
+        ...currentStructure,
+        rawReferences: allRawRefs,
+        references: formattedReferences
+      };
+      
+      const { error: updateError } = await supabaseAdmin
+        .from('books')
+        .update({ structure: updatedStructure })
+        .eq('id', bookId);
+      
+      if (updateError) {
+        console.error('Error updating book references:', updateError);
+      } else {
+        console.log(`Updated references for book ${bookId}: ${newReferences.length} new references added and formatted`);
+      }
+    } catch (aiError) {
+      console.error('Error generating formatted references:', aiError);
+      // Fallback to simple sorted list if AI formatting fails
+      const updatedStructure = {
+        ...currentStructure,
+        rawReferences: allRawRefs,
+        references: allRawRefs.sort().join('\n')
+      };
+      
+      await supabaseAdmin
+        .from('books')
+        .update({ structure: updatedStructure })
+        .eq('id', bookId);
     }
   } catch (error) {
     console.error('Error in updateBookReferences:', error);
@@ -94,7 +158,7 @@ async function updateBookAppendix(bookId: string, chapterContent: string): Promi
 
     const { data: chapters, error: chaptersError } = await supabaseAdmin
       .from('chapters')
-      .select('content')
+      .select('content, title')
       .eq('book_id', bookId)
       .not('content', 'is', null);
 
@@ -103,102 +167,107 @@ async function updateBookAppendix(bookId: string, chapterContent: string): Promi
       return;
     }
 
+    // Only generate appendix if we have substantial content (at least 5 chapters)
+    if (!chapters || chapters.length < 5) {
+      console.log('Not enough chapters to generate appendix yet');
+      return;
+    }
+
     // Extract concepts and tools from all chapter content
-    const allContent = chapters?.map(ch => ch.content).join(' ') || '';
-    const concepts = new Set<string>();
-    const tools = new Set<string>();
-    const frameworks = new Set<string>();
+    const allContent = chapters?.map(ch => ch.content).join('\n\n') || '';
+    const chapterTitles = chapters?.map(ch => ch.title).join(', ') || '';
 
-    // Extract key concepts (common self-improvement terms)
-    const conceptMatches = allContent.match(/\b(framework|methodology|technique|strategy|approach|model|system|process|tool|template|checklist|worksheet|assessment|exercise|habit|practice|routine|mindset|principle|concept|theory|method|step|phase|stage|level)\b/gi);
-    if (conceptMatches) {
-      conceptMatches.forEach(match => concepts.add(match.toLowerCase()));
-    }
+    // Generate AI-powered appendix content
+    const appendixPrompt = `You are creating a comprehensive appendix for a book titled "${book.title}" about ${book.topic}. 
+    
+The book covers these chapters: ${chapterTitles}
 
-    // Extract actionable tools/templates mentioned
-    const toolMatches = allContent.match(/\b(template|worksheet|checklist|planner|tracker|journal|assessment|evaluation|guide|roadmap|blueprint)\b/gi);
-    if (toolMatches) {
-      toolMatches.forEach(match => tools.add(match.toLowerCase()));
-    }
+Based on the actual content of the book, generate detailed appendix sections. Make the content specific to the book's topic and directly reference concepts, methods, and strategies discussed in the chapters.
 
-    // Extract frameworks mentioned
-    const frameworkMatches = allContent.match(/\b([A-Z][a-z]+ (Framework|Method|System|Model|Approach))/g);
-    if (frameworkMatches) {
-      frameworkMatches.forEach(match => frameworks.add(match));
-    }
+Create the following sections with ACTUAL, DETAILED content (not placeholder lists):
 
-    // Generate comprehensive appendix content
-    const appendixSections = [];
+**A. Tools and Templates**
+Create 8-10 specific, practical tools/templates that readers can use to implement the book's concepts. Each tool should have a brief description of how to use it.
 
-    // Section A: Tools and Templates
-    if (tools.size > 0) {
-      appendixSections.push(`**A. Tools and Templates**
-- Daily Progress Tracker
-- Goal Setting Worksheet  
-- Habit Formation Checklist
-- Self-Assessment Template
-- Weekly Reflection Journal
-- Action Plan Template
-- Progress Monitoring Chart
-- Resource Planning Worksheet`);
-    }
+**B. Frameworks and Methods Reference**
+Provide detailed summaries of 5-6 key frameworks, methods, or processes discussed in the book. Include step-by-step implementation guides.
 
-    // Section B: Frameworks and Methods
-    if (frameworks.size > 0 || concepts.size > 0) {
-      appendixSections.push(`**B. Frameworks and Methods Reference**
-- The ${book.topic} Implementation Framework
-- Step-by-Step Process Guide
-- Decision-Making Matrix
-- Progress Evaluation Methods
-- Common Challenges and Solutions
-- Best Practices Checklist`);
-    }
+**C. Additional Resources**
+List 15-20 specific, real resources (books, websites, organizations, apps) relevant to ${book.topic}. Group them by category and include brief descriptions.
 
-    // Section C: Resources
-    appendixSections.push(`**C. Additional Resources**
-- Recommended Books for Further Reading
-- Online Communities and Support Groups
-- Professional Development Courses
-- Apps and Digital Tools
-- Websites and Blogs
-- Podcasts and Videos
-- Expert Networks and Mentorship Programs`);
+**D. Frequently Asked Questions**
+Create 10-12 detailed Q&A pairs addressing common concerns and challenges readers might face when implementing the book's teachings. Provide comprehensive answers.
 
-    // Section D: FAQ
-    appendixSections.push(`**D. Frequently Asked Questions**
-- How long does it typically take to see results?
-- What if I miss a day or fall off track?
-- How do I adapt this approach to my specific situation?
-- Where can I find additional support?
-- How do I measure my progress effectively?
-- What are the most common mistakes to avoid?`);
+**E. Quick Reference Guide**
+Create a condensed reference guide with key concepts, formulas, checklists, or decision trees from the book.
 
-    // Section E: Emergency Action Plans
-    appendixSections.push(`**E. Emergency Action Plans**
-- When You Feel Stuck: 5-Step Recovery Plan
-- Dealing with Setbacks: Resilience Strategy
-- Motivation Maintenance: Quick Wins List
-- Crisis Management: Emergency Contacts and Resources
-- Burnout Prevention: Warning Signs and Actions`);
+Format the output in clear markdown with proper headings and structure. Make all content specific and actionable, not generic placeholders.`;
 
-    const generatedAppendix = appendixSections.join('\n\n');
+    try {
+      const appendixMessages = [
+        { 
+          role: 'system', 
+          content: 'You are an expert content creator specializing in creating comprehensive, practical appendices for non-fiction books. Your appendices are known for being highly useful and specific to the book content.'
+        },
+        { role: 'user', content: appendixPrompt }
+      ];
 
-    // Update book structure with generated appendix
-    const currentStructure = book.structure || {};
-    const updatedStructure = {
-      ...currentStructure,
-      appendix: generatedAppendix
-    };
+      const response = await executeOpenRouterRequest({
+        model: 'google/gemini-2.0-flash-001',
+        messages: appendixMessages,
+        temperature: 0.7,
+        max_tokens: 4000
+      });
 
-    const { error: updateError } = await supabaseAdmin
-      .from('books')
-      .update({ structure: updatedStructure })
-      .eq('id', bookId);
+      const generatedAppendix = response.choices[0].message.content || '';
 
-    if (updateError) {
-      console.error('Error updating book appendix:', updateError);
-    } else {
-      console.log(`Updated appendix for book ${bookId} with ${appendixSections.length} sections`);
+      // Update book structure with generated appendix
+      const currentStructure = book.structure || {};
+      const updatedStructure = {
+        ...currentStructure,
+        appendix: generatedAppendix
+      };
+
+      const { error: updateError } = await supabaseAdmin
+        .from('books')
+        .update({ structure: updatedStructure })
+        .eq('id', bookId);
+
+      if (updateError) {
+        console.error('Error updating book appendix:', updateError);
+      } else {
+        console.log(`Updated appendix for book ${bookId} with AI-generated content`);
+      }
+    } catch (aiError) {
+      console.error('Error generating AI appendix content:', aiError);
+      // Fallback to basic appendix structure if AI generation fails
+      const fallbackAppendix = `**Appendix**
+
+**A. Tools and Templates**
+[Tools and templates specific to ${book.topic} will be added here based on chapter content]
+
+**B. Frameworks and Methods Reference**  
+[Key frameworks and methods from the book will be summarized here]
+
+**C. Additional Resources**
+[Curated resources for further learning about ${book.topic}]
+
+**D. Frequently Asked Questions**
+[Common questions about implementing the concepts in this book]
+
+**E. Quick Reference Guide**
+[Key takeaways and action items from each chapter]`;
+
+      const currentStructure = book.structure || {};
+      const updatedStructure = {
+        ...currentStructure,
+        appendix: fallbackAppendix
+      };
+
+      await supabaseAdmin
+        .from('books')
+        .update({ structure: updatedStructure })
+        .eq('id', bookId);
     }
   } catch (error) {
     console.error('Error in updateBookAppendix:', error);

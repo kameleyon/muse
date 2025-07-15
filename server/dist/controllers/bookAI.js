@@ -26,10 +26,10 @@ function extractReferencesFromContent(content) {
 // Helper function to update book's centralized references
 async function updateBookReferences(bookId, newReferences) {
     try {
-        // Get current book structure
+        // Get current book structure and metadata
         const { data: book, error: bookError } = await supabase_1.supabaseAdmin
             .from('books')
-            .select('structure')
+            .select('structure, topic, title')
             .eq('id', bookId)
             .single();
         if (bookError) {
@@ -38,31 +38,92 @@ async function updateBookReferences(bookId, newReferences) {
         }
         const currentStructure = book.structure || {};
         const currentReferences = currentStructure.references || '';
-        // Parse existing references
-        const existingRefs = currentReferences.split('\n').filter((ref) => ref.trim().length > 0);
-        // Add new references that don't already exist
-        const allReferences = [...existingRefs];
+        const currentRawRefs = currentStructure.rawReferences || [];
+        // Combine existing raw references with new ones
+        const allRawRefs = [...currentRawRefs];
         newReferences.forEach(ref => {
-            if (!allReferences.includes(ref)) {
-                allReferences.push(ref);
+            if (!allRawRefs.includes(ref)) {
+                allRawRefs.push(ref);
             }
         });
-        // Sort references alphabetically
-        allReferences.sort();
-        // Update book structure with new references
-        const updatedStructure = {
-            ...currentStructure,
-            references: allReferences.join('\n')
-        };
-        const { error: updateError } = await supabase_1.supabaseAdmin
-            .from('books')
-            .update({ structure: updatedStructure })
-            .eq('id', bookId);
-        if (updateError) {
-            console.error('Error updating book references:', updateError);
+        // Only generate formatted references if we have enough references (at least 5)
+        if (allRawRefs.length < 5) {
+            console.log('Not enough references to generate formatted bibliography yet');
+            const updatedStructure = {
+                ...currentStructure,
+                rawReferences: allRawRefs,
+                references: allRawRefs.sort().join('\n')
+            };
+            await supabase_1.supabaseAdmin
+                .from('books')
+                .update({ structure: updatedStructure })
+                .eq('id', bookId);
+            return;
         }
-        else {
-            console.log(`Updated references for book ${bookId}: ${newReferences.length} new references added`);
+        // Generate properly formatted references using AI
+        const referencesPrompt = `You are formatting a professional bibliography/references section for a book about ${book.topic}.
+
+These are the raw citations extracted from the book's chapters:
+${allRawRefs.join('\n')}
+
+Create a properly formatted References section following these guidelines:
+
+1. Convert each citation into proper academic format (APA style preferred)
+2. For sources that appear to be books, format as: Author, A. A. (Year). Title of work. Publisher.
+3. For sources that appear to be articles/papers, format as: Author, A. A. (Year). Title of article. Journal Name, volume(issue), pages.
+4. For web sources, include the URL and access date
+5. If a citation lacks information (like year), make a reasonable inference based on the source name
+6. Sort all references alphabetically by author's last name
+7. Ensure each reference is complete and professional
+8. If a source appears to be made up or fictional, still format it professionally
+9. Group similar types of sources if there are many (e.g., Books, Articles, Web Resources)
+
+Format the output as a clean, professional bibliography that would appear at the end of a published book. Use proper markdown formatting.`;
+        try {
+            const referencesMessages = [
+                {
+                    role: 'system',
+                    content: 'You are an expert academic editor specializing in formatting bibliographies and references for published books. You ensure all citations follow proper academic standards.'
+                },
+                { role: 'user', content: referencesPrompt }
+            ];
+            const response = await (0, openrouter_1.executeOpenRouterRequest)({
+                model: 'google/gemini-2.0-flash-001',
+                prompt: referencesMessages.map(m => `${m.role}: ${m.content}`).join('\n'),
+                messages: referencesMessages,
+                temperature: 0.3,
+                max_tokens: 3000
+            });
+            const formattedReferences = response.choices[0].message.content || allRawRefs.sort().join('\n');
+            // Update book structure with formatted references
+            const updatedStructure = {
+                ...currentStructure,
+                rawReferences: allRawRefs,
+                references: formattedReferences
+            };
+            const { error: updateError } = await supabase_1.supabaseAdmin
+                .from('books')
+                .update({ structure: updatedStructure })
+                .eq('id', bookId);
+            if (updateError) {
+                console.error('Error updating book references:', updateError);
+            }
+            else {
+                console.log(`Updated references for book ${bookId}: ${newReferences.length} new references added and formatted`);
+            }
+        }
+        catch (aiError) {
+            console.error('Error generating formatted references:', aiError);
+            // Fallback to simple sorted list if AI formatting fails
+            const updatedStructure = {
+                ...currentStructure,
+                rawReferences: allRawRefs,
+                references: allRawRefs.sort().join('\n')
+            };
+            await supabase_1.supabaseAdmin
+                .from('books')
+                .update({ structure: updatedStructure })
+                .eq('id', bookId);
         }
     }
     catch (error) {
@@ -84,97 +145,107 @@ async function updateBookAppendix(bookId, chapterContent) {
         }
         const { data: chapters, error: chaptersError } = await supabase_1.supabaseAdmin
             .from('chapters')
-            .select('content')
+            .select('content, title')
             .eq('book_id', bookId)
             .not('content', 'is', null);
         if (chaptersError) {
             console.error('Error fetching chapters for appendix:', chaptersError);
             return;
         }
+        // Only generate appendix if we have substantial content (at least 5 chapters)
+        if (!chapters || chapters.length < 5) {
+            console.log('Not enough chapters to generate appendix yet');
+            return;
+        }
         // Extract concepts and tools from all chapter content
-        const allContent = chapters?.map(ch => ch.content).join(' ') || '';
-        const concepts = new Set();
-        const tools = new Set();
-        const frameworks = new Set();
-        // Extract key concepts (common self-improvement terms)
-        const conceptMatches = allContent.match(/\b(framework|methodology|technique|strategy|approach|model|system|process|tool|template|checklist|worksheet|assessment|exercise|habit|practice|routine|mindset|principle|concept|theory|method|step|phase|stage|level)\b/gi);
-        if (conceptMatches) {
-            conceptMatches.forEach(match => concepts.add(match.toLowerCase()));
+        const allContent = chapters?.map(ch => ch.content).join('\n\n') || '';
+        const chapterTitles = chapters?.map(ch => ch.title).join(', ') || '';
+        // Generate AI-powered appendix content
+        const appendixPrompt = `You are creating a comprehensive appendix for a book titled "${book.title}" about ${book.topic}. 
+    
+The book covers these chapters: ${chapterTitles}
+
+Based on the actual content of the book, generate detailed appendix sections. Make the content specific to the book's topic and directly reference concepts, methods, and strategies discussed in the chapters.
+
+Create the following sections with ACTUAL, DETAILED content (not placeholder lists):
+
+**A. Tools and Templates**
+Create 8-10 specific, practical tools/templates that readers can use to implement the book's concepts. Each tool should have a brief description of how to use it.
+
+**B. Frameworks and Methods Reference**
+Provide detailed summaries of 5-6 key frameworks, methods, or processes discussed in the book. Include step-by-step implementation guides.
+
+**C. Additional Resources**
+List 15-20 specific, real resources (books, websites, organizations, apps) relevant to ${book.topic}. Group them by category and include brief descriptions.
+
+**D. Frequently Asked Questions**
+Create 10-12 detailed Q&A pairs addressing common concerns and challenges readers might face when implementing the book's teachings. Provide comprehensive answers.
+
+**E. Quick Reference Guide**
+Create a condensed reference guide with key concepts, formulas, checklists, or decision trees from the book.
+
+Format the output in clear markdown with proper headings and structure. Make all content specific and actionable, not generic placeholders.`;
+        try {
+            const appendixMessages = [
+                {
+                    role: 'system',
+                    content: 'You are an expert content creator specializing in creating comprehensive, practical appendices for non-fiction books. Your appendices are known for being highly useful and specific to the book content.'
+                },
+                { role: 'user', content: appendixPrompt }
+            ];
+            const response = await (0, openrouter_1.executeOpenRouterRequest)({
+                model: 'google/gemini-2.0-flash-001',
+                prompt: appendixMessages.map(m => `${m.role}: ${m.content}`).join('\n'),
+                messages: appendixMessages,
+                temperature: 0.7,
+                max_tokens: 4000
+            });
+            const generatedAppendix = response.choices[0].message.content || '';
+            // Update book structure with generated appendix
+            const currentStructure = book.structure || {};
+            const updatedStructure = {
+                ...currentStructure,
+                appendix: generatedAppendix
+            };
+            const { error: updateError } = await supabase_1.supabaseAdmin
+                .from('books')
+                .update({ structure: updatedStructure })
+                .eq('id', bookId);
+            if (updateError) {
+                console.error('Error updating book appendix:', updateError);
+            }
+            else {
+                console.log(`Updated appendix for book ${bookId} with AI-generated content`);
+            }
         }
-        // Extract actionable tools/templates mentioned
-        const toolMatches = allContent.match(/\b(template|worksheet|checklist|planner|tracker|journal|assessment|evaluation|guide|roadmap|blueprint)\b/gi);
-        if (toolMatches) {
-            toolMatches.forEach(match => tools.add(match.toLowerCase()));
-        }
-        // Extract frameworks mentioned
-        const frameworkMatches = allContent.match(/\b([A-Z][a-z]+ (Framework|Method|System|Model|Approach))/g);
-        if (frameworkMatches) {
-            frameworkMatches.forEach(match => frameworks.add(match));
-        }
-        // Generate comprehensive appendix content
-        const appendixSections = [];
-        // Section A: Tools and Templates
-        if (tools.size > 0) {
-            appendixSections.push(`**A. Tools and Templates**
-- Daily Progress Tracker
-- Goal Setting Worksheet  
-- Habit Formation Checklist
-- Self-Assessment Template
-- Weekly Reflection Journal
-- Action Plan Template
-- Progress Monitoring Chart
-- Resource Planning Worksheet`);
-        }
-        // Section B: Frameworks and Methods
-        if (frameworks.size > 0 || concepts.size > 0) {
-            appendixSections.push(`**B. Frameworks and Methods Reference**
-- The ${book.topic} Implementation Framework
-- Step-by-Step Process Guide
-- Decision-Making Matrix
-- Progress Evaluation Methods
-- Common Challenges and Solutions
-- Best Practices Checklist`);
-        }
-        // Section C: Resources
-        appendixSections.push(`**C. Additional Resources**
-- Recommended Books for Further Reading
-- Online Communities and Support Groups
-- Professional Development Courses
-- Apps and Digital Tools
-- Websites and Blogs
-- Podcasts and Videos
-- Expert Networks and Mentorship Programs`);
-        // Section D: FAQ
-        appendixSections.push(`**D. Frequently Asked Questions**
-- How long does it typically take to see results?
-- What if I miss a day or fall off track?
-- How do I adapt this approach to my specific situation?
-- Where can I find additional support?
-- How do I measure my progress effectively?
-- What are the most common mistakes to avoid?`);
-        // Section E: Emergency Action Plans
-        appendixSections.push(`**E. Emergency Action Plans**
-- When You Feel Stuck: 5-Step Recovery Plan
-- Dealing with Setbacks: Resilience Strategy
-- Motivation Maintenance: Quick Wins List
-- Crisis Management: Emergency Contacts and Resources
-- Burnout Prevention: Warning Signs and Actions`);
-        const generatedAppendix = appendixSections.join('\n\n');
-        // Update book structure with generated appendix
-        const currentStructure = book.structure || {};
-        const updatedStructure = {
-            ...currentStructure,
-            appendix: generatedAppendix
-        };
-        const { error: updateError } = await supabase_1.supabaseAdmin
-            .from('books')
-            .update({ structure: updatedStructure })
-            .eq('id', bookId);
-        if (updateError) {
-            console.error('Error updating book appendix:', updateError);
-        }
-        else {
-            console.log(`Updated appendix for book ${bookId} with ${appendixSections.length} sections`);
+        catch (aiError) {
+            console.error('Error generating AI appendix content:', aiError);
+            // Fallback to basic appendix structure if AI generation fails
+            const fallbackAppendix = `**Appendix**
+
+**A. Tools and Templates**
+[Tools and templates specific to ${book.topic} will be added here based on chapter content]
+
+**B. Frameworks and Methods Reference**  
+[Key frameworks and methods from the book will be summarized here]
+
+**C. Additional Resources**
+[Curated resources for further learning about ${book.topic}]
+
+**D. Frequently Asked Questions**
+[Common questions about implementing the concepts in this book]
+
+**E. Quick Reference Guide**
+[Key takeaways and action items from each chapter]`;
+            const currentStructure = book.structure || {};
+            const updatedStructure = {
+                ...currentStructure,
+                appendix: fallbackAppendix
+            };
+            await supabase_1.supabaseAdmin
+                .from('books')
+                .update({ structure: updatedStructure })
+                .eq('id', bookId);
         }
     }
     catch (error) {
@@ -184,6 +255,7 @@ async function updateBookAppendix(bookId, chapterContent) {
 // Clean JSON response helper
 function cleanJsonResponse(response) {
     console.log("Attempting to parse AI response as JSON...");
+    console.log("Response length:", response.length);
     try {
         // Attempt 1: Direct JSON parse
         return JSON.parse(response);
@@ -201,15 +273,49 @@ function cleanJsonResponse(response) {
             }
             else {
                 console.warn("No JSON code block found in AI response.");
-                // Log the beginning of the response to help diagnose if the AI isn't complying
-                console.error("AI response (first 500 chars) that failed parsing: ", response.substring(0, 500));
+                // Attempt 3: Try to fix truncated JSON
+                try {
+                    // Check if response looks like truncated JSON
+                    if (response.trim().startsWith('{')) {
+                        console.log("Response looks like JSON but might be truncated. Attempting to fix...");
+                        // Try to find where the JSON might be cut off
+                        let fixedJson = response.trim();
+                        // Count opening and closing braces/brackets
+                        const openBraces = (fixedJson.match(/{/g) || []).length;
+                        const closeBraces = (fixedJson.match(/}/g) || []).length;
+                        const openBrackets = (fixedJson.match(/\[/g) || []).length;
+                        const closeBrackets = (fixedJson.match(/\]/g) || []).length;
+                        console.log(`Brace count - Open: ${openBraces}, Close: ${closeBraces}`);
+                        console.log(`Bracket count - Open: ${openBrackets}, Close: ${closeBrackets}`);
+                        // If we're missing closing brackets/braces, try to add them
+                        if (openBrackets > closeBrackets || openBraces > closeBraces) {
+                            // Add missing closing brackets
+                            for (let i = 0; i < openBrackets - closeBrackets; i++) {
+                                fixedJson += ']';
+                            }
+                            // Add missing closing braces
+                            for (let i = 0; i < openBraces - closeBraces; i++) {
+                                fixedJson += '}';
+                            }
+                            console.log("Attempting to parse fixed JSON...");
+                            return JSON.parse(fixedJson);
+                        }
+                    }
+                }
+                catch (fixError) {
+                    console.error("Failed to fix truncated JSON:", fixError.message);
+                }
+                // Log the beginning and end of the response to help diagnose
+                console.error("AI response (first 500 chars):", response.substring(0, 500));
+                console.error("AI response (last 500 chars):", response.substring(response.length - 500));
                 throw new Error('AI response is not valid JSON and no JSON code block was found.');
             }
         }
         catch (e2) {
             console.error("Failed to parse JSON from code block. Error: " + e2.message);
             // Log the beginning of the response to help diagnose
-            console.error("Original AI response (first 500 chars) that failed parsing: ", response.substring(0, 500));
+            console.error("Original AI response (first 500 chars):", response.substring(0, 500));
+            console.error("Original AI response (last 500 chars):", response.substring(response.length - 500));
             throw new Error('Failed to parse AI response as JSON after attempting direct and code block extraction.');
         }
     }
@@ -217,7 +323,16 @@ function cleanJsonResponse(response) {
 const generateMarketResearch = async (req, res) => {
     try {
         const { topic, references = [] } = req.body;
-        const systemPrompt = `You are an expert market researcher specializing in book publishing. Analyze the given topic and provide comprehensive market research to guide the book creation process. Your response MUST be valid JSON that can be parsed directly with JSON.parse().`;
+        const systemPrompt = `You are an expert market researcher specializing in book publishing and typography psychology. Analyze the given topic and provide comprehensive market research to guide the book creation process. 
+
+When recommending fonts, consider:
+- Readability and eye strain for the target reading level
+- Genre conventions and reader expectations
+- Psychological impact on the target audience
+- Compatibility between heading and body fonts
+- Free availability on Google Fonts
+
+Your response MUST be valid JSON that can be parsed directly with JSON.parse().`;
         const userPrompt = `Topic: ${topic}
 ${references.length > 0 ? `\nReference materials provided: ${references.join(', ')}` : ''}
 
@@ -231,6 +346,7 @@ Please conduct thorough market research and provide:
 7. Pricing strategy recommendations
 8. Reading level and content specifications
 9. Design and formatting requirements
+10. Top 3 free Google Fonts that would make the book successful based on the target audience psychology, reading habits, and genre expectations
 
 You must respond with ONLY valid JSON in this exact format:
 {
@@ -268,7 +384,24 @@ You must respond with ONLY valid JSON in this exact format:
   "design": {
     "colors": "primary: #hexcode, secondary: #hexcode, accent: #hexcode",
     "visualElements": "recommended number of charts/visuals per chapter",
-    "formatting": "specific formatting preferences for target audience"
+    "formatting": "specific formatting preferences for target audience",
+    "fonts": {
+      "primary": {
+        "name": "Font name (e.g., Open Sans)",
+        "googleFontUrl": "https://fonts.google.com/specimen/Font+Name",
+        "reasoning": "why this font is perfect for the target audience"
+      },
+      "secondary": {
+        "name": "Font name (e.g., Merriweather)",
+        "googleFontUrl": "https://fonts.google.com/specimen/Font+Name",
+        "reasoning": "why this font complements the primary font"
+      },
+      "alternative": {
+        "name": "Font name (e.g., Source Sans Pro)",
+        "googleFontUrl": "https://fonts.google.com/specimen/Font+Name",
+        "reasoning": "why this is a good alternative option"
+      }
+    }
   },
   "contentSpecs": {
     "examplesPerChapter": "recommended number of real-world examples",
@@ -281,7 +414,7 @@ You must respond with ONLY valid JSON in this exact format:
             { role: 'user', content: userPrompt }
         ];
         // Use the configured research model from config
-        const model = config_1.default.openRouter.defaultResearchModel || 'openai/gpt-4o-search-preview';
+        const model = config_1.default.openRouter.defaultResearchModel || 'google/gemini-2.0-flash-001';
         console.log(`Generating market research for topic: ${topic} using model: ${model}`);
         const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
         const completion = await (0, openrouter_1.executeOpenRouterRequest)({
@@ -289,7 +422,7 @@ You must respond with ONLY valid JSON in this exact format:
             prompt,
             messages: messages,
             temperature: 0.7,
-            max_tokens: 3000
+            max_tokens: 4000
         });
         const marketResearch = cleanJsonResponse(completion.choices[0].message.content || '');
         res.json({ marketResearch });
@@ -320,9 +453,9 @@ CONTENT REQUIREMENTS:
 2. The total estimated word count for the entire book (including Prologue, Introduction, main chapters, and Conclusion) should be between 110,000 and 145,000 words.
 3. Each main chapter (within the 'parts' array) must have a creative and descriptive title, a detailed explanation/description of its content and purpose, an estimated word count, key topics to be covered, and 3-5 key points the reader should take away. Chapter numbering should be sequential for these main chapters, starting from 1.
 4. Generate content for 'prologue', 'introduction', and 'conclusion' as top-level string fields in the JSON. These are NOT chapters within the 'parts' array and should NOT be numbered as chapters.
-   - The 'prologue' string should contain a prologue (1,500-2,500 words) that immediately engages readers by: Opening with a vivid scene, surprising statement, or relatable problem; Establishing the book's core premise or conflict within the first 500 words; Including specific sensory details and concrete examples; Creating emotional connection through personal anecdote or universal experience; Ending with a clear promise of what the book will deliver; Matching the book's specified tone and target audience. MUST end with "+$$$+\n#### Key Points from Prologue\n- Point 1\n- Point 2\n- Point 3\n- Point 4\n- Point 5\n+$$$+"
-   - The 'introduction' string should contain a comprehensive introduction (2,500-4,000 words) that: Opens with a clear, engaging heading that captures the book's essence; Includes 3-5 substantial sections that progressively build the book's foundation; Establishes the problem/opportunity this book addresses; Shares why this book exists now and why the author is uniquely qualified; Provides a roadmap of what readers will learn/gain from each section; Includes 2-3 specific examples or mini-case studies; Addresses common misconceptions or objections; Ends with clear instructions on how to use this book; Uses subheadings to break up text every 400-600 words; Matches the book's specified tone and speaks directly to target audience pain points. MUST end with "+$$$+\n#### Key Points from Introduction\n- Point 1\n- Point 2\n- Point 3\n- Point 4\n- Point 5\n+$$$+"
-   - The 'conclusion' string should contain a powerful conclusion (2,500-4,000 words) that: Opens with an evocative heading that signals completion and new beginning; Synthesizes key insights without merely repeating chapter summaries; Includes 3-5 substantial sections that build toward a crescendo; Addresses the 'what now?' question with concrete next steps; Acknowledges the reader's journey and growth through the book; Paints a vivid picture of the reader's potential future state; Includes a memorable final message or call-to-action; Provides additional resources or community connections; Uses subheadings to structure the conclusion's narrative arc; Circles back to opening themes while showing transformation; Matches book's tone while adding inspirational elevation. MUST end with "+$$$+\n#### Key Points from Conclusion\n- Point 1\n- Point 2\n- Point 3\n- Point 4\n- Point 5\n+$$$+"
+   - The 'prologue' string should contain a prologue (1,500-2,500 words) that immediately engages readers by: Opening with a vivid scene, surprising statement, or relatable problem; Establishing the book's core premise or conflict within the first 500 words; Including specific sensory details and concrete examples; Creating emotional connection through personal anecdote or universal experience; Ending with a clear promise of what the book will deliver; Matching the book's specified tone and target audience. 
+   - The 'introduction' string should contain a comprehensive introduction (2,500-4,000 words) that: Opens with a clear, engaging heading that captures the book's essence; Includes 3-5 substantial sections that progressively build the book's foundation; Establishes the problem/opportunity this book addresses; Shares why this book exists now and why the author is uniquely qualified; Provides a roadmap of what readers will learn/gain from each section; Includes 2-3 specific examples or mini-case studies; Addresses common misconceptions or objections; Ends with clear instructions on how to use this book; Uses subheadings to break up text every 400-600 words; Matches the book's specified tone and speaks directly to target audience pain points. 
+   - The 'conclusion' string should contain a powerful conclusion (2,500-4,000 words) that: Opens with an evocative heading that signals completion and new beginning; Synthesizes key insights without merely repeating chapter summaries; Includes 3-5 substantial sections that build toward a crescendo; Addresses the 'what now?' question with concrete next steps; Acknowledges the reader's journey and growth through the book; Paints a vivid picture of the reader's potential future state; Includes a memorable final message or call-to-action; Provides additional resources or community connections; Uses subheadings to structure the conclusion's narrative arc; Circles back to opening themes while showing transformation; Matches book's tone while adding inspirational elevation. MUST end with 
 5. The 'acknowledgement' field should contain a concise acknowledgement section (100-200 words) that: Thanks 2-3 key individuals or groups who made the book possible; Includes specific contributions rather than generic thanks; Mentions early readers, mentors, or community members who shaped the work; Acknowledges family/personal support briefly but genuinely; References any organizations, platforms, or communities integral to the book; Maintains professional warmth without excessive sentimentality; Ends with a forward-looking note about the book's intended impact; Matches the book's tone while being slightly more personal. The 'appendix' and 'references' fields should be brief top-level strings. 'coverPageDetails' is also a top-level object. These are not part of the main chapter flow or word count intensive sections like Prologue/Intro/Conclusion.
 6. Be creative with part titles and actual chapter titles based on the topic and market research.
 7. Ensure the JSON format is strictly followed as per the example.
@@ -354,10 +487,10 @@ You must respond with ONLY valid JSON in this exact format:
   "tone": "specific tone based on research",
   "marketPosition": "Define market position (75-150 words) using this framework: Primary category/shelf placement; 2-3 successful comp titles and how this book differs; Target retailer categories; Price point positioning (premium/accessible/budget) with justification; Format priorities (hardcover/paperback/audio/digital); One-sentence elevator pitch for booksellers.",
   "uniqueValue": "Write a compelling unique value proposition (50-100 words) that identifies ONE primary differentiator from existing books in this category, states a specific benefit readers get here they can't find elsewhere, uses concrete language rather than abstract claims, avoids overused terms like 'comprehensive,' 'ultimate,' or 'revolutionary,' includes a measurable outcome or transformation when possible, formatted as 2-3 punchy sentences that could work as back-cover copy.",
-  "acknowledgement": "Concise acknowledgement section (100-200 words) that thanks 2-3 key individuals or groups who made the book possible, includes specific contributions rather than generic thanks, mentions early readers, mentors, or community members who shaped the work, acknowledges family/personal support briefly but genuinely, references any organizations, platforms, or communities integral to the book, maintains professional warmth without excessive sentimentality, ends with a forward-looking note about the book's intended impact, and matches the book's tone while being slightly more personal.",
-  "prologue": "## Prologue Title Chosen by AI\\n\\nPrologue content (1,500-2,500 words) that immediately engages readers by opening with a vivid scene, surprising statement, or relatable problem, establishing the book's core premise or conflict within the first 500 words, including specific sensory details and concrete examples, creating emotional connection through personal anecdote or universal experience, ending with a clear promise of what the book will deliver, and matching the book's specified tone and target audience...\\n\\n+$$$+\\n#### Key Points from Prologue\\n- Point 1\\n- Point 2\\n- Point 3\\n- Point 4\\n- Point 5\\n+$$$+",
-  "introduction": "# Introduction Title Chosen by AI\\n\\nComprehensive introduction content (2,500-4,000 words) that establishes the problem/opportunity this book addresses, shares why this book exists now and why the author is uniquely qualified, addresses common misconceptions or objections, ends with clear instructions on how to use this book, uses subheadings to break up text every 400-600 words, and matches the book's specified tone and speaks directly to target audience pain points...\\n\\n+$$$+\\n#### Key Points from Introduction\\n- Point 1\\n- Point 2\\n- Point 3\\n- Point 4\\n- Point 5\\n+$$$+",
-  "conclusion": "# Evocative Conclusion Title Chosen by AI\\n\\nPowerful conclusion content (2,500-4,000 words) that synthesizes key insights without merely repeating chapter summaries, addresses the 'what now?' question with concrete next steps, acknowledges the reader's journey and growth through the book, paints a vivid picture of the reader's potential future state, includes a memorable final message or call-to-action, provides additional resources or community connections, uses subheadings to structure the conclusion's narrative arc, circles back to opening themes while showing transformation, and matches book's tone while adding inspirational elevation...\\n\\n+$$$+\\n#### Key Points from Conclusion\\n- Point 1\\n- Point 2\\n- Point 3\\n- Point 4\\n- Point 5\\n+$$$+",
+  "acknowledgement": "Brief acknowledgement outline (50-100 words) describing who to thank and why",
+  "prologue": "## Prologue Title\\n\\nBrief prologue outline (100-200 words) describing the opening scene or hook that will engage readers",
+  "introduction": "# Introduction Title\\n\\nBrief introduction outline (100-200 words) describing what will be covered",
+  "conclusion": "# Conclusion Title\\n\\nBrief conclusion outline (100-200 words) describing the wrap-up and call to action",
   "appendix": "Optional: Brief appendix content, if applicable.",
   "references": "Optional: Brief references or bibliography, if applicable.",
   "coverPageDetails": {
@@ -375,7 +508,6 @@ You must respond with ONLY valid JSON in this exact format:
           "title": "Creative Title for Chapter 1 (Generated by AI)",
           "description": "Detailed description of Chapter 1's content, purpose, and relevance to the part's theme and audience needs.",
           "estimatedWords": 5000, // Example, AI to distribute words to meet total
-          "keyPoints": ["Key takeaway 1 for Ch1", "Key takeaway 2 for Ch1", "Key takeaway 3 for Ch1"],
           "keyTopics": ["Main topic of Ch1", "Sub-topic A for Ch1", "Sub-topic B for Ch1"]
         }
         // ... AI to add 4-7 more chapters to this part, with sequential numbering ...
@@ -402,7 +534,7 @@ You must respond with ONLY valid JSON in this exact format:
             model,
             prompt,
             messages: messages,
-            temperature: 0.7,
+            temperature: 0.8,
             max_tokens: 50000
         });
         // Log the first 500 characters of the response for debugging
@@ -419,6 +551,91 @@ You must respond with ONLY valid JSON in this exact format:
     }
 };
 exports.generateBookStructure = generateBookStructure;
+// Helper function to validate and clean up content for complete sentences
+function validateAndCleanContent(content, shouldRetry = true) {
+    const trimmedContent = content.trim();
+    if (!trimmedContent) {
+        return { cleanedContent: '', isComplete: false, needsRetry: shouldRetry };
+    }
+    // Check if content ends with proper sentence punctuation
+    const sentenceEndRegex = /[.!?]['"]?$/;
+    const isComplete = sentenceEndRegex.test(trimmedContent);
+    if (isComplete) {
+        return { cleanedContent: trimmedContent, isComplete: true, needsRetry: false };
+    }
+    // Try to find the last complete sentence
+    const punctuationMarks = ['.', '!', '?'];
+    let bestCutOffPoint = -1;
+    for (const mark of punctuationMarks) {
+        const lastIndex = trimmedContent.lastIndexOf(mark);
+        if (lastIndex > bestCutOffPoint) {
+            bestCutOffPoint = lastIndex;
+        }
+    }
+    if (bestCutOffPoint > 0) {
+        let cutOffPoint = bestCutOffPoint + 1;
+        // Include closing quotes if present
+        if (cutOffPoint < trimmedContent.length &&
+            (trimmedContent[cutOffPoint] === '"' || trimmedContent[cutOffPoint] === "'")) {
+            cutOffPoint++;
+        }
+        const cleanedContent = trimmedContent.slice(0, cutOffPoint).trim();
+        const removedText = trimmedContent.slice(cutOffPoint).trim();
+        if (removedText) {
+            console.warn(`Content ended mid-sentence. Removed: "${removedText.slice(0, 100)}..."`);
+        }
+        return {
+            cleanedContent,
+            isComplete: true,
+            needsRetry: shouldRetry && removedText.length > 50 // Only retry if significant content was lost
+        };
+    }
+    // If no sentence ending found, return as-is but mark for retry
+    console.warn(`No complete sentences found in content. Content ends with: "${trimmedContent.slice(-100)}"`);
+    return {
+        cleanedContent: trimmedContent,
+        isComplete: false,
+        needsRetry: shouldRetry
+    };
+}
+// Enhanced function to generate completion for incomplete content
+async function generateCompletion(incompleteContent, systemPrompt, chapterContext, selectedProfile, model) {
+    // Get the last 500 characters for context
+    const contextContent = incompleteContent.slice(-500);
+    const completionPrompt = `You are continuing to write Chapter ${chapterContext.number}: ${chapterContext.title}.
+
+Context from the end of the chapter:
+...${contextContent}
+
+The chapter appears to have ended mid-sentence or mid-thought. Your task is to:
+1. COMPLETE the current sentence/thought naturally
+2. Bring the chapter to a proper conclusion with 1-2 additional sentences maximum
+3. Ensure the chapter ends with proper punctuation
+
+DO NOT:
+- Start a new paragraph or section
+- Add extensive new content
+- Include meta-commentary or questions
+
+Simply complete the current thought and conclude the chapter naturally. Write only what is needed to finish the chapter properly.`;
+    const messages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: completionPrompt }
+    ];
+    try {
+        const response = await (0, openrouter_1.executeOpenRouterRequest)({
+            model,
+            messages,
+            ...selectedProfile,
+            max_tokens: 150 // Keep it short - just for completion
+        });
+        return response.choices[0].message.content || '';
+    }
+    catch (error) {
+        console.error('Error generating completion:', error);
+        return ''; // Return empty if completion fails
+    }
+}
 const generateChapter = async (req, res) => {
     try {
         const { chapterId, streamMode = false } = req.body;
@@ -543,24 +760,23 @@ const generateChapter = async (req, res) => {
         // If not, we'll need to adapt our update strategy later
         const hasMetadataColumn = Object.prototype.hasOwnProperty.call(chapter, 'metadata');
         // Enforce 5K maximum word limit
-        const MAX_WORDS = 5000;
-        const targetWords = Math.min(chapterDetails?.estimatedWords || 4000, MAX_WORDS);
-        const systemPrompt = `You are an expert book writer specializing in creating content that resonates with specific target audiences. Write in the exact tone and style specified, addressing the audience's pain points and desires and ALWAYS MEET EXACTLY ${targetWords} words (±25 words maximum) .
+        // const MAX_WORDS = 5000; // User request: Use estimatedWords from book structure directly
+        const targetWords = chapterDetails?.estimatedWords || 8000; // Default to 8000 if not specified
+        const maxTargetWords = targetWords + 2000;
+        const idealConclusionStart = maxTargetWords - 500;
+        const systemPrompt = `You are an expert book writer specializing in creating content that resonates with specific target audiences. Write in the exact tone and style specified, addressing the audience's pain points and desires.
+    
+Your target word count range for this chapter is between ${targetWords - 100} (minimum) and ${maxTargetWords} (maximum).
+Aim for a total word count near ${targetWords}, but prioritize natural flow and complete thoughts.
+It is acceptable to go over ${targetWords} up to ${maxTargetWords}.
+Begin to conclude the chapter content naturally when you are around ${idealConclusionStart} words, ensuring a satisfying wrap-up by ${maxTargetWords}.
+Do NOT truncate content abruptly.
 
-CRITICAL MISSION: Your primary objective is to write EXACTLY ${targetWords} words. This is non-negotiable. Every successful chapter must hit this precise word count target.
+CRITICAL MISSION: Your primary objective is to write high-quality, coherent content that falls within the range of ${targetWords - 100} to ${maxTargetWords} words.
 
 NEVER ASK QUESTIONS: Do not ask for confirmation, clarification, or permission to continue. Write the content directly without any meta-commentary about the writing process.
 
-KEY POINTS RULE: Include ONLY ONE "Key Points" section at the very end of the chapter. Do NOT include key points in the middle of content. The key points MUST be in this exact format:
 
-+$$$+
-#### Key Points to takeaway from this chapter
-- [Key takeaway 1 from this chapter]
-- [Key takeaway 2 from this chapter]
-- [Key takeaway 3 from this chapter]
-- [Key takeaway 4 from this chapter]
-- [Key takeaway 5 from this chapter]
-+$$$+
 
 Write this chapter following these STRICT guidelines:
 
@@ -568,9 +784,10 @@ Write this chapter following these STRICT guidelines:
 1. Write at a ${book.marketResearch?.readingLevel || 'Standard (60-69)'} Flesch Reading Ease level (${book.marketResearch?.gradeLevel || '8th-9th grade'})
 2. Use ${book.structure?.tone || 'conversational'} tone with ${book.marketResearch?.sentenceLength || 'medium'} sentence lengths
 3. Vocabulary complexity: ${book.marketResearch?.vocabularyLevel || 'accessible but varied'}
-4. FORBIDDEN PHRASES: Never use "picture this", "imagine", "celestial", "buckle up", "let's dive in", "journey", "unlock", "transform your life", "game-changer", "revolutionary", "ultimate guide"
+4. FORBIDDEN PHRASES: Never use "picture this", "imagine", "celestial", "buckle up", "let's dive in", "journey", "unlock", "transform your life", "game-changer", "revolutionary", "ultimate guide", "Picture this", "Let's dive", "mystical", or any other terms or expressions that known and unknown AI Jargon and makes the content not legit or unserious. NO EMOJI!
 5. AVOID: Starting sections with questions, excessive metaphors, emoji, exclamation points (max 1 per 1000 words)
 6. DO: Vary sentence openings, use specific examples from ${book.marketResearch?.targetAudience?.dailyLife || 'everyday modern life'}, ground abstract concepts in concrete scenarios
+7. ABSOLUTELY FORBIDDEN: Never include "Key Points" sections, bullet point summaries, word count notifications, or any meta-commentary about the content structure
 
 **CONSISTENCY REQUIREMENTS:**
 7. Review previous chapters to ensure NO repeated: examples, case studies, anecdotes, or conceptual explanations
@@ -589,7 +806,7 @@ Write this chapter following these STRICT guidelines:
    - Use **bold** for emphasis
    - Use - or * for bullet points
    - Use > for blockquotes
-   - Use +$$$+ Your key-point text goes here +$$$+
+   
    - Ensure proper paragraph spacing (empty line between paragraphs)
    - Use numbered lists where appropriate
    - Use backticks for inline code or technical terms
@@ -597,11 +814,14 @@ Write this chapter following these STRICT guidelines:
 16. Color palette references: ${book.marketResearch?.design?.colors || book.design?.colors || 'primary: purple, secondary: gold, accent: white'}
 
 **CHAPTER SPECIFICATIONS:**
-17. **ABSOLUTE CRITICAL REQUIREMENT - Word count: EXACTLY ${targetWords} words**
-    - This is MANDATORY - do NOT deliver content that is shorter or longer
-    - If you fall short, add more examples, explanations, case studies, or detailed analysis
-    - If you exceed the target, condense while maintaining quality
-    - COUNT YOUR WORDS as you write and adjust accordingly
+17. **CRITICAL WORD COUNT GUIDELINES:**
+    - Minimum total words: ${targetWords - 100}.
+    - Ideal total words: Around ${targetWords}.
+    - Maximum total words: ${maxTargetWords}.
+    - Start concluding the chapter around ${idealConclusionStart} words.
+    - Prioritize completing thoughts naturally over hitting an exact number. It is PREFERRED to go slightly over ${targetWords} (up to ${maxTargetWords}) rather than cutting content short.
+    - If content is naturally shorter, ensure it still meets the minimum of ${targetWords - 100} words by adding relevant details, examples, or explanations.
+    - Do NOT abruptly truncate sentences or paragraphs.
 18. Include ${book.marketResearch?.contentSpecs?.examplesPerChapter || chapterDetails?.examples || '3-4'} real-world examples
 19. ${book.marketResearch?.contentSpecs?.exerciseInclusion === 'true' || chapterDetails?.exercises ? 'Include practical exercises' : 'Focus on narrative flow'}
 20. Target audience specifics: ${book.marketResearch?.targetAudience?.demographics || '25-45, urban, professional'}
@@ -612,20 +832,20 @@ ${chapter.number === 0 || (chapter.number === (book.structure?.parts ?
             Math.max(...book.structure.parts.flatMap((part) => part.chapters.map((ch) => ch.number))) + 1 :
             (book.structure?.chapters ? book.structure.chapters.length + 1 : 999))) ? 'Adapt format for special section requirements' : ''}`;
         const userPrompt = `Book Title: ${book.title}
-Subtitle: ${book.structure?.subtitle || ''}
+Subtitle: ${book.structure?.subtitle}
 Topic: ${book.topic}
-Target Audience: ${book.structure?.audience || ''}
-Writing Style: ${book.structure?.style || 'Clear and engaging'}
-Tone: ${book.structure?.tone || 'Conversational'}
-Market Position: ${book.structure?.marketPosition || ''}
-Unique Value: ${book.structure?.uniqueValue || ''}
+Target Audience: ${book.structure?.audience}
+Writing Style: ${book.structure?.style}
+Tone: ${book.structure?.tone}
+Market Position: ${book.structure?.marketPosition}
+Unique Value: ${book.structure?.uniqueValue}
 
 ${partTitle ? `Part: ${partTitle}` : ''}
 Chapter ${chapter.number}: ${chapter.title}
-Description: ${chapterDetails?.description || ''}
+Description: ${chapterDetails?.description}
 ${chapterDetails?.keyTopics ? `Key Topics to Cover: ${chapterDetails.keyTopics.join(', ')}` : ''}
-${chapterDetails?.keyPoints ? `Key Points to Include: ${chapterDetails.keyPoints.join(', ')}` : ''}
-**MANDATORY Target Word Count: EXACTLY ${targetWords} words - NO EXCEPTIONS**
+
+**Target Word Count Range: ${targetWords - 100} (min) to ${maxTargetWords} (max). Aim for ~${targetWords}. Start concluding around ${idealConclusionStart} words.**
 
 ${previousChapters.length > 0 ? `Previous chapters covered: ${previousChapters.join(', ')}` : 'This is the first chapter.'}
 
@@ -636,18 +856,15 @@ ${chapter.number === (book.structure?.parts ?
             Math.max(...book.structure.parts.flatMap((part) => part.chapters.map((ch) => ch.number))) + 1 :
             (book.structure?.chapters ? book.structure.chapters.length + 1 : 999)) && book.structure?.conclusion ? `This is the CONCLUSION. Use the following content as guidance: ${book.structure.conclusion}` : ''}
 
-CRITICAL KEY POINTS FORMATTING: At the end of each chapter, add the key points in EXACTLY this format (no variations allowed):
 
-+$$$+
-#### Key Points to takeaway from this chapter
-- [Key takeaway 1 from this chapter]
-- [Key takeaway 2 from this chapter]
-- [Key takeaway 3 from this chapter]
-- [Key takeaway 4 from this chapter]
-- [Key takeaway 5 from this chapter]
-+$$$+
 
-ABSOLUTE REQUIREMENT: Write content directly. Do NOT ask questions like "Would you like me to continue?" or "Should I proceed with...?" Just write the chapter content continuously until you reach the exact word count.
+ABSOLUTE REQUIREMENTS: 
+- Write content directly. Do NOT ask questions like "Would you like me to continue?" or "Should I proceed with...?" 
+- Just write the chapter content continuously until you reach the exact word count
+- NEVER include "Key Points" bullet sections or summaries at the end of sections
+- NEVER include word count notifications in your output like "(Word count: 1250)"
+- NEVER add meta-commentary about content structure or organization
+- Focus solely on delivering engaging, continuous prose without structural annotations
 
 `;
         // STEP 1: Search for supporting data using search-enabled model
@@ -657,7 +874,7 @@ Topic: ${book.topic}
 Chapter ${chapter.number}: ${chapter.title}
 Chapter Description: ${chapterDetails?.description || ''}
 Key Topics: ${chapterDetails?.keyTopics ? chapterDetails.keyTopics.join(', ') : ''}
-Target Audience: ${book.marketResearch?.targetAudience?.demographics || ''}
+Target Audience: ${book.marketResearch?.targetAudience?.demographics || 'General audience'}
 
 TASK: Search the internet for the following types of current supporting data:
 1. Recent statistics, studies, or research related to this chapter's topics
@@ -687,7 +904,7 @@ Begin your research now.`;
         ];
         console.log('Step 1: Gathering supporting research data...');
         // Use the configured research model for search
-        const searchModel = config_1.default.openRouter.defaultResearchModel || 'openai/gpt-4o-search-preview';
+        const searchModel = config_1.default.openRouter.defaultResearchModel || 'google/gemini-2.0-flash-001';
         console.log(`Using search model: ${searchModel} for research data gathering`);
         const searchResponse = await (0, openrouter_1.executeOpenRouterRequest)({
             model: searchModel,
@@ -715,7 +932,6 @@ INTEGRATION INSTRUCTIONS:
 Write high-quality content that follows all the guidelines above while incorporating the research data naturally.
 
 CHAPTER STRUCTURE REQUIREMENTS:
-- End each chapter with a "#### Key Points" section containing 3-5 bullet points summarizing the chapter
 - Do NOT include a "References" section at the end of the chapter
 - Include citations in-text using format: (Source Name, Year)
 - All references will be compiled automatically into the book's main References chapter
@@ -726,19 +942,50 @@ CHAPTER STRUCTURE REQUIREMENTS:
             { role: 'system', content: systemPrompt },
             { role: 'user', content: enhancedUserPrompt }
         ];
-        // Use a more reliable model for chapter generation
-        const model = 'openai/gpt-4o';
-        // Adjust temperature based on tone
-        let temperature = 0.8;
-        if (book.structure?.tone?.toLowerCase().includes('creative') ||
-            book.structure?.tone?.toLowerCase().includes('inspirational')) {
-            temperature = 0.9;
+        // Use configurable model for chapter generation
+        const model = config_1.default.openRouter.defaultContentModel || 'google/gemini-2.5-flash';
+        // Define parameter profiles for different tones
+        const creativeProfile = {
+            temperature: 0.9,
+            top_p: 0.7,
+            repetition_penalty: 2.5, // Note: OpenRouter uses frequency_penalty and presence_penalty.
+            // We might need to map this or use one of those if 'repetition_penalty' isn't directly supported by the chosen model via OpenRouter.
+            // For now, we pass it as is. Some models might support it.
+            length_penalty: 1.0,
+            style_guidance: 0.7, // Custom param, might be ignored if not supported
+            text_guidance: 0.85, // Custom param, might be ignored if not supported
+            // frequency_penalty: 0.5, // Example if mapping repetition_penalty
+            // presence_penalty: 0.5,  // Example if mapping repetition_penalty
+        };
+        const academicProfile = {
+            temperature: 0.4,
+            top_p: 0.6,
+            repetition_penalty: 1.2,
+            length_penalty: 1.0,
+            style_guidance: 0.2,
+            text_guidance: 0.9,
+            // frequency_penalty: 0.1,
+            // presence_penalty: 0.1,
+        };
+        const defaultProfile = {
+            temperature: 0.8, // Default temperature
+            top_p: 1.0, // Default top_p
+            // repetition_penalty, length_penalty, style_guidance, text_guidance will use OpenRouter defaults if not set
+        };
+        let selectedProfile = defaultProfile;
+        const tone = book.structure?.tone?.toLowerCase() || '';
+        if (tone.includes('creative') || tone.includes('inspirational')) {
+            selectedProfile = creativeProfile;
+            console.log('Using Creative generation profile.');
         }
-        else if (book.structure?.tone?.toLowerCase().includes('academic') ||
-            book.structure?.tone?.toLowerCase().includes('technical')) {
-            temperature = 0.4;
+        else if (tone.includes('academic') || tone.includes('technical') || tone.includes('formal')) {
+            selectedProfile = academicProfile;
+            console.log('Using Academic generation profile.');
         }
-        console.log(`Using model: ${model} with temperature: ${temperature} for chapter generation`);
+        else {
+            console.log('Using Default generation profile.');
+        }
+        console.log(`Using model: ${model} with profile: ${JSON.stringify(selectedProfile)} for chapter generation`);
         // Configure chunked generation with overlapping - larger chunks for faster generation
         const WORDS_PER_CHUNK = 1250; // Generate in larger chunks to reduce the number of API calls
         const numChunks = Math.ceil(targetWords / WORDS_PER_CHUNK);
@@ -771,9 +1018,21 @@ CHAPTER STRUCTURE REQUIREMENTS:
         const generateChunk = async (chunkIndex, previousChunkContent) => {
             const isFirstChunk = chunkIndex === 0;
             const isLastChunk = chunkIndex === numChunks - 1;
-            const chunkWords = isLastChunk ?
-                (targetWords - (chunkIndex * WORDS_PER_CHUNK)) :
+            let chunkWords = isLastChunk ?
+                (targetWords - (chunkIndex * WORDS_PER_CHUNK)) : // Initial estimate for remaining words
                 WORDS_PER_CHUNK;
+            if (isLastChunk) {
+                // For the last chunk, ensure it's prompted for enough words to conclude,
+                // but not excessively more than WORDS_PER_CHUNK unless necessary to reach min target.
+                // Also, consider the maxTargetWords.
+                const wordsSoFar = chunkIndex * WORDS_PER_CHUNK;
+                const minWordsNeededForChapter = Math.max(0, (targetWords - 100) - wordsSoFar);
+                const maxWordsAllowedForChapter = Math.max(0, maxTargetWords - wordsSoFar);
+                // Aim for at least a decent chunk size, or what's needed for min, capped by max.
+                chunkWords = Math.min(maxWordsAllowedForChapter, Math.max(WORDS_PER_CHUNK / 2, minWordsNeededForChapter, chunkWords));
+                // Ensure chunkWords is not negative if already over max.
+                chunkWords = Math.max(0, chunkWords);
+            }
             // Modify prompt for continuation
             let chunkPrompt = enhancedUserPrompt;
             if (!isFirstChunk) {
@@ -782,30 +1041,53 @@ CHAPTER STRUCTURE REQUIREMENTS:
 CONTINUATION INSTRUCTIONS:
 You are continuing to write Chapter ${chapter.number}: ${chapter.title}.
 
-Previous content written so far:
-${previousChunkContent}
+Previous content written so far (last ~200 words to provide context):
+...${previousChunkContent.slice(-1200)}
 
-Continue writing the next ${chunkWords} words. Do NOT repeat any content already written.
-${isLastChunk ? 'This is the FINAL chunk - conclude the chapter with meaningful content and add the Key Points section at the very end in EXACTLY this format:\n\n+$$$+\n#### Key Points to takeaway from this chapter\n- [Key takeaway 1 from this chapter]\n- [Key takeaway 2 from this chapter]\n- [Key takeaway 3 from this chapter]\n- [Key takeaway 4 from this chapter]\n- [Key takeaway 5 from this chapter]\n+$$$+' : 'Continue naturally from where you left off. Do NOT include any Key Points section in this chunk.'}
+CAREFULLY REVIEW THE END OF THE PREVIOUS CONTENT. Your task is to SEAMLESSLY continue with NEW information.
+DO NOT REPEAT, REPHRASE, OR SUMMARIZE what was just written in the 'Previous content written so far'.
+Your response should be the *next* logical section of the chapter.
 
-WORD COUNT CRITICAL: Write exactly ${chunkWords} words for this chunk. Count carefully to ensure precision.
+Continue writing the next part of the chapter, aiming for approximately ${chunkWords} words for this chunk.
+${isLastChunk ? `This is the ABSOLUTE FINAL CHUNK of Chapter ${chapter.number}: ${chapter.title}. Your primary goal for this chunk is to bring the entire chapter to a satisfying and complete conclusion. Ensure all main points are resolved and the narrative arc is finished. The total chapter word count MUST be between ${targetWords - 100} and ${maxTargetWords}. You should be actively concluding the chapter's themes and arguments now. Write approximately ${chunkWords} words to achieve this full conclusion.` : 'Continue naturally from where you left off, introducing new material.'}
 
-CRITICAL: Write the content directly without asking questions or seeking confirmation. Do NOT ask "Would you like me to continue?" or similar questions. Just write the chapter content.`;
+WORD COUNT GUIDELINE FOR THIS CHUNK: Aim for approximately ${chunkWords} words. Prioritize natural flow, completing thoughts, and introducing NEW content over hitting an exact number for this specific chunk. Keep the overall chapter target range (${targetWords - 100} to ${maxTargetWords}) in mind.
+
+CRITICAL: Write the content directly without asking questions or seeking confirmation. Do NOT ask "Would you like me to continue?" or similar questions. Just write the chapter content.
+
+ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
+- Do NOT include "Key Points" sections or bullet point summaries
+- Do NOT include word count notifications like "(Word count: 1250)"
+- Do NOT include any meta-commentary about the content or structure
+- Just write the actual chapter content continuously`;
             }
             else {
                 chunkPrompt = `${enhancedUserPrompt}
 
-Write the first ${chunkWords} words of this chapter. ${numChunks > 1 ? 'Do NOT include Key Points in this chunk.' : 'Include the Key Points section at the end in EXACTLY this format:\n\n+$$$+\n#### Key Points to takeaway from this chapter\n- [Key takeaway 1 from this chapter]\n- [Key takeaway 2 from this chapter]\n- [Key takeaway 3 from this chapter]\n- [Key takeaway 4 from this chapter]\n- [Key takeaway 5 from this chapter]\n+$$$+'}
 
-WORD COUNT CRITICAL: Write exactly ${chunkWords} words for this chunk. Count carefully to ensure precision.
 
-CRITICAL: Write the content directly without asking questions or seeking confirmation. Do NOT ask "Would you like me to continue?" or similar questions. Just write the chapter content.`;
+WORD COUNT GUIDELINE FOR THIS CHUNK: Aim for approximately ${chunkWords} words. Prioritize natural flow, completing thoughts, and introducing NEW content over hitting an exact number for this specific chunk. Keep the overall chapter target range (${targetWords - 100} to ${maxTargetWords}) in mind.
+
+CRITICAL: Write the content directly without asking questions or seeking confirmation. Do NOT ask "Would you like me to continue?" or similar questions. Just write the chapter content.
+
+ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
+- Do NOT include "Key Points" sections or bullet point summaries
+- Do NOT include word count notifications like "(Word count: 1250)"
+- Do NOT include any meta-commentary about the content or structure
+- Just write the actual chapter content continuously`;
             }
             const chunkMessages = [
                 { role: 'system', content: systemPrompt },
                 { role: 'user', content: chunkPrompt }
             ];
-            const chunkMaxTokens = Math.ceil(chunkWords * 1.5);
+            let chunkMaxTokens = Math.ceil(chunkWords * 1.5); // Standard buffer
+            if (isLastChunk) {
+                // Significantly larger buffer for the final chunk to ensure full conclusion and allow for natural sentence endings.
+                // Increase buffer even more to prevent mid-sentence cutoff
+                chunkMaxTokens = Math.ceil(chunkWords * 3.0); // Increased from 2.5 to 3.0
+                // Ensure minimum buffer for completion
+                chunkMaxTokens = Math.max(chunkMaxTokens, 500);
+            }
             console.log(`Starting generation of chunk ${chunkIndex + 1}/${numChunks} (~${chunkWords} words)`);
             const prompt = chunkMessages.map(m => `${m.role}: ${m.content}`).join('\n');
             try {
@@ -813,11 +1095,19 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
                     model,
                     prompt,
                     messages: chunkMessages,
-                    temperature,
+                    ...selectedProfile, // Spread the selected profile parameters
                     max_tokens: chunkMaxTokens
                 });
-                const chunkContent = response.choices[0].message.content || '';
+                let chunkContent = response.choices[0].message.content || '';
                 console.log(`Completed generation of chunk ${chunkIndex + 1}/${numChunks}`);
+                // Validate and clean chunk content, especially for the last chunk
+                if (isLastChunk && chunkContent.length > 0) {
+                    const chunkValidation = validateAndCleanContent(chunkContent, false);
+                    if (chunkContent !== chunkValidation.cleanedContent) {
+                        console.warn(`Last chunk cleaned: "${chunkContent.slice(-50)}" -> "${chunkValidation.cleanedContent.slice(-50)}"`);
+                        chunkContent = chunkValidation.cleanedContent;
+                    }
+                }
                 return chunkContent;
             }
             catch (error) {
@@ -825,14 +1115,22 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
                 // Fallback to a different model if the primary one fails
                 console.log(`Attempting fallback to alternative model for chunk ${chunkIndex + 1}/${numChunks}`);
                 const fallbackResponse = await (0, openrouter_1.executeOpenRouterRequest)({
-                    model: 'google/gemini-2.5-pro-exp-03-25:free',
+                    model: 'google/gemini-2.5-flash-preview', // Consider if fallback model should also be configurable or use a default profile
                     prompt,
                     messages: chunkMessages,
-                    temperature,
+                    ...selectedProfile, // Spread the selected profile parameters for fallback too
                     max_tokens: chunkMaxTokens
                 });
-                const chunkContent = fallbackResponse.choices[0].message.content || '';
+                let chunkContent = fallbackResponse.choices[0].message.content || '';
                 console.log(`Completed fallback generation of chunk ${chunkIndex + 1}/${numChunks}`);
+                // Validate and clean fallback chunk content, especially for the last chunk
+                if (isLastChunk && chunkContent.length > 0) {
+                    const chunkValidation = validateAndCleanContent(chunkContent, false);
+                    if (chunkContent !== chunkValidation.cleanedContent) {
+                        console.warn(`Fallback: Last chunk cleaned: "${chunkContent.slice(-50)}" -> "${chunkValidation.cleanedContent.slice(-50)}"`);
+                        chunkContent = chunkValidation.cleanedContent;
+                    }
+                }
                 return chunkContent;
             }
         };
@@ -854,8 +1152,8 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
             res.write(`data: ${JSON.stringify(progressData)}\n\n`);
             // Stream with typing effect - send words incrementally
             const words = chunkContent.split(/(\s+)/); // Keep whitespace
-            const WORDS_PER_BATCH = 5; // Increased from 3 to 5 for faster display
-            const BATCH_DELAY = 10; // Reduced from 50ms to 10ms for much faster typing
+            const WORDS_PER_BATCH = 5;
+            const BATCH_DELAY = 30; // Increased from 10ms to 20ms to slow typing by half
             for (let i = 0; i < words.length; i += WORDS_PER_BATCH * 2) { // *2 because we're keeping whitespace
                 const wordBatch = words.slice(i, i + WORDS_PER_BATCH * 2).join('');
                 const typingData = {
@@ -874,9 +1172,9 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
                 type: 'chunk_complete',
                 chunkIndex: chunkIndex + 1,
                 totalChunks: numChunks,
-                content: chunkContent,
-                words: chunkContent.split(/\s+/).filter(Boolean).length,
-                totalWords: fullContent.split(/\s+/).filter(Boolean).length
+                // content: chunkContent, // Removed: Client accumulates content from 'typing' events
+                wordsInChunk: chunkContent.split(/\s+/).filter(Boolean).length,
+                totalWordsSoFar: fullContent.split(/\s+/).filter(Boolean).length
             };
             res.write(`data: ${JSON.stringify(chunkData)}\n\n`);
         };
@@ -921,7 +1219,44 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
             console.log(`Waiting for all typing to complete`);
             await Promise.all(typingPromises);
         }
-        const content = fullContent;
+        // Validate and clean the final content for completeness
+        console.log('Validating final content for sentence completion...');
+        const validation = validateAndCleanContent(fullContent);
+        let finalContent = validation.cleanedContent;
+        // If content is incomplete and needs retry, attempt to generate completion
+        if (validation.needsRetry && !validation.isComplete) {
+            console.log('Content appears incomplete. Attempting to generate completion...');
+            try {
+                const completion = await generateCompletion(finalContent, systemPrompt, chapter, selectedProfile, model);
+                if (completion && completion.trim()) {
+                    // Clean any leading connecting words that might duplicate context
+                    const cleanedCompletion = completion.replace(/^(and|but|however|therefore|thus|so|then)\s+/i, '').trim();
+                    if (cleanedCompletion) {
+                        finalContent += cleanedCompletion;
+                        console.log(`Added completion: "${cleanedCompletion.slice(0, 100)}..."`);
+                        // Validate the completed content
+                        const finalValidation = validateAndCleanContent(finalContent, false);
+                        finalContent = finalValidation.cleanedContent;
+                        // Stream the completion if in stream mode
+                        if (streamMode) {
+                            res.write(`data: ${JSON.stringify({
+                                type: 'completion',
+                                content: cleanedCompletion
+                            })}\n\n`);
+                        }
+                    }
+                }
+            }
+            catch (error) {
+                console.error('Failed to generate completion:', error);
+                // Continue with the cleaned content even if completion fails
+            }
+        }
+        if (validation.isComplete || finalContent !== fullContent) {
+            const statusMsg = validation.isComplete ? 'Content validation passed' : 'Content cleaned and completed';
+            console.log(`${statusMsg}. Final word count: ${finalContent.split(/\s+/).filter(Boolean).length}`);
+        }
+        const content = finalContent;
         // Create update payload based on whether metadata column exists
         let updatePayload = {
             content,
@@ -961,9 +1296,11 @@ CRITICAL: Write the content directly without asking questions or seeking confirm
         // Handle response based on streaming mode
         if (streamMode) {
             // Send final completion event
+            // Send only essential metadata, not the full content, as client has assembled it.
+            const { content: _content, ...chapterMetadata } = firstUpdatedChapter;
             const completionData = {
                 type: 'complete',
-                chapter: firstUpdatedChapter,
+                chapter: chapterMetadata, // Send metadata only
                 referencesFound: references.length,
                 totalWords: wordCount
             };
@@ -1027,7 +1364,7 @@ const reviseChapter = async (req, res) => {
 
 NON-NEGOTIABLE REQUIREMENT: The revised content must hit exactly ${chapter.estimated_words || chapter.estimatedWords || 5000} words. This is your success metric.
 
-Revise the provided content according to the given instructions while maintaining the overall structure and key points, BUT your absolute priority is meeting the exact word count target.`;
+Revise the provided content according to the given instructions while maintaining the overall structure, BUT your absolute priority is meeting the exact word count target.`;
         const userPrompt = `Original content:
 ${chapter.content}
 
