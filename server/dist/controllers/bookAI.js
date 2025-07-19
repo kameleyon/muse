@@ -88,7 +88,7 @@ Format the output as a clean, professional bibliography that would appear at the
                 { role: 'user', content: referencesPrompt }
             ];
             const response = await (0, openrouter_1.executeOpenRouterRequest)({
-                model: 'google/gemini-2.0-flash-001',
+                model: 'google/gemini-2.5-flash',
                 prompt: referencesMessages.map(m => `${m.role}: ${m.content}`).join('\n'),
                 messages: referencesMessages,
                 temperature: 0.3,
@@ -194,7 +194,7 @@ Format the output in clear markdown with proper headings and structure. Make all
                 { role: 'user', content: appendixPrompt }
             ];
             const response = await (0, openrouter_1.executeOpenRouterRequest)({
-                model: 'google/gemini-2.0-flash-001',
+                model: 'google/gemini-2.5-flash',
                 prompt: appendixMessages.map(m => `${m.role}: ${m.content}`).join('\n'),
                 messages: appendixMessages,
                 temperature: 0.7,
@@ -414,7 +414,7 @@ You must respond with ONLY valid JSON in this exact format:
             { role: 'user', content: userPrompt }
         ];
         // Use the configured research model from config
-        const model = config_1.default.openRouter.defaultResearchModel || 'google/gemini-2.0-flash-001';
+        const model = config_1.default.openRouter.defaultResearchModel || 'google/gemini-2.5-flash';
         console.log(`Generating market research for topic: ${topic} using model: ${model}`);
         const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
         const completion = await (0, openrouter_1.executeOpenRouterRequest)({
@@ -904,7 +904,7 @@ Begin your research now.`;
         ];
         console.log('Step 1: Gathering supporting research data...');
         // Use the configured research model for search
-        const searchModel = config_1.default.openRouter.defaultResearchModel || 'google/gemini-2.0-flash-001';
+        const searchModel = config_1.default.openRouter.defaultResearchModel || 'google/gemini-2.5-flash';
         console.log(`Using search model: ${searchModel} for research data gathering`);
         const searchResponse = await (0, openrouter_1.executeOpenRouterRequest)({
             model: searchModel,

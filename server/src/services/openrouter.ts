@@ -3,7 +3,7 @@ import config from '../config';
 import logger from '../utils/logger';
 
 interface OpenRouterRequestParams {
-  prompt: string;
+  prompt?: string;
   model: string;
   max_tokens?: number;
   temperature?: number;

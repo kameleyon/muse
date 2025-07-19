@@ -22,6 +22,8 @@ import { cn } from '../../../lib/utils'
 import { bookService } from '../../../lib/books'
 import MarkdownEditor from '../../MarkdownEditor'
 import TypingContentDisplay from '../../TypingContentDisplay'
+import QualityScore from '../../quality/QualityScore'
+import api from '../../../utils/api'
 import type { Book, Chapter, BookStructure } from '../../../types/books'
 
 type EditableSectionType =
@@ -68,6 +70,9 @@ const BookEditorPage: React.FC = () => {
     estimatedTotalWords: number;
   } | null>(null);
   const [typingContent, setTypingContent] = useState('');
+  const [qualityScore, setQualityScore] = useState<number | null>(null);
+  const [qualityLastCheck, setQualityLastCheck] = useState<string | null>(null);
+  const [qualityLoading, setQualityLoading] = useState(false);
 
 
   const loadBookAndStructure = useCallback(async () => {
@@ -118,11 +123,58 @@ const BookEditorPage: React.FC = () => {
     if (selectedSection) {
       setCurrentContent(selectedSection.content || '');
       setActiveSectionTypeForEditor(selectedSection.type);
+      
+      // Load quality score for chapters
+      if (selectedSection.type === 'chapter' && selectedSection.metadata) {
+        const metadata = selectedSection.metadata as any;
+        if (metadata.qualityScore) {
+          setQualityScore(metadata.qualityScore);
+          setQualityLastCheck(metadata.lastQualityCheck || null);
+        } else {
+          setQualityScore(null);
+          setQualityLastCheck(null);
+        }
+      } else {
+        setQualityScore(null);
+        setQualityLastCheck(null);
+      }
     } else {
       setCurrentContent('');
       setActiveSectionTypeForEditor(null);
+      setQualityScore(null);
+      setQualityLastCheck(null);
     }
   }, [selectedSection]);
+
+  const handleAnalyzeQuality = async () => {
+    if (!selectedSection || selectedSection.type !== 'chapter') return;
+    
+    setQualityLoading(true);
+    try {
+      const response = await api.post('/api/quality/analyze-chapter', {
+        chapterId: selectedSection.id
+      });
+      
+      const { qualityMetrics } = response.data;
+      setQualityScore(qualityMetrics.overallScore);
+      setQualityLastCheck(qualityMetrics.timestamp);
+      
+      // Update metadata
+      setSelectedSection(prev => prev ? {
+        ...prev,
+        metadata: {
+          ...prev.metadata,
+          qualityScore: qualityMetrics.overallScore,
+          lastQualityCheck: qualityMetrics.timestamp
+        }
+      } : null);
+    } catch (error) {
+      console.error('Failed to analyze quality:', error);
+      setError('Failed to analyze content quality');
+    } finally {
+      setQualityLoading(false);
+    }
+  };
 
   const handleGenerateContent = async () => {
     if (!selectedSection) return;
@@ -595,6 +647,19 @@ const BookEditorPage: React.FC = () => {
                                 {topic}
                               </span>
                             ))}
+                          </div>
+                        )}
+                        
+                        {/* Quality Score Component */}
+                        {currentContent && currentContent.trim().length > 100 && (
+                          <div className="mt-4">
+                            <QualityScore
+                              score={qualityScore || 0}
+                              lastCheck={qualityLastCheck || undefined}
+                              chapterId={selectedSection.id}
+                              onRefresh={handleAnalyzeQuality}
+                              isLoading={qualityLoading}
+                            />
                           </div>
                         )}
                       </>

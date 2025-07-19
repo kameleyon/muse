@@ -7,16 +7,45 @@ import config from '../config';
 function extractReferencesFromContent(content: string): string[] {
   const references: string[] = [];
   
-  // Extract citations in format (Source Name, Year)
-  const citationRegex = /\(([^,]+),\s*(\d{4})\)/g;
+  // Extract citations in multiple formats
+  // Format 1: (Source Name, Year)
+  const citationRegex1 = /\(([^,]+),\s*(\d{4})\)/g;
+  // Format 2: Source Name (Year)
+  const citationRegex2 = /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+\((\d{4})\)/g;
+  // Format 3: According to/Based on/Research by... patterns
+  const citationRegex3 = /(?:According to|Based on|Research by|Study by|Report by)\s+([^,]+?)\s*\((\d{4})\)/gi;
+  
   let match;
   
-  while ((match = citationRegex.exec(content)) !== null) {
+  // Extract format 1
+  while ((match = citationRegex1.exec(content)) !== null) {
     const sourceName = match[1].trim();
     const year = match[2];
     const reference = `${sourceName} (${year})`;
     
-    if (!references.includes(reference)) {
+    if (!references.includes(reference) && sourceName.length > 3) {
+      references.push(reference);
+    }
+  }
+  
+  // Extract format 2
+  while ((match = citationRegex2.exec(content)) !== null) {
+    const sourceName = match[1].trim();
+    const year = match[2];
+    const reference = `${sourceName} (${year})`;
+    
+    if (!references.includes(reference) && sourceName.length > 3) {
+      references.push(reference);
+    }
+  }
+  
+  // Extract format 3
+  while ((match = citationRegex3.exec(content)) !== null) {
+    const sourceName = match[1].trim();
+    const year = match[2];
+    const reference = `${sourceName} (${year})`;
+    
+    if (!references.includes(reference) && sourceName.length > 3) {
       references.push(reference);
     }
   }
@@ -26,6 +55,8 @@ function extractReferencesFromContent(content: string): string[] {
 
 // Helper function to update book's centralized references
 async function updateBookReferences(bookId: string, newReferences: string[]): Promise<void> {
+  console.log(`[updateBookReferences] Starting for book ${bookId} with ${newReferences.length} new references`);
+  
   try {
     // Get current book structure and metadata
     const { data: book, error: bookError } = await supabaseAdmin
@@ -34,10 +65,12 @@ async function updateBookReferences(bookId: string, newReferences: string[]): Pr
       .eq('id', bookId)
       .single();
     
-    if (bookError) {
+    if (bookError || !book) {
       console.error('Error fetching book for references update:', bookError);
-      return;
+      throw new Error(`Failed to fetch book ${bookId} for references update`);
     }
+    
+    console.log(`[updateBookReferences] Current structure has references: ${!!book.structure?.references}`);
     
     const currentStructure = book.structure || {};
     const currentReferences = currentStructure.references || '';
@@ -51,19 +84,11 @@ async function updateBookReferences(bookId: string, newReferences: string[]): Pr
       }
     });
     
-    // Only generate formatted references if we have enough references (at least 5)
-    if (allRawRefs.length < 5) {
-      console.log('Not enough references to generate formatted bibliography yet');
-      const updatedStructure = {
-        ...currentStructure,
-        rawReferences: allRawRefs,
-        references: allRawRefs.sort().join('\n')
-      };
-      
-      await supabaseAdmin
-        .from('books')
-        .update({ structure: updatedStructure })
-        .eq('id', bookId);
+    console.log(`[updateBookReferences] Total raw references: ${allRawRefs.length}`);
+    
+    // Only proceed if we have references to format
+    if (allRawRefs.length === 0) {
+      console.log('[updateBookReferences] No references to format yet');
       return;
     }
     
@@ -97,13 +122,17 @@ Format the output as a clean, professional bibliography that would appear at the
       ];
 
       const response = await executeOpenRouterRequest({
-        model: 'google/gemini-2.0-flash-001',
+        model: 'openai/gpt-4o-search-preview',
         messages: referencesMessages,
         temperature: 0.3,
         max_tokens: 3000
       });
 
-      const formattedReferences = response.choices[0].message.content || allRawRefs.sort().join('\n');
+      const aiContent = response.choices[0].message.content;
+      if (!aiContent || aiContent.trim() === '') {
+        throw new Error('AI failed to generate references content - no fallback available');
+      }
+      const formattedReferences = aiContent;
 
       // Update book structure with formatted references
       const updatedStructure = {
@@ -124,25 +153,60 @@ Format the output as a clean, professional bibliography that would appear at the
       }
     } catch (aiError) {
       console.error('Error generating formatted references:', aiError);
-      // Fallback to simple sorted list if AI formatting fails
-      const updatedStructure = {
-        ...currentStructure,
-        rawReferences: allRawRefs,
-        references: allRawRefs.sort().join('\n')
-      };
-      
-      await supabaseAdmin
-        .from('books')
-        .update({ structure: updatedStructure })
-        .eq('id', bookId);
+      // No fallback - if AI fails, throw the error
+      throw aiError;
     }
   } catch (error) {
     console.error('Error in updateBookReferences:', error);
+    throw error;
   }
+}
+
+// Helper function to extract keywords from content
+function extractKeywordsFromContent(content: string): string[] {
+  const keywords = new Set<string>();
+  
+  // Remove markdown formatting
+  const cleanContent = content
+    .replace(/#{1,6}\s/g, '') // Remove headers
+    .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold
+    .replace(/\*([^*]+)\*/g, '$1') // Remove italic
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links
+    .replace(/`([^`]+)`/g, '$1'); // Remove inline code
+  
+  // Extract capitalized terms (likely important concepts)
+  const capitalizedTerms = cleanContent.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g) || [];
+  capitalizedTerms.forEach(term => {
+    // Filter out common words and very short terms
+    if (term.length > 3 && !['The', 'This', 'That', 'These', 'Those', 'What', 'When', 'Where', 'Who', 'Why', 'How'].includes(term)) {
+      keywords.add(term);
+    }
+  });
+  
+  // Extract terms in quotes (often definitions or important concepts)
+  const quotedTerms = cleanContent.match(/"([^"]+)"/g) || [];
+  quotedTerms.forEach(term => {
+    const cleaned = term.replace(/"/g, '').trim();
+    if (cleaned.length > 3 && cleaned.split(' ').length <= 4) {
+      keywords.add(cleaned);
+    }
+  });
+  
+  // Extract technical terms (containing hyphens or special patterns)
+  const technicalTerms = cleanContent.match(/\b[a-zA-Z]+(?:-[a-zA-Z]+)+\b/g) || [];
+  technicalTerms.forEach(term => {
+    if (term.length > 3) {
+      keywords.add(term);
+    }
+  });
+  
+  return Array.from(keywords).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 }
 
 // Helper function to auto-generate appendix content
 async function updateBookAppendix(bookId: string, chapterContent: string): Promise<void> {
+  console.log(`[updateBookAppendix] Starting for book ${bookId}`);
+  
   try {
     // Get current book structure and all chapters
     const { data: book, error: bookError } = await supabaseAdmin
@@ -151,10 +215,12 @@ async function updateBookAppendix(bookId: string, chapterContent: string): Promi
       .eq('id', bookId)
       .single();
     
-    if (bookError) {
+    if (bookError || !book) {
       console.error('Error fetching book for appendix update:', bookError);
-      return;
+      throw new Error(`Failed to fetch book ${bookId} for appendix update`);
     }
+
+    console.log(`[updateBookAppendix] Current structure has appendix: ${!!book.structure?.appendix}`);
 
     const { data: chapters, error: chaptersError } = await supabaseAdmin
       .from('chapters')
@@ -164,68 +230,105 @@ async function updateBookAppendix(bookId: string, chapterContent: string): Promi
 
     if (chaptersError) {
       console.error('Error fetching chapters for appendix:', chaptersError);
-      return;
+      // Don't return, continue with appendix generation
     }
 
-    // Only generate appendix if we have substantial content (at least 5 chapters)
-    if (!chapters || chapters.length < 5) {
-      console.log('Not enough chapters to generate appendix yet');
-      return;
-    }
+    console.log(`[updateBookAppendix] Found ${chapters?.length || 0} chapters with content`);
 
-    // Extract concepts and tools from all chapter content
+    // Extract all content and keywords
     const allContent = chapters?.map(ch => ch.content).join('\n\n') || '';
-    const chapterTitles = chapters?.map(ch => ch.title).join(', ') || '';
-
-    // Generate AI-powered appendix content
-    const appendixPrompt = `You are creating a comprehensive appendix for a book titled "${book.title}" about ${book.topic}. 
+    const allKeywords = extractKeywordsFromContent(allContent);
     
+    console.log(`[updateBookAppendix] Extracted ${allKeywords.length} keywords`);
+
+    // Always generate appendix, even if no chapters yet
+    if (!book.structure?.appendix || (chapters && chapters.length > 0)) {
+      console.log('[updateBookAppendix] Generating appendix content');
+
+      const chapterTitles = chapters?.map(ch => ch.title).join(', ') || '';
+
+      // Generate AI-powered appendix content with keyword index
+      let appendixContent = `# Appendix\n\n`;
+      
+      // Add keyword index if we have keywords
+      if (allKeywords.length > 0) {
+        appendixContent += `## Keyword Index\n\n`;
+        appendixContent += `*Key terms and concepts from this book, listed alphabetically:*\n\n`;
+        
+        // Group keywords by first letter
+        const keywordsByLetter: { [key: string]: string[] } = {};
+        allKeywords.forEach(keyword => {
+          const firstLetter = keyword[0].toUpperCase();
+          if (!keywordsByLetter[firstLetter]) {
+            keywordsByLetter[firstLetter] = [];
+          }
+          keywordsByLetter[firstLetter].push(keyword);
+        });
+        
+        // Create alphabetical index
+        Object.keys(keywordsByLetter).sort().forEach(letter => {
+          appendixContent += `### ${letter}\n`;
+          keywordsByLetter[letter].forEach(keyword => {
+            appendixContent += `- ${keyword}\n`;
+          });
+          appendixContent += `\n`;
+        });
+      }
+      
+      // Generate additional appendix content
+      const appendixPrompt = `You are creating additional appendix sections for a book titled "${book.title}" about ${book.topic}.
+     
 The book covers these chapters: ${chapterTitles}
 
-Based on the actual content of the book, generate detailed appendix sections. Make the content specific to the book's topic and directly reference concepts, methods, and strategies discussed in the chapters.
+${allKeywords.length > 0 ? `Key terms already indexed: ${allKeywords.slice(0, 20).join(', ')}${allKeywords.length > 20 ? '...' : ''}` : ''}
 
-Create the following sections with ACTUAL, DETAILED content (not placeholder lists):
+Based on the actual content of the book, generate the following appendix sections with ACTUAL, DETAILED content (not placeholder lists):
 
-**A. Tools and Templates**
-Create 8-10 specific, practical tools/templates that readers can use to implement the book's concepts. Each tool should have a brief description of how to use it.
+**Tools and Templates**
+Create 5-7 specific, practical tools/templates that readers can use to implement the book's concepts. Each tool should have a brief description of how to use it.
 
-**B. Frameworks and Methods Reference**
-Provide detailed summaries of 5-6 key frameworks, methods, or processes discussed in the book. Include step-by-step implementation guides.
+**Quick Reference Guide**
+Create a condensed reference guide with key formulas, checklists, or decision trees from the book.
 
-**C. Additional Resources**
-List 15-20 specific, real resources (books, websites, organizations, apps) relevant to ${book.topic}. Group them by category and include brief descriptions.
+**Additional Resources**
+List 10-15 specific, real resources (books, websites, organizations, apps) relevant to ${book.topic}. Group them by category and include brief descriptions.
 
-**D. Frequently Asked Questions**
-Create 10-12 detailed Q&A pairs addressing common concerns and challenges readers might face when implementing the book's teachings. Provide comprehensive answers.
+**Glossary**
+Define 15-20 important terms specific to ${book.topic} that readers might need clarification on.
 
-**E. Quick Reference Guide**
-Create a condensed reference guide with key concepts, formulas, checklists, or decision trees from the book.
-
-Format the output in clear markdown with proper headings and structure. Make all content specific and actionable, not generic placeholders.`;
+Format the output in clear markdown with proper headings. Make all content specific and actionable, not generic placeholders.`;
 
     try {
       const appendixMessages = [
-        { 
-          role: 'system', 
+        {
+          role: 'system',
           content: 'You are an expert content creator specializing in creating comprehensive, practical appendices for non-fiction books. Your appendices are known for being highly useful and specific to the book content.'
         },
         { role: 'user', content: appendixPrompt }
       ];
 
       const response = await executeOpenRouterRequest({
-        model: 'google/gemini-2.0-flash-001',
+        model: 'google/gemini-2.5-flash',
         messages: appendixMessages,
         temperature: 0.7,
         max_tokens: 4000
       });
 
-      const generatedAppendix = response.choices[0].message.content || '';
+      const aiContent = response.choices[0].message.content;
+      if (!aiContent || aiContent.trim() === '') {
+        throw new Error('AI failed to generate appendix content - no fallback available');
+      }
+      const generatedSections = aiContent;
+      
+      // Combine keyword index with generated sections
+      appendixContent += `\n${generatedSections}`;
 
       // Update book structure with generated appendix
       const currentStructure = book.structure || {};
       const updatedStructure = {
         ...currentStructure,
-        appendix: generatedAppendix
+        appendix: appendixContent,
+        keywords: allKeywords // Store keywords separately for reference
       };
 
       const { error: updateError } = await supabaseAdmin
@@ -236,39 +339,14 @@ Format the output in clear markdown with proper headings and structure. Make all
       if (updateError) {
         console.error('Error updating book appendix:', updateError);
       } else {
-        console.log(`Updated appendix for book ${bookId} with AI-generated content`);
+        console.log(`Updated appendix for book ${bookId} with keyword index and AI-generated content`);
       }
     } catch (aiError) {
       console.error('Error generating AI appendix content:', aiError);
-      // Fallback to basic appendix structure if AI generation fails
-      const fallbackAppendix = `**Appendix**
-
-**A. Tools and Templates**
-[Tools and templates specific to ${book.topic} will be added here based on chapter content]
-
-**B. Frameworks and Methods Reference**  
-[Key frameworks and methods from the book will be summarized here]
-
-**C. Additional Resources**
-[Curated resources for further learning about ${book.topic}]
-
-**D. Frequently Asked Questions**
-[Common questions about implementing the concepts in this book]
-
-**E. Quick Reference Guide**
-[Key takeaways and action items from each chapter]`;
-
-      const currentStructure = book.structure || {};
-      const updatedStructure = {
-        ...currentStructure,
-        appendix: fallbackAppendix
-      };
-
-      await supabaseAdmin
-        .from('books')
-        .update({ structure: updatedStructure })
-        .eq('id', bookId);
+      // No fallback - if AI fails, throw the error
+      throw aiError;
     }
+    } // Close the if statement that started at line 237
   } catch (error) {
     console.error('Error in updateBookAppendix:', error);
   }
@@ -445,7 +523,7 @@ You must respond with ONLY valid JSON in this exact format:
     ];
 
     // Use the configured research model from config
-    const model = config.openRouter.defaultResearchModel || 'google/gemini-2.0-flash-001';
+    const model = config.openRouter.defaultResearchModel || 'openai/gpt-4o-search-preview';
     
     console.log(`Generating market research for topic: ${topic} using model: ${model}`);
     const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
@@ -464,6 +542,23 @@ You must respond with ONLY valid JSON in this exact format:
     res.status(500).json({ error: error.message || 'Failed to generate market research' });
   }
 };
+
+// Helper function to initialize book references and appendix
+async function initializeBookExtras(bookId: string, bookStructure: any): Promise<void> {
+  console.log(`[initializeBookExtras] Initializing references and appendix for book ${bookId}`);
+  
+  try {
+    // Initialize references with placeholder
+    await updateBookReferences(bookId, []);
+    
+    // Initialize appendix
+    await updateBookAppendix(bookId, '');
+    
+    console.log(`[initializeBookExtras] Successfully initialized extras for book ${bookId}`);
+  } catch (error) {
+    console.error(`[initializeBookExtras] Failed to initialize extras for book ${bookId}:`, error);
+  }
+}
 
 export const generateBookStructure = async (req: Request, res: Response) => {
   try {
@@ -583,6 +678,13 @@ You must respond with ONLY valid JSON in this exact format:
     
     // Try to clean and parse the JSON response
     const structure = cleanJsonResponse(rawResponse);
+    
+    // Initialize references and appendix for the book if we have bookId in request
+    if (req.body.bookId) {
+      console.log(`Initializing references and appendix for book ${req.body.bookId}`);
+      await initializeBookExtras(req.body.bookId, structure);
+    }
+    
     res.json({ structure });
   } catch (error: any) {
     console.error('Error generating book structure:', error);
@@ -863,7 +965,20 @@ CRITICAL MISSION: Your primary objective is to write high-quality, coherent cont
 
 NEVER ASK QUESTIONS: Do not ask for confirmation, clarification, or permission to continue. Write the content directly without any meta-commentary about the writing process.
 
-
+**CRITICAL AI PATTERN AVOIDANCE - ABSOLUTELY FORBIDDEN PHRASES AND PATTERNS:**
+You MUST avoid ALL of these overused AI writing patterns:
+- NEVER start with: "picture this", "imagine", "let's dive", "buckle up", "welcome to", "have you ever wondered", "in this article", "are you looking to", "curious about"
+- FORBIDDEN transitions: "however,", "moreover,", "furthermore,", "additionally,", "on the other hand,", "with that said,", "in contrast,", "similarly,", "consequently,", "nevertheless,", "meanwhile,", "specifically,", "to illustrate,", "for instance,", "in particular,"
+- BANNED conclusions: "in conclusion,", "to sum up,", "in summary,", "ultimately,", "to wrap things up,", "the bottom line is,", "all things considered,"
+- NO meta-commentary: "as we've seen,", "moving forward,", "looking ahead,", "it's worth noting", "it's important to note", "it should be mentioned", "keep in mind that", "it's crucial to remember"
+- AVOID qualifiers: "generally speaking,", "in most cases,", "typically,", "often,", "usually,"
+- FORBIDDEN jargon: "leverage", "utilize", "implement", "facilitate", "optimize", "streamline", "robust", "game-changer", "revolutionary", "cutting-edge", "innovative", "strategic", "synergy", "best practices", "pain points"
+- BANNED metaphors: "journey", "path", "landscape", "navigate", "roadmap", "blueprint", "tapestry", "realm", "ecosystem", "horizon", "unlock", "transform your life", "gateway to", "bridge the gap", "pave the way"
+- NO listicles: "top X", "X essential tips", "X strategies", "X benefits", "X common mistakes"
+- AVOID questions: "but what does this mean?", "how can you apply this?", "why does this matter?"
+- FORBIDDEN adjectives: "amazing", "incredible", "stunning", "powerful", "effective", "essential", "critical", "crucial", "vital", "comprehensive", "extensive", "thorough"
+- BANNED transitions: "in technical terms", "in simpler terms", "step by step", "pros and cons", "faq", "beginner", "intermediate", "advanced", "problem-solution", "definition", "example", "application", "comparison", "technical term", "layperson"
+- NEVER use: "celestial", "mystical", "cosmic", "delve into"
 
 Write this chapter following these STRICT guidelines:
 
@@ -871,8 +986,8 @@ Write this chapter following these STRICT guidelines:
 1. Write at a ${book.marketResearch?.readingLevel || 'Standard (60-69)'} Flesch Reading Ease level (${book.marketResearch?.gradeLevel || '8th-9th grade'})
 2. Use ${book.structure?.tone || 'conversational'} tone with ${book.marketResearch?.sentenceLength || 'medium'} sentence lengths
 3. Vocabulary complexity: ${book.marketResearch?.vocabularyLevel || 'accessible but varied'}
-4. FORBIDDEN PHRASES: Never use "picture this", "imagine", "celestial", "buckle up", "let's dive in", "journey", "unlock", "transform your life", "game-changer", "revolutionary", "ultimate guide", "Picture this", "Let's dive", "mystical", or any other terms or expressions that known and unknown AI Jargon and makes the content not legit or unserious. NO EMOJI!
-5. AVOID: Starting sections with questions, excessive metaphors, emoji, exclamation points (max 1 per 1000 words)
+4. Write with direct, concrete language using natural transitions that flow from content
+5. Use specific examples instead of generic descriptions, active voice, and varied sentence structures
 6. DO: Vary sentence openings, use specific examples from ${book.marketResearch?.targetAudience?.dailyLife || 'everyday modern life'}, ground abstract concepts in concrete scenarios
 7. ABSOLUTELY FORBIDDEN: Never include "Key Points" sections, bullet point summaries, word count notifications, or any meta-commentary about the content structure
 
@@ -997,7 +1112,7 @@ Begin your research now.`;
 
     console.log('Step 1: Gathering supporting research data...');
     // Use the configured research model for search
-    const searchModel = config.openRouter.defaultResearchModel || 'google/gemini-2.0-flash-001';
+    const searchModel = config.openRouter.defaultResearchModel || 'openai/gpt-4o-search-preview';
     console.log(`Using search model: ${searchModel} for research data gathering`);
     
     const searchResponse = await executeOpenRouterRequest({
@@ -1020,8 +1135,12 @@ ${researchData}
 INTEGRATION INSTRUCTIONS:
 - Seamlessly integrate the research data into your chapter content
 - Include specific statistics, examples, and expert insights from the research
-- Add proper citations throughout the text in this format: (Source Name, Year)
-- Compile all sources into a "References" section at the end of the chapter
+- MANDATORY: Add AT LEAST 5-10 proper citations throughout the text in this format: (Source Name, Year)
+- CRITICAL: Every major claim, statistic, or expert insight MUST have a citation
+- Examples of good citations:
+  * "According to research by Harvard Business Review (2023), 67% of companies..."
+  * "This approach has been validated in multiple studies (McKinsey & Company, 2024)"
+  * "As noted by Dr. Jane Smith in her groundbreaking work (Smith, 2023)..."
 - Ensure all claims are backed by the provided research data
 - Use the research to strengthen your key points and examples
 
@@ -1029,8 +1148,9 @@ Write high-quality content that follows all the guidelines above while incorpora
 
 CHAPTER STRUCTURE REQUIREMENTS:
 - Do NOT include a "References" section at the end of the chapter
-- Include citations in-text using format: (Source Name, Year)
-- All references will be compiled automatically into the book's main References chapter
+- MANDATORY: Include AT LEAST 5-10 citations in-text using format: (Source Name, Year)
+- Citations are REQUIRED - chapters without citations will be considered incomplete
+- All references will be compiled automatically into the book's main References section
 
 
 `;
@@ -1041,53 +1161,23 @@ CHAPTER STRUCTURE REQUIREMENTS:
     ];
 
     // Use a more reliable model for chapter generation
-    const model = 'google/gemini-2.5-flash-preview';
+    const model = 'google/gemini-2.5-flash';
     
-    // Define parameter profiles for different tones
-    const creativeProfile = {
+    // Use the exact parameters specified by the user for ALL content generation
+    // Note: Google Gemini models have a max repetition_penalty of 2.0
+    const isGeminiModel = model.includes('gemini');
+    const generationParameters = {
       temperature: 0.9,
       top_p: 0.7,
-      repetition_penalty: 2.5, // Note: OpenRouter uses frequency_penalty and presence_penalty.
-                               // We might need to map this or use one of those if 'repetition_penalty' isn't directly supported by the chosen model via OpenRouter.
-                               // For now, we pass it as is. Some models might support it.
-      length_penalty: 1.0,
-      style_guidance: 0.7, // Custom param, might be ignored if not supported
-      text_guidance: 0.85, // Custom param, might be ignored if not supported
-      // frequency_penalty: 0.5, // Example if mapping repetition_penalty
-      // presence_penalty: 0.5,  // Example if mapping repetition_penalty
+      repetition_penalty: isGeminiModel ? 2.0 : 2.5, // Gemini max is 2.0
+      // Map repetition_penalty to frequency_penalty and presence_penalty for OpenRouter
+      frequency_penalty: 1.2, // Higher values reduce repetition
+      presence_penalty: 1.3,  // Higher values encourage topic diversity
     };
 
-    const academicProfile = {
-      temperature: 0.4,
-      top_p: 0.6,
-      repetition_penalty: 1.2,
-      length_penalty: 1.0,
-      style_guidance: 0.2,
-      text_guidance: 0.9,
-      // frequency_penalty: 0.1,
-      // presence_penalty: 0.1,
-    };
-
-    const defaultProfile = {
-      temperature: 0.8, // Default temperature
-      top_p: 1.0,       // Default top_p
-      // repetition_penalty, length_penalty, style_guidance, text_guidance will use OpenRouter defaults if not set
-    };
-
-    let selectedProfile = defaultProfile;
-    const tone = book.structure?.tone?.toLowerCase() || '';
-
-    if (tone.includes('creative') || tone.includes('inspirational')) {
-      selectedProfile = creativeProfile;
-      console.log('Using Creative generation profile.');
-    } else if (tone.includes('academic') || tone.includes('technical') || tone.includes('formal')) {
-      selectedProfile = academicProfile;
-      console.log('Using Academic generation profile.');
-    } else {
-      console.log('Using Default generation profile.');
-    }
+    console.log(`Using generation parameters for ${model}:`, JSON.stringify(generationParameters));
     
-    console.log(`Using model: ${model} with profile: ${JSON.stringify(selectedProfile)} for chapter generation`);
+    console.log(`Using model: ${model} with parameters: ${JSON.stringify(generationParameters)} for chapter generation`);
     
     // Configure chunked generation with overlapping - larger chunks for faster generation
     const WORDS_PER_CHUNK = 1250; // Generate in larger chunks to reduce the number of API calls
@@ -1209,7 +1299,7 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
           model,
           prompt,
           messages: chunkMessages,
-          ...selectedProfile, // Spread the selected profile parameters
+          ...generationParameters, // Use mandatory parameters
           max_tokens: chunkMaxTokens
         });
         
@@ -1230,10 +1320,10 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
         // Fallback to a different model if the primary one fails
         console.log(`Attempting fallback to alternative model for chunk ${chunkIndex + 1}/${numChunks}`);
         const fallbackResponse = await executeOpenRouterRequest({
-          model: 'google/gemini-2.5-flash-preview', // Consider if fallback model should also be configurable or use a default profile
+          model: 'google/gemini-2.5-flash', // Consider if fallback model should also be configurable or use a default profile
           prompt,
           messages: chunkMessages,
-          ...selectedProfile, // Spread the selected profile parameters for fallback too
+          ...generationParameters, // Use mandatory parameters for fallback too
           max_tokens: chunkMaxTokens
         });
         
@@ -1370,7 +1460,7 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
           finalContent,
           systemPrompt,
           chapter,
-          selectedProfile,
+          generationParameters,
           model
         );
         
@@ -1447,14 +1537,25 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
 
     // Extract references from the generated content
     const references = extractReferencesFromContent(content);
+    console.log(`Extracted ${references.length} references from chapter ${chapter.number}`);
     
-    // Update book's centralized references if any were found
-    if (references.length > 0) {
+    // Always update book's centralized references (even if empty, to trigger generation)
+    try {
       await updateBookReferences(chapter.book_id, references);
+      console.log(`Successfully updated book references for book ${chapter.book_id}`);
+    } catch (refError) {
+      console.error(`Failed to update references for book ${chapter.book_id}:`, refError);
+      // Continue execution even if references update fails
     }
 
-    // Auto-generate/update appendix content based on new chapter
-    await updateBookAppendix(chapter.book_id, content);
+    // Always auto-generate/update appendix content after each chapter
+    try {
+      await updateBookAppendix(chapter.book_id, content);
+      console.log(`Successfully updated book appendix for book ${chapter.book_id}`);
+    } catch (appError) {
+      console.error(`Failed to update appendix for book ${chapter.book_id}:`, appError);
+      // Continue execution even if appendix update fails
+    }
 
     // Handle response based on streaming mode
     if (streamMode) {

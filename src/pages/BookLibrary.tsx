@@ -688,7 +688,7 @@ const BookLibraryPage: React.FC = () => {
                             </span>
                             <span className="text-gray-700 font-semibold">{getProgressPercent(item)}%</span>
                           </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                          <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
                             <div
                               className="bg-gradient-to-r from-primary to-primary-hover rounded-full h-2 transition-all duration-500 ease-out"
                               style={{ width: `${getProgressPercent(item)}%` }}

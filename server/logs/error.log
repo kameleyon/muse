@@ -213,3 +213,32 @@
 2025-06-03 23:12:15 [error]: OpenRouter API error: 400 - {"error":{"message":"google/gemini-2.0-flash-thinking-exp:free is not a valid model ID","code":400},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
 2025-06-03 23:12:15 [error]: Request was for model: google/gemini-2.0-flash-thinking-exp:free
 2025-06-05 09:44:18 [error]: OpenRouter client error: Cannot read properties of undefined (reading 'total_tokens')
+2025-07-15 22:22:03 [error]: OpenRouter API request error: aborted
+2025-07-15 22:40:28 [error]: OpenRouter API error: 404 - {"error":{"message":"No endpoints found for google/gemini-2.5-flash-preview.","code":404},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-15 22:40:28 [error]: Request was for model: google/gemini-2.5-flash-preview
+2025-07-15 22:40:28 [error]: Model not found: google/gemini-2.5-flash-preview
+2025-07-15 22:40:28 [error]: OpenRouter API error: 404 - {"error":{"message":"No endpoints found for google/gemini-2.5-flash-preview.","code":404},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-15 22:40:28 [error]: Request was for model: google/gemini-2.5-flash-preview
+2025-07-15 22:40:28 [error]: Model not found: google/gemini-2.5-flash-preview
+2025-07-15 22:40:28 [error]: OpenRouter API error: 404 - {"error":{"message":"No endpoints found for google/gemini-2.5-flash-preview.","code":404},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-15 22:42:27 [error]: OpenRouter API error: 404 - {"error":{"message":"No endpoints found for google/gemini-2.5-flash-preview.","code":404},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-15 22:42:27 [error]: Request was for model: google/gemini-2.5-flash-preview
+2025-07-15 22:42:27 [error]: Model not found: google/gemini-2.5-flash-preview
+2025-07-15 22:42:27 [error]: OpenRouter API error: 404 - {"error":{"message":"No endpoints found for google/gemini-2.5-flash-preview.","code":404},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-15 22:42:27 [error]: Request was for model: google/gemini-2.5-flash-preview
+2025-07-15 22:42:27 [error]: Model not found: google/gemini-2.5-flash-preview
+2025-07-15 22:42:28 [error]: OpenRouter API error: 404 - {"error":{"message":"No endpoints found for google/gemini-2.5-flash-preview.","code":404},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-16 16:57:51 [error]: OpenRouter API error: 401 - {"error":{"message":"Provider returned error","code":401,"metadata":{"raw":"{\n    \"error\": {\n        \"message\": \"Incorrect API key provided: sk-proj-********************************************************************************************************************************************************MnIA. You can find your API key at https://platform.openai.com/account/api-keys.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"invalid_api_key\"\n    }\n}\n","provider_name":"OpenAI"}},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-16 16:57:51 [error]: Request was for model: openai/gpt-4o-search-preview
+2025-07-16 16:57:51 [error]: Authentication error - check API key validity and permissions
+2025-07-16 21:49:25 [error]: OpenRouter client error: Cannot read properties of undefined (reading 'total_tokens')
+2025-07-19 00:36:46 [error]: OpenRouter API error: 400 - {"error":{"message":"Expected repetition_penalty to be at most 2, received 2.5","code":400,"metadata":{"provider_name":null}}}
+2025-07-19 00:36:46 [error]: Request was for model: google/gemini-2.5-flash
+2025-07-19 00:36:46 [error]: OpenRouter API error: 400 - {"error":{"message":"Expected repetition_penalty to be at most 2, received 2.5","code":400,"metadata":{"provider_name":null}}}
+2025-07-19 00:36:46 [error]: Request was for model: google/gemini-2.5-flash
+2025-07-19 00:36:46 [error]: OpenRouter API error: 400 - {"error":{"message":"Expected repetition_penalty to be at most 2, received 2.5","code":400,"metadata":{"provider_name":null}}}
+2025-07-19 00:39:37 [error]: OpenRouter API error: 400 - {"error":{"message":"Expected repetition_penalty to be at most 2, received 2.5","code":400,"metadata":{"provider_name":null}}}
+2025-07-19 00:39:37 [error]: Request was for model: google/gemini-2.5-flash
+2025-07-19 00:39:37 [error]: OpenRouter API error: 400 - {"error":{"message":"Expected repetition_penalty to be at most 2, received 2.5","code":400,"metadata":{"provider_name":null}}}
+2025-07-19 00:39:37 [error]: Request was for model: google/gemini-2.5-flash
+2025-07-19 00:39:37 [error]: OpenRouter API error: 400 - {"error":{"message":"Expected repetition_penalty to be at most 2, received 2.5","code":400,"metadata":{"provider_name":null}}}
