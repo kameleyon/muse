@@ -1161,7 +1161,7 @@ CHAPTER STRUCTURE REQUIREMENTS:
     ];
 
     // Use a more reliable model for chapter generation
-    const model = 'google/gemini-2.5-flash';
+    const model = 'google/gemini-flash-1.5';
     
     // Use the exact parameters specified by the user for ALL content generation
     // Note: Google Gemini models have a max repetition_penalty of 2.0
@@ -1320,7 +1320,7 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
         // Fallback to a different model if the primary one fails
         console.log(`Attempting fallback to alternative model for chunk ${chunkIndex + 1}/${numChunks}`);
         const fallbackResponse = await executeOpenRouterRequest({
-          model: 'google/gemini-2.5-flash', // Consider if fallback model should also be configurable or use a default profile
+          model: 'openai/gpt-4o-search-preview', // Consider if fallback model should also be configurable or use a default profile
           prompt,
           messages: chunkMessages,
           ...generationParameters, // Use mandatory parameters for fallback too

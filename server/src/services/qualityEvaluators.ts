@@ -1,4 +1,5 @@
 import { executeOpenRouterRequest } from './openrouter';
+import { cleanJsonResponse } from '../utils/jsonUtils';
 
 interface BookContext {
   topic: string;
@@ -56,7 +57,7 @@ Respond with a JSON object:
 
   try {
     const response = await executeOpenRouterRequest({
-      model: 'google/gemini-2.0-flash-001',
+      model: 'openai/gpt-4o-search-preview',
       messages: [
         { role: 'system', content: 'You are an expert content analyst. Respond only with valid JSON.' },
         { role: 'user', content: prompt }
@@ -65,23 +66,26 @@ Respond with a JSON object:
       max_tokens: 500
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error('Empty response from OpenRouter for audience alignment');
+    }
+    const result = cleanJsonResponse(content);
+
+    if (typeof result.score !== 'number') {
+      throw new Error('Invalid score in response from OpenRouter for audience alignment');
+    }
+
     return {
-      score: result.score || 85,
+      score: result.score,
       maxScore: 100,
-      percentage: result.score || 85,
+      percentage: result.score,
       issues: result.issues || [],
-      highlights: result.highlights || ['Content aligns with target audience']
+      highlights: result.highlights || []
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error evaluating audience alignment:', error);
-    return {
-      score: 85,
-      maxScore: 100,
-      percentage: 85,
-      issues: [],
-      highlights: ['Content appears aligned with target audience']
-    };
+    throw new Error(`Failed to evaluate audience alignment: ${error.message}`);
   }
 }
 
@@ -145,7 +149,7 @@ Respond with JSON:
 
   try {
     const response = await executeOpenRouterRequest({
-      model: 'google/gemini-2.0-flash-001',
+      model: 'openai/gpt-4o-search-preview',
       messages: [
         { role: 'system', content: 'You are a professional editor. Respond only with valid JSON.' },
         { role: 'user', content: prompt }
@@ -154,8 +158,16 @@ Respond with JSON:
       max_tokens: 500
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
-    const score = Math.max(0, 100 - (result.errorCount || 0) * 5);
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error('Empty response from OpenRouter for correctness');
+    }
+    const result = cleanJsonResponse(content);
+
+    if (typeof result.errorCount !== 'number') {
+      throw new Error('Invalid errorCount in response from OpenRouter for correctness');
+    }
+    const score = Math.max(0, 100 - result.errorCount * 5);
 
     return {
       score,
@@ -164,15 +176,9 @@ Respond with JSON:
       issues: result.errors?.slice(0, 3) || [],
       highlights: score > 90 ? ['Excellent grammar and spelling'] : ['Good grammar and spelling']
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error evaluating correctness:', error);
-    return {
-      score: 90,
-      maxScore: 100,
-      percentage: 90,
-      issues: [],
-      highlights: ['Grammar appears correct']
-    };
+    throw new Error(`Failed to evaluate correctness: ${error.message}`);
   }
 }
 
@@ -324,7 +330,7 @@ Respond with JSON:
 
   try {
     const response = await executeOpenRouterRequest({
-      model: 'google/gemini-2.0-flash-001',
+      model: 'openai/gpt-4o-search-preview',
       messages: [
         { role: 'system', content: 'You are a fact-checker with expertise in various domains. Respond only with valid JSON.' },
         { role: 'user', content: prompt }
@@ -333,27 +339,30 @@ Respond with JSON:
       max_tokens: 500
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error('Empty response from OpenRouter for factual accuracy');
+    }
+    const result = cleanJsonResponse(content);
+
+    if (typeof result.score !== 'number') {
+      throw new Error('Invalid score in response from OpenRouter for factual accuracy');
+    }
+
     const issues = [
       ...((result.factualErrors || []).map((e: string) => `Factual error: ${e}`)),
       ...((result.unsupportedClaims || []).map((c: string) => `Unsupported: ${c}`))
     ];
 
     return {
-      score: result.score || 90,
+      score: result.score,
       maxScore: 100,
-      percentage: result.score || 90,
+      percentage: result.score,
       issues: issues.slice(0, 3),
       highlights: result.score > 95 ? ['All facts appear accurate'] : ['Facts appear mostly accurate']
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error evaluating factual accuracy:', error);
-    return {
-      score: 90,
-      maxScore: 100,
-      percentage: 90,
-      issues: [],
-      highlights: ['Content appears factually sound']
-    };
+    throw new Error(`Failed to evaluate factual accuracy: ${error.message}`);
   }
 }

@@ -35,21 +35,38 @@ export async function calculateQualityScore(
   const repetitions = detectRepetitions(content);
   const aiPatterns = detectAIPatterns(content);
   
-  // Initialize breakdown with all criteria
+  const createErrorScore = (error: any) => ({
+    score: 0,
+    maxScore: 100,
+    percentage: 0,
+    issues: ['Evaluation failed', error.message],
+    highlights: [],
+  });
+
+  const evaluationPromises = {
+    audienceAlignment: evaluateAudienceAlignment(content, bookContext, contentAnalysis).catch(createErrorScore),
+    correctness: evaluateCorrectness(content).catch(createErrorScore),
+    factualAccuracy: evaluateFactualAccuracy(content, bookContext).catch(createErrorScore),
+    accuracy: evaluateAccuracy(content, bookContext, chapterContext).catch(createErrorScore),
+    purposeAlignment: evaluatePurposeAlignment(content, bookContext, chapterContext).catch(createErrorScore),
+  };
+
+  const evaluatedScores = await Promise.all(Object.values(evaluationPromises));
+  
   const breakdown: QualityMetrics['breakdown'] = {
-    audienceAlignment: await evaluateAudienceAlignment(content, bookContext, contentAnalysis),
+    audienceAlignment: evaluatedScores[0],
     readability: evaluateReadability(contentAnalysis, bookContext),
-    accuracy: await evaluateAccuracy(content, bookContext, chapterContext),
+    accuracy: evaluatedScores[3],
     engagement: evaluateEngagement(content, contentAnalysis),
-    correctness: await evaluateCorrectness(content),
+    correctness: evaluatedScores[1],
     styleGuide: evaluateStyleGuide(content, bookContext),
     delivery: evaluateDelivery(content, contentAnalysis),
     originality: evaluateOriginality(aiPatterns),
     repetition: evaluateRepetition(repetitions, contentAnalysis),
     vocabulary: evaluateVocabulary(contentAnalysis, bookContext),
     aiPatterns: evaluateAIPatterns(aiPatterns),
-    purposeAlignment: await evaluatePurposeAlignment(content, bookContext, chapterContext),
-    factualAccuracy: await evaluateFactualAccuracy(content, bookContext)
+    purposeAlignment: evaluatedScores[4],
+    factualAccuracy: evaluatedScores[2],
   };
   
   // Calculate overall score (weighted average)
