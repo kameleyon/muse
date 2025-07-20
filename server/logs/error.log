@@ -271,3 +271,24 @@
 2025-07-19 20:52:45 [error]: OpenRouter API error: 429 - {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"google/gemini-2.0-flash-exp:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Google AI Studio"}},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
 2025-07-19 20:52:45 [error]: Request was for model: google/gemini-2.0-flash-exp:free
 2025-07-19 20:52:45 [error]: Rate limit exceeded
+2025-07-19 22:06:21 [error]: OpenRouter API error: 429 - {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"google/gemini-2.0-flash-exp:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Google AI Studio"}},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-19 22:06:21 [error]: Request was for model: google/gemini-2.0-flash-exp:free
+2025-07-19 22:06:21 [error]: Rate limit exceeded
+2025-07-19 22:06:26 [error]: OpenRouter API error: 429 - {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"google/gemini-2.0-flash-exp:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Google AI Studio"}},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-19 22:06:26 [error]: Request was for model: google/gemini-2.0-flash-exp:free
+2025-07-19 22:06:26 [error]: Rate limit exceeded
+2025-07-19 22:06:26 [error]: OpenRouter API error: 429 - {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"google/gemini-2.0-flash-exp:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Google"}},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-19 22:06:26 [error]: Request was for model: google/gemini-2.0-flash-exp:free
+2025-07-19 22:06:26 [error]: Rate limit exceeded
+2025-07-19 22:06:27 [error]: OpenRouter API error: 429 - {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"google/gemini-2.0-flash-exp:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Google"}},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-19 22:06:27 [error]: Request was for model: google/gemini-2.0-flash-exp:free
+2025-07-19 22:06:27 [error]: Rate limit exceeded
+2025-07-19 22:31:04 [error]: OpenRouter API error: 429 - {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"google/gemini-2.0-flash-exp:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Google AI Studio"}},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-19 22:31:04 [error]: Request was for model: google/gemini-2.0-flash-exp:free
+2025-07-19 22:31:04 [error]: Rate limit exceeded
+2025-07-19 22:46:24 [error]: OpenRouter API error: 429 - {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"google/gemini-2.0-flash-exp:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Google AI Studio"}},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-19 22:46:24 [error]: Request was for model: google/gemini-2.0-flash-exp:free
+2025-07-19 22:46:24 [error]: Rate limit exceeded
+2025-07-19 22:50:49 [error]: OpenRouter API error: 429 - {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"google/gemini-2.0-flash-exp:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Google AI Studio"}},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-19 22:50:49 [error]: Request was for model: google/gemini-2.0-flash-exp:free
+2025-07-19 22:50:49 [error]: Rate limit exceeded
