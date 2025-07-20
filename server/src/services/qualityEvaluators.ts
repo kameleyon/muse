@@ -1,5 +1,6 @@
 import { executeOpenRouterRequest } from './openrouter';
 import { cleanJsonResponse } from '../utils/jsonUtils';
+import config from '../config';
 
 interface BookContext {
   topic: string;
@@ -57,7 +58,7 @@ Respond with a JSON object:
 
   try {
     const response = await executeOpenRouterRequest({
-      model: 'openai/gpt-4o-search-preview',
+      model: config.openRouter.defaultResearchModel,
       messages: [
         { role: 'system', content: 'You are an expert content analyst. Respond only with valid JSON.' },
         { role: 'user', content: prompt }
@@ -149,7 +150,7 @@ Respond with JSON:
 
   try {
     const response = await executeOpenRouterRequest({
-      model: 'openai/gpt-4o-search-preview',
+      model: config.openRouter.defaultResearchModel ,
       messages: [
         { role: 'system', content: 'You are a professional editor. Respond only with valid JSON.' },
         { role: 'user', content: prompt }
@@ -330,7 +331,7 @@ Respond with JSON:
 
   try {
     const response = await executeOpenRouterRequest({
-      model: 'openai/gpt-4o-search-preview',
+      model: config.openRouter.defaultResearchModel ,
       messages: [
         { role: 'system', content: 'You are a fact-checker with expertise in various domains. Respond only with valid JSON.' },
         { role: 'user', content: prompt }

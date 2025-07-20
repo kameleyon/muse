@@ -48,7 +48,15 @@ export class QwenService extends OpenRouterService {
     qwenModel?: string
   ) {
     super(apiKey, baseUrl);
-    this.qwenModel = qwenModel || import.meta.env.VITE_DEFAULT_CHAT_MODEL || 'qwen/qwen-plus';
+    if (!qwenModel) {
+      const chatModel = import.meta.env.VITE_DEFAULT_CHAT_MODEL;
+      if (!chatModel) {
+        throw new Error('VITE_DEFAULT_CHAT_MODEL must be set');
+      }
+      this.qwenModel = chatModel;
+    } else {
+      this.qwenModel = qwenModel;
+    }
   }
 
   /**

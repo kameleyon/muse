@@ -49,7 +49,7 @@ const ResearchPanel: React.FC<ResearchPanelProps> = ({ onAddToContent }) => {
       // Research model (gpt-4o-search-preview)
       const researchModel = openRouterService.getAvailableModels().find(
         model => model.category === 'research'
-      )?.id || 'openai/gpt-4o-search-preview';
+      )?.id || import.meta.env.VITE_DEFAULT_RESEARCH_MODEL;
 
       // Generate content with progress tracking
       const response = await openRouterService.generateContent({

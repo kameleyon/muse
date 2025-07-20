@@ -35,7 +35,7 @@ interface OpenRouterResponse {
 // Available models configuration
 export const availableModels = [
   {
-    id: 'google/gemini-2.5-pro-exp-03-25:free', // Changed model ID
+    id: import.meta.env.VITE_DEFAULT_QUALITY_MODEL , // Changed model ID
     name: 'Gemini 2.5 Pro (Free Tier)', // Changed name
     description: 'Google\'s Gemini 2.5 Pro model (experimental free tier).', // Updated description
     maxTokens: 200000,
@@ -47,7 +47,7 @@ export const availableModels = [
   // Removed Claude 3 Sonnet definition
   // Removed Claude 3 Haiku definition
   {
-    id: 'openai/gpt-4o-search-preview',
+    id: import.meta.env.VITE_DEFAULT_RESEARCH_MODEL ,
     name: 'GPT-4o Search',
     description: 'Specialized model for internet research and fact-checking',
     maxTokens: 128000,
@@ -74,7 +74,7 @@ export const contentPresets = [
     description: 'Clear, informative content for business blogs',
     type: 'blog',
     parameters: {
-      model: 'google/gemini-2.5-pro-exp-03-25:free',
+      model: import.meta.env.VITE_DEFAULT_QUALITY_MODEL ,
       temperature: 0.7,
       max_tokens: 1500,
     },
@@ -85,7 +85,7 @@ export const contentPresets = [
     description: 'Conversational, engaging content for personal blogs',
     type: 'blog',
     parameters: {
-      model: 'google/gemini-2.5-pro-exp-03-25:free', // Changed model
+      model: import.meta.env.VITE_DEFAULT_QUALITY_MODEL , // Changed model
       temperature: 0.8,
       max_tokens: 1200,
     },
@@ -96,7 +96,7 @@ export const contentPresets = [
     description: 'Compelling copy that drives conversions',
     type: 'marketing',
     parameters: {
-      model: 'google/gemini-2.5-pro-exp-03-25:free', // Changed model
+      model: import.meta.env.VITE_DEFAULT_QUALITY_MODEL , // Changed model
       temperature: 0.75,
       max_tokens: 800,
     },
@@ -107,7 +107,7 @@ export const contentPresets = [
     description: 'Attention-grabbing content for social media',
     type: 'social',
     parameters: {
-      model: 'google/gemini-2.5-pro-exp-03-25:free', // Changed model
+      model: import.meta.env.VITE_DEFAULT_QUALITY_MODEL , // Changed model
       temperature: 0.9,
       max_tokens: 400,
     },
@@ -118,7 +118,7 @@ export const contentPresets = [
     description: 'Formal, well-structured content for academic purposes',
     type: 'academic',
     parameters: {
-      model: 'google/gemini-2.5-pro-exp-03-25:free', // Changed model
+      model: import.meta.env.VITE_DEFAULT_QUALITY_MODEL , // Changed model
       temperature: 0.5,
       max_tokens: 2000,
     },
@@ -129,7 +129,7 @@ export const contentPresets = [
     description: 'Verify information and conduct web research',
     type: 'research',
     parameters: {
-      model: 'openai/gpt-4o-search-preview',
+      model: import.meta.env.VITE_DEFAULT_RESEARCH_MODEL ,
       temperature: 0.3,
       max_tokens: 1500,
     },
@@ -149,7 +149,16 @@ export class OpenRouterService {
   ) {
     this.apiKey = apiKey || import.meta.env.VITE_OPENROUTER_API_KEY;
     this.baseUrl = baseUrl;
-    this.defaultModel = defaultModel || import.meta.env.VITE_DEFAULT_CONTENT_MODEL || 'google/gemini-2.5-pro-exp-03-25:free';
+    if (!defaultModel) {
+      const contentModel = import.meta.env.VITE_DEFAULT_CONTENT_MODEL;
+      const qualityModel = import.meta.env.VITE_DEFAULT_QUALITY_MODEL;
+      if (!contentModel && !qualityModel) {
+        throw new Error('Either VITE_DEFAULT_CONTENT_MODEL or VITE_DEFAULT_QUALITY_MODEL must be set');
+      }
+      this.defaultModel = contentModel || qualityModel;
+    } else {
+      this.defaultModel = defaultModel;
+    }
   }
 
   // Get the API key

@@ -3,9 +3,23 @@ import { collectProjectData, generateResearchPrompt, generateFullContentPrompt }
 import { useProjectWorkflowStore } from '@/store/projectWorkflowStore';
 
 // Read environment variables (Vite specific)
-const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const CONTENT_MODEL = import.meta.env.VITE_DEFAULT_CONTENT_MODEL || 'openrouter/optimus-alpha';
-const RESEARCH_MODEL = import.meta.env.VITE_DEFAULT_RESEARCH_MODEL || 'openai/gpt-4o-search-preview';
+const OPENROUTER_API_KEY = (() => {
+  const key = import.meta.env.VITE_OPENROUTER_API_KEY;
+  if (!key) throw new Error('VITE_OPENROUTER_API_KEY is required');
+  return key;
+})();
+
+const CONTENT_MODEL = (() => {
+  const model = import.meta.env.VITE_DEFAULT_CONTENT_MODEL;
+  if (!model) throw new Error('VITE_DEFAULT_CONTENT_MODEL is required');
+  return model;
+})();
+
+const RESEARCH_MODEL = (() => {
+  const model = import.meta.env.VITE_DEFAULT_RESEARCH_MODEL;
+  if (!model) throw new Error('VITE_DEFAULT_RESEARCH_MODEL is required');
+  return model;
+})();
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'http://localhost:5173';
 const APP_NAME = import.meta.env.VITE_APP_NAME || 'MagicMuse';
 

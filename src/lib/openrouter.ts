@@ -15,8 +15,17 @@ class OpenRouterAPI {
   private baseUrl: string
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_OPENROUTER_API_KEY || import.meta.env.VITE_API_KEY || ''
-    this.baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:9999'
+    const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY || import.meta.env.VITE_API_KEY;
+    if (!apiKey) {
+      throw new Error('VITE_OPENROUTER_API_KEY or VITE_API_KEY must be set');
+    }
+    this.apiKey = apiKey;
+    
+    const baseUrl = import.meta.env.VITE_BACKEND_URL;
+    if (!baseUrl) {
+      throw new Error('VITE_BACKEND_URL must be set');
+    }
+    this.baseUrl = baseUrl;
     
     if (!this.apiKey) {
       console.warn('API key not found in environment variables, some features may not work')
@@ -111,7 +120,10 @@ You must respond with ONLY valid JSON in this exact format:
       { role: 'user', content: userPrompt }
     ]
 
-    const model = import.meta.env.VITE_MARKET_RESEARCH_MODEL || 'openai/gpt-4o-search-preview'
+    const model = import.meta.env.VITE_DEFAULT_RESEARCH_MODEL;
+    if (!model) {
+      throw new Error('VITE_DEFAULT_RESEARCH_MODEL must be set');
+    }
     
     const response = await this.generateCompletion({
       model,
@@ -213,7 +225,10 @@ Create a natural flow from beginning to end, with a clear introduction and concl
       { role: 'user', content: userPrompt }
     ]
 
-    const model = import.meta.env.VITE_BOOK_STRUCTURE_MODEL || 'anthropic/claude-3.5-sonnet'
+    const model = import.meta.env.VITE_BOOK_STRUCTURE_MODEL;
+    if (!model) {
+      throw new Error('VITE_BOOK_STRUCTURE_MODEL must be set');
+    }
     
     const response = await this.generateCompletion({
       model,
@@ -296,7 +311,7 @@ Write this chapter following these guidelines:
       { role: 'user', content: userPrompt }
     ]
 
-    const model = import.meta.env.VITE_CONTENT_GENERATOR_MODEL || 'anthropic/claude-3.5-sonnet'
+    const model = import.meta.env.VITE_DEFAULT_CONTENT_MODEL
     
     let temperature = 0.7
     if (bookContext.tone?.toLowerCase().includes('creative') || 
@@ -338,7 +353,7 @@ Please revise the content accordingly.`
       { role: 'user', content: userPrompt }
     ]
 
-    const model = 'anthropic/claude-3.7-sonnet'
+    const model = import.meta.env.VITE_DEFAULT_CONTENT_MODEL
     
     return await this.generateCompletion({
       model,

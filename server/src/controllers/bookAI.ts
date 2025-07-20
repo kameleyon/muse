@@ -122,10 +122,10 @@ Format the output as a clean, professional bibliography that would appear at the
       ];
 
       const response = await executeOpenRouterRequest({
-        model: 'openai/gpt-4o-search-preview',
+        model: config.openRouter.defaultResearchModel,
         messages: referencesMessages,
-        temperature: 0.3,
-        max_tokens: 3000
+        temperature: 0.1,
+        max_tokens: 7000
       });
 
       const aiContent = response.choices[0].message.content;
@@ -308,9 +308,16 @@ Format the output in clear markdown with proper headings. Make all content speci
       ];
 
       const response = await executeOpenRouterRequest({
-        model: 'google/gemini-2.5-flash',
+        model: config.openRouter.defaultResearchModel,
         messages: appendixMessages,
-        temperature: 0.7,
+        temperature: 0.9,    
+        top_p: 0.85,           
+        repetition_penalty: 1.15, 
+        frequency_penalty: 0.45,    
+        presence_penalty: 0.3,     
+        length_penalty: 1.0,       
+        style_guidance: 0.5,       
+        text_guidance: 0.7, 
         max_tokens: 4000
       });
 
@@ -523,17 +530,25 @@ You must respond with ONLY valid JSON in this exact format:
     ];
 
     // Use the configured research model from config
-    const model = config.openRouter.defaultResearchModel || 'openai/gpt-4o-search-preview';
+    const model = config.openRouter.defaultResearchModel;
     
     console.log(`Generating market research for topic: ${topic} using model: ${model}`);
     const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
-    const completion = await executeOpenRouterRequest({
+    const requestParams = {
       model,
       prompt,
       messages: messages as any,
-      temperature: 0.7,
+      temperature: 0.9,    
+      top_p: 0.85,           
+      repetition_penalty: 1.15, 
+      frequency_penalty: 0.45,    
+      presence_penalty: 0.3,     
+      length_penalty: 1.0,       
+      style_guidance: 0.5,       
+      text_guidance: 0.7,
       max_tokens: 4000
-    });
+    };
+    const completion = await executeOpenRouterRequest(requestParams);
 
     const marketResearch = cleanJsonResponse(completion.choices[0].message.content || '');
     res.json({ marketResearch });
@@ -658,18 +673,26 @@ You must respond with ONLY valid JSON in this exact format:
     ];
 
     // Use the configured book structure model from config
-    const model = config.openRouter.bookStructureModel || 'anthropic/claude-3.7-sonnet';
+    const model = config.openRouter.bookStructureModel;
     
     console.log(`Using model: ${model} for book structure generation`);
     
     const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
-    const completion = await executeOpenRouterRequest({
+    const requestParams = {
       model,
       prompt,
       messages: messages as any,
-      temperature: 0.8,
+      temperature: 0.9,    
+      top_p: 0.85,           
+      repetition_penalty: 1.15, 
+      frequency_penalty: 0.45,    
+      presence_penalty: 0.3,     
+      length_penalty: 1.0,       
+      style_guidance: 0.5,       
+      text_guidance: 0.7,
       max_tokens: 50000
-    });
+    };
+    const completion = await executeOpenRouterRequest(requestParams);
 
     // Log the first 500 characters of the response for debugging
     // Extract content from the response
@@ -794,6 +817,14 @@ Simply complete the current thought and conclude the chapter naturally. Write on
       model,
       messages,
       ...selectedProfile,
+      temperature: 0.9,    
+top_p: 0.85,           
+repetition_penalty: 1.15, 
+frequency_penalty: 0.45,    
+presence_penalty: 0.3,     
+length_penalty: 1.0,       
+style_guidance: 0.5,       
+text_guidance: 0.7,
       max_tokens: 150 // Keep it short - just for completion
     });
 
@@ -1112,14 +1143,21 @@ Begin your research now.`;
 
     console.log('Step 1: Gathering supporting research data...');
     // Use the configured research model for search
-    const searchModel = config.openRouter.defaultResearchModel || 'openai/gpt-4o-search-preview';
+    const searchModel = config.openRouter.defaultResearchModel;
     console.log(`Using search model: ${searchModel} for research data gathering`);
     
     const searchResponse = await executeOpenRouterRequest({
       model: searchModel,
       prompt: searchMessages.map(m => `${m.role}: ${m.content}`).join('\n'),
       messages: searchMessages as any,
-      temperature: 0.4,
+      temperature: 0.9,    
+top_p: 0.85,           
+repetition_penalty: 1.15, 
+frequency_penalty: 0.45,    
+presence_penalty: 0.3,     
+length_penalty: 1.0,       
+style_guidance: 0.5,       
+text_guidance: 0.7,
       max_tokens: 40000
     });
 
@@ -1161,18 +1199,18 @@ CHAPTER STRUCTURE REQUIREMENTS:
     ];
 
     // Use a more reliable model for chapter generation
-    const model = 'google/gemini-flash-1.5';
+    const model = config.openRouter.defaultContentModel;
     
     // Use the exact parameters specified by the user for ALL content generation
-    // Note: Google Gemini models have a max repetition_penalty of 2.0
-    const isGeminiModel = model.includes('gemini');
     const generationParameters = {
-      temperature: 0.9,
-      top_p: 0.7,
-      repetition_penalty: isGeminiModel ? 2.0 : 2.5, // Gemini max is 2.0
-      // Map repetition_penalty to frequency_penalty and presence_penalty for OpenRouter
-      frequency_penalty: 1.2, // Higher values reduce repetition
-      presence_penalty: 1.3,  // Higher values encourage topic diversity
+      temperature: 0.9,    
+top_p: 0.85,           
+repetition_penalty: 1.15, 
+frequency_penalty: 0.45,    
+presence_penalty: 0.3,     
+length_penalty: 1.0,       
+style_guidance: 0.5,       
+text_guidance: 0.7,
     };
 
     console.log(`Using generation parameters for ${model}:`, JSON.stringify(generationParameters));
@@ -1320,7 +1358,7 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
         // Fallback to a different model if the primary one fails
         console.log(`Attempting fallback to alternative model for chunk ${chunkIndex + 1}/${numChunks}`);
         const fallbackResponse = await executeOpenRouterRequest({
-          model: 'openai/gpt-4o-search-preview', // Consider if fallback model should also be configurable or use a default profile
+          model: config.openRouter.defaultResearchModel, // Consider if fallback model should also be configurable or use a default profile
           prompt,
           messages: chunkMessages,
           ...generationParameters, // Use mandatory parameters for fallback too
@@ -1660,7 +1698,7 @@ Please revise the content accordingly, ensuring you meet the exact word count re
     ];
 
     // Use the configured model for chapter revision
-    const model = config.openRouter.bookStructureModel || 'anthropic/claude-3.7-sonnet';
+    const model = config.openRouter.bookStructureModel;
     
     console.log(`Using model: ${model} for chapter revision`);
     
@@ -1669,7 +1707,14 @@ Please revise the content accordingly, ensuring you meet the exact word count re
       model,
       prompt,
       messages,
-      temperature: 0.8,
+      temperature: 0.9,    
+top_p: 0.85,           
+repetition_penalty: 1.15, 
+frequency_penalty: 0.45,    
+presence_penalty: 0.3,     
+length_penalty: 1.0,       
+style_guidance: 0.5,       
+text_guidance: 0.7,
       max_tokens: 4000
     });
 

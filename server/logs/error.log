@@ -242,3 +242,32 @@
 2025-07-19 00:39:37 [error]: OpenRouter API error: 400 - {"error":{"message":"Expected repetition_penalty to be at most 2, received 2.5","code":400,"metadata":{"provider_name":null}}}
 2025-07-19 00:39:37 [error]: Request was for model: google/gemini-2.5-flash
 2025-07-19 00:39:37 [error]: OpenRouter API error: 400 - {"error":{"message":"Expected repetition_penalty to be at most 2, received 2.5","code":400,"metadata":{"provider_name":null}}}
+2025-07-19 16:56:31 [error]: OpenRouter API error: 400 - {"error":{"message":"Expected repetition_penalty to be at most 2, received 2.5","code":400,"metadata":{"provider_name":null}}}
+2025-07-19 16:56:31 [error]: Request was for model: google/gemini-2.5-flash
+2025-07-19 16:56:31 [error]: OpenRouter API error: 400 - {"error":{"message":"Expected repetition_penalty to be at most 2, received 2.5","code":400,"metadata":{"provider_name":null}}}
+2025-07-19 16:56:31 [error]: Request was for model: google/gemini-2.5-flash
+2025-07-19 16:56:31 [error]: OpenRouter API error: 400 - {"error":{"message":"Expected repetition_penalty to be at most 2, received 2.5","code":400,"metadata":{"provider_name":null}}}
+2025-07-19 17:31:31 [error]: OpenRouter API error: 400 - {"error":{"message":"Expected repetition_penalty to be at most 2, received 2.5","code":400,"metadata":{"provider_name":null}}}
+2025-07-19 17:31:31 [error]: Request was for model: openai/gpt-4o
+2025-07-19 17:38:58 [error]: OpenRouter API error: 400 - {"error":{"message":"Expected repetition_penalty to be at most 2, received 2.5","code":400,"metadata":{"provider_name":null}}}
+2025-07-19 17:38:58 [error]: Request was for model: openai/gpt-4o-search-preview
+2025-07-19 17:45:45 [error]: OpenRouter API error: 400 - {"error":{"message":"Expected repetition_penalty to be at most 2, received 2.5","code":400,"metadata":{"provider_name":null}}}
+2025-07-19 17:45:45 [error]: Request was for model: openai/gpt-4o-search-preview
+2025-07-19 17:50:21 [error]: OpenRouter API error: 400 - {"error":{"message":"Expected repetition_penalty to be at most 2, received 2.5","code":400,"metadata":{"provider_name":null}}}
+2025-07-19 17:50:21 [error]: Request was for model: openai/gpt-4o-search-preview
+2025-07-19 18:56:11 [error]: OpenRouter API error: 400 - {"error":{"message":"Expected repetition_penalty to be at most 2, received 2.5","code":400,"metadata":{"provider_name":null}}}
+2025-07-19 18:56:11 [error]: Request was for model: openai/gpt-4o-search-preview
+2025-07-19 19:02:20 [error]: OpenRouter API error: 400 - {"error":{"message":"Expected repetition_penalty to be at most 2, received 2.5","code":400,"metadata":{"provider_name":null}}}
+2025-07-19 19:02:20 [error]: Request was for model: google/gemini-2.0-flash-exp:free
+2025-07-19 20:49:02 [error]: OpenRouter API error: 429 - {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"google/gemini-2.0-flash-exp:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Google AI Studio"}},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-19 20:49:02 [error]: Request was for model: google/gemini-2.0-flash-exp:free
+2025-07-19 20:49:02 [error]: Rate limit exceeded
+2025-07-19 20:49:02 [error]: OpenRouter API error: 429 - {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"google/gemini-2.0-flash-exp:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Google AI Studio"}},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-19 20:49:02 [error]: Request was for model: google/gemini-2.0-flash-exp:free
+2025-07-19 20:49:02 [error]: Rate limit exceeded
+2025-07-19 20:49:02 [error]: OpenRouter API error: 429 - {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"google/gemini-2.0-flash-exp:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Google"}},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-19 20:49:02 [error]: Request was for model: google/gemini-2.0-flash-exp:free
+2025-07-19 20:49:02 [error]: Rate limit exceeded
+2025-07-19 20:52:45 [error]: OpenRouter API error: 429 - {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"google/gemini-2.0-flash-exp:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Google AI Studio"}},"user_id":"user_2mFnAVLwo9hZcRB1Q6IvQqpfMy4"}
+2025-07-19 20:52:45 [error]: Request was for model: google/gemini-2.0-flash-exp:free
+2025-07-19 20:52:45 [error]: Rate limit exceeded
