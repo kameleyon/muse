@@ -119,6 +119,15 @@ const aiPatterns = [
   /delve into/gi
   ];
 
+// Helper function to remove forbidden AI patterns from content
+function filterAIContent(content: string): string {
+  let filteredContent = content;
+  aiPatterns.forEach(pattern => {
+    filteredContent = filteredContent.replace(pattern, '');
+  });
+  return filteredContent;
+}
+
 // Helper function to extract references from chapter content
 function extractReferencesFromContent(content: string): string[] {
   const references: string[] = [];
@@ -748,6 +757,7 @@ You must respond with ONLY valid JSON in this exact format:
   "marketPosition": "Define market position (75-150 words) using this framework: Primary category/shelf placement; 2-3 successful comp titles and how this book differs; Target retailer categories; Price point positioning (premium/accessible/budget) with justification; Format priorities (hardcover/paperback/audio/digital); One-sentence elevator pitch for booksellers.",
   "uniqueValue": "Write a compelling unique value proposition (50-100 words) that identifies ONE primary differentiator from existing books in this category, states a specific benefit readers get here they can't find elsewhere, uses concrete language rather than abstract claims, avoids overused terms like 'comprehensive,' 'ultimate,' or 'revolutionary,' includes a measurable outcome or transformation when possible, formatted as 2-3 punchy sentences that could work as back-cover copy.",
   "acknowledgement": "Brief acknowledgement outline (50-100 words) describing who to thank and why",
+  "disclaimer": "A concise and simple yet comprehensive disclaimer for the book.",
   "prologue": "## Prologue Title\\n\\nBrief prologue outline (100-200 words) describing the opening scene or hook that will engage readers",
   "introduction": "# Introduction Title\\n\\nBrief introduction outline (100-200 words) describing what will be covered",
   "conclusion": "# Conclusion Title\\n\\nBrief conclusion outline (100-200 words) describing the wrap-up and call to action",
@@ -1113,21 +1123,24 @@ CRITICAL MISSION: Your primary objective is to write high-quality, coherent cont
 NEVER ASK QUESTIONS: Do not ask for confirmation, clarification, or permission to continue. Write the content directly without any meta-commentary about the writing process.
 
 **CRITICAL AI PATTERN AVOIDANCE - ABSOLUTELY FORBIDDEN PHRASES AND PATTERNS:**
-You MUST avoid ALL of these overused AI writing patterns:
-- NEVER start with: "picture this", "imagine", "let's dive", "buckle up", "welcome to", "have you ever wondered", "in this article", "are you looking to", "curious about"
-- FORBIDDEN transitions: "however,", "moreover,", "furthermore,", "additionally,", "on the other hand,", "with that said,", "in contrast,", "similarly,", "consequently,", "nevertheless,", "meanwhile,", "specifically,", "to illustrate,", "for instance,", "in particular,"
-- BANNED conclusions: "in conclusion,", "to sum up,", "in summary,", "ultimately,", "to wrap things up,", "the bottom line is,", "all things considered,"
-- NO meta-commentary: "as we've seen,", "moving forward,", "looking ahead,", "it's worth noting", "it's important to note", "it should be mentioned", "keep in mind that", "it's crucial to remember"
-- AVOID qualifiers: "generally speaking,", "in most cases,", "typically,", "often,", "usually,"
-- FORBIDDEN jargon: "leverage", "utilize", "implement", "facilitate", "optimize", "streamline", "robust", "game-changer", "revolutionary", "cutting-edge", "innovative", "strategic", "synergy", "best practices", "pain points"
-- BANNED metaphors: "journey", "path", "landscape", "navigate", "roadmap", "blueprint", "tapestry", "realm", "ecosystem", "horizon", "unlock", "transform your life", "gateway to", "bridge the gap", "pave the way"
-- NO listicles: "top X", "X essential tips", "X strategies", "X benefits", "X common mistakes"
-- AVOID questions: "but what does this mean?", "how can you apply this?", "why does this matter?"
-- FORBIDDEN adjectives: "amazing", "incredible", "stunning", "powerful", "effective", "essential", "critical", "crucial", "vital", "comprehensive", "extensive", "thorough"
-- BANNED transitions: "in technical terms", "in simpler terms", "step by step", "pros and cons", "faq", "beginner", "intermediate", "advanced", "problem-solution", "definition", "example", "application", "comparison", "technical term", "layperson"
-- NEVER use: "celestial", "mystical", "cosmic", "delve into"
+Your output will be programmatically checked and rejected if it contains any of the following. There is no flexibility on this.
 
-The following is a list of additional AI patterns to avoid:
+You MUST NOT use ANY of these overused AI writing patterns:
+DO NOT INCLUDE IN THE CONTENT ANY OF THE FOLLOWING WORDS OR EXPRESSION - A ALL COST!
+- **FORBIDDEN OPENINGS:** "picture this", "imagine", "let's dive", "buckle up", "welcome to", "have you ever wondered", "in this article", "are you looking to", "curious about"
+- **FORBIDDEN TRANSITIONS:** "however,", "moreover,", "furthermore,", "additionally,", "on the other hand,", "with that said,", "in contrast,", "similarly,", "consequently,", "nevertheless,", "meanwhile,", "specifically,", "to illustrate,", "for instance,", "in particular,"
+- **FORBIDDEN CONCLUSIONS:** "in conclusion,", "to sum up,", "in summary,", "ultimately,", "to wrap things up,", "the bottom line is,", "all things considered,"
+- **FORBIDDEN META-COMMENTARY:** "as we've seen,", "moving forward,", "looking ahead,", "it's worth noting", "it's important to note", "it should be mentioned", "keep in mind that", "it's crucial to remember"
+- **FORBIDDEN QUALIFIERS:** "generally speaking,", "in most cases,", "typically,", "often,", "usually,"
+- **FORBIDDEN CORPORATE JARGON:** "leverage", "utilize", "implement", "facilitate", "optimize", "streamline", "robust", "game-changer", "revolutionary", "cutting-edge", "innovative", "strategic", "synergy", "best practices", "pain points"
+- **FORBIDDEN ABSTRACT METAPHORS:** "journey", "path", "landscape", "navigate", "roadmap", "blueprint", "tapestry", "realm", "ecosystem", "horizon", "unlock", "transform your life", "gateway to", "bridge the gap", "pave the way"
+- **FORBIDDEN LISTICLE FORMATS:** "top X", "X essential tips", "X strategies", "X benefits", "X common mistakes"
+- **FORBIDDEN RHETORICAL QUESTIONS:** "but what does this mean?", "how can you apply this?", "why does this matter?"
+- **FORBIDDEN INTENSIFIERS & ADJECTIVES:** "amazing", "incredible", "stunning", "powerful", "effective", "essential", "critical", "crucial", "vital", "comprehensive", "extensive", "thorough"
+- **FORBIDDEN EXPLANATORY PHRASES:** "in technical terms", "in simpler terms", "step by step", "pros and cons", "faq", "beginner", "intermediate", "advanced", "problem-solution", "definition", "example", "application", "comparison", "technical term", "layperson"
+- **FORBIDDEN IMAGERY:** "celestial", "mystical", "cosmic", "delve into"
+
+This is the complete list of forbidden patterns. Adherence is mandatory.
 ${aiPatterns.map(p => `- ${p.source}`).join('\n')}
 
 Write this chapter following these STRICT guidelines:
@@ -1551,56 +1564,32 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
       res.write(`data: ${JSON.stringify(chunkData)}\n\n`);
     };
 
-    // Start first chunk generation immediately
+    // Start first chunk generation
     chunkPromises[0] = generateChunk(0, '');
-    
-    // Pre-generate the second chunk immediately to reduce waiting time
-    if (numChunks > 1) {
-      console.log('Pre-generating second chunk to reduce waiting time');
-      chunkPromises[1] = generateChunk(1, '');
-    }
-    
-    // Create an array to track typing promises
-    const typingPromises: Promise<void>[] = [];
-    
-    // Process chunks with aggressive overlapping generation and streaming
+
+    // Process chunks with aggressive overlapping generation and sequential streaming
     for (let chunkIndex = 0; chunkIndex < numChunks; chunkIndex++) {
       console.log(`Waiting for generation of chunk ${chunkIndex + 1}/${numChunks}`);
       
       // Wait for current chunk to complete generation
       const chunkContent = await chunkPromises[chunkIndex];
-      chunkResults[chunkIndex] = chunkContent;
       
-      console.log(`Chunk ${chunkIndex + 1}/${numChunks} generation complete, starting typing`);
-      
-      // Update full content
+      // Update full content. This will be used as context for the next chunk.
       fullContent += (chunkIndex === 0 ? '' : '\n\n') + chunkContent;
-      previousContent = fullContent;
       
-      // Start next TWO chunks generation immediately for more aggressive overlapping
-      if (chunkIndex + 1 < numChunks && !chunkPromises[chunkIndex + 1]) {
+      // Start next chunk generation in the background
+      if (chunkIndex + 1 < numChunks) {
         console.log(`Starting generation of next chunk ${chunkIndex + 2}/${numChunks} in background`);
-        chunkPromises[chunkIndex + 1] = generateChunk(chunkIndex + 1, previousContent);
+        chunkPromises[chunkIndex + 1] = generateChunk(chunkIndex + 1, fullContent);
       }
       
-      // Pre-generate the chunk after next to maximize overlapping
-      if (chunkIndex + 2 < numChunks && !chunkPromises[chunkIndex + 2]) {
-        console.log(`Pre-generating chunk ${chunkIndex + 3}/${numChunks} for maximum overlapping`);
-        // Use empty content for pre-generation, will be updated with proper context when its turn comes
-        chunkPromises[chunkIndex + 2] = generateChunk(chunkIndex + 2, '');
-      }
-      
-      // Stream current chunk with typing effect WITHOUT awaiting its completion
-      // This allows the next chunk to start typing as soon as it's generated
-      typingPromises[chunkIndex] = streamChunk(chunkIndex, chunkContent).then(() => {
+      // If streaming, stream the current chunk and wait for it to complete before proceeding.
+      // This ensures chunks are typed in the correct order.
+      if (streamMode) {
+        console.log(`Chunk ${chunkIndex + 1}/${numChunks} generation complete, starting typing`);
+        await streamChunk(chunkIndex, chunkContent);
         console.log(`Completed typing of chunk ${chunkIndex + 1}/${numChunks}`);
-      });
-    }
-    
-    // Wait for all typing to complete at the end
-    if (streamMode) {
-      console.log(`Waiting for all typing to complete`);
-      await Promise.all(typingPromises);
+      }
     }
     
     // Validate and clean the final content for completeness
@@ -1653,7 +1642,7 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
       console.log(`${statusMsg}. Final word count: ${finalContent.split(/\s+/).filter(Boolean).length}`);
     }
     
-    const content = finalContent;
+    const content = filterAIContent(finalContent);
     
     // Create update payload based on whether metadata column exists
     let updatePayload: any = {
@@ -1714,6 +1703,18 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
       // Continue execution even if appendix update fails
     }
 
+    // Refetch the book to get the latest structure with updated references and appendix
+    const { data: updatedBook, error: refetchError } = await supabaseAdmin
+      .from('books')
+      .select('*')
+      .eq('id', chapter.book_id)
+      .single();
+
+    if (refetchError) {
+      console.error('Error refetching book after updates:', refetchError);
+      // Not a fatal error, proceed without the updated book data
+    }
+
     // Handle response based on streaming mode
     if (streamMode) {
       // Send final completion event
@@ -1722,15 +1723,16 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
       const completionData = {
         type: 'complete',
         chapter: chapterMetadata, // Send metadata only
+        book: updatedBook,
         referencesFound: references.length,
         totalWords: wordCount
       };
       res.write(`data: ${JSON.stringify(completionData)}\n\n`);
-      res.write('data: [DONE]\n\n');
       res.end();
     } else {
       res.json({ 
         chapter: firstUpdatedChapter,
+        book: updatedBook,
         referencesFound: references.length
       });
     }
@@ -2049,5 +2051,47 @@ export const generatePDF = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Error generating PDF:', error);
     res.status(500).json({ error: error.message || 'Failed to generate PDF' });
+  }
+};
+
+export const regenerateBookExtras = async (req: Request, res: Response) => {
+  try {
+    const { bookId } = req.params;
+
+    // Get all chapters for the book to have complete context
+    const { data: chapters, error: chaptersError } = await supabaseAdmin
+      .from('chapters')
+      .select('content')
+      .eq('book_id', bookId)
+      .not('content', 'is', null);
+
+    if (chaptersError) {
+      throw new Error('Failed to fetch chapters for regeneration');
+    }
+
+    const allContent = chapters.map(c => c.content).join('\n\n');
+    const allReferences = extractReferencesFromContent(allContent);
+
+    // Regenerate references
+    await updateBookReferences(bookId, allReferences);
+
+    // Regenerate appendix
+    await updateBookAppendix(bookId, allContent);
+
+    // Refetch the book to get the latest structure
+    const { data: updatedBook, error: refetchError } = await supabaseAdmin
+      .from('books')
+      .select('*')
+      .eq('id', bookId)
+      .single();
+
+    if (refetchError) {
+      throw new Error('Failed to refetch book after regeneration');
+    }
+
+    res.json({ message: 'References and appendix regenerated successfully', book: updatedBook });
+  } catch (error: any) {
+    console.error('Error regenerating book extras:', error);
+    res.status(500).json({ error: error.message || 'Failed to regenerate book extras' });
   }
 };

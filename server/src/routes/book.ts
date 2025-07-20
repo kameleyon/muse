@@ -17,6 +17,7 @@ import {
   deleteUpload,
   getDownloadUrl
 } from '../controllers/bookUpload';
+import { regenerateBookExtras } from '../controllers/bookAI';
 
 const router = express.Router();
 
@@ -37,5 +38,8 @@ router.post('/books/:bookId/upload', auth, uploadMiddleware, uploadBookReference
 router.get('/books/:bookId/uploads', auth, getBookUploads);
 router.delete('/uploads/:uploadId', auth, deleteUpload);
 router.get('/uploads/:uploadId/download', auth, getDownloadUrl);
+
+// New route for regenerating references and appendix
+router.post('/books/:bookId/regenerate-extras', auth, regenerateBookExtras);
 
 export default router;
