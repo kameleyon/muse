@@ -83,6 +83,7 @@ router.post('/analyze-chapter', authenticate, async (req, res) => {
     const updatedMetadata = {
       ...(chapter.metadata || {}),
       qualityScore: qualityMetrics.overallScore,
+      qualityMetrics: qualityMetrics,
       lastQualityCheck: qualityMetrics.timestamp
     };
     
@@ -114,17 +115,18 @@ router.get('/chapter/:chapterId/quality', authenticate, async (req, res) => {
       return res.status(404).json({ error: 'Chapter not found' });
     }
     
-    const qualityScore = chapter.metadata?.qualityScore;
-    const lastCheck = chapter.metadata?.lastQualityCheck;
+    const qualityMetrics = chapter.metadata?.qualityMetrics;
     
-    if (!qualityScore) {
+    if (!qualityMetrics) {
+      // If only old score is available, return that for backward compatibility
+      const qualityScore = chapter.metadata?.qualityScore;
+      if (qualityScore) {
+        return res.json({ qualityScore, lastCheck: chapter.metadata?.lastQualityCheck });
+      }
       return res.status(404).json({ error: 'No quality analysis available for this chapter' });
     }
     
-    res.json({ 
-      qualityScore,
-      lastCheck
-    });
+    res.json({ qualityMetrics });
   } catch (error: any) {
     console.error('Error getting quality metrics:', error);
     res.status(500).json({ error: error.message || 'Failed to get quality metrics' });

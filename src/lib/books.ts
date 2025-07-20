@@ -554,6 +554,7 @@ export const bookService = {
         const decoder = new TextDecoder();
         let accumulatedContent = '';
         let finalChapter: Chapter | null = null;
+        let buffer = ''; // Buffer to handle incomplete JSON chunks
         
         if (reader) {
           while (true) {
@@ -561,12 +562,18 @@ export const bookService = {
             if (done) break;
             
             const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split('\n');
+            buffer += chunk;
+            
+            // Process complete lines from buffer
+            const lines = buffer.split('\n');
+            // Keep the last (potentially incomplete) line in buffer
+            buffer = lines.pop() || '';
             
             for (const line of lines) {
               if (line.startsWith('data: ')) {
-                const data = line.slice(6);
+                const data = line.slice(6).trim();
                 if (data === '[DONE]') continue;
+                if (data === '') continue; // Skip empty data lines
                 
                 try {
                   const parsedData = JSON.parse(data);
@@ -596,7 +603,27 @@ export const bookService = {
                   }
                 } catch (e) {
                   console.error('Error parsing SSE data:', e);
+                  console.error('Problematic data:', data.substring(0, 200) + '...');
+                  // Continue processing other lines instead of breaking
                 }
+              }
+            }
+          }
+          
+          // Process any remaining data in buffer after stream ends
+          if (buffer.trim() && buffer.startsWith('data: ')) {
+            const data = buffer.slice(6).trim();
+            if (data !== '[DONE]' && data !== '') {
+              try {
+                const parsedData = JSON.parse(data);
+                if (parsedData.type === 'complete' && parsedData.chapter && !finalChapter) {
+                  finalChapter = {
+                    ...parsedData.chapter,
+                    content: accumulatedContent
+                  };
+                }
+              } catch (e) {
+                console.error('Error parsing final buffer data:', e);
               }
             }
           }

@@ -119,12 +119,23 @@ const aiPatterns = [
   /delve into/gi
   ];
 
-// Helper function to remove forbidden AI patterns from content
+// Helper function to remove only the most obvious AI patterns (minimal filtering)
 function filterAIContent(content: string): string {
   let filteredContent = content;
-  aiPatterns.forEach(pattern => {
+  
+  // Only filter the most obvious AI-generated patterns - less than 10% of original restrictions
+  const minimalPatterns = [
+    /as an ai language model/gi,
+    /i'm just an ai/gi,
+    /i cannot provide/gi,
+    /i don't have the ability/gi,
+    /as an artificial intelligence/gi
+  ];
+  
+  minimalPatterns.forEach(pattern => {
     filteredContent = filteredContent.replace(pattern, '');
   });
+  
   return filteredContent;
 }
 
@@ -496,14 +507,28 @@ function cleanJsonResponse(response: string): any {
     console.warn("Direct JSON.parse failed. Trying to extract from markdown code block. Error: " + e1.message);
     try {
       // Attempt 2: Extract JSON from markdown code blocks
-      // Regex to find ```json ... ``` or ``` ... ```
-      const jsonMatch = response.match(/```(?:json)?\s*([\s\S]*?)```/);
+      // More robust regex to find ```json ... ``` or ``` ... ```
+      const jsonMatch = response.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
       if (jsonMatch && jsonMatch[1]) {
-        const extractedJson = jsonMatch[1].trim();
+        let extractedJson = jsonMatch[1].trim();
+        
+        // Remove any remaining backticks that might have been captured
+        extractedJson = extractedJson.replace(/^`+|`+$/g, '');
+        
         console.log("Extracted JSON from code block. Attempting to parse.");
+        console.log("Extracted content (first 200 chars):", extractedJson.substring(0, 200));
         return JSON.parse(extractedJson);
       } else {
         console.warn("No JSON code block found in AI response.");
+        
+        // Try alternative extraction - look for { ... } pattern
+        const jsonObjectMatch = response.match(/(\{[\s\S]*\})/);
+        if (jsonObjectMatch && jsonObjectMatch[1]) {
+          let extractedJson = jsonObjectMatch[1].trim();
+          console.log("Found JSON object pattern. Attempting to parse.");
+          console.log("Extracted content (first 200 chars):", extractedJson.substring(0, 200));
+          return JSON.parse(extractedJson);
+        }
         
         // Attempt 3: Try to fix truncated JSON
         try {
@@ -757,7 +782,6 @@ You must respond with ONLY valid JSON in this exact format:
   "marketPosition": "Define market position (75-150 words) using this framework: Primary category/shelf placement; 2-3 successful comp titles and how this book differs; Target retailer categories; Price point positioning (premium/accessible/budget) with justification; Format priorities (hardcover/paperback/audio/digital); One-sentence elevator pitch for booksellers.",
   "uniqueValue": "Write a compelling unique value proposition (50-100 words) that identifies ONE primary differentiator from existing books in this category, states a specific benefit readers get here they can't find elsewhere, uses concrete language rather than abstract claims, avoids overused terms like 'comprehensive,' 'ultimate,' or 'revolutionary,' includes a measurable outcome or transformation when possible, formatted as 2-3 punchy sentences that could work as back-cover copy.",
   "acknowledgement": "Brief acknowledgement outline (50-100 words) describing who to thank and why",
-  "disclaimer": "A concise and simple yet comprehensive disclaimer for the book.",
   "prologue": "## Prologue Title\\n\\nBrief prologue outline (100-200 words) describing the opening scene or hook that will engage readers",
   "introduction": "# Introduction Title\\n\\nBrief introduction outline (100-200 words) describing what will be covered",
   "conclusion": "# Conclusion Title\\n\\nBrief conclusion outline (100-200 words) describing the wrap-up and call to action",
@@ -1110,93 +1134,27 @@ export const generateChapter = async (req: Request, res: Response) => {
     const maxTargetWords = targetWords + 2000;
     const idealConclusionStart = maxTargetWords - 500;
     
-    const systemPrompt = `You are an expert book writer specializing in creating content that resonates with specific target audiences. Write in the exact tone and style specified, addressing the audience's pain points and desires.
-    
-Your target word count range for this chapter is between ${targetWords - 100} (minimum) and ${maxTargetWords} (maximum).
-Aim for a total word count near ${targetWords}, but prioritize natural flow and complete thoughts.
-It is acceptable to go over ${targetWords} up to ${maxTargetWords}.
-Begin to conclude the chapter content naturally when you are around ${idealConclusionStart} words, ensuring a satisfying wrap-up by ${maxTargetWords}.
-Do NOT truncate content abruptly.
+    const systemPrompt = `You are an elite author, a master of prose and narrative, tasked with writing a chapter for a book. Your writing must be indistinguishable from that of a seasoned human author, exhibiting creativity, depth, and a sophisticated command of language. Your goal is to produce content with 100% originality and 0% AI detection.
 
-CRITICAL MISSION: Your primary objective is to write high-quality, coherent content that falls within the range of ${targetWords - 100} to ${maxTargetWords} words.
+**Core Mission: Emulate Human Excellence**
+- **Vocabulary:** Employ a rich, diverse, and precise vocabulary. Avoid simplistic and repetitive words. The vocabulary should reflect deep expertise in the subject matter.
+- **Sentence Structure:** Craft sentences with varied length and structure. Use a mix of simple, compound, and complex sentences to create a compelling rhythm. Avoid starting sentences with the same words or phrases.
+- **Flow and Transitions:** Ensure seamless transitions between paragraphs and ideas. The narrative must flow logically and elegantly.
+- **Tone and Style:** Adhere strictly to the specified tone and style. Your writing should be engaging, authoritative, and tailored to the target audience's sensibilities.
+- **Originality:** Generate completely original thoughts and expressions. Avoid common phrases and clichés.
 
-NEVER ASK QUESTIONS: Do not ask for confirmation, clarification, or permission to continue. Write the content directly without any meta-commentary about the writing process.
+**Operational Directives:**
+- **Word Count:** Your target word count is between ${targetWords - 100} and ${maxTargetWords}. Aim for approximately ${targetWords}. Conclude the chapter naturally as you approach the upper limit.
+- **No Meta-Commentary:** Do not break character. Never ask questions, seek clarification, or mention the writing process. Produce the chapter content directly.
+- **Natural Language:** Write in a natural, conversational style that feels human and authentic.
 
-**CRITICAL AI PATTERN AVOIDANCE - ABSOLUTELY FORBIDDEN PHRASES AND PATTERNS:**
-Your output will be programmatically checked and rejected if it contains any of the following. There is no flexibility on this.
-
-You MUST NOT use ANY of these overused AI writing patterns:
-DO NOT INCLUDE IN THE CONTENT ANY OF THE FOLLOWING WORDS OR EXPRESSION - A ALL COST!
-- **FORBIDDEN OPENINGS:** "picture this", "imagine", "let's dive", "buckle up", "welcome to", "have you ever wondered", "in this article", "are you looking to", "curious about"
-- **FORBIDDEN TRANSITIONS:** "however,", "moreover,", "furthermore,", "additionally,", "on the other hand,", "with that said,", "in contrast,", "similarly,", "consequently,", "nevertheless,", "meanwhile,", "specifically,", "to illustrate,", "for instance,", "in particular,"
-- **FORBIDDEN CONCLUSIONS:** "in conclusion,", "to sum up,", "in summary,", "ultimately,", "to wrap things up,", "the bottom line is,", "all things considered,"
-- **FORBIDDEN META-COMMENTARY:** "as we've seen,", "moving forward,", "looking ahead,", "it's worth noting", "it's important to note", "it should be mentioned", "keep in mind that", "it's crucial to remember"
-- **FORBIDDEN QUALIFIERS:** "generally speaking,", "in most cases,", "typically,", "often,", "usually,"
-- **FORBIDDEN CORPORATE JARGON:** "leverage", "utilize", "implement", "facilitate", "optimize", "streamline", "robust", "game-changer", "revolutionary", "cutting-edge", "innovative", "strategic", "synergy", "best practices", "pain points"
-- **FORBIDDEN ABSTRACT METAPHORS:** "journey", "path", "landscape", "navigate", "roadmap", "blueprint", "tapestry", "realm", "ecosystem", "horizon", "unlock", "transform your life", "gateway to", "bridge the gap", "pave the way"
-- **FORBIDDEN LISTICLE FORMATS:** "top X", "X essential tips", "X strategies", "X benefits", "X common mistakes"
-- **FORBIDDEN RHETORICAL QUESTIONS:** "but what does this mean?", "how can you apply this?", "why does this matter?"
-- **FORBIDDEN INTENSIFIERS & ADJECTIVES:** "amazing", "incredible", "stunning", "powerful", "effective", "essential", "critical", "crucial", "vital", "comprehensive", "extensive", "thorough"
-- **FORBIDDEN EXPLANATORY PHRASES:** "in technical terms", "in simpler terms", "step by step", "pros and cons", "faq", "beginner", "intermediate", "advanced", "problem-solution", "definition", "example", "application", "comparison", "technical term", "layperson"
-- **FORBIDDEN IMAGERY:** "celestial", "mystical", "cosmic", "delve into"
-
-This is the complete list of forbidden patterns. Adherence is mandatory.
-${aiPatterns.map(p => `- ${p.source}`).join('\n')}
-
-Write this chapter following these STRICT guidelines:
-
-**CONTENT QUALITY & VOICE:**
-1. Write at a ${book.marketResearch?.readingLevel || 'Standard (60-69)'} Flesch Reading Ease level (${book.marketResearch?.gradeLevel || '8th-9th grade'})
-2. Use ${book.structure?.tone || 'conversational'} tone with ${book.marketResearch?.sentenceLength || 'medium'} sentence lengths
-3. Vocabulary complexity: ${book.marketResearch?.vocabularyLevel || 'accessible but varied'}
-4. Write with direct, concrete language using natural transitions that flow from content
-5. Use specific examples instead of generic descriptions, active voice, and varied sentence structures
-6. DO: Vary sentence openings, use specific examples from ${book.marketResearch?.targetAudience?.dailyLife || 'everyday modern life'}, ground abstract concepts in concrete scenarios
-7. ABSOLUTELY FORBIDDEN: Never include "Key Points" sections, bullet point summaries, word count notifications, or any meta-commentary about the content structure
-
-**CONSISTENCY REQUIREMENTS:**
-7. Review previous chapters to ensure NO repeated: examples, case studies, anecdotes, or conceptual explanations
-8. Unique examples only - flag if similar territory covered in: ${previousChapters.length > 0 ? previousChapters.join(', ') : 'N/A'}
-9. Maintain consistent terminology established in: ${book.glossary || 'chapter 1'}
-
-**FORMATTING SPECIFICATIONS:**
-10. DO NOT repeat the chapter title (already provided in structure)
-11. START with captivating first sentence - no throat-clearing or preview
-12. Paragraph indentation: Use 2 spaces at start of each paragraph
-13. Line spacing: Single space between all elements (including between bullet point titles and lists)
-14. Format the content as proper markdown:
-   - Use ## for the main chapter title
-   - Use ### for subsections
-   - Use #### for important point in subsctions
-   - Use **bold** for emphasis
-   - Use - or * for bullet points
-   - Use > for blockquotes
-   
-   - Ensure proper paragraph spacing (empty line between paragraphs)
-   - Use numbered lists where appropriate
-   - Use backticks for inline code or technical terms
-15. Include ${book.marketResearch?.design?.visualElements || chapterDetails?.visualElements || '1-2'} data visualizations using markdown tables or ASCII-style simple graphs when data supports it
-16. Color palette references: ${book.marketResearch?.design?.colors || book.design?.colors || 'primary: purple, secondary: gold, accent: white'}
-
-**CHAPTER SPECIFICATIONS:**
-17. **CRITICAL WORD COUNT GUIDELINES:**
-    - Minimum total words: ${targetWords - 100}.
-    - Ideal total words: Around ${targetWords}.
-    - Maximum total words: ${maxTargetWords}.
-    - Start concluding the chapter around ${idealConclusionStart} words.
-    - Prioritize completing thoughts naturally over hitting an exact number. It is PREFERRED to go slightly over ${targetWords} (up to ${maxTargetWords}) rather than cutting content short.
-    - If content is naturally shorter, ensure it still meets the minimum of ${targetWords - 100} words by adding relevant details, examples, or explanations.
-    - Do NOT abruptly truncate sentences or paragraphs.
-18. Include ${book.marketResearch?.contentSpecs?.examplesPerChapter || chapterDetails?.examples || '3-4'} real-world examples
-19. ${book.marketResearch?.contentSpecs?.exerciseInclusion === 'true' || chapterDetails?.exercises ? 'Include practical exercises' : 'Focus on narrative flow'}
-20. Target audience specifics: ${book.marketResearch?.targetAudience?.demographics || '25-45, urban, professional'}
-
-**SPECIAL INSTRUCTIONS:**
-${book.marketResearch?.contentSpecs?.specialInstructions || chapterDetails?.specialInstructions || 'None'}
-${chapter.number === 0 || (chapter.number === (book.structure?.parts ? 
-  Math.max(...book.structure.parts.flatMap((part: any) => part.chapters.map((ch: any) => ch.number))) + 1 : 
-  (book.structure?.chapters ? book.structure.chapters.length + 1 : 999)
-)) ? 'Adapt format for special section requirements' : ''}`;
+**Content & Formatting Guidelines:**
+- **Reading Level:** ${book.marketResearch?.readingLevel || 'Standard (60-69)'} Flesch Reading Ease (${book.marketResearch?.gradeLevel || '8th-9th grade'}).
+- **Tone/Style:** ${book.structure?.tone || 'conversational'} with ${book.marketResearch?.sentenceLength || 'medium'} sentence lengths.
+- **Formatting:** Use proper markdown (## for title, ### for subsections, **bold**, etc.). Start with a captivating first sentence.
+- **Consistency:** Ensure no repetition of examples or concepts from previous chapters: ${previousChapters.length > 0 ? previousChapters.join(', ') : 'N/A'}.
+- **Visuals:** Include ${book.marketResearch?.design?.visualElements || chapterDetails?.visualElements || '1-2'} data visualizations (markdown tables, etc.) where appropriate.
+- **Examples:** Integrate ${book.marketResearch?.contentSpecs?.examplesPerChapter || chapterDetails?.examples || '3-4'} real-world examples.`;
     
     const userPrompt = `Book Title: ${book.title}
 Subtitle: ${book.structure?.subtitle}
@@ -1335,14 +1293,14 @@ CHAPTER STRUCTURE REQUIREMENTS:
     
     // Use the exact parameters specified by the user for ALL content generation
     const generationParameters = {
-      temperature: 0.9,    
-top_p: 0.85,           
-repetition_penalty: 1.15, 
-frequency_penalty: 0.45,    
-presence_penalty: 0.3,     
-length_penalty: 1.0,       
-style_guidance: 0.5,       
-text_guidance: 0.7,
+      temperature: 0.8,
+      top_p: 0.8,
+      repetition_penalty: 1.2,
+      frequency_penalty: 0.5,
+      presence_penalty: 0.4,
+      length_penalty: 1.0,
+      style_guidance: 0.5,
+      text_guidance: 0.7,
     };
 
     console.log(`Using generation parameters for ${model}:`, JSON.stringify(generationParameters));
@@ -1723,7 +1681,10 @@ ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:
       const completionData = {
         type: 'complete',
         chapter: chapterMetadata, // Send metadata only
-        book: updatedBook,
+        updatedBookData: {
+          references: updatedBook?.structure?.references,
+          appendix: updatedBook?.structure?.appendix
+        },
         referencesFound: references.length,
         totalWords: wordCount
       };

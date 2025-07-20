@@ -133,6 +133,11 @@ const BookEditorPage: React.FC = () => {
         } else {
           setQualityScore(null);
           setQualityLastCheck(null);
+          
+          // Auto-generate quality score if content exists but no score exists
+          if (selectedSection.content && selectedSection.content.trim() && !qualityLoading) {
+            setTimeout(() => handleAnalyzeQuality(), 1000); // Small delay to ensure UI is ready
+          }
         }
       } else {
         setQualityScore(null);
@@ -223,6 +228,15 @@ const BookEditorPage: React.FC = () => {
           };
         });
         setSelectedSection(prevSel => prevSel ? { ...prevSel, status: updatedChapter.status, content: updatedChapter.content } : null);
+        
+        // Auto-generate quality score after successful content generation
+        if (updatedChapter.content && updatedChapter.content.trim()) {
+          setTimeout(() => {
+            if (!qualityLoading) {
+              handleAnalyzeQuality();
+            }
+          }, 3000); // Delay to ensure UI updates are complete
+        }
 
       } else if (selectedSection.type === 'appendix' || selectedSection.type === 'references') {
         const generatedText = `AI generated content for ${selectedSection.title}...`; // Placeholder
@@ -360,6 +374,15 @@ const BookEditorPage: React.FC = () => {
             // Auto-generate appendix and references when a chapter is saved
             if (currentContent && currentContent.trim() && updatedBookData.chapters) {
               await generateAppendixAndReferences({ ...updatedBookData, chapters: updatedBookData.chapters });
+            }
+            
+            // Auto-generate quality score after saving content
+            if (currentContent && currentContent.trim()) {
+              setTimeout(() => {
+                if (!qualityLoading) {
+                  handleAnalyzeQuality();
+                }
+              }, 2000); // Delay to ensure save is complete
             }
         }
       } else {
