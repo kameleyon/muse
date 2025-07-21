@@ -26,6 +26,35 @@ interface ChapterContext {
   keyTopics?: string[];
 }
 
+// ============================================================================
+// OPTIMIZED QUALITY THRESHOLDS
+// ============================================================================
+
+const ENHANCED_QUALITY_THRESHOLDS = {
+  VOCABULARY: {
+    EXCELLENT: 0.65,
+    GOOD: 0.55,
+    ACCEPTABLE: 0.35,     // More realistic threshold
+    POOR: 0.25
+  },
+  GRADE_LEVEL_TOLERANCE: 3,   // Increased from 2
+  AI_CONFIDENCE: {
+    EXCELLENT: 15,
+    GOOD: 25,
+    ACCEPTABLE: 40,       // More lenient
+    POOR: 60
+  },
+  READABILITY: {
+    FLESCH_TOLERANCE: 15,      // Increased from 10
+    SENTENCE_LENGTH: { min: 8, max: 30 }, // Wider range
+    PARAGRAPH_LENGTH: { min: 2, max: 8 }  // More flexible
+  }
+};
+
+// ============================================================================
+// ENHANCED QUALITY CALCULATION
+// ============================================================================
+
 export async function calculateQualityScore(
   content: string,
   bookContext: BookContext,
@@ -43,6 +72,7 @@ export async function calculateQualityScore(
     highlights: [],
   });
 
+  // Async evaluations with error handling
   const evaluationPromises = {
     audienceAlignment: evaluateAudienceAlignment(content, bookContext, contentAnalysis).catch(createErrorScore),
     correctness: evaluateCorrectness(content).catch(createErrorScore),
@@ -53,35 +83,30 @@ export async function calculateQualityScore(
 
   const evaluatedScores = await Promise.all(Object.values(evaluationPromises));
   
+  // Build quality breakdown with enhanced evaluations
   const breakdown: QualityMetrics['breakdown'] = {
     audienceAlignment: evaluatedScores[0],
-    readability: evaluateReadability(contentAnalysis, bookContext),
-    accuracy: evaluatedScores[3],
-    engagement: evaluateEngagement(content, contentAnalysis),
+    readability: evaluateEnhancedReadability(contentAnalysis, bookContext),
+    engagement: evaluateEnhancedEngagement(content, contentAnalysis),
     correctness: evaluatedScores[1],
     styleGuide: evaluateStyleGuide(content, bookContext),
     delivery: evaluateDelivery(content, contentAnalysis),
-    originality: evaluateOriginality(aiPatterns),
-    repetition: evaluateRepetition(repetitions, contentAnalysis),
-    vocabulary: evaluateVocabulary(contentAnalysis, bookContext),
-    aiPatterns: evaluateAIPatterns(aiPatterns),
+    vocabulary: evaluateEnhancedVocabulary(contentAnalysis, bookContext),
+    aiPatterns: evaluateEnhancedAIPatterns(aiPatterns),
     purposeAlignment: evaluatedScores[4],
     factualAccuracy: evaluatedScores[2],
   };
   
-  // Calculate overall score (weighted average)
+  // Enhanced weighted scoring system
   const weights = {
     audienceAlignment: 0.12,
     readability: 0.10,
-    accuracy: 0.08,
-    engagement: 0.10,
+    engagement: 0.12,
     correctness: 0.08,
-    styleGuide: 0.08,
-    delivery: 0.08,
-    originality: 0.10,
-    repetition: 0.06,
-    vocabulary: 0.06,
-    aiPatterns: 0.08,
+    styleGuide: 0.10,
+    delivery: 0.10,
+    vocabulary: 0.12,        // Increased weight
+    aiPatterns: 0.10,        // Increased weight
     purposeAlignment: 0.08,
     factualAccuracy: 0.08
   };
@@ -97,8 +122,8 @@ export async function calculateQualityScore(
   
   const overallScore = Math.round(totalScore / totalWeight);
   
-  // Generate suggestions based on low-scoring areas
-  const suggestions = generateSuggestions(breakdown);
+  // Generate intelligent suggestions
+  const suggestions = generateEnhancedSuggestions(breakdown);
   
   return {
     overallScore,
@@ -108,37 +133,53 @@ export async function calculateQualityScore(
   };
 }
 
-function evaluateReadability(analysis: ReturnType<typeof analyzeContent>, context: BookContext) {
+// ============================================================================
+// ENHANCED READABILITY EVALUATION
+// ============================================================================
+
+function evaluateEnhancedReadability(analysis: ReturnType<typeof analyzeContent>, context: BookContext) {
   let score = 100;
   const issues: string[] = [];
   const highlights: string[] = [];
   
-  // Check against target reading level
+  // More lenient Flesch Reading Ease evaluation
   const targetFleschScore = getTargetFleschScore(context.readingLevel);
   const fleschDiff = Math.abs(analysis.fleschReadingEase - targetFleschScore);
   
-  if (fleschDiff > 10) {
-    score -= Math.min(30, fleschDiff - 10);
-    issues.push(`Reading ease score (${analysis.fleschReadingEase.toFixed(1)}) differs from target (${targetFleschScore})`);
+  if (fleschDiff > ENHANCED_QUALITY_THRESHOLDS.READABILITY.FLESCH_TOLERANCE) {
+    const penalty = Math.min(25, (fleschDiff - ENHANCED_QUALITY_THRESHOLDS.READABILITY.FLESCH_TOLERANCE) * 1.5);
+    score -= penalty;
+    issues.push(`Reading ease (${analysis.fleschReadingEase.toFixed(1)}) differs from target (${targetFleschScore})`);
+  } else if (fleschDiff <= 5) {
+    highlights.push(`Excellent reading ease alignment with target audience`);
   } else {
-    highlights.push(`Reading ease matches target audience well`);
+    highlights.push(`Good reading ease for target audience`);
   }
   
-  // Check sentence length
-  if (analysis.avgWordsPerSentence > 25) {
-    score -= 10;
-    issues.push(`Sentences too long (avg ${analysis.avgWordsPerSentence.toFixed(1)} words)`);
-  } else if (analysis.avgWordsPerSentence < 10) {
-    score -= 5;
-    issues.push(`Sentences too short (avg ${analysis.avgWordsPerSentence.toFixed(1)} words)`);
+  // Enhanced sentence length evaluation
+  const { min: minSentence, max: maxSentence } = ENHANCED_QUALITY_THRESHOLDS.READABILITY.SENTENCE_LENGTH;
+  
+  if (analysis.avgWordsPerSentence > maxSentence) {
+    score -= Math.min(15, (analysis.avgWordsPerSentence - maxSentence) * 0.5);
+    issues.push(`Sentences may be too long (avg ${analysis.avgWordsPerSentence.toFixed(1)} words)`);
+  } else if (analysis.avgWordsPerSentence < minSentence) {
+    score -= Math.min(10, (minSentence - analysis.avgWordsPerSentence) * 0.5);
+    issues.push(`Sentences may be too short (avg ${analysis.avgWordsPerSentence.toFixed(1)} words)`);
   } else {
-    highlights.push(`Good sentence length variation`);
+    highlights.push(`Excellent sentence length for readability`);
   }
   
-  // Check paragraph structure
-  if (analysis.avgSentencesPerParagraph > 6) {
-    score -= 5;
-    issues.push(`Paragraphs too long (avg ${analysis.avgSentencesPerParagraph.toFixed(1)} sentences)`);
+  // Enhanced paragraph structure evaluation
+  const { min: minParagraph, max: maxParagraph } = ENHANCED_QUALITY_THRESHOLDS.READABILITY.PARAGRAPH_LENGTH;
+  
+  if (analysis.avgSentencesPerParagraph > maxParagraph) {
+    score -= Math.min(8, (analysis.avgSentencesPerParagraph - maxParagraph) * 1);
+    issues.push(`Paragraphs may be too long (avg ${analysis.avgSentencesPerParagraph.toFixed(1)} sentences)`);
+  } else if (analysis.avgSentencesPerParagraph < minParagraph) {
+    score -= 3;
+    issues.push(`Paragraphs may be too short for depth`);
+  } else {
+    highlights.push(`Good paragraph structure and flow`);
   }
   
   return {
@@ -150,107 +191,50 @@ function evaluateReadability(analysis: ReturnType<typeof analyzeContent>, contex
   };
 }
 
-function evaluateEngagement(content: string, analysis: ReturnType<typeof analyzeContent>) {
-  let score = 100;
-  const issues: string[] = [];
-  const highlights: string[] = [];
-  
-  // Check for questions (engaging the reader)
-  const questions = (content.match(/\?/g) || []).length;
-  const questionRatio = questions / analysis.sentenceCount;
-  
-  if (questionRatio < 0.02) {
-    score -= 10;
-    issues.push(`Too few questions to engage readers`);
-  } else if (questionRatio > 0.1) {
-    score -= 5;
-    issues.push(`Too many questions may feel overwhelming`);
-  } else {
-    highlights.push(`Good use of questions to engage readers`);
-  }
-  
-  // Check for examples and stories
-  const examples = (content.match(/\b(for example|for instance|such as|like|consider)\b/gi) || []).length;
-  if (examples < 2) {
-    score -= 15;
-    issues.push(`Needs more concrete examples`);
-  } else {
-    highlights.push(`Good use of examples`);
-  }
-  
-  // Check for active voice (more engaging)
-  const passiveIndicators = (content.match(/\b(was|were|been|being)\s+\w+ed\b/gi) || []).length;
-  const passiveRatio = passiveIndicators / analysis.sentenceCount;
-  
-  if (passiveRatio > 0.3) {
-    score -= 10;
-    issues.push(`Too much passive voice reduces engagement`);
-  }
-  
-  return {
-    score: Math.max(0, score),
-    maxScore: 100,
-    percentage: Math.max(0, score),
-    issues,
-    highlights
-  };
-}
+// ============================================================================
+// ENHANCED VOCABULARY EVALUATION
+// ============================================================================
 
-function evaluateRepetition(repetitions: ReturnType<typeof detectRepetitions>, analysis: ReturnType<typeof analyzeContent>) {
+function evaluateEnhancedVocabulary(analysis: ReturnType<typeof analyzeContent>, context: BookContext) {
   let score = 100;
   const issues: string[] = [];
   const highlights: string[] = [];
   
-  // Check for overused words
-  const severeRepetitions = repetitions.filter((r: any) => r.density > 0.02 && r.count > 5);
-  const moderateRepetitions = repetitions.filter((r: any) => r.density > 0.01 && r.count > 3);
+  const diversity = analysis.vocabularyDiversity;
+  const thresholds = ENHANCED_QUALITY_THRESHOLDS.VOCABULARY;
   
-  severeRepetitions.forEach((rep: any) => {
-    score -= 5;
-    issues.push(`"${rep.word}" used ${rep.count} times`);
-  });
-  
-  if (moderateRepetitions.length > 5) {
-    score -= 10;
-    issues.push(`Too many repeated words/phrases`);
-  }
-  
-  if (severeRepetitions.length === 0 && moderateRepetitions.length < 3) {
-    highlights.push(`Good vocabulary variety`);
-  }
-  
-  return {
-    score: Math.max(0, score),
-    maxScore: 100,
-    percentage: Math.max(0, score),
-    issues,
-    highlights
-  };
-}
-
-function evaluateVocabulary(analysis: ReturnType<typeof analyzeContent>, context: BookContext) {
-  let score = 100;
-  const issues: string[] = [];
-  const highlights: string[] = [];
-  
-  // Check vocabulary diversity
-  if (analysis.vocabularyDiversity < 0.4) {
-    score -= 20;
-    issues.push(`Limited vocabulary variety (${(analysis.vocabularyDiversity * 100).toFixed(1)}% unique words)`);
-  } else if (analysis.vocabularyDiversity > 0.7) {
-    score -= 10;
-    issues.push(`Vocabulary may be too complex for target audience`);
+  // Enhanced vocabulary diversity scoring
+  if (diversity < thresholds.POOR) {
+    score -= 30;
+    issues.push(`Very limited vocabulary variety (${(diversity * 100).toFixed(1)}% unique words)`);
+  } else if (diversity < thresholds.ACCEPTABLE) {
+    score -= 15;  // Reduced penalty
+    issues.push(`Limited vocabulary variety (${(diversity * 100).toFixed(1)}% unique words)`);
+  } else if (diversity >= thresholds.EXCELLENT) {
+    if (diversity > 0.75) {
+      score -= 5;  // Minor penalty for potentially too complex vocabulary
+      issues.push(`Vocabulary may be complex for some readers (${(diversity * 100).toFixed(1)}% unique)`);
+    } else {
+      highlights.push(`Excellent vocabulary diversity (${(diversity * 100).toFixed(1)}% unique words)`);
+    }
+  } else if (diversity >= thresholds.GOOD) {
+    highlights.push(`Good vocabulary variety for target audience (${(diversity * 100).toFixed(1)}%)`);
   } else {
-    highlights.push(`Good vocabulary diversity for target audience`);
+    highlights.push(`Acceptable vocabulary diversity for the content type`);
   }
   
-  // Check grade level alignment
+  // Enhanced grade level alignment with increased tolerance
   const targetGrade = parseInt(context.gradeLevel) || 9;
   const gradeDiff = Math.abs(analysis.gradeLevel - targetGrade);
   
-  if (gradeDiff > 2) {
-    score -= 15;
-    issues.push(`Grade level (${analysis.gradeLevel.toFixed(1)}) misaligned with target (${targetGrade})`);
+  if (gradeDiff > ENHANCED_QUALITY_THRESHOLDS.GRADE_LEVEL_TOLERANCE) {
+    score -= Math.min(20, gradeDiff * 3);
+    issues.push(`Grade level (${analysis.gradeLevel.toFixed(1)}) significantly differs from target (${targetGrade})`);
+  } else if (gradeDiff > 1.5) {
+    score -= Math.min(8, gradeDiff * 2);
+    issues.push(`Grade level slightly above target range`);
+  } else {
+    highlights.push(`Grade level well-aligned with target audience`);
   }
   
   return {
@@ -262,56 +246,189 @@ function evaluateVocabulary(analysis: ReturnType<typeof analyzeContent>, context
   };
 }
 
-function evaluateOriginality(aiPatterns: ReturnType<typeof detectAIPatterns>) {
-  const score = aiPatterns.score;
+// ============================================================================
+// ENHANCED ENGAGEMENT EVALUATION
+// ============================================================================
+
+function evaluateEnhancedEngagement(content: string, analysis: ReturnType<typeof analyzeContent>) {
+  let score = 100;
   const issues: string[] = [];
   const highlights: string[] = [];
   
-  if (aiPatterns.patterns.length > 0) {
-    issues.push(`Detected AI patterns: ${aiPatterns.patterns.slice(0, 3).join(', ')}`);
-    if (aiPatterns.patterns.length > 3) {
-      issues.push(`...and ${aiPatterns.patterns.length - 3} more`);
-    }
+  // Enhanced question analysis
+  const questions = (content.match(/\?/g) || []).length;
+  const questionRatio = questions / analysis.sentenceCount;
+  
+  if (questionRatio < 0.01) {
+    score -= 8;  // Reduced penalty
+    issues.push(`Consider adding more questions to engage readers`);
+  } else if (questionRatio > 0.15) {
+    score -= 8;
+    issues.push(`Too many questions may overwhelm readers`);
+  } else if (questionRatio >= 0.03) {
+    highlights.push(`Excellent use of questions to engage readers`);
+  } else {
+    highlights.push(`Good reader engagement through questions`);
   }
   
-  if (score > 85) {
-    highlights.push(`Content appears original and human-written`);
-  } else if (score > 70) {
-    highlights.push(`Mostly original with some common patterns`);
+  // Enhanced example detection
+  const exampleIndicators = [
+    /\b(for example|for instance|such as|like|consider|take)\b/gi,
+    /\b(imagine|suppose|let's say|picture)\b/gi,
+    /\b(case study|real.world|in practice)\b/gi
+  ];
+  
+  let exampleCount = 0;
+  exampleIndicators.forEach(pattern => {
+    const matches = content.match(pattern);
+    if (matches) exampleCount += matches.length;
+  });
+  
+  if (exampleCount < 2) {
+    score -= 12;
+    issues.push(`Needs more concrete examples and illustrations`);
+  } else if (exampleCount >= 5) {
+    highlights.push(`Rich in examples and practical illustrations`);
+  } else {
+    highlights.push(`Good use of examples to clarify concepts`);
+  }
+  
+  // Enhanced active voice analysis
+  const passiveIndicators = content.match(/\b(was|were|been|being)\s+\w+ed\b/gi) || [];
+  const passiveRatio = passiveIndicators.length / analysis.sentenceCount;
+  
+  if (passiveRatio > 0.4) {
+    score -= 15;
+    issues.push(`Excessive passive voice reduces engagement`);
+  } else if (passiveRatio > 0.25) {
+    score -= 8;
+    issues.push(`Consider using more active voice`);
+  } else if (passiveRatio < 0.1) {
+    highlights.push(`Excellent use of active voice for engagement`);
+  }
+  
+  // Content variety analysis
+  const listItems = (content.match(/^\s*[-*•]\s/gm) || []).length;
+  const headings = (content.match(/^#{1,6}\s/gm) || []).length;
+  
+  if (headings >= 3 && listItems >= 2) {
+    highlights.push(`Good content structure with headings and lists`);
+  } else if (headings < 2) {
+    score -= 5;
+    issues.push(`Consider adding more section headings for better structure`);
   }
   
   return {
-    score,
+    score: Math.max(0, score),
     maxScore: 100,
-    percentage: score,
+    percentage: Math.max(0, score),
     issues,
     highlights
   };
 }
 
-function evaluateAIPatterns(aiPatterns: ReturnType<typeof detectAIPatterns>) {
-  const score = 100 - aiPatterns.confidence;
+// ============================================================================
+// ENHANCED AI PATTERNS EVALUATION
+// ============================================================================
+
+function evaluateEnhancedAIPatterns(aiPatterns: ReturnType<typeof detectAIPatterns>) {
+  const confidence = aiPatterns.confidence;
+  const thresholds = ENHANCED_QUALITY_THRESHOLDS.AI_CONFIDENCE;
+  
+  let score = 100;
   const issues: string[] = [];
   const highlights: string[] = [];
   
-  if (aiPatterns.confidence > 30) {
-    issues.push(`${aiPatterns.confidence}% AI pattern confidence detected`);
-  }
-  
-  if (score > 90) {
-    highlights.push(`Very low AI pattern detection`);
-  } else if (score > 80) {
-    highlights.push(`Minimal AI patterns detected`);
+  // Enhanced AI confidence scoring
+  if (confidence > thresholds.POOR) {
+    score = 30;  // Cap at 30 for very high confidence
+    issues.push(`High AI pattern confidence detected (${confidence}%)`);
+    if (aiPatterns.patterns.length > 0) {
+      issues.push(`Detected patterns: ${aiPatterns.patterns.slice(0, 2).join(', ')}`);
+    }
+  } else if (confidence > thresholds.ACCEPTABLE) {
+    score = Math.max(60, 100 - confidence);
+    issues.push(`Moderate AI pattern confidence (${confidence}%)`);
+  } else if (confidence > thresholds.GOOD) {
+    score = Math.max(75, 100 - confidence * 0.8);
+    highlights.push(`Low AI pattern detection`);
+  } else if (confidence <= thresholds.EXCELLENT) {
+    score = Math.max(85, 100 - confidence * 0.5);
+    highlights.push(`Very natural, human-like writing style`);
+  } else {
+    score = Math.max(80, 100 - confidence * 0.6);
+    highlights.push(`Mostly natural writing with minimal AI patterns`);
   }
   
   return {
-    score,
+    score: Math.round(score),
     maxScore: 100,
-    percentage: score,
+    percentage: Math.round(score),
     issues,
     highlights
   };
 }
+
+// ============================================================================
+// ENHANCED SUGGESTIONS GENERATOR
+// ============================================================================
+
+function generateEnhancedSuggestions(breakdown: QualityMetrics['breakdown']): string[] {
+  const suggestions: string[] = [];
+  
+  // Find areas needing improvement (below 80%)
+  const improvementAreas = Object.entries(breakdown)
+    .map(([key, detail]) => ({ 
+      key, 
+      score: (detail as any).percentage,
+      issues: (detail as any).issues 
+    }))
+    .filter(area => area.score < 80)
+    .sort((a, b) => a.score - b.score);
+  
+  // Prioritize suggestions based on impact
+  const priorityOrder = ['vocabulary', 'aiPatterns', 'readability', 'engagement'];
+  
+  priorityOrder.forEach(priorityKey => {
+    const area = improvementAreas.find(a => a.key === priorityKey);
+    if (area && area.issues.length > 0) {
+      suggestions.push(`${getDisplayName(area.key)}: ${area.issues[0]}`);
+    }
+  });
+  
+  // Add remaining suggestions
+  improvementAreas
+    .filter(area => !priorityOrder.includes(area.key))
+    .slice(0, 2)
+    .forEach(area => {
+      if (area.issues.length > 0) {
+        suggestions.push(`${getDisplayName(area.key)}: ${area.issues[0]}`);
+      }
+    });
+  
+  return suggestions.slice(0, 5); // Limit to top 5 suggestions
+}
+
+function getDisplayName(key: string): string {
+  const displayNames: { [key: string]: string } = {
+    vocabulary: 'Vocabulary',
+    aiPatterns: 'Writing Style',
+    readability: 'Readability',
+    engagement: 'Engagement',
+    audienceAlignment: 'Audience Alignment',
+    correctness: 'Correctness',
+    styleGuide: 'Style Guide',
+    delivery: 'Delivery',
+    purposeAlignment: 'Purpose Alignment',
+    factualAccuracy: 'Factual Accuracy'
+  };
+  
+  return displayNames[key] || key;
+}
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
 
 function getTargetFleschScore(readingLevel: string): number {
   const levels: { [key: string]: number } = {
@@ -325,25 +442,4 @@ function getTargetFleschScore(readingLevel: string): number {
   };
   
   return levels[readingLevel] || 65;
-}
-
-function generateSuggestions(breakdown: QualityMetrics['breakdown']): string[] {
-  const suggestions: string[] = [];
-  
-  // Find the three lowest scoring areas
-  const scores = Object.entries(breakdown)
-    .map(([key, detail]) => ({ key, score: (detail as any).percentage }))
-    .sort((a, b) => a.score - b.score)
-    .slice(0, 3);
-  
-  scores.forEach(({ key, score }) => {
-    if (score < 80) {
-      const detail = breakdown[key as keyof typeof breakdown];
-      if (detail.issues.length > 0) {
-        suggestions.push(`${key}: ${detail.issues[0]}`);
-      }
-    }
-  });
-  
-  return suggestions;
 }

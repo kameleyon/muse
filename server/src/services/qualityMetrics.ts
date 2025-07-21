@@ -5,13 +5,10 @@ export interface QualityMetrics {
   breakdown: {
     audienceAlignment: ScoreDetail;
     readability: ScoreDetail;
-    accuracy: ScoreDetail;
     engagement: ScoreDetail;
     correctness: ScoreDetail;
     styleGuide: ScoreDetail;
     delivery: ScoreDetail;
-    originality: ScoreDetail;
-    repetition: ScoreDetail;
     vocabulary: ScoreDetail;
     aiPatterns: ScoreDetail;
     purposeAlignment: ScoreDetail;
@@ -38,25 +35,67 @@ interface ContentAnalysis {
   vocabularyDiversity: number;
   fleschReadingEase: number;
   gradeLevel: number;
+  sentenceVariety: number;
+  wordFrequency: Map<string, number>;
 }
 
-// Analyze basic content metrics
+// ============================================================================
+// ENHANCED CONTENT ANALYSIS
+// ============================================================================
+
 export function analyzeContent(content: string): ContentAnalysis {
-  const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
-  const paragraphs = content.split(/\n\n+/).filter(p => p.trim().length > 0);
-  const words = content.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+  // Clean and prepare text
+  const cleanContent = content
+    .replace(/#{1,6}\s+/g, '') // Remove markdown headers
+    .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold formatting
+    .replace(/\*([^*]+)\*/g, '$1') // Remove italic formatting
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1'); // Remove links, keep text
+  
+  // Analyze sentences with improved splitting
+  const sentences = cleanContent
+    .split(/[.!?]+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 3); // Filter out very short fragments
+  
+  // Analyze paragraphs
+  const paragraphs = content
+    .split(/\n\s*\n/)
+    .map(p => p.trim())
+    .filter(p => p.length > 10); // Filter out very short paragraphs
+  
+  // Enhanced word analysis
+  const words = cleanContent
+    .toLowerCase()
+    .split(/\s+/)
+    .map(w => w.replace(/[^\w]/g, '')) // Remove punctuation
+    .filter(w => w.length > 2); // Filter out very short words
+  
+  // Calculate word frequency for diversity analysis
+  const wordFrequency = new Map<string, number>();
+  words.forEach(word => {
+    wordFrequency.set(word, (wordFrequency.get(word) || 0) + 1);
+  });
+  
   const uniqueWords = new Set(words);
   
+  // Enhanced metrics calculation
   const avgWordsPerSentence = words.length / sentences.length;
-  const avgSentencesPerParagraph = sentences.length / paragraphs.length;
+  const avgSentencesPerParagraph = sentences.length / Math.max(paragraphs.length, 1);
   const vocabularyDiversity = uniqueWords.size / words.length;
   
-  // Calculate Flesch Reading Ease
-  const syllableCount = words.reduce((count, word) => count + countSyllables(word), 0);
-  const avgSyllablesPerWord = syllableCount / words.length;
+  // Calculate sentence variety (length variation)
+  const sentenceLengths = sentences.map(s => s.split(/\s+/).length);
+  const avgSentenceLength = sentenceLengths.reduce((a, b) => a + b, 0) / sentenceLengths.length;
+  const sentenceLengthVariance = sentenceLengths.reduce((acc, len) => 
+    acc + Math.pow(len - avgSentenceLength, 2), 0) / sentenceLengths.length;
+  const sentenceVariety = Math.min(1, Math.sqrt(sentenceLengthVariance) / avgSentenceLength);
+  
+  // Enhanced Flesch Reading Ease calculation
+  const syllableCount = words.reduce((count, word) => count + countEnhancedSyllables(word), 0);
+  const avgSyllablesPerWord = syllableCount / Math.max(words.length, 1);
   const fleschReadingEase = 206.835 - 1.015 * avgWordsPerSentence - 84.6 * avgSyllablesPerWord;
   
-  // Calculate grade level (Flesch-Kincaid)
+  // Enhanced Flesch-Kincaid Grade Level
   const gradeLevel = 0.39 * avgWordsPerSentence + 11.8 * avgSyllablesPerWord - 15.59;
   
   return {
@@ -65,58 +104,113 @@ export function analyzeContent(content: string): ContentAnalysis {
     paragraphCount: paragraphs.length,
     avgWordsPerSentence,
     avgSentencesPerParagraph,
-    vocabularyDiversity,
+    vocabularyDiversity: Math.max(0, Math.min(1, vocabularyDiversity)),
     fleschReadingEase: Math.max(0, Math.min(100, fleschReadingEase)),
-    gradeLevel: Math.max(1, Math.min(18, gradeLevel))
+    gradeLevel: Math.max(1, Math.min(18, gradeLevel)),
+    sentenceVariety,
+    wordFrequency
   };
 }
 
-// Count syllables in a word (approximation)
-function countSyllables(word: string): number {
-  word = word.toLowerCase();
+// ============================================================================
+// ENHANCED SYLLABLE COUNTING
+// ============================================================================
+
+function countEnhancedSyllables(word: string): number {
+  if (!word || word.length === 0) return 0;
+  
+  word = word.toLowerCase().replace(/[^a-z]/g, '');
+  if (word.length === 0) return 1;
+  
+  // Handle common patterns
+  const specialCases: { [key: string]: number } = {
+    'the': 1, 'a': 1, 'an': 1, 'and': 1, 'or': 1, 'but': 1, 'in': 1, 'on': 1, 'at': 1, 'to': 1,
+    'fire': 1, 'hour': 1, 'our': 1, 'your': 1, 'here': 1, 'there': 1, 'where': 1,
+    'people': 2, 'simple': 2, 'table': 2, 'little': 2, 'middle': 2, 'purple': 2
+  };
+  
+  if (specialCases[word]) {
+    return specialCases[word];
+  }
+  
   let count = 0;
   let previousWasVowel = false;
+  const vowels = /[aeiouy]/;
   
   for (let i = 0; i < word.length; i++) {
-    const isVowel = /[aeiou]/.test(word[i]);
+    const isVowel = vowels.test(word[i]);
     if (isVowel && !previousWasVowel) {
       count++;
     }
     previousWasVowel = isVowel;
   }
   
-  // Adjust for silent e
-  if (word.endsWith('e')) {
+  // Handle silent e
+  if (word.endsWith('e') && count > 1) {
     count--;
   }
   
-  // Ensure at least one syllable
+  // Handle 'le' endings
+  if (word.endsWith('le') && word.length > 2 && !/[aeiou]/.test(word[word.length - 3])) {
+    count++;
+  }
+  
+  // Handle 'ed' endings
+  if (word.endsWith('ed') && word.length > 2) {
+    const beforeEd = word[word.length - 3];
+    if (!/[aeiou]/.test(beforeEd) || beforeEd === 'd' || beforeEd === 't') {
+      // Silent ed
+    } else {
+      count++;
+    }
+  }
+  
   return Math.max(1, count);
 }
 
-// Detect word/phrase repetitions
+// ============================================================================
+// ENHANCED REPETITION DETECTION
+// ============================================================================
+
 export function detectRepetitions(content: string): { word: string; count: number; density: number }[] {
-  const words = content.toLowerCase().split(/\s+/)
-    .filter(w => w.length > 3) // Ignore short words
-    .map(w => w.replace(/[^a-z]/g, '')); // Remove punctuation
+  const cleanContent = content
+    .toLowerCase()
+    .replace(/[^\w\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  const words = cleanContent
+    .split(/\s+/)
+    .filter(w => w.length > 3) // Only analyze meaningful words
+    .filter(w => !isCommonWord(w)); // Filter out common words
   
   const wordCounts = new Map<string, number>();
+  const phraseCounts = new Map<string, number>();
+  
+  // Count individual words
   words.forEach(word => {
     wordCounts.set(word, (wordCounts.get(word) || 0) + 1);
   });
   
-  // Find 2-word phrases
-  const phrases = new Map<string, number>();
+  // Count 2-word phrases
   for (let i = 0; i < words.length - 1; i++) {
     const phrase = `${words[i]} ${words[i + 1]}`;
-    phrases.set(phrase, (phrases.get(phrase) || 0) + 1);
+    phraseCounts.set(phrase, (phraseCounts.get(phrase) || 0) + 1);
+  }
+  
+  // Count 3-word phrases for important concepts
+  for (let i = 0; i < words.length - 2; i++) {
+    const phrase = `${words[i]} ${words[i + 1]} ${words[i + 2]}`;
+    if (phrase.length > 10) { // Only longer phrases
+      phraseCounts.set(phrase, (phraseCounts.get(phrase) || 0) + 1);
+    }
   }
   
   const repetitions: { word: string; count: number; density: number }[] = [];
   
-  // Add overused words
+  // Analyze word repetitions with adjusted thresholds
   wordCounts.forEach((count, word) => {
-    if (count > 3) {
+    if (count > 4) { // Slightly more lenient threshold
       repetitions.push({
         word,
         count,
@@ -125,187 +219,306 @@ export function detectRepetitions(content: string): { word: string; count: numbe
     }
   });
   
-  // Add overused phrases
-  phrases.forEach((count, phrase) => {
+  // Analyze phrase repetitions
+  phraseCounts.forEach((count, phrase) => {
     if (count > 2) {
       repetitions.push({
         word: phrase,
         count,
-        density: count / (words.length - 1)
+        density: count / (words.length - phrase.split(' ').length + 1)
       });
     }
   });
   
-  return repetitions.sort((a, b) => b.density - a.density);
+  return repetitions
+    .sort((a, b) => b.density - a.density)
+    .slice(0, 20); // Limit to top 20 repetitions
 }
 
-// Detect AI writing patterns
+// ============================================================================
+// ENHANCED AI PATTERN DETECTION
+// ============================================================================
+
 export function detectAIPatterns(content: string): { 
   score: number; 
   patterns: string[]; 
   confidence: number;
 } {
-  const aiPatterns = [
-    /picture this/gi,
-  /imagine/gi,
-  /let's dive/gi,
-  /buckle up/gi,
-  /welcome to/gi,
-  /cosmic/gi,
-  /have you ever wondered/gi,
-  /in this article/gi,
-  /are you looking to/gi,
-  /curious about/gi,
-  /however,/gi,
-  /moreover,/gi,
-  /furthermore,/gi,
-  /additionally,/gi,
-  /on the other hand,/gi,
-  /with that said,/gi,
-  /in contrast,/gi,
-  /similarly,/gi,
-  /consequently,/gi,
-  /nevertheless,/gi,
-  /meanwhile,/gi,
-  /specifically,/gi,
-  /to illustrate,/gi,
-  /for instance,/gi,
-  /in particular,/gi,
-  /in conclusion,/gi,
-  /to sum up,/gi,
-  /in summary,/gi,
-  /ultimately,/gi,
-  /to wrap things up,/gi,
-  /the bottom line is,/gi,
-  /all things considered,/gi,
-  /as we've seen,/gi,
-  /moving forward,/gi,
-  /looking ahead,/gi,
-  /it's worth noting/gi,
-  /it's important to note/gi,
-  /it should be mentioned/gi,
-  /keep in mind that/gi,
-  /it's crucial to remember/gi,
-  /generally speaking,/gi,
-  /in most cases,/gi,
-  /typically,/gi,
-  /often,/gi,
-  /usually,/gi,
-  /leverage/gi,
-  /utilize/gi,
-  /implement/gi,
-  /facilitate/gi,
-  /optimize/gi,
-  /streamline/gi,
-  /robust/gi,
-  /game-changer/gi,
-  /revolutionary/gi,
-  /cutting-edge/gi,
-  /innovative/gi,
-  /strategic/gi,
-  /synergy/gi,
-  /best practices/gi,
-  /pain points/gi,
-  /journey/gi,
-  /path/gi,
-  /landscape/gi,
-  /navigate/gi,
-  /roadmap/gi,
-  /blueprint/gi,
-  /tapestry/gi,
-  /realm/gi,
-  /ecosystem/gi,
-  /horizon/gi,
-  /unlock/gi,
-  /transform your life/gi,
-  /gateway to/gi,
-  /bridge the gap/gi,
-  /pave the way/gi,
-  /top \d+/gi,
-  /\d+ essential tips/gi,
-  /\d+ strategies/gi,
-  /\d+ benefits/gi,
-  /\d+ common mistakes/gi,
-  /but what does this mean/gi,
-  /how can you apply this/gi,
-  /why does this matter/gi,
-  /amazing/gi,
-  /incredible/gi,
-  /stunning/gi,
-  /powerful/gi,
-  /effective/gi,
-  /essential/gi,
-  /critical/gi,
-  /crucial/gi,
-  /vital/gi,
-  /comprehensive/gi,
-  /extensive/gi,
-  /thorough/gi,
-  /in technical terms/gi,
-  /in simpler terms/gi,
-  /step by step/gi,
-  /pros and cons/gi,
-  /faq/gi,
-  /beginner/gi,
-  /intermediate/gi,
-  /advanced/gi,
-  /problem-solution/gi,
-  /definition/gi,
-  /example/gi,
-  /application/gi,
-  /comparison/gi,
-  /technical term/gi,
-  /layperson/gi,
-  /celestial/gi,
-  /mystical/gi,
-  /delve into/gi
+  // Critical AI patterns that are strong indicators
+  const criticalAIPatterns = [
+    /\bpicture this\b/gi,
+    /\bimagine if we\b/gi,
+    /\blet's dive deep into\b/gi,
+    /\bbuckle up\b/gi,
+    /\bwelcome to the world of\b/gi,
+    /\bin this comprehensive guide\b/gi,
+    /\bare you ready to transform\b/gi,
+    /\bunlock the secrets of\b/gi,
+    /\bthe ultimate guide to\b/gi,
+    /\bmind-blowing\b/gi,
+    /\blife-changing\b/gi,
+    /\bgame-changing revolution\b/gi,
+    /\bcutting-edge innovation\b/gi,
+    /\brevolutionary breakthrough\b/gi
+  ];
+  
+  // Moderate AI patterns (only flag if overused)
+  const moderateAIPatterns = [
+    /\bhowever,\b/gi,
+    /\bmoreover,\b/gi,
+    /\bfurthermore,\b/gi,
+    /\badditionally,\b/gi,
+    /\bconsequently,\b/gi,
+    /\bnevertheless,\b/gi,
+    /\bin conclusion,\b/gi,
+    /\bit's important to note\b/gi,
+    /\bit should be mentioned\b/gi,
+    /\bmoving forward,\b/gi
+  ];
+  
+  // Marketing jargon patterns
+  const marketingPatterns = [
+    /\bgame-changer\b/gi,
+    /\brevolutionary\b/gi,
+    /\bcutting-edge\b/gi,
+    /\bgroundbreaking\b/gi,
+    /\btransform your life\b/gi,
+    /\bunlock your potential\b/gi,
+    /\bseamless experience\b/gi,
+    /\bmaximi[sz]e your\b/gi,
+    /\boptimi[sz]e your\b/gi
   ];
   
   const detectedPatterns: string[] = [];
-  let patternCount = 0;
+  let criticalScore = 0;
+  let moderateScore = 0;
+  let marketingScore = 0;
   
-  aiPatterns.forEach(pattern => {
+  const wordCount = content.split(/\s+/).filter(w => w.length > 0).length;
+  const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  
+  // Check critical patterns (heavy weight)
+  criticalAIPatterns.forEach(pattern => {
     const matches = content.match(pattern);
     if (matches) {
-      patternCount += matches.length;
-      detectedPatterns.push(matches[0]);
+      criticalScore += matches.length * 15; // High penalty
+      detectedPatterns.push(`${matches[0]} (${matches.length}x)`);
     }
   });
   
-  // Check for overly formal transitions
-  const transitionCount = (content.match(/\b(However|Moreover|Furthermore|Additionally|Consequently|Therefore|Nevertheless)\b/g) || []).length;
+  // Check moderate patterns (only penalize if overused)
+  moderateAIPatterns.forEach(pattern => {
+    const matches = content.match(pattern);
+    if (matches && matches.length > 2) { // Only flag if used more than twice
+      moderateScore += (matches.length - 2) * 5; // Graduated penalty
+      detectedPatterns.push(`${matches[0]} (overused: ${matches.length}x)`);
+    }
+  });
   
-  // Check for repetitive sentence starters
-  const sentences = content.split(/[.!?]+/);
-  const starterWords = sentences.map(s => s.trim().split(' ')[0]).filter(w => w);
+  // Check marketing jargon
+  marketingPatterns.forEach(pattern => {
+    const matches = content.match(pattern);
+    if (matches) {
+      marketingScore += matches.length * 8;
+      detectedPatterns.push(`${matches[0]} (marketing jargon)`);
+    }
+  });
+  
+  // Analyze sentence starter repetition with increased tolerance
+  const starterWords = sentences.map(s => {
+    const firstWords = s.trim().split(/\s+/).slice(0, 2).join(' ').toLowerCase();
+    return firstWords.replace(/[^\w\s]/g, '');
+  }).filter(w => w.length > 2);
+  
   const starterCounts = new Map<string, number>();
-  starterWords.forEach(word => {
-    starterCounts.set(word, (starterCounts.get(word) || 0) + 1);
+  starterWords.forEach(starter => {
+    starterCounts.set(starter, (starterCounts.get(starter) || 0) + 1);
   });
   
   const repetitiveStarters = Array.from(starterCounts.entries())
-    .filter(([_, count]) => count > 3)
-    .map(([word, _]) => word);
+    .filter(([_, count]) => count > 4) // Increased threshold from 3 to 4
+    .map(([starter, count]) => ({ starter, count }));
   
-  if (repetitiveStarters.length > 0) {
-    detectedPatterns.push(`Repetitive sentence starters: ${repetitiveStarters.join(', ')}`);
+  let repetitionScore = 0;
+  if (repetitiveStarters.length > 2) { // Only penalize if multiple starters are overused
+    repetitionScore = repetitiveStarters.reduce((acc, { count }) => acc + (count - 4) * 3, 0);
+    const topStarters = repetitiveStarters
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3)
+      .map(({ starter, count }) => `"${starter}" (${count}x)`)
+      .join(', ');
+    detectedPatterns.push(`Repetitive starters: ${topStarters}`);
   }
   
-  const wordCount = content.split(/\s+/).length;
-  const patternDensity = patternCount / wordCount;
-  const transitionDensity = transitionCount / sentences.length;
+  // Calculate final scores with more lenient weights
+  const totalPenalty = criticalScore + moderateScore + marketingScore + repetitionScore;
+  const normalizedPenalty = Math.min(80, totalPenalty / Math.max(1, wordCount / 100)); // Normalize by content length
   
-  // Calculate AI pattern score (0-100, where 100 is most human-like)
-  let aiScore = 100;
-  aiScore -= patternDensity * 500; // Heavy penalty for AI patterns
-  aiScore -= transitionDensity * 100; // Penalty for overuse of formal transitions
-  aiScore -= repetitiveStarters.length * 5; // Penalty for repetitive starters
+  // More realistic confidence calculation
+  let confidence = Math.min(75, normalizedPenalty); // Cap at 75% instead of 99%
   
-  const confidence = Math.min(99, Math.max(1, 100 - Math.max(0, aiScore)));
+  // Adjust confidence based on content characteristics
+  if (wordCount < 500) {
+    confidence *= 0.8; // Reduce confidence for shorter content
+  }
+  
+  if (detectedPatterns.length === 0) {
+    confidence = Math.min(confidence, 15); // Low confidence if no patterns detected
+  }
+  
+  const score = Math.max(20, 100 - normalizedPenalty); // Ensure minimum score of 20
   
   return {
-    score: Math.max(0, aiScore),
-    patterns: detectedPatterns,
-    confidence
+    score: Math.round(score),
+    patterns: detectedPatterns.slice(0, 8), // Limit to top 8 patterns
+    confidence: Math.round(confidence)
+  };
+}
+
+// ============================================================================
+// ENHANCED VOCABULARY ANALYSIS
+// ============================================================================
+
+export function analyzeVocabularyDepth(content: string): {
+  complexity: number;
+  diversity: number;
+  academicWords: number;
+  commonWords: number;
+  technicalTerms: string[];
+} {
+  const words = content
+    .toLowerCase()
+    .split(/\s+/)
+    .map(w => w.replace(/[^\w]/g, ''))
+    .filter(w => w.length > 2);
+  
+  const uniqueWords = new Set(words);
+  const diversity = uniqueWords.size / words.length;
+  
+  // Academic word list (simplified)
+  const academicWords = new Set([
+    'analyze', 'assessment', 'concept', 'consist', 'constitute', 'context', 'contract',
+    'create', 'data', 'define', 'derive', 'distribute', 'economy', 'environment',
+    'establish', 'estimate', 'evident', 'export', 'factor', 'formula', 'function',
+    'identify', 'income', 'indicate', 'individual', 'interpret', 'involve', 'issue',
+    'labor', 'legal', 'legislate', 'major', 'method', 'occur', 'percent', 'period',
+    'policy', 'principle', 'proceed', 'process', 'require', 'research', 'respond',
+    'role', 'section', 'significant', 'similar', 'source', 'specific', 'structure',
+    'theory', 'vary', 'approach', 'area', 'available', 'benefit', 'concept',
+    'consistent', 'constitutional', 'create', 'economic', 'environment', 'established',
+    'estimate', 'factors', 'financial', 'formula', 'function', 'identified',
+    'income', 'indicate', 'individual', 'interpretation', 'involved', 'issues'
+  ]);
+  
+  const commonWords = new Set([
+    'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with',
+    'by', 'from', 'up', 'about', 'into', 'through', 'during', 'before', 'after',
+    'above', 'below', 'between', 'among', 'under', 'over', 'is', 'are', 'was', 'were',
+    'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would',
+    'could', 'should', 'may', 'might', 'must', 'can', 'this', 'that', 'these', 'those',
+    'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them',
+    'my', 'your', 'his', 'her', 'its', 'our', 'their', 'what', 'which', 'who', 'when',
+    'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other',
+    'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too',
+    'very', 'can', 'said', 'just', 'like', 'get', 'make', 'go', 'know', 'take', 'see',
+    'come', 'think', 'look', 'want', 'give', 'use', 'find', 'tell', 'ask', 'work',
+    'seem', 'feel', 'try', 'leave', 'call', 'good', 'new', 'first', 'last', 'long',
+    'great', 'little', 'own', 'other', 'old', 'right', 'big', 'high', 'different',
+    'small', 'large', 'next', 'early', 'young', 'important', 'few', 'public', 'bad',
+    'same', 'able'
+  ]);
+  
+  let academicWordCount = 0;
+  let commonWordCount = 0;
+  const technicalTerms: string[] = [];
+  
+  words.forEach(word => {
+    if (academicWords.has(word)) {
+      academicWordCount++;
+    } else if (commonWords.has(word)) {
+      commonWordCount++;
+    } else if (word.length > 6 && !isCommonWord(word)) {
+      technicalTerms.push(word);
+    }
+  });
+  
+  const complexity = (academicWordCount + technicalTerms.length) / words.length;
+  
+  return {
+    complexity,
+    diversity,
+    academicWords: academicWordCount,
+    commonWords: commonWordCount,
+    technicalTerms: [...new Set(technicalTerms)].slice(0, 20)
+  };
+}
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+function isCommonWord(word: string): boolean {
+  const commonWords = new Set([
+    'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with',
+    'by', 'from', 'about', 'into', 'through', 'during', 'before', 'after', 'above',
+    'below', 'between', 'under', 'over', 'is', 'are', 'was', 'were', 'be', 'been',
+    'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+    'should', 'may', 'might', 'must', 'can', 'this', 'that', 'these', 'those',
+    'what', 'which', 'who', 'when', 'where', 'why', 'how', 'all', 'any', 'both',
+    'each', 'few', 'more', 'most', 'other', 'some', 'such', 'not', 'only', 'own',
+    'same', 'than', 'too', 'very', 'said', 'just', 'like', 'get', 'make', 'know',
+    'take', 'see', 'come', 'think', 'look', 'want', 'give', 'use', 'find', 'tell',
+    'ask', 'work', 'seem', 'feel', 'try', 'leave', 'call', 'good', 'new', 'first',
+    'last', 'long', 'great', 'little', 'old', 'right', 'big', 'high', 'different',
+    'small', 'large', 'next', 'early', 'young', 'important', 'public', 'bad', 'able'
+  ]);
+  
+  return commonWords.has(word.toLowerCase());
+}
+
+export function getContentStatistics(content: string): {
+  readabilityGrade: string;
+  vocabularyLevel: string;
+  engagementScore: number;
+  structureScore: number;
+} {
+  const analysis = analyzeContent(content);
+  const vocabAnalysis = analyzeVocabularyDepth(content);
+  
+  // Determine readability grade
+  let readabilityGrade = 'Advanced';
+  if (analysis.fleschReadingEase >= 90) readabilityGrade = 'Very Easy';
+  else if (analysis.fleschReadingEase >= 80) readabilityGrade = 'Easy';
+  else if (analysis.fleschReadingEase >= 70) readabilityGrade = 'Fairly Easy';
+  else if (analysis.fleschReadingEase >= 60) readabilityGrade = 'Standard';
+  else if (analysis.fleschReadingEase >= 50) readabilityGrade = 'Fairly Difficult';
+  else if (analysis.fleschReadingEase >= 30) readabilityGrade = 'Difficult';
+  
+  // Determine vocabulary level
+  let vocabularyLevel = 'Advanced';
+  if (vocabAnalysis.complexity < 0.1) vocabularyLevel = 'Basic';
+  else if (vocabAnalysis.complexity < 0.2) vocabularyLevel = 'Intermediate';
+  else if (vocabAnalysis.complexity < 0.3) vocabularyLevel = 'Upper Intermediate';
+  
+  // Calculate engagement score
+  const questions = (content.match(/\?/g) || []).length;
+  const examples = (content.match(/\b(example|instance|case|such as)\b/gi) || []).length;
+  const lists = (content.match(/^\s*[-*•]\s/gm) || []).length;
+  const engagementScore = Math.min(100, 
+    (questions * 5) + (examples * 3) + (lists * 2) + (analysis.sentenceVariety * 30)
+  );
+  
+  // Calculate structure score
+  const headings = (content.match(/^#{1,6}\s/gm) || []).length;
+  const paragraphBalance = Math.min(1, 1 / Math.abs(analysis.avgSentencesPerParagraph - 4));
+  const structureScore = Math.min(100, 
+    (headings * 10) + (paragraphBalance * 40) + (analysis.paragraphCount > 3 ? 30 : 0)
+  );
+  
+  return {
+    readabilityGrade,
+    vocabularyLevel,
+    engagementScore: Math.round(engagementScore),
+    structureScore: Math.round(structureScore)
   };
 }
