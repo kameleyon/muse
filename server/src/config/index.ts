@@ -22,31 +22,21 @@ const config = {
       return key;
     })(),
     baseUrl: 'https://openrouter.ai/api/v1',
-    defaultContentModel: (() => {
-      const model = process.env.DEFAULT_CONTENT_MODEL || process.env.VITE_DEFAULT_CONTENT_MODEL;
-      if (!model) throw new Error('DEFAULT_CONTENT_MODEL is required');
-      return model;
-    })(),
-    defaultResearchModel: (() => {
-      const model = process.env.DEFAULT_RESEARCH_MODEL || process.env.VITE_DEFAULT_RESEARCH_MODEL;
-      if (!model) throw new Error('DEFAULT_RESEARCH_MODEL is required');
-      return model;
-    })(),
-    bookStructureModel: (() => {
-      const model = process.env.BOOK_STRUCTURE_MODEL || process.env.VITE_BOOK_STRUCTURE_MODEL;
-      if (!model) throw new Error('BOOK_STRUCTURE_MODEL is required');
-      return model;
-    })(),
-    defaultQualityModel: (() => {
-      const model = process.env.DEFAULT_QUALITY_MODEL || process.env.VITE_DEFAULT_QUALITY_MODEL;
-      if (!model) throw new Error('DEFAULT_QUALITY_MODEL is required');
-      return model;
-    })(),
-    defaultChatModel: (() => {
-      const model = process.env.DEFAULT_CHAT_MODEL || process.env.VITE_DEFAULT_CHAT_MODEL;
-      if (!model) throw new Error('DEFAULT_CHAT_MODEL is required');
-      return model;
-    })(),
+    defaultContentModel: process.env.DEFAULT_CONTENT_MODEL ||
+      process.env.VITE_DEFAULT_CONTENT_MODEL ||
+      'qwen/qwen-plus',
+    defaultResearchModel: process.env.DEFAULT_RESEARCH_MODEL ||
+      process.env.VITE_DEFAULT_RESEARCH_MODEL ||
+      'google/gemini-2.5-flash-lite-preview-06-17',
+    bookStructureModel: process.env.BOOK_STRUCTURE_MODEL ||
+      process.env.VITE_BOOK_STRUCTURE_MODEL ||
+      'anthropic/claude-3.7-sonnet:thinking',
+    defaultQualityModel: process.env.DEFAULT_QUALITY_MODEL ||
+      process.env.VITE_DEFAULT_QUALITY_MODEL ||
+      'google/gemini-2.5-flash',
+    defaultChatModel: process.env.DEFAULT_CHAT_MODEL ||
+      process.env.VITE_DEFAULT_CHAT_MODEL ||
+      'qwen/qwen-plus',
   },
   
   // JWT

@@ -41216,3 +41216,413 @@
 2025-07-21 19:17:23 [info]: Seeding sample notifications...
 2025-07-21 19:17:23 [info]: Notifications already exist, skipping seed
 2025-07-21 19:17:23 [info]: Server running in development mode on port 9998
+2025-07-21 19:18:37 [info]: Checking Supabase connection...
+2025-07-21 19:18:37 [info]: Using Supabase URL: https://azaiyskdyzdhtomcwrsw.supabase.co
+2025-07-21 19:18:38 [info]: Supabase connection successful. Projects table exists.
+2025-07-21 19:18:38 [info]: Running migrations to ensure schema is up to date...
+2025-07-21 19:18:38 [info]: Running database migrations...
+2025-07-21 19:18:38 [info]: Projects table exists, proceed with other migrations
+2025-07-21 19:18:38 [info]: Found 17 migration files to run
+2025-07-21 19:18:38 [info]: Migrations table does not exist, creating it...
+2025-07-21 19:18:38 [warn]: Migrations table check failed: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:38 [info]: Will attempt to continue with migrations
+2025-07-21 19:18:38 [warn]: Could not fetch applied migrations: relation "public.migrations" does not exist
+2025-07-21 19:18:38 [info]: Will process all migration files
+2025-07-21 19:18:38 [info]: Processing migration: 20250326225500_add_setup_details_to_projects.sql
+2025-07-21 19:18:38 [warn]: Error recording migration 20250326225500_add_setup_details_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:38 [info]: ✓ Processed migration file: 20250326225500_add_setup_details_to_projects.sql
+2025-07-21 19:18:38 [info]: Processing migration: 20250327001000_create_pitch_deck_tables.sql
+2025-07-21 19:18:38 [warn]: Error recording migration 20250327001000_create_pitch_deck_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:38 [info]: ✓ Processed migration file: 20250327001000_create_pitch_deck_tables.sql
+2025-07-21 19:18:38 [info]: Processing migration: 20250329224600_add_import_fields_to_projects.sql
+2025-07-21 19:18:38 [warn]: Error recording migration 20250329224600_add_import_fields_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:38 [info]: ✓ Processed migration file: 20250329224600_add_import_fields_to_projects.sql
+2025-07-21 19:18:38 [info]: Processing migration: 20250329231100_fix_projects_table_schema.sql
+2025-07-21 19:18:38 [warn]: Error recording migration 20250329231100_fix_projects_table_schema.sql: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:38 [info]: ✓ Processed migration file: 20250329231100_fix_projects_table_schema.sql
+2025-07-21 19:18:38 [info]: Processing migration: 20250331170600_add_comment_to_project_name.sql
+2025-07-21 19:18:39 [warn]: Error recording migration 20250331170600_add_comment_to_project_name.sql: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:39 [info]: ✓ Processed migration file: 20250331170600_add_comment_to_project_name.sql
+2025-07-21 19:18:39 [info]: Processing migration: 20250409190500_add_type_column_to_projects.sql
+2025-07-21 19:18:39 [warn]: Error recording migration 20250409190500_add_type_column_to_projects.sql: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:39 [info]: ✓ Processed migration file: 20250409190500_add_type_column_to_projects.sql
+2025-07-21 19:18:39 [info]: Processing migration: 20250410000000_rename_project_name_column.sql
+2025-07-21 19:18:39 [warn]: Error recording migration 20250410000000_rename_project_name_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:39 [info]: ✓ Processed migration file: 20250410000000_rename_project_name_column.sql
+2025-07-21 19:18:39 [info]: Processing migration: 20250519000000_create_book_tables.sql
+2025-07-21 19:18:39 [warn]: Error recording migration 20250519000000_create_book_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:39 [info]: ✓ Processed migration file: 20250519000000_create_book_tables.sql
+2025-07-21 19:18:39 [info]: Processing migration: 20250519000001_add_book_type_column.sql
+2025-07-21 19:18:39 [warn]: Error recording migration 20250519000001_add_book_type_column.sql: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:39 [info]: ✓ Processed migration file: 20250519000001_add_book_type_column.sql
+2025-07-21 19:18:39 [info]: Processing migration: 20250519000002_add_structure_to_books.sql
+2025-07-21 19:18:39 [warn]: Error recording migration 20250519000002_add_structure_to_books.sql: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:39 [info]: ✓ Processed migration file: 20250519000002_add_structure_to_books.sql
+2025-07-21 19:18:39 [info]: Processing migration: 20250521000000_add_metadata_to_chapters.sql
+2025-07-21 19:18:39 [warn]: Error recording migration 20250521000000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:39 [info]: ✓ Processed migration file: 20250521000000_add_metadata_to_chapters.sql
+2025-07-21 19:18:39 [info]: Processing migration: 20250521100000_add_metadata_to_chapters.sql
+2025-07-21 19:18:39 [warn]: Error recording migration 20250521100000_add_metadata_to_chapters.sql: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:39 [info]: ✓ Processed migration file: 20250521100000_add_metadata_to_chapters.sql
+2025-07-21 19:18:39 [info]: Processing migration: 20250531000000_create_notifications_table.sql
+2025-07-21 19:18:39 [warn]: Error recording migration 20250531000000_create_notifications_table.sql: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:39 [info]: ✓ Processed migration file: 20250531000000_create_notifications_table.sql
+2025-07-21 19:18:39 [info]: Processing migration: 20250531000001_update_notifications_policies.sql
+2025-07-21 19:18:39 [warn]: Error recording migration 20250531000001_update_notifications_policies.sql: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:39 [info]: ✓ Processed migration file: 20250531000001_update_notifications_policies.sql
+2025-07-21 19:18:39 [info]: Processing migration: 20250531000002_create_user_tables.sql
+2025-07-21 19:18:39 [warn]: Error recording migration 20250531000002_create_user_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:39 [info]: ✓ Processed migration file: 20250531000002_create_user_tables.sql
+2025-07-21 19:18:39 [info]: Processing migration: 20250531000003_fix_user_tables.sql
+2025-07-21 19:18:39 [warn]: Error recording migration 20250531000003_fix_user_tables.sql: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:39 [info]: ✓ Processed migration file: 20250531000003_fix_user_tables.sql
+2025-07-21 19:18:39 [info]: Processing migration: 20250603000000_create_storage_buckets.sql
+2025-07-21 19:18:39 [warn]: Error recording migration 20250603000000_create_storage_buckets.sql: Cannot read properties of undefined (reading 'includes')
+2025-07-21 19:18:39 [info]: ✓ Processed migration file: 20250603000000_create_storage_buckets.sql
+2025-07-21 19:18:39 [info]: Projects table is now accessible - migrations successful!
+2025-07-21 19:18:39 [info]: Seeding sample notifications...
+2025-07-21 19:18:40 [info]: Notifications already exist, skipping seed
+2025-07-21 19:18:40 [info]: Server running in development mode on port 9998
+2025-07-21 19:19:53 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-07-21 19:19:54 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:20:00 [info]: OpenRouter request successful. Tokens used: 3960
+2025-07-21 19:20:00 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:20:57 [info]: OpenRouter request successful. Tokens used: 8896
+2025-07-21 19:20:57 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:20:57 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:20:57 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:20:58 [info]: OpenRouter request successful. Tokens used: 1834
+2025-07-21 19:20:58 [info]: OpenRouter request successful. Tokens used: 540
+2025-07-21 19:20:58 [info]: OpenRouter request successful. Tokens used: 568
+2025-07-21 19:21:00 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:22:53 [info]: OpenRouter request successful. Tokens used: 7114
+2025-07-21 19:22:53 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:22:53 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:22:53 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:22:53 [info]: OpenRouter request successful. Tokens used: 1801
+2025-07-21 19:22:54 [info]: OpenRouter request successful. Tokens used: 581
+2025-07-21 19:22:54 [info]: OpenRouter request successful. Tokens used: 601
+2025-07-21 19:22:57 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:24:07 [info]: OpenRouter request successful. Tokens used: 5703
+2025-07-21 19:24:07 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:24:07 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:24:07 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:24:08 [info]: OpenRouter request successful. Tokens used: 500
+2025-07-21 19:24:08 [info]: OpenRouter request successful. Tokens used: 1783
+2025-07-21 19:24:08 [info]: OpenRouter request successful. Tokens used: 625
+2025-07-21 19:24:08 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:25:37 [info]: OpenRouter request successful. Tokens used: 9167
+2025-07-21 19:25:37 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:25:37 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:25:37 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:25:38 [info]: OpenRouter request successful. Tokens used: 547
+2025-07-21 19:25:38 [info]: OpenRouter request successful. Tokens used: 650
+2025-07-21 19:25:38 [info]: OpenRouter request successful. Tokens used: 2068
+2025-07-21 19:25:41 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:25:58 [info]: OpenRouter request successful. Tokens used: 3572
+2025-07-21 19:25:58 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:25:58 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:25:58 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:25:59 [info]: OpenRouter request successful. Tokens used: 589
+2025-07-21 19:25:59 [info]: OpenRouter request successful. Tokens used: 2048
+2025-07-21 19:26:00 [info]: OpenRouter request successful. Tokens used: 684
+2025-07-21 19:26:00 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:26:20 [info]: OpenRouter request successful. Tokens used: 4410
+2025-07-21 19:26:20 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:26:20 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:26:20 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:26:20 [info]: OpenRouter request successful. Tokens used: 1848
+2025-07-21 19:26:21 [info]: OpenRouter request successful. Tokens used: 637
+2025-07-21 19:26:21 [info]: OpenRouter request successful. Tokens used: 828
+2025-07-21 19:26:22 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:26:22 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:26:22 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:26:22 [info]: OpenRouter request successful. Tokens used: 1834
+2025-07-21 19:26:22 [info]: OpenRouter request successful. Tokens used: 540
+2025-07-21 19:26:23 [info]: OpenRouter request successful. Tokens used: 587
+2025-07-21 19:26:23 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:26:30 [info]: OpenRouter request successful. Tokens used: 6481
+2025-07-21 19:26:31 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:26:47 [info]: OpenRouter request successful. Tokens used: 8371
+2025-07-21 19:26:50 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-07-21 19:26:51 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:26:51 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:26:51 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:26:51 [info]: OpenRouter request successful. Tokens used: 1834
+2025-07-21 19:26:51 [info]: OpenRouter request successful. Tokens used: 540
+2025-07-21 19:26:52 [info]: OpenRouter request successful. Tokens used: 642
+2025-07-21 19:29:31 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-07-21 19:29:31 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-07-21 19:29:33 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:29:33 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:29:33 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:29:33 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:29:33 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:29:33 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:29:33 [info]: OpenRouter request successful. Tokens used: 540
+2025-07-21 19:29:34 [info]: OpenRouter request successful. Tokens used: 1834
+2025-07-21 19:29:34 [info]: OpenRouter request successful. Tokens used: 540
+2025-07-21 19:29:34 [info]: OpenRouter request successful. Tokens used: 1834
+2025-07-21 19:29:34 [info]: OpenRouter request successful. Tokens used: 580
+2025-07-21 19:29:34 [info]: OpenRouter request successful. Tokens used: 589
+2025-07-21 19:29:55 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-07-21 19:29:56 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:29:56 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:29:56 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:29:56 [info]: OpenRouter request successful. Tokens used: 1832
+2025-07-21 19:29:56 [info]: OpenRouter request successful. Tokens used: 537
+2025-07-21 19:29:57 [info]: OpenRouter request successful. Tokens used: 612
+2025-07-21 19:29:59 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-07-21 19:29:59 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:30:11 [info]: OpenRouter request successful. Tokens used: 5888
+2025-07-21 19:30:11 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:31:15 [info]: OpenRouter request successful. Tokens used: 11412
+2025-07-21 19:31:15 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:31:15 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:31:15 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:31:15 [info]: OpenRouter request successful. Tokens used: 566
+2025-07-21 19:31:15 [info]: OpenRouter request successful. Tokens used: 1929
+2025-07-21 19:31:16 [info]: OpenRouter request successful. Tokens used: 624
+2025-07-21 19:31:18 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:32:44 [info]: OpenRouter request successful. Tokens used: 6549
+2025-07-21 19:32:44 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:32:44 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:32:44 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:32:45 [info]: OpenRouter request successful. Tokens used: 505
+2025-07-21 19:32:45 [info]: OpenRouter request successful. Tokens used: 1914
+2025-07-21 19:32:45 [info]: OpenRouter request successful. Tokens used: 611
+2025-07-21 19:32:49 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:33:22 [info]: OpenRouter request successful. Tokens used: 4247
+2025-07-21 19:33:22 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:33:22 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:33:22 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:33:23 [info]: OpenRouter request successful. Tokens used: 568
+2025-07-21 19:33:23 [info]: OpenRouter request successful. Tokens used: 1918
+2025-07-21 19:33:24 [info]: OpenRouter request successful. Tokens used: 672
+2025-07-21 19:33:25 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:33:59 [info]: OpenRouter request successful. Tokens used: 4347
+2025-07-21 19:33:59 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:33:59 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:33:59 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:34:00 [info]: OpenRouter request successful. Tokens used: 540
+2025-07-21 19:34:00 [info]: OpenRouter request successful. Tokens used: 624
+2025-07-21 19:34:00 [info]: OpenRouter request successful. Tokens used: 1996
+2025-07-21 19:34:01 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:34:01 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:34:01 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:34:02 [info]: OpenRouter request successful. Tokens used: 1852
+2025-07-21 19:34:02 [info]: OpenRouter request successful. Tokens used: 566
+2025-07-21 19:34:02 [info]: OpenRouter request successful. Tokens used: 645
+2025-07-21 19:34:03 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:34:11 [info]: OpenRouter request successful. Tokens used: 6499
+2025-07-21 19:34:11 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:34:24 [info]: OpenRouter request successful. Tokens used: 7266
+2025-07-21 19:34:27 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-07-21 19:34:27 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:34:27 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:34:27 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:34:28 [info]: OpenRouter request successful. Tokens used: 1852
+2025-07-21 19:34:28 [info]: OpenRouter request successful. Tokens used: 566
+2025-07-21 19:34:29 [info]: OpenRouter request successful. Tokens used: 653
+2025-07-21 19:35:07 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-07-21 19:35:07 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:35:07 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:35:07 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:35:07 [info]: OpenRouter request successful. Tokens used: 1849
+2025-07-21 19:35:07 [info]: OpenRouter request successful. Tokens used: 563
+2025-07-21 19:35:08 [info]: OpenRouter request successful. Tokens used: 634
+2025-07-21 19:35:14 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-07-21 19:35:14 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:35:24 [info]: OpenRouter request successful. Tokens used: 5103
+2025-07-21 19:35:24 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:36:44 [info]: OpenRouter request successful. Tokens used: 11296
+2025-07-21 19:36:44 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:36:44 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:36:44 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:36:45 [info]: OpenRouter request successful. Tokens used: 539
+2025-07-21 19:36:45 [info]: OpenRouter request successful. Tokens used: 1831
+2025-07-21 19:36:45 [info]: OpenRouter request successful. Tokens used: 615
+2025-07-21 19:36:48 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:37:42 [info]: OpenRouter request successful. Tokens used: 5126
+2025-07-21 19:37:42 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:37:42 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:37:42 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:37:43 [info]: OpenRouter request successful. Tokens used: 1801
+2025-07-21 19:37:43 [info]: OpenRouter request successful. Tokens used: 493
+2025-07-21 19:37:43 [info]: OpenRouter request successful. Tokens used: 592
+2025-07-21 19:37:45 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:38:50 [info]: OpenRouter request successful. Tokens used: 5495
+2025-07-21 19:38:51 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:38:51 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:38:51 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:38:51 [info]: OpenRouter request successful. Tokens used: 1799
+2025-07-21 19:38:51 [info]: OpenRouter request successful. Tokens used: 542
+2025-07-21 19:38:52 [info]: OpenRouter request successful. Tokens used: 642
+2025-07-21 19:38:52 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:40:16 [info]: OpenRouter request successful. Tokens used: 8836
+2025-07-21 19:40:16 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:40:16 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:40:16 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:40:16 [info]: OpenRouter request successful. Tokens used: 494
+2025-07-21 19:40:16 [info]: OpenRouter request successful. Tokens used: 1801
+2025-07-21 19:40:17 [info]: OpenRouter request successful. Tokens used: 632
+2025-07-21 19:40:19 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:41:07 [info]: OpenRouter request successful. Tokens used: 4941
+2025-07-21 19:41:07 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:41:07 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:41:07 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:41:08 [info]: OpenRouter request successful. Tokens used: 566
+2025-07-21 19:41:08 [info]: OpenRouter request successful. Tokens used: 1852
+2025-07-21 19:41:08 [info]: OpenRouter request successful. Tokens used: 711
+2025-07-21 19:41:10 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:41:24 [info]: OpenRouter request successful. Tokens used: 3506
+2025-07-21 19:41:24 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:41:24 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:41:24 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:41:24 [info]: OpenRouter request successful. Tokens used: 495
+2025-07-21 19:41:25 [info]: OpenRouter request successful. Tokens used: 1791
+2025-07-21 19:41:25 [info]: OpenRouter request successful. Tokens used: 586
+2025-07-21 19:41:25 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:41:42 [info]: OpenRouter request successful. Tokens used: 4234
+2025-07-21 19:41:42 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:41:42 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:41:42 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:41:43 [info]: OpenRouter request successful. Tokens used: 1827
+2025-07-21 19:41:43 [info]: OpenRouter request successful. Tokens used: 640
+2025-07-21 19:41:43 [info]: OpenRouter request successful. Tokens used: 614
+2025-07-21 19:41:44 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:41:44 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:41:44 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:41:44 [info]: OpenRouter request successful. Tokens used: 1831
+2025-07-21 19:41:44 [info]: OpenRouter request successful. Tokens used: 539
+2025-07-21 19:41:45 [info]: OpenRouter request successful. Tokens used: 625
+2025-07-21 19:41:45 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:41:56 [info]: OpenRouter request successful. Tokens used: 8336
+2025-07-21 19:41:56 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:42:10 [info]: OpenRouter request successful. Tokens used: 7774
+2025-07-21 19:42:14 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-07-21 19:42:14 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:42:14 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:42:14 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:42:15 [info]: OpenRouter request successful. Tokens used: 539
+2025-07-21 19:42:15 [info]: OpenRouter request successful. Tokens used: 1831
+2025-07-21 19:42:15 [info]: OpenRouter request successful. Tokens used: 616
+2025-07-21 19:45:58 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-07-21 19:45:59 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:45:59 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:45:59 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:45:59 [info]: OpenRouter request successful. Tokens used: 535
+2025-07-21 19:45:59 [info]: OpenRouter request successful. Tokens used: 1829
+2025-07-21 19:46:00 [info]: OpenRouter request successful. Tokens used: 651
+2025-07-21 19:46:00 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-07-21 19:46:01 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:46:09 [info]: OpenRouter request successful. Tokens used: 4437
+2025-07-21 19:46:09 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:47:44 [info]: OpenRouter request successful. Tokens used: 10648
+2025-07-21 19:47:44 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:47:44 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:47:44 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:47:45 [info]: OpenRouter request successful. Tokens used: 1952
+2025-07-21 19:47:45 [info]: OpenRouter request successful. Tokens used: 701
+2025-07-21 19:47:45 [info]: OpenRouter request successful. Tokens used: 626
+2025-07-21 19:47:48 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:48:26 [info]: OpenRouter request successful. Tokens used: 4322
+2025-07-21 19:48:26 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:48:26 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:48:26 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:48:27 [info]: OpenRouter request successful. Tokens used: 565
+2025-07-21 19:48:27 [info]: OpenRouter request successful. Tokens used: 1963
+2025-07-21 19:48:27 [info]: OpenRouter request successful. Tokens used: 598
+2025-07-21 19:48:28 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:48:56 [info]: OpenRouter request successful. Tokens used: 4024
+2025-07-21 19:48:56 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:48:56 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:48:56 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:48:56 [info]: OpenRouter request successful. Tokens used: 1830
+2025-07-21 19:48:56 [info]: OpenRouter request successful. Tokens used: 563
+2025-07-21 19:48:57 [info]: OpenRouter request successful. Tokens used: 557
+2025-07-21 19:48:58 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:49:56 [info]: OpenRouter request successful. Tokens used: 5058
+2025-07-21 19:49:56 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:49:56 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:49:56 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:49:57 [info]: OpenRouter request successful. Tokens used: 540
+2025-07-21 19:49:57 [info]: OpenRouter request successful. Tokens used: 2071
+2025-07-21 19:49:57 [info]: OpenRouter request successful. Tokens used: 699
+2025-07-21 19:49:59 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:49:59 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:49:59 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:50:00 [info]: OpenRouter request successful. Tokens used: 1857
+2025-07-21 19:50:00 [info]: OpenRouter request successful. Tokens used: 627
+2025-07-21 19:50:00 [info]: OpenRouter request successful. Tokens used: 680
+2025-07-21 19:50:01 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:50:10 [info]: OpenRouter request successful. Tokens used: 7173
+2025-07-21 19:50:10 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:50:27 [info]: OpenRouter request successful. Tokens used: 8373
+2025-07-21 19:51:27 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-07-21 19:51:27 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:51:27 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:51:27 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:51:28 [info]: OpenRouter request successful. Tokens used: 566
+2025-07-21 19:51:28 [info]: OpenRouter request successful. Tokens used: 1968
+2025-07-21 19:51:28 [info]: OpenRouter request successful. Tokens used: 608
+2025-07-21 19:51:38 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-07-21 19:51:38 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:51:49 [info]: OpenRouter request successful. Tokens used: 4698
+2025-07-21 19:51:49 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:52:27 [info]: OpenRouter request successful. Tokens used: 9034
+2025-07-21 19:52:27 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:52:27 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:52:27 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:52:28 [info]: OpenRouter request successful. Tokens used: 525
+2025-07-21 19:52:28 [info]: OpenRouter request successful. Tokens used: 1817
+2025-07-21 19:52:28 [info]: OpenRouter request successful. Tokens used: 642
+2025-07-21 19:52:29 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:53:19 [info]: OpenRouter request successful. Tokens used: 4802
+2025-07-21 19:53:19 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:53:19 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:53:19 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:53:20 [info]: OpenRouter request successful. Tokens used: 1848
+2025-07-21 19:53:20 [info]: OpenRouter request successful. Tokens used: 609
+2025-07-21 19:53:20 [info]: OpenRouter request successful. Tokens used: 678
+2025-07-21 19:53:22 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:54:25 [info]: OpenRouter request successful. Tokens used: 5370
+2025-07-21 19:54:26 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:54:26 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:54:26 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:54:26 [info]: OpenRouter request successful. Tokens used: 500
+2025-07-21 19:54:26 [info]: OpenRouter request successful. Tokens used: 1812
+2025-07-21 19:54:27 [info]: OpenRouter request successful. Tokens used: 612
+2025-07-21 19:54:29 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:55:17 [info]: OpenRouter request successful. Tokens used: 4846
+2025-07-21 19:55:17 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:55:17 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:55:17 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:55:18 [info]: OpenRouter request successful. Tokens used: 496
+2025-07-21 19:55:18 [info]: OpenRouter request successful. Tokens used: 667
+2025-07-21 19:55:21 [info]: OpenRouter request successful. Tokens used: 2111
+2025-07-21 19:55:21 [info]: Making OpenRouter request to model: qwen/qwen-plus
+2025-07-21 19:55:50 [info]: OpenRouter request successful. Tokens used: 5969
+2025-07-21 19:55:50 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:55:50 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:55:50 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:55:50 [info]: OpenRouter request successful. Tokens used: 554
+2025-07-21 19:55:51 [info]: OpenRouter request successful. Tokens used: 618
+2025-07-21 19:55:51 [info]: OpenRouter request successful. Tokens used: 2163
+2025-07-21 19:55:52 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:55:52 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:55:52 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:55:52 [info]: OpenRouter request successful. Tokens used: 1817
+2025-07-21 19:55:53 [info]: OpenRouter request successful. Tokens used: 525
+2025-07-21 19:55:53 [info]: OpenRouter request successful. Tokens used: 632
+2025-07-21 19:55:54 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:56:00 [info]: OpenRouter request successful. Tokens used: 6305
+2025-07-21 19:56:00 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:56:18 [info]: OpenRouter request successful. Tokens used: 8768
+2025-07-21 19:56:23 [info]: Authenticated user ID: 3d3ba6f6-a232-4bed-827a-eda37ea1539d
+2025-07-21 19:56:23 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:56:23 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:56:23 [info]: Making OpenRouter request to model: google/gemini-2.5-flash-lite-preview-06-17
+2025-07-21 19:56:24 [info]: OpenRouter request successful. Tokens used: 525
+2025-07-21 19:56:24 [info]: OpenRouter request successful. Tokens used: 1817
+2025-07-21 19:56:24 [info]: OpenRouter request successful. Tokens used: 690
